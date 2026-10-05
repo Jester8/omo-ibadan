@@ -101,7 +101,7 @@ export default function InteriorPanel() {
           <summary className="cursor-pointer select-none px-4 py-3 text-sm font-semibold text-stone-800">Decorate your home</summary>
           <ul className="space-y-2 px-3 pb-3">
             {DECOR.map((d) => {
-              const owned = (decor[interior.id] ?? []).filter((x) => x === d.id).length;
+              const owned = (plot?.decor ?? decor[interior.id] ?? []).filter((x) => x === d.id).length;
               const locked = !!d.minTier && (plot?.tier ?? 0) < d.minTier;
               return (
                 <li key={d.id} className="flex items-center justify-between gap-3 rounded-xl bg-white p-3 ring-1 ring-black/5">

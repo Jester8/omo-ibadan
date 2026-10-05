@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import { ChevronUp, EyeOff, Eye, CarFront, Landmark, Drumstick, DoorOpen, House, ListChecks, Moon, Phone, PartyPopper, Sun, Target, UserRound, Users, Zap, ZapOff, Wifi, WifiOff, Volume2, VolumeX } from "lucide-react";
 import { useGame } from "@/lib/store";
 import { useClock } from "@/lib/hooks";
-import { formatClock, periodLabel } from "@/lib/time";
+import { formatClock } from "@/lib/time";
 import { naira } from "@/lib/plots";
 import { TITLES, titleIndex } from "@/lib/titles";
 import { QUESTS } from "@/lib/quests";
@@ -35,7 +35,7 @@ export default function Hud() {
   const hideCard = useGame((s) => s.hideCard);
   const hideIcons = useGame((s) => s.hideIcons);
   const patch = useGame((s) => s.patch);
-  const { minutes, hour, day, nepa } = useClock();
+  const { minutes, day, nepa } = useClock();
   const title = TITLES[titleIndex(rep)];
   const nextQuest = QUESTS.find((q) => !questsDone.includes(q.id));
 
@@ -57,7 +57,7 @@ export default function Hud() {
         initial={{ opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, type: "spring", stiffness: 200, damping: 22 }}
-        className="absolute left-3 top-3 z-10 w-[min(21rem,calc(100vw-5.5rem))] sm:w-[21rem] rounded-3xl bg-white/85 p-3.5 shadow-xl ring-1 ring-black/5 backdrop-blur-xl sm:left-5 sm:top-5"
+        className="absolute left-3 top-3 z-10 w-[min(21rem,calc(100vw-5.5rem))] sm:w-[21rem] rounded-[1.6rem] bg-white/75 p-3 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.25)] ring-1 ring-white/60 backdrop-blur-2xl sm:left-5 sm:top-5"
       >
         <button onClick={() => patch({ hideCard: true })} className="absolute -bottom-2.5 left-1/2 grid h-5 w-10 -translate-x-1/2 place-items-center rounded-full bg-white/90 text-stone-400 shadow ring-1 ring-black/5 hover:text-stone-700" aria-label="Hide card" title="Hide card">
           <ChevronUp className="size-3.5" />
@@ -78,14 +78,14 @@ export default function Hud() {
           </div>
         </div>
 
-        <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2">
+        <div className="mt-2.5 grid grid-cols-4 gap-2">
           {NEEDS.map(({ key, label, icon: Icon, color }) => {
             const v = needs[key];
             const low = v < 25;
             return (
-              <div key={key} title={label} className="flex items-center gap-2">
-                <Icon className={`size-3.5 shrink-0 ${low ? "text-red-500" : "text-stone-400"}`} />
-                <div className="h-2 flex-1 overflow-hidden rounded-full bg-stone-200">
+              <div key={key} title={`${label} ${Math.round(v)}%`} className="flex flex-col items-center gap-1">
+                <Icon className={`size-3.5 ${low ? "animate-pulse text-red-500" : "text-stone-400"}`} />
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-stone-900/10">
                   <motion.div className={`h-full rounded-full ${low ? "bg-red-500" : color}`} animate={{ width: `${v}%` }} transition={{ duration: 0.6, ease: "easeOut" }} />
                 </div>
               </div>
@@ -93,10 +93,15 @@ export default function Hud() {
           })}
         </div>
 
-        <div className="mt-3 flex items-center justify-between border-t border-stone-100 pt-2.5 text-xs font-medium text-stone-500">
+        <div className="mt-2.5 flex items-center justify-between text-[11px] font-medium text-stone-500">
           <span className="flex items-center gap-1.5">
             {day > 0.5 ? <Sun className="size-3.5 text-amber-500" /> : <Moon className="size-3.5 text-indigo-400" />}
-            {formatClock(minutes)} · {periodLabel(hour)}
+            {formatClock(minutes)}
+            {nepa && (
+              <span className="flex items-center gap-1 rounded-full bg-amber-100 px-1.5 py-0.5 text-amber-700">
+                <ZapOff className="size-3" /> NEPA
+              </span>
+            )}
           </span>
           <span className="flex items-center gap-1.5">
             {net === "online" ? <Wifi className="size-3.5 text-emerald-500" /> : <WifiOff className="size-3.5 text-stone-300" />}
@@ -107,21 +112,11 @@ export default function Hud() {
         {nextQuest && (
           <button
             onClick={() => setSheet("quests")}
-            className="mt-2.5 flex w-full items-center gap-2 rounded-xl bg-amber-50 px-3 py-1.5 text-left text-xs font-semibold text-amber-800 ring-1 ring-amber-100 transition hover:bg-amber-100"
+            className="mt-2 flex w-full items-center gap-1.5 rounded-xl bg-amber-500/10 px-2.5 py-1 text-left text-[11px] font-semibold text-amber-800 transition hover:bg-amber-500/20"
           >
-            <Target className="size-3.5 shrink-0" />
-            <span className="truncate">Next goal: {nextQuest.title}</span>
+            <Target className="size-3 shrink-0" />
+            <span className="truncate">{nextQuest.title}</span>
           </button>
-        )}
-
-        {nepa && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            className="mt-2.5 flex items-center gap-2 rounded-xl bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 ring-1 ring-amber-200"
-          >
-            <ZapOff className="size-3.5" /> NEPA took light. Sleep restores half.
-          </motion.div>
         )}
       </motion.div>}
 

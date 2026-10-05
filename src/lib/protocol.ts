@@ -6,6 +6,8 @@ export type PlotState = {
   /** 0 = empty land, 1 = bungalow, 2 = duplex, 3 = mansion */
   tier: number;
   collectedAt: number;
+  /** decor ids placed in the house, visible to every visitor */
+  decor?: string[];
 };
 
 export type Policy = "none" | "transport" | "food" | "wages";

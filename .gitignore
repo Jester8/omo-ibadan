@@ -12,3 +12,4 @@ coverage
 server/reports.log
 .vercel
 next-env.d.ts
+server/plots.json

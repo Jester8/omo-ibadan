@@ -36,8 +36,9 @@ export function loadLayout(ref: InteriorRef): Layout | null {
   const base = layoutFor(ref, plotInfo);
   if (!base || ref.kind !== "home") return base;
   const s = useGame.getState();
-  const mine = ref.id === FLAT.id || s.plots[ref.id]?.ownerId === s.profile?.id;
-  return mine ? withDecor(base, s.decor[ref.id] ?? []) : base;
+  // houses show whatever the owner placed, to every visitor; the flat is yours alone
+  const ids = ref.id === FLAT.id ? s.decor[ref.id] : s.plots[ref.id]?.decor ?? (s.plots[ref.id]?.ownerId === s.profile?.id ? s.decor[ref.id] : undefined);
+  return withDecor(base, ids ?? []);
 }
 
 /** Rebuild the current room after its decor changed. */

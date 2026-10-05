@@ -322,14 +322,22 @@ export const useGame = create<State>()(
         const s = get();
         const def = decorById(decorId);
         if (!def) return "Not available.";
-        const have = s.decor[homeId] ?? [];
+        const plotState = s.plots[homeId];
+        const have = plotState?.decor ?? s.decor[homeId] ?? [];
         if (def.minTier && tier < def.minTier) return "Build a house first.";
         if (have.filter((d) => d === decorId).length >= MAX_PER_KIND) return `You already have ${MAX_PER_KIND} of those.`;
         if (s.money < def.price) return `You need ${naira(def.price)}.`;
         const l = layoutFor({ kind: "home", id: homeId }, (id) => s.plots[id]);
         if (!l) return "Can't decorate here.";
         if (withDecor(l, [...have, decorId]).items.length === withDecor(l, have).items.length) return "No room left for that.";
-        set({ money: s.money - def.price, decor: { ...s.decor, [homeId]: [...have, decorId] }, decorRev: s.decorRev + 1 });
+        const nextDecor = [...have, decorId];
+        if (plotState) {
+          const state = { ...plotState, decor: nextDecor };
+          set({ money: s.money - def.price, plots: { ...s.plots, [homeId]: state }, decor: { ...s.decor, [homeId]: nextDecor }, decorRev: s.decorRev + 1 });
+          hooks.plotSet?.(homeId, state);
+        } else {
+          set({ money: s.money - def.price, decor: { ...s.decor, [homeId]: nextDecor }, decorRev: s.decorRev + 1 });
+        }
         return null;
       },
       buyPlot: (id) => {
@@ -456,7 +464,9 @@ export const useGame = create<State>()(
         merged.plots = { ...NPC_PLOTS, ...(p.plots ?? {}) };
         const away = p.savedAt ? Math.min(1200, (Date.now() - p.savedAt) / 1000) : 0;
         if (away > 30 && p.needs) {
-          merged.needs = decayNeeds(p.needs, away * 0.4);
+          const d = decayNeeds(p.needs, away * 0.4);
+          // coming back should never mean starting from rock bottom
+          merged.needs = { hunger: Math.max(20, d.hunger), energy: Math.max(20, d.energy), fun: Math.max(20, d.fun), social: Math.max(20, d.social) };
           merged.awaySecs = away;
         }
         return merged;

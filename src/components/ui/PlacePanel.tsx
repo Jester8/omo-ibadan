@@ -122,7 +122,7 @@ export default function SidePanel() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 40, scale: 0.97 }}
           transition={{ type: "spring", stiffness: 260, damping: 26 }}
-          className={`absolute inset-x-3 bottom-3 z-20 ${min ? "max-sm:max-h-12 max-sm:overflow-hidden max-sm:py-2" : interior ? "max-h-[44dvh]" : "max-h-[62dvh]"} overflow-y-auto rounded-3xl bg-white/92 p-5 shadow-2xl ring-1 ring-black/5 backdrop-blur-xl sm:inset-x-auto sm:bottom-auto sm:right-5 sm:top-20 sm:max-h-[calc(100dvh-7rem)] sm:w-[24rem]`}
+          className={`absolute inset-x-3 bottom-3 z-20 ${min ? "max-sm:max-h-12 max-sm:overflow-hidden max-sm:py-2" : interior ? "max-h-[44dvh]" : "max-h-[62dvh]"} overflow-y-auto rounded-[1.6rem] bg-white/80 p-5 shadow-[0_12px_40px_-10px_rgba(0,0,0,0.35)] ring-1 ring-white/60 backdrop-blur-2xl sm:inset-x-auto sm:bottom-auto sm:right-5 sm:top-20 sm:max-h-[calc(100dvh-7rem)] sm:w-[24rem]`}
         >
           <button
             onClick={setMin}

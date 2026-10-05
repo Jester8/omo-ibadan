@@ -161,6 +161,7 @@ wss.on("connection", (ws) => {
           ownerName: clean(m.plot.ownerName, 16),
           tier: Math.max(0, Math.min(3, Math.floor(num(m.plot.tier)))),
           collectedAt: num(m.plot.collectedAt, Date.now()),
+          decor: Array.isArray(m.plot.decor) ? m.plot.decor.filter((d) => typeof d === "string" && /^[a-z0-9]{1,20}$/.test(d)).slice(0, 21) : existing?.decor,
         };
         plots[m.plotId] = plot;
         savePlots();
