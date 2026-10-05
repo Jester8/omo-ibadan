@@ -6648,17 +6648,21 @@ function InteriorScene() {
     const interior = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"])({
         "InteriorScene.useGame[interior]": (s)=>s.interior
     }["InteriorScene.useGame[interior]"]);
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"])({
+        "InteriorScene.useGame": (s)=>s.decorRev
+    }["InteriorScene.useGame"]);
     if (!interior || !__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$interiorRuntime$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["rt"].layout) return null;
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Room, {
         layout: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$interiorRuntime$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["rt"].layout
     }, (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$interiors$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["interiorKey"])(interior), false, {
         fileName: "[project]/src/components/interior/InteriorScene.tsx",
-        lineNumber: 401,
+        lineNumber: 402,
         columnNumber: 10
     }, this);
 }
-_s6(InteriorScene, "lONsK+F2GeCIQ86q01zJFEU2tpA=", false, function() {
+_s6(InteriorScene, "zDs1cYtwv7LtBXFvdCA80d84axE=", false, function() {
     return [
+        __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"],
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"]
     ];
 });
@@ -10372,7 +10376,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$movement$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/movement.ts [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$interior$2f$InteriorScene$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/interior/InteriorScene.tsx [app-client] (ecmascript)");
 ;
-var _s = __turbopack_context__.k.signature(), _s1 = __turbopack_context__.k.signature(), _s2 = __turbopack_context__.k.signature();
+var _s = __turbopack_context__.k.signature(), _s1 = __turbopack_context__.k.signature(), _s2 = __turbopack_context__.k.signature(), _s3 = __turbopack_context__.k.signature();
 "use client";
 ;
 ;
@@ -10418,6 +10422,7 @@ function CameraRig() {
                     if (!p) return;
                     if (pts.size === 1) {
                         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cam"].az -= (e.clientX - p.x) * 0.006;
+                        __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cam"].el = clamp(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cam"].el + (e.clientY - p.y) * 0.004, 0.35, 1.25);
                     } else if (pts.size === 2) {
                         const [a, b] = [
                             ...pts.values()
@@ -10474,7 +10479,7 @@ function CameraRig() {
             }
             const wantDist = hasProfile ? __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cam"].dist : 40;
             dist.current += (wantDist - dist.current) * (1 - Math.exp(-3 * dt));
-            const el = 0.85;
+            const el = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cam"].el;
             const d = dist.current;
             camera.position.set(target.current.x + Math.sin(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cam"].az) * Math.cos(el) * d, target.current.y + Math.sin(el) * d, target.current.z + Math.cos(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cam"].az) * Math.cos(el) * d);
             camera.lookAt(target.current);
@@ -10521,32 +10526,38 @@ _s1(LabelProjector, "X8dctQS+5HFLpO8EhP/G6dKQ3ZQ=", false, function() {
 });
 _c1 = LabelProjector;
 /** Everything outside: streets, buildings, plots, citizens, click-to-walk ground. */ function WorldContent() {
+    _s2();
+    const placesOnly = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"])({
+        "WorldContent.useGame[placesOnly]": (s)=>s.placesOnly
+    }["WorldContent.useGame[placesOnly]"]);
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$world$2f$Lighting$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                 fileName: "[project]/src/components/world/CityScene.tsx",
-                lineNumber: 118,
-                columnNumber: 7
-            }, this),
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$world$2f$Terrain$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
-                fileName: "[project]/src/components/world/CityScene.tsx",
-                lineNumber: 119,
-                columnNumber: 7
-            }, this),
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$world$2f$Buildings$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
-                fileName: "[project]/src/components/world/CityScene.tsx",
                 lineNumber: 120,
                 columnNumber: 7
             }, this),
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$world$2f$PlotsLayer$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$world$2f$Terrain$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                placesOnly: placesOnly
+            }, void 0, false, {
                 fileName: "[project]/src/components/world/CityScene.tsx",
                 lineNumber: 121,
                 columnNumber: 7
             }, this),
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$world$2f$People$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Npcs"], {}, void 0, false, {
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$world$2f$Buildings$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                 fileName: "[project]/src/components/world/CityScene.tsx",
                 lineNumber: 122,
                 columnNumber: 7
+            }, this),
+            !placesOnly && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$world$2f$PlotsLayer$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
+                fileName: "[project]/src/components/world/CityScene.tsx",
+                lineNumber: 123,
+                columnNumber: 23
+            }, this),
+            !placesOnly && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$world$2f$People$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Npcs"], {}, void 0, false, {
+                fileName: "[project]/src/components/world/CityScene.tsx",
+                lineNumber: 124,
+                columnNumber: 23
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("mesh", {
                 "rotation-x": -Math.PI / 2,
@@ -10565,7 +10576,7 @@ _c1 = LabelProjector;
                         ]
                     }, void 0, false, {
                         fileName: "[project]/src/components/world/CityScene.tsx",
-                        lineNumber: 134,
+                        lineNumber: 136,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("meshBasicMaterial", {
@@ -10574,28 +10585,36 @@ _c1 = LabelProjector;
                         depthWrite: false
                     }, void 0, false, {
                         fileName: "[project]/src/components/world/CityScene.tsx",
-                        lineNumber: 135,
+                        lineNumber: 137,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/world/CityScene.tsx",
-                lineNumber: 124,
+                lineNumber: 126,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/world/CityScene.tsx",
-        lineNumber: 117,
+        lineNumber: 119,
         columnNumber: 5
     }, this);
 }
+_s2(WorldContent, "3Ybdz//3Ua5P4hhXK4z6v3KvZI8=", false, function() {
+    return [
+        __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"]
+    ];
+});
 _c2 = WorldContent;
 function CityScene() {
-    _s2();
+    _s3();
     const inside = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"])({
         "CityScene.useGame[inside]": (s)=>!!s.interior
     }["CityScene.useGame[inside]"]);
+    const placesOnly = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"])({
+        "CityScene.useGame[placesOnly]": (s)=>s.placesOnly
+    }["CityScene.useGame[placesOnly]"]);
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$react$2d$three$2f$fiber$2f$dist$2f$react$2d$three$2d$fiber$2e$esm$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$locals$3e$__["Canvas"], {
         dpr: [
             1,
@@ -10615,46 +10634,47 @@ function CityScene() {
         gl: {
             antialias: true
         },
-        className: "!absolute inset-0",
+        className: "!absolute inset-0 touch-none",
         children: [
             inside ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$interior$2f$InteriorScene$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                 fileName: "[project]/src/components/world/CityScene.tsx",
-                lineNumber: 151,
+                lineNumber: 154,
                 columnNumber: 17
             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(WorldContent, {}, void 0, false, {
                 fileName: "[project]/src/components/world/CityScene.tsx",
-                lineNumber: 151,
+                lineNumber: 154,
                 columnNumber: 37
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$world$2f$Player$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                 fileName: "[project]/src/components/world/CityScene.tsx",
-                lineNumber: 152,
+                lineNumber: 155,
                 columnNumber: 7
             }, this),
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$world$2f$People$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["RemotePlayers"], {}, void 0, false, {
+            !placesOnly && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$world$2f$People$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["RemotePlayers"], {}, void 0, false, {
                 fileName: "[project]/src/components/world/CityScene.tsx",
-                lineNumber: 153,
-                columnNumber: 7
+                lineNumber: 156,
+                columnNumber: 23
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(CameraRig, {}, void 0, false, {
                 fileName: "[project]/src/components/world/CityScene.tsx",
-                lineNumber: 154,
+                lineNumber: 157,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(LabelProjector, {}, void 0, false, {
                 fileName: "[project]/src/components/world/CityScene.tsx",
-                lineNumber: 155,
+                lineNumber: 158,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/world/CityScene.tsx",
-        lineNumber: 144,
+        lineNumber: 147,
         columnNumber: 5
     }, this);
 }
-_s2(CityScene, "DTR0Nyi3VyGk/wqm7A5GcGQ3xWY=", false, function() {
+_s3(CityScene, "8g9+Ooqdvu3Ixdpx+pVLWcgeLU0=", false, function() {
     return [
+        __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"],
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"]
     ];
 });
@@ -12639,7 +12659,7 @@ _s4(Vehicle, "oGpTFNp4GSby0bHzkAWZQHetE7I=", false, function() {
     ];
 });
 _c5 = Vehicle;
-function Terrain() {
+function Terrain({ placesOnly = false }) {
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("mesh", {
@@ -12681,27 +12701,27 @@ function Terrain() {
                 lineNumber: 300,
                 columnNumber: 7
             }, this),
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Trees, {}, void 0, false, {
+            !placesOnly && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Trees, {}, void 0, false, {
                 fileName: "[project]/src/components/world/Terrain.tsx",
                 lineNumber: 301,
-                columnNumber: 7
+                columnNumber: 23
             }, this),
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Lamps, {}, void 0, false, {
+            !placesOnly && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Lamps, {}, void 0, false, {
                 fileName: "[project]/src/components/world/Terrain.tsx",
                 lineNumber: 302,
-                columnNumber: 7
+                columnNumber: 23
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Surroundings, {}, void 0, false, {
                 fileName: "[project]/src/components/world/Terrain.tsx",
                 lineNumber: 303,
                 columnNumber: 7
             }, this),
-            CARS.map((c, i)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Vehicle, {
+            !placesOnly && CARS.map((c, i)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Vehicle, {
                     car: c
                 }, i, false, {
                     fileName: "[project]/src/components/world/Terrain.tsx",
-                    lineNumber: 305,
-                    columnNumber: 9
+                    lineNumber: 304,
+                    columnNumber: 42
                 }, this))
         ]
     }, void 0, true, {
