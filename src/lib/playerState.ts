@@ -13,6 +13,14 @@ export const me = {
   goalPlace: null as string | null,
   /** riding a keke for the current trip (fast, costs money) */
   ride: false,
+  /** world position to return to when leaving an interior */
+  worldReturn: null as { x: number; z: number } | null,
+  /** furniture index to use once we arrive */
+  pendingUse: null as number | null,
+  /** leave the interior once we reach the exit mat */
+  pendingExit: false,
+  /** currently seated or lying on furniture (positions in world units) */
+  use: null as null | { pose: "sit" | "lie"; x: number; z: number; ry: number; seatH: number; standX: number; standZ: number },
 };
 
 export type RemoteMotion = { x: number; z: number; ry: number; speed: number; tx: number; tz: number; tr: number };

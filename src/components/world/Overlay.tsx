@@ -10,7 +10,10 @@ import { me, remoteMotion } from "@/lib/playerState";
 import { useGame } from "@/lib/store";
 import { walkToPlace } from "@/lib/movement";
 import { colorFor } from "@/lib/look";
-import { NPCS } from "./People";
+import { NPCS, sameSpace } from "./People";
+import { FURN, S } from "@/lib/furniture";
+import { interiorKey } from "@/lib/interiors";
+import { rt, walkToExit, walkToFurn } from "@/lib/interiorRuntime";
 import { TAG_Y } from "./Player";
 
 function Anchored({
@@ -145,6 +148,8 @@ function PeopleTags() {
   const profile = useGame((s) => s.profile);
   const remotes = useGame((s) => s.remotes);
   const speaking = useGame((s) => s.voice.speaking);
+  const inside = useGame((s) => !!s.interior);
+  const mine = useGame((s) => (s.interior ? interiorKey(s.interior) : null));
   return (
     <>
       {profile && (
@@ -152,7 +157,9 @@ function PeopleTags() {
           <NameTag name={profile.name} bubbleId="me" speaking={speaking.me} />
         </Anchored>
       )}
-      {Object.values(remotes).map((r) => (
+      {Object.values(remotes)
+        .filter((r) => sameSpace(r.room, mine))
+        .map((r) => (
         <Anchored
           key={r.id}
           id={`peer:${r.id}`}
@@ -164,9 +171,48 @@ function PeopleTags() {
           <NameTag name={r.name} bubbleId={r.id} speaking={speaking[r.id]} tone="other" />
         </Anchored>
       ))}
-      {NPCS.map((n) => (
-        <Anchored key={n.id} id={n.id} get={(o) => o.set(n.st.x, TAG_Y, n.st.z)} maxDist={11}>
-          <NameTag name={n.name} bubbleId={n.id} tone="other" dim />
+      {!inside &&
+        NPCS.map((n) => (
+          <Anchored key={n.id} id={n.id} get={(o) => o.set(n.st.x, TAG_Y, n.st.z)} maxDist={11}>
+            <NameTag name={n.name} bubbleId={n.id} tone="other" dim />
+          </Anchored>
+        ))}
+    </>
+  );
+}
+
+/** Exit sign, "what can I do here" prompts on usable furniture, and resident name tags. */
+function InteriorLabels() {
+  const interior = useGame((s) => s.interior);
+  const layout = interior ? rt.layout : null;
+  if (!layout) return null;
+  return (
+    <>
+      <Anchored id="exit" get={(o) => o.set(layout.exitX * S, 1.3, (layout.d / 2 - 0.45) * S)}>
+        <button
+          onClick={walkToExit}
+          className="pointer-events-auto whitespace-nowrap rounded-full bg-stone-900/90 px-3 py-1.5 text-[12px] font-semibold text-white shadow-lg ring-1 ring-black/10 transition hover:scale-105"
+        >
+          ↩ Exit
+        </button>
+      </Anchored>
+      {layout.items.map((it, i) => {
+        const def = FURN[it.kind];
+        if (!def.use) return null;
+        return (
+          <Anchored key={`f${i}`} id={`furn:${i}`} get={(o) => o.set(it.x * S, ((def.h || 0.9) + 0.3) * S, it.z * S)} maxDist={3.2}>
+            <button
+              onClick={() => walkToFurn(i)}
+              className="pointer-events-auto whitespace-nowrap rounded-full bg-white/92 px-2.5 py-1 text-[11px] font-semibold text-stone-800 shadow-md ring-1 ring-black/5 transition hover:scale-105 hover:bg-emerald-50"
+            >
+              {it.verb ?? def.use.verb}
+            </button>
+          </Anchored>
+        );
+      })}
+      {(layout.residents ?? []).map((r) => (
+        <Anchored key={`r${r.name}`} id={`res:${r.name}`} get={(o) => o.set(r.x * S, TAG_Y, r.z * S)} maxDist={9}>
+          <NameTag name={r.name} bubbleId={`res:${r.name}`} tone="other" dim />
         </Anchored>
       ))}
     </>
@@ -174,11 +220,18 @@ function PeopleTags() {
 }
 
 export default function Overlay() {
+  const inside = useGame((s) => !!s.interior);
   return (
     <div className="pointer-events-none absolute inset-0 z-[5] overflow-hidden">
-      <DistrictLabels />
-      <PlotLabels />
-      <PlaceLabels />
+      {inside ? (
+        <InteriorLabels />
+      ) : (
+        <>
+          <DistrictLabels />
+          <PlotLabels />
+          <PlaceLabels />
+        </>
+      )}
       <PeopleTags />
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { Footprints, X } from "lucide-react";
+import { DoorOpen, Footprints, X } from "lucide-react";
 import { PLACES, KIND_COLORS } from "@/lib/places";
 import { useGame } from "@/lib/store";
 import { useClock } from "@/lib/hooks";
@@ -9,6 +9,9 @@ import { KEKE_FARE, rideToPlace, walkToPlace } from "@/lib/movement";
 import { naira } from "@/lib/plots";
 import { ActionRow, VoiceRoomCard } from "./parts";
 import PlotPanelBody from "./PlotPanel";
+import InteriorPanel from "./InteriorPanel";
+import { enterInterior } from "@/lib/interiorRuntime";
+import { placeLayout } from "@/lib/layouts";
 
 function PlaceBody({ id }: { id: string }) {
   const place = PLACES.find((p) => p.id === id)!;
@@ -54,6 +57,15 @@ function PlaceBody({ id }: { id: string }) {
         </div>
       )}
 
+      {at && placeLayout(id) && (
+        <button
+          onClick={() => enterInterior({ kind: "place", id })}
+          className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 py-3 text-sm font-semibold text-white shadow-lg shadow-amber-500/20 transition hover:bg-amber-600 active:scale-[0.98]"
+        >
+          <DoorOpen className="size-4" /> Go inside
+        </button>
+      )}
+
       {busy && at && (
         <div className="mt-4 overflow-hidden rounded-2xl bg-emerald-50 p-3 ring-1 ring-emerald-100">
           <p className="text-sm font-semibold text-emerald-800">{busy.label}…</p>
@@ -89,19 +101,21 @@ function PlaceBody({ id }: { id: string }) {
 
 export default function SidePanel() {
   const selected = useGame((s) => s.selected);
+  const interior = useGame((s) => s.interior);
   useClock();
+  const shown = interior ? { type: "interior", id: `${interior.kind}:${interior.id}` } : selected;
   return (
     <AnimatePresence mode="wait">
-      {selected && (
+      {shown && (
         <motion.aside
-          key={`${selected.type}:${selected.id}`}
+          key={`${shown.type}:${shown.id}`}
           initial={{ opacity: 0, y: 40, scale: 0.97 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 40, scale: 0.97 }}
           transition={{ type: "spring", stiffness: 260, damping: 26 }}
-          className="absolute inset-x-3 bottom-3 z-20 max-h-[62dvh] overflow-y-auto rounded-3xl bg-white/92 p-5 shadow-2xl ring-1 ring-black/5 backdrop-blur-xl sm:inset-x-auto sm:bottom-auto sm:right-5 sm:top-20 sm:max-h-[calc(100dvh-7rem)] sm:w-[24rem]"
+          className={`absolute inset-x-3 bottom-3 z-20 ${interior ? "max-h-[44dvh]" : "max-h-[62dvh]"} overflow-y-auto rounded-3xl bg-white/92 p-5 shadow-2xl ring-1 ring-black/5 backdrop-blur-xl sm:inset-x-auto sm:bottom-auto sm:right-5 sm:top-20 sm:max-h-[calc(100dvh-7rem)] sm:w-[24rem]`}
         >
-          {selected.type === "place" ? <PlaceBody id={selected.id} /> : <PlotPanelBody id={selected.id} />}
+          {interior ? <InteriorPanel /> : selected?.type === "place" ? <PlaceBody id={selected.id} /> : selected ? <PlotPanelBody id={selected.id} /> : null}
         </motion.aside>
       )}
     </AnimatePresence>

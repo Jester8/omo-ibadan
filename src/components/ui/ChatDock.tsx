@@ -6,6 +6,7 @@ import { MessageCircle, Send, X } from "lucide-react";
 import { useGame } from "@/lib/store";
 import { PLACES } from "@/lib/places";
 import { net, roomOf } from "@/lib/net";
+import { rt } from "@/lib/interiorRuntime";
 
 export default function ChatDock() {
   const [open, setOpen] = useState(() => typeof window !== "undefined" && window.innerWidth >= 640);
@@ -14,8 +15,9 @@ export default function ChatDock() {
   const chat = useGame((s) => s.chat);
   const muted = useGame((s) => s.muted);
   const [menu, setMenu] = useState<string | null>(null);
-  const room = roomOf(atPlace);
-  const label = atPlace ? PLACES.find((p) => p.id === atPlace)?.name : "The streets";
+  const interior = useGame((s) => s.interior);
+  const room = roomOf(atPlace, interior);
+  const label = interior ? rt.layout?.name : atPlace ? PLACES.find((p) => p.id === atPlace)?.name : "The streets";
   const msgs = chat.filter((m) => m.room === room && !(m.fromPid && muted.includes(m.fromPid))).slice(-40);
   const end = useRef<HTMLDivElement>(null);
 

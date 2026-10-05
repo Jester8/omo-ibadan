@@ -13,8 +13,10 @@ import { anchors } from "@/lib/overlay";
 import { cam, me } from "@/lib/playerState";
 import { useGame } from "@/lib/store";
 import { walkTo } from "@/lib/movement";
+import InteriorScene from "@/components/interior/InteriorScene";
 
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
+const limits = (): [number, number] => (useGame.getState().interior ? [4, 20] : [9, 44]);
 
 function CameraRig() {
   const { camera, gl } = useThree();
@@ -34,7 +36,7 @@ function CameraRig() {
       } else if (pts.size === 2) {
         const [a, b] = [...pts.values()];
         const d = Math.hypot(a.x - b.x, a.y - b.y);
-        if (pinch) cam.dist = clamp(cam.dist * (pinch / d), 9, 44);
+        if (pinch) cam.dist = clamp(cam.dist * (pinch / d), ...limits());
         pinch = d;
       }
       p.x = e.clientX;
@@ -46,7 +48,7 @@ function CameraRig() {
     };
     const wheel = (e: WheelEvent) => {
       e.preventDefault();
-      cam.dist = clamp(cam.dist + e.deltaY * 0.02, 9, 44);
+      cam.dist = clamp(cam.dist + e.deltaY * 0.02, ...limits());
     };
     el.addEventListener("pointerdown", down);
     el.addEventListener("pointermove", move);
@@ -109,24 +111,15 @@ function LabelProjector() {
   return null;
 }
 
-export default function CityScene() {
+/** Everything outside: streets, buildings, plots, citizens, click-to-walk ground. */
+function WorldContent() {
   return (
-    <Canvas
-      dpr={[1, 2]}
-      shadows="percentage"
-      camera={{ fov: 30, near: 0.5, far: 300, position: [24, 28, 24] }}
-      gl={{ antialias: true }}
-      className="!absolute inset-0"
-    >
+    <>
       <Lighting />
       <Terrain />
       <Buildings />
       <PlotsLayer />
-      <Player />
-      <RemotePlayers />
       <Npcs />
-      <CameraRig />
-      <LabelProjector />
       {/* invisible ground: click anywhere to walk */}
       <mesh
         rotation-x={-Math.PI / 2}
@@ -141,6 +134,25 @@ export default function CityScene() {
         <planeGeometry args={[140, 140]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
+    </>
+  );
+}
+
+export default function CityScene() {
+  const inside = useGame((s) => !!s.interior);
+  return (
+    <Canvas
+      dpr={[1, 2]}
+      shadows="percentage"
+      camera={{ fov: 30, near: 0.5, far: 300, position: [24, 28, 24] }}
+      gl={{ antialias: true }}
+      className="!absolute inset-0"
+    >
+      {inside ? <InteriorScene /> : <WorldContent />}
+      <Player />
+      <RemotePlayers />
+      <CameraRig />
+      <LabelProjector />
     </Canvas>
   );
 }

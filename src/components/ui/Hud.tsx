@@ -1,13 +1,14 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Drumstick, ListChecks, Moon, Phone, PartyPopper, Sun, Target, UserRound, Users, Zap, ZapOff, Wifi, WifiOff } from "lucide-react";
+import { Drumstick, DoorOpen, House, ListChecks, Moon, Phone, PartyPopper, Sun, Target, UserRound, Users, Zap, ZapOff, Wifi, WifiOff } from "lucide-react";
 import { useGame } from "@/lib/store";
 import { useClock } from "@/lib/hooks";
 import { formatClock, periodLabel } from "@/lib/time";
 import { naira } from "@/lib/plots";
 import { TITLES, titleIndex } from "@/lib/titles";
 import { QUESTS } from "@/lib/quests";
+import { enterInterior, exitInterior, homeRef } from "@/lib/interiorRuntime";
 
 const NEEDS = [
   { key: "hunger", label: "Hunger", icon: Drumstick, color: "bg-orange-500" },
@@ -25,6 +26,7 @@ export default function Hud() {
   const online = useGame((s) => s.online);
   const call = useGame((s) => s.call.phase);
   const questsDone = useGame((s) => s.questsDone);
+  const inside = useGame((s) => !!s.interior);
   const setSheet = useGame((s) => s.setSheet);
   const { minutes, hour, day, nepa } = useClock();
   const title = TITLES[titleIndex(rep)];
@@ -107,6 +109,14 @@ export default function Hud() {
         transition={{ delay: 0.3, type: "spring", stiffness: 200, damping: 22 }}
         className="absolute right-3 top-3 z-10 flex flex-col gap-2 sm:right-5 sm:top-5 sm:flex-row"
       >
+        <button
+          onClick={() => (inside ? exitInterior() : enterInterior(homeRef()))}
+          className="grid size-11 place-items-center rounded-2xl bg-amber-500 text-white shadow-xl ring-1 ring-black/5 transition hover:bg-amber-600 active:scale-95"
+          aria-label={inside ? "Leave the building" : "Go home"}
+          title={inside ? "Leave" : "Go home"}
+        >
+          {inside ? <DoorOpen className="size-5" /> : <House className="size-5" />}
+        </button>
         <button
           onClick={() => setSheet("phone")}
           className="relative grid size-11 place-items-center rounded-2xl bg-white/85 text-stone-700 shadow-xl ring-1 ring-black/5 backdrop-blur-xl transition hover:bg-white active:scale-95"

@@ -6,7 +6,8 @@ import * as THREE from "three";
 import Avatar from "@/components/avatar/Avatar";
 import { AVATAR_SCALE } from "./Player";
 import { PLACES, doorOf } from "@/lib/places";
-import { findPath, type Pt } from "@/lib/pathing";
+import { findWorldPath, type Pt } from "@/lib/pathing";
+import { interiorKey } from "@/lib/interiors";
 import { randomLook, type Look } from "@/lib/look";
 import { remoteMotion } from "@/lib/playerState";
 import { useGame } from "@/lib/store";
@@ -44,13 +45,19 @@ function Remote({ id }: { id: string }) {
   );
 }
 
+/** Players are visible when they are in the same place: both outside, or inside the same building. */
+export const sameSpace = (peerRoom: string, mine: string | null) => (mine ? peerRoom === mine : !peerRoom.startsWith("in:"));
+
 export function RemotePlayers() {
   const remotes = useGame((s) => s.remotes);
+  const mine = useGame((s) => (s.interior ? interiorKey(s.interior) : null));
   return (
     <>
-      {Object.keys(remotes).map((id) => (
-        <Remote key={id} id={id} />
-      ))}
+      {Object.values(remotes)
+        .filter((r) => sameSpace(r.room, mine))
+        .map((r) => (
+          <Remote key={r.id} id={r.id} />
+        ))}
     </>
   );
 }
@@ -101,7 +108,7 @@ function NpcActor({ index }: { index: number }) {
       const dest = PLACES[Math.floor(Math.random() * PLACES.length)];
       if (dest.id !== st.place) {
         const d = doorOf(dest);
-        const path = findPath(st.x, st.z, d.x + (Math.random() - 0.5), d.z + 0.2);
+        const path = findWorldPath(st.x, st.z, d.x + (Math.random() - 0.5), d.z + 0.2);
         if (path) {
           st.path = path;
           st.place = null;

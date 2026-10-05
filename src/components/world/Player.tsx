@@ -9,6 +9,8 @@ import { PLACES, doorOf } from "@/lib/places";
 import { boost, cam, me } from "@/lib/playerState";
 import { isBlockedAt } from "@/lib/pathing";
 import { net } from "@/lib/net";
+import { S } from "@/lib/furniture";
+import { endUse, exitInterior, startUse } from "@/lib/interiorRuntime";
 
 /** Avatars are ~1.7 units tall; scaled to sit well with the buildings. */
 export const AVATAR_SCALE = 0.56;
@@ -37,7 +39,7 @@ export default function Player() {
   const profile = useGame((s) => s.profile);
   const group = useRef<THREE.Group>(null);
   const marker = useRef<THREE.Mesh>(null);
-  const motion = useRef({ speed: 0 });
+  const motion = useRef<{ speed: number; pose: "sit" | "lie" | null }>({ speed: 0, pose: null });
   const keys = useRef(new Set<string>());
   const sent = useRef({ t: 0, x: 0, z: 0, s: 0 });
 
@@ -66,9 +68,31 @@ export default function Player() {
     const s = useGame.getState();
     if (!s.profile || !group.current) return;
     const dt = Math.min(rawDt, 0.05);
+
+    // seated or sleeping on furniture: hold the pose until the action finishes
+    if (me.use) {
+      if (!s.busy) {
+        endUse();
+      } else {
+        me.speed = 0;
+        motion.current.speed = 0;
+        motion.current.pose = me.use.pose;
+        const u = me.use;
+        if (u.pose === "sit") {
+          group.current.position.set(u.x, (u.seatH + 0.04 - 0.865) * S, u.z);
+          group.current.rotation.set(0, u.ry, 0);
+        } else {
+          group.current.position.set(u.x + Math.sin(u.ry) * 0.85 * S, (u.seatH + 0.12) * S, u.z + Math.cos(u.ry) * 0.85 * S);
+          group.current.rotation.set(-Math.PI / 2, u.ry, 0, "YXZ");
+        }
+        return;
+      }
+    }
+    motion.current.pose = null;
+
     const energy = s.needs.energy;
     const tired = energy < 3 ? 0.4 : energy < 15 ? 0.65 : 1;
-    const base = me.ride ? 8.5 : Date.now() < boost.until ? 6.5 : 3.1 * tired;
+    const base = s.interior ? 2.2 * tired : me.ride ? 8.5 : Date.now() < boost.until ? 6.5 : 3.1 * tired;
     let moving = false;
     let tx = me.ry;
 
@@ -115,23 +139,36 @@ export default function Player() {
     if (me.speed < 0.02) me.speed = 0;
     motion.current.speed = me.speed;
     group.current.position.set(me.x, 0, me.z);
-    group.current.rotation.y = me.ry;
+    group.current.rotation.set(0, me.ry, 0);
 
-    // which place are we standing at?
-    let near: string | null = null;
-    let best = 1.7;
-    for (const p of PLACES) {
-      const d = doorOf(p);
-      const dist = Math.hypot(d.x - me.x, d.z - me.z);
-      if (dist < best) {
-        best = dist;
-        near = p.id;
+    // which place are we standing at? (not while inside a building)
+    if (!s.interior) {
+      let near: string | null = null;
+      let best = 1.7;
+      for (const p of PLACES) {
+        const d = doorOf(p);
+        const dist = Math.hypot(d.x - me.x, d.z - me.z);
+        if (dist < best) {
+          best = dist;
+          near = p.id;
+        }
       }
+      if (near !== s.atPlace) s.setAtPlace(near);
     }
-    if (near !== s.atPlace) s.setAtPlace(near);
     if (!me.path.length) {
       me.goalPlace = null;
       me.ride = false;
+      // arrived at a piece of furniture or the exit mat
+      if (!s.busy && !moving) {
+        if (me.pendingUse !== null) {
+          const idx = me.pendingUse;
+          me.pendingUse = null;
+          startUse(idx);
+        } else if (me.pendingExit) {
+          me.pendingExit = false;
+          exitInterior();
+        }
+      }
     }
 
     // destination marker

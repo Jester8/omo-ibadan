@@ -8,7 +8,10 @@ import { clone as cloneSkinned } from "three/examples/jsm/utils/SkeletonUtils.js
 import type { Look } from "@/lib/look";
 import { ANIM_URL, BASE_URL, baseFor, dressAvatar } from "./rig";
 
-export type Motion = { current: { speed: number } };
+export type Motion = { current: { speed: number; pose?: "sit" | "lie" | null } };
+
+const SIT_THIGH = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -1.45);
+const SIT_KNEE = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), 1.5);
 
 /** Avatar height in avatar units (metres) at scale 1. */
 export const AVATAR_HEIGHT = 1.81;
@@ -29,7 +32,9 @@ function Inner({ look: lookIn, motion, scale }: { look: Look; motion?: Motion; s
     const mixer = new THREE.AnimationMixer(root);
     const actions: Record<string, THREE.AnimationAction> = {};
     for (const clip of anim.animations) actions[clip.name] = mixer.clipAction(clip);
-    return { root, dressed, mixer, actions };
+    const bone = (n: string) => root.getObjectByName(n) ?? null;
+    const legs = { ul: bone("UpperLegL"), ur: bone("UpperLegR"), ll: bone("LowerLegL"), lr: bone("LowerLegR") };
+    return { root, dressed, mixer, actions, legs };
   }, [gltf, anim, key, base]);
 
   useEffect(
@@ -43,9 +48,10 @@ function Inner({ look: lookIn, motion, scale }: { look: Look; motion?: Motion; s
   useFrame((_, dt) => {
     const speed = motion?.current.speed ?? 0;
     const ms = speed / scale; // speed in the model's own metres per second
+    const pose = motion?.current.pose;
     let want = "Idle_Neutral";
     let timeScale = 1;
-    if (ms > 0.15) {
+    if (ms > 0.15 && !pose) {
       if (ms < 3) {
         want = "Walk";
         timeScale = Math.max(0.6, ms / 1.4);
@@ -67,6 +73,12 @@ function Inner({ look: lookIn, motion, scale }: { look: Look; motion?: Motion; s
       next.setEffectiveTimeScale(timeScale);
     }
     built.mixer.update(dt);
+    if (pose === "sit") {
+      built.legs.ul?.quaternion.multiply(SIT_THIGH);
+      built.legs.ur?.quaternion.multiply(SIT_THIGH);
+      built.legs.ll?.quaternion.multiply(SIT_KNEE);
+      built.legs.lr?.quaternion.multiply(SIT_KNEE);
+    }
   });
 
   const bw = lookIn.build === "slim" ? 0.94 : lookIn.build === "broad" ? 1.07 : 1;

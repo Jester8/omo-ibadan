@@ -16,6 +16,12 @@ const ROADS = [-20, -10, 0, 10, 20];
 const rotation = () => -Math.PI / 2 - Math.atan2(-Math.cos(cam.az), -Math.sin(cam.az));
 
 export default function Minimap() {
+  const inside = useGame((s) => !!s.interior);
+  if (inside) return null;
+  return <MinimapCanvas />;
+}
+
+function MinimapCanvas() {
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {

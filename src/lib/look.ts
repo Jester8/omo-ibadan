@@ -120,9 +120,10 @@ export const DEFAULT_LOOK: Look = {
   accessory: "none",
 };
 
-const pick = <T,>(a: readonly T[]): T => a[Math.floor(Math.random() * a.length)];
+type Rng = () => number;
 
-export function randomLook(): Look {
+function makeLook(r: Rng): Look {
+  const pick = <T,>(a: readonly T[]): T => a[Math.floor(r() * a.length)];
   const frame = pick(FRAMES).id;
   const hairStyle = pick(HAIR_STYLES).id;
   const headwear = hairStyle === "gele" || hairStyle === "turban" || hairStyle === "hijab" || hairStyle === "afro" || hairStyle === "puffs";
@@ -138,6 +139,21 @@ export function randomLook(): Look {
     shoeColor: pick(["#f4f4f2", "#1d2433", "#dc2626", "#f59e0b"]),
     accessory: headwear ? pick<Accessory>(["none", "none", "glasses", "sunglasses"]) : pick(ACCESSORIES).id,
   };
+}
+
+export const randomLook = (): Look => makeLook(Math.random);
+
+/** The same look every time for the same seed (used for shopkeepers, residents and so on). */
+export function seededLook(seed: string): Look {
+  let h = 2166136261;
+  for (let i = 0; i < seed.length; i++) h = Math.imul(h ^ seed.charCodeAt(i), 16777619) >>> 0;
+  const r: Rng = () => {
+    h = Math.imul(h ^ (h >>> 15), 2246822507) >>> 0;
+    h = Math.imul(h ^ (h >>> 13), 3266489909) >>> 0;
+    h ^= h >>> 16;
+    return (h >>> 0) / 4294967296;
+  };
+  return makeLook(r);
 }
 
 /** Stable pastel-ish colour for a player id (used for land ownership tint). */

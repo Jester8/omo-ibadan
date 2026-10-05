@@ -1,6 +1,7 @@
 "use client";
 
-import { Footprints, Hammer, KeyRound, Landmark, X } from "lucide-react";
+import { DoorOpen, Footprints, Hammer, KeyRound, Landmark, X } from "lucide-react";
+import { enterInterior } from "@/lib/interiorRuntime";
 import { HOME_ACTIONS, PLOT_SIZE, TIERS, naira, plotById } from "@/lib/plots";
 import { pendingRent, useGame } from "@/lib/store";
 import { colorFor } from "@/lib/look";
@@ -27,6 +28,20 @@ export default function PlotPanelBody({ id }: { id: string }) {
     const err = fn();
     if (err) useGame.getState().toast(err, "bad");
   };
+
+  const enterHome = () => {
+    if (!near) return walkTo(plot.pos[0], plot.pos[1] + PLOT_SIZE / 2 + 0.6);
+    enterInterior({ kind: "home", id });
+  };
+  const enterButton =
+    tier >= 1 ? (
+      <button
+        onClick={enterHome}
+        className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 py-3 text-sm font-semibold text-white shadow-lg shadow-amber-500/20 transition hover:bg-amber-600 active:scale-[0.98]"
+      >
+        <DoorOpen className="size-4" /> {near ? (mine ? "Go inside your home" : `Knock and go in`) : "Walk to the door"}
+      </button>
+    ) : null;
 
   return (
     <>
@@ -93,6 +108,7 @@ export default function PlotPanelBody({ id }: { id: string }) {
             </button>
           )}
 
+          {enterButton}
           {tier >= 1 && (
             <>
               {!near && (
@@ -129,7 +145,8 @@ export default function PlotPanelBody({ id }: { id: string }) {
           <p className="flex items-center gap-2 font-semibold text-stone-800">
             <KeyRound className="size-4" /> Owned by {state.ownerName}
           </p>
-          <p className="mt-1">Ask them to host a house party, then walk over and join their voice room.</p>
+          <p className="mt-1">Ask them to host a house party, or just knock and go in.</p>
+          {enterButton}
           {tier >= 1 && (
             <button
               onClick={() => walkTo(plot.pos[0], plot.pos[1] + PLOT_SIZE / 2 + 0.6)}

@@ -1,4 +1,5 @@
 import type { ActionDef } from "./places";
+import type { PlotState } from "./protocol";
 
 export const PLOT_SIZE = 3.4;
 
@@ -52,3 +53,21 @@ export const HOME_ACTIONS: ActionDef[] = [
   { id: "cook", label: "Cook at home", secs: 5, cost: 800, gain: { hunger: 40, fun: 5 } },
   { id: "host", label: "Host friends", secs: 6, gain: { social: 25, fun: 15 }, rep: 2 },
 ];
+
+/** Houses already lived in by NPC neighbours. They can be visited but not bought. */
+export const NPC_HOMES: Record<string, { ownerName: string; tier: number }> = {
+  "bodija-estate-1": { ownerName: "Chief Adeyemi", tier: 3 },
+  "bodija-estate-2": { ownerName: "Alhaji Rasheed", tier: 2 },
+  "jericho-gra-1": { ownerName: "Mrs Folake", tier: 3 },
+  "oluyole-estate-1": { ownerName: "Dr. Okafor", tier: 2 },
+  "iyaganku-gra-1": { ownerName: "Engr. Bello", tier: 3 },
+  "agbowo-1": { ownerName: "Mama Bisi", tier: 1 },
+  "mokola-1": { ownerName: "Mr Seun", tier: 1 },
+};
+
+export const NPC_PLOTS: Record<string, PlotState> = Object.fromEntries(
+  Object.entries(NPC_HOMES).map(([id, h]) => [
+    id,
+    { ownerId: `npc:${h.ownerName.toLowerCase().replace(/[^a-z]+/g, "-")}`, ownerName: h.ownerName, tier: h.tier, collectedAt: 0 },
+  ]),
+);

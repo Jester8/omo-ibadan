@@ -2,7 +2,8 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import type { Look } from "./look";
 import { type ActionDef, type Needs } from "./places";
-import { TIERS, plotById, RENT_CAP_MIN, naira, PLOTS } from "./plots";
+import { TIERS, plotById, RENT_CAP_MIN, naira, PLOTS, NPC_PLOTS } from "./plots";
+import type { InteriorRef } from "./interiors";
 import type { PeerInfo, PlotState } from "./protocol";
 import { titleIndex, TITLES } from "./titles";
 import { boost } from "./playerState";
@@ -71,6 +72,11 @@ type State = {
 
   // session
   awaySecs: number;
+  interior: InteriorRef | null;
+  /** black fade between city and interiors */
+  fade: boolean;
+  /** epoch ms until which the generator keeps the lights on */
+  generatorUntil: number;
   selected: Selection;
   atPlace: string | null;
   busy: Busy;
@@ -127,12 +133,15 @@ export const useGame = create<State>()(
       money: START_MONEY,
       needs: START_NEEDS,
       rep: 0,
-      plots: {},
+      plots: NPC_PLOTS,
       stats: EMPTY_STATS,
       questsDone: [],
       muted: [],
       savedAt: 0,
       awaySecs: 0,
+      interior: null,
+      fade: false,
+      generatorUntil: 0,
 
       selected: null,
       atPlace: null,
@@ -279,9 +288,10 @@ export const useGame = create<State>()(
             refund += (p?.price ?? 0) + TIERS.slice(1, mine.tier + 1).reduce((a, t) => a + t.cost, 0);
           }
         }
-        set({ plots: incoming, money: s.money + refund });
+        const merged = { ...NPC_PLOTS, ...incoming };
+        set({ plots: merged, money: s.money + refund });
         if (refund > 0) get().toast(`That land was already taken. Refunded ${naira(refund)}.`, "bad");
-        rebuildGrid(Object.entries(incoming).filter(([, p]) => p.tier > 0).map(([id]) => id));
+        rebuildGrid(Object.entries(merged).filter(([, p]) => p.tier > 0).map(([id]) => id));
       },
 
       setPlot: (id, plot) => {
@@ -308,7 +318,7 @@ export const useGame = create<State>()(
 
       setRemotes: (remotes) => set({ remotes }),
 
-      recordStat: (k, n = 1) => set((s) => ({ stats: { ...s.stats, [k]: s.stats[k] + n } })),
+      recordStat: (k, n = 1) => set((s) => ({ stats: { ...s.stats, [k]: (s.stats[k] ?? 0) + n } })),
 
       mute: (pid) => set((s) => (s.muted.includes(pid) ? s : { muted: [...s.muted, pid] })),
       clearMuted: () => set({ muted: [] }),
@@ -344,6 +354,7 @@ export const useGame = create<State>()(
         const p = persisted as Partial<State> | undefined;
         if (!p) return current;
         const merged = { ...current, ...p } as State;
+        merged.plots = { ...NPC_PLOTS, ...(p.plots ?? {}) };
         const away = p.savedAt ? Math.min(1200, (Date.now() - p.savedAt) / 1000) : 0;
         if (away > 30 && p.needs) {
           merged.needs = decayNeeds(p.needs, away * 0.4);
@@ -361,3 +372,6 @@ export const useGame = create<State>()(
 
 export const ownedBy = (plots: Record<string, PlotState>, pid: string | undefined) =>
   PLOTS.filter((p) => plots[p.id]?.ownerId === pid);
+
+// make sure NPC-owned houses are solid for pathfinding from the first frame
+rebuildGrid(Object.entries(useGame.getState().plots).filter(([, p]) => p.tier > 0).map(([id]) => id));

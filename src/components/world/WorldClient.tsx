@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { AnimatePresence } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { ArrowLeft } from "lucide-react";
 import Hud from "@/components/ui/Hud";
 import SidePanel from "@/components/ui/PlacePanel";
@@ -19,6 +19,7 @@ import { naira } from "@/lib/plots";
 import { useMounted } from "@/lib/hooks";
 import { net, roomOf } from "@/lib/net";
 import { voice } from "@/lib/voice";
+import { enterInterior, homeRef } from "@/lib/interiorRuntime";
 
 const CityScene = dynamic(() => import("./CityScene"), {
   ssr: false,
@@ -30,6 +31,7 @@ function Runtime() {
   const hasProfile = useGame((s) => !!s.profile);
   const lookKey = useGame((s) => (s.profile ? JSON.stringify([s.profile.name, s.profile.look]) : ""));
   const atPlace = useGame((s) => s.atPlace);
+  const interior = useGame((s) => s.interior);
   const net_ = useGame((s) => s.net);
 
   useEffect(() => {
@@ -65,6 +67,15 @@ function Runtime() {
     useGame.getState().patch({ awaySecs: 0 });
   }, []);
 
+  // deep link: /play?enter=home or /play?enter=<place id> walks straight inside
+  useEffect(() => {
+    if (!hasProfile) return;
+    const target = new URLSearchParams(location.search).get("enter");
+    if (!target) return;
+    const t = setTimeout(() => enterInterior(target === "home" ? homeRef() : target === "flat" ? { kind: "home", id: "flat" } : { kind: "place", id: target }), 1800);
+    return () => clearTimeout(t);
+  }, [hasProfile]);
+
   useEffect(() => {
     if (!hasProfile) return;
     net.connect();
@@ -77,14 +88,15 @@ function Runtime() {
 
   useEffect(() => {
     if (net_ !== "online") return;
-    net.room(roomOf(atPlace));
-  }, [atPlace, net_]);
+    net.room(roomOf(atPlace, interior));
+  }, [atPlace, interior, net_]);
 
   // walking out of a venue drops you from its voice room (call rooms are unaffected)
   useEffect(() => {
     const room = useGame.getState().voice.room;
     if (room?.startsWith("place:") && room !== `place:${atPlace}`) voice.leave();
-  }, [atPlace]);
+    if (room?.startsWith("home:") && !interior) voice.leave();
+  }, [atPlace, interior]);
 
   return null;
 }
@@ -95,6 +107,7 @@ export default function WorldClient() {
   const editing = useGame((s) => s.editingAvatar);
   const setProfile = useGame((s) => s.setProfile);
   const patch = useGame((s) => s.patch);
+  const fade = useGame((s) => s.fade);
 
   return (
     <div className="relative h-dvh w-full overflow-hidden bg-[#eef3ec]">
@@ -111,6 +124,11 @@ export default function WorldClient() {
           <Hint />
         </>
       )}
+      <AnimatePresence>
+        {mounted && fade && (
+          <motion.div key="fade" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }} className="pointer-events-none absolute inset-0 z-[70] bg-stone-950" />
+        )}
+      </AnimatePresence>
       {mounted && <Toasts />}
       {mounted && <IncomingCall />}
       {mounted && <Runtime />}

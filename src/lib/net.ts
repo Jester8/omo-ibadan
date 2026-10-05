@@ -3,6 +3,7 @@ import { hooks, useGame } from "./store";
 import { remoteMotion } from "./playerState";
 import { voice } from "./voice";
 import { cleanChat } from "./moderation";
+import { interiorKey, type InteriorRef } from "./interiors";
 
 let ws: WebSocket | null = null;
 let want = false;
@@ -19,7 +20,7 @@ function send(m: C2S) {
 voice.init(send);
 hooks.plotSet = (plotId, plot) => send({ t: "plotSet", plotId, plot });
 
-export const roomOf = (atPlace: string | null) => atPlace ?? "streets";
+export const roomOf = (atPlace: string | null, interior?: InteriorRef | null) => (interior ? interiorKey(interior) : (atPlace ?? "streets"));
 export const callRoom = (a: string, b: string) => `call:${[a, b].sort().join(":")}`;
 
 function upsert(p: PeerInfo) {
@@ -43,7 +44,7 @@ function handle(m: S2C) {
       remoteMotion.clear();
       useGame.setState({ remotes: {} });
       m.peers.forEach(upsert);
-      send({ t: "room", room: roomOf(useGame.getState().atPlace) });
+      send({ t: "room", room: roomOf(useGame.getState().atPlace, useGame.getState().interior) });
       break;
     }
     case "join":
@@ -194,7 +195,7 @@ export const net = {
     const clean = cleanChat(text);
     if (!clean) return;
     s.recordStat("chats");
-    const room = roomOf(s.atPlace);
+    const room = roomOf(s.atPlace, s.interior);
     if (s.net === "online") send({ t: "chat", text: clean });
     else s.addChat({ room, from: s.profile?.name ?? "me", text: clean, at: Date.now(), self: true }, "me");
   },

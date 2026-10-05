@@ -17,7 +17,15 @@
 - **Getting around:** minimap (click to walk, rotates with the camera) and keke rides (₦300, fast) from any place panel
 - **Safety basics:** chat filter (profanity, slurs, links), per-player mute, report button (logged to `server/reports.log`)
 
+- **Interiors:** every one of the 20 places has its own enterable interior (lecture hall and library, market hall, amala restaurant, ward, arcade, council hall, mosque, cathedral, stadium concourse and more), each with its own size, rooms and furniture. Players get a rented flat ("room and parlour") and can enter any built house; NPC neighbours own 7 houses (bungalows, duplexes, mansions) with residents inside. Four home tiers (flat, bungalow, duplex, mansion) with different room counts and sizes.
+  - Ibadan look: red-oxide cement floors, terracotta and sand walls, adire-indigo rugs, louvre windows, ceiling fans, lanterns, generators
+  - Furniture you can use: sofas and chairs (sit), beds (sleep), stove, fridge, TV, desks, bookshelves, shower, arcade, drums, prayer mats and more
+  - NEPA matters indoors: the TV, fridge, fans and lights go off; fuel the generator (₦800) to bring them back
+  - Multiplayer: you can see and chat with others who are in the same room; each interior has its own chat and voice room
+  - `npm run check:interiors` validates every layout (free spawn, every usable item reachable, no overlapping furniture)
+
 ## Not verified yet
+- **Interiors on a phone:** only checked on a desktop-size window plus one narrow view.
 - **Audio itself.** Signalling, ringing and room joins are tested; microphone capture was blocked in the preview browser, so test two real devices on https.
 
 ## Before a public launch

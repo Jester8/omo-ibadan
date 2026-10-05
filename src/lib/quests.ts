@@ -8,9 +8,12 @@ export type Stats = {
   chats: number;
   voiceJoins: number;
   calls: number;
+  entered: number;
+  slept: number;
+  used: number;
 };
 
-export const EMPTY_STATS: Stats = { visited: [], worked: 0, ate: 0, chats: 0, voiceJoins: 0, calls: 0 };
+export const EMPTY_STATS: Stats = { visited: [], worked: 0, ate: 0, chats: 0, voiceJoins: 0, calls: 0, entered: 0, slept: 0, used: 0 };
 
 export type QuestState = { stats: Stats; plots: Record<string, PlotState>; pid: string | undefined };
 
@@ -38,6 +41,13 @@ export const QUESTS: Quest[] = [
     progress: (s) => ({ cur: Math.min(3, s.stats.visited.length), max: 3 }),
   },
   {
+    id: "inside",
+    title: "Step inside",
+    blurb: "Walk through a door. Every building has an interior, and you have a flat of your own.",
+    reward: { money: 1500, rep: 1 },
+    done: (s) => (s.stats.entered ?? 0) >= 1,
+  },
+  {
     id: "earn",
     title: "Earn your first naira",
     blurb: "Finish a job shift anywhere (Cocoa House, a market stall, the motor park).",
@@ -57,6 +67,13 @@ export const QUESTS: Quest[] = [
     blurb: "Send a message in the chat.",
     reward: { rep: 2 },
     done: (s) => s.stats.chats >= 1,
+  },
+  {
+    id: "rest",
+    title: "A good night's sleep",
+    blurb: "Sleep in a bed, at home or anywhere with one.",
+    reward: { money: 2000, rep: 2 },
+    done: (s) => (s.stats.slept ?? 0) >= 1,
   },
   {
     id: "culture",
