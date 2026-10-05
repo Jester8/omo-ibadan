@@ -8,8 +8,9 @@ import { AVATAR_SCALE } from "./Player";
 import { PLACES, doorOf } from "@/lib/places";
 import { findWorldPath, type Pt } from "@/lib/pathing";
 import { interiorKey } from "@/lib/interiors";
-import { randomLook, type Look } from "@/lib/look";
-import { emotes, remoteMotion } from "@/lib/playerState";
+import { seededLook, topsFor, type Look } from "@/lib/look";
+import { walkTo } from "@/lib/movement";
+import { emotes, me, remoteMotion } from "@/lib/playerState";
 import { useGame } from "@/lib/store";
 
 const angleDiff = (a: number, b: number) => {
@@ -73,7 +74,15 @@ type Npc = {
   st: { x: number; z: number; ry: number; speed: number; path: Pt[]; waitUntil: number; place: string | null; nextChat: number };
 };
 
-const NAMES = ["Kunle", "Bisi", "Kemi", "Femi", "Ayo", "Sola", "Dami", "Ngozi", "Seun", "Yemi"];
+/** Six women (ids npc-0..5, see romance.ts) and four men. */
+const NAMES = ["Bisi", "Kemi", "Ngozi", "Funke", "Yetunde", "Tolani", "Kunle", "Femi", "Ayo", "Seun"];
+
+function npcLook(name: string, female: boolean): Look {
+  const frame = female ? ("f" as const) : ("m" as const);
+  const look = { ...seededLook(`npc-${name}`), frame };
+  const tops = topsFor(frame);
+  return tops.some((t) => t.id === look.top) ? look : { ...look, top: tops[0].id };
+}
 
 const LINES: Record<string, string[]> = {
   default: ["How far? Una dey alright?", "Ibadan is peace o.", "Abeg make NEPA no take light again.", "E kaaro o!", "Who wan chop?"],
@@ -86,13 +95,13 @@ const LINES: Record<string, string[]> = {
   "agodi": ["This lake is so calm.", "Fresh air, finally."],
 };
 
-export const NPCS: Npc[] = NAMES.slice(0, 8).map((name, i) => {
+export const NPCS: Npc[] = NAMES.map((name, i) => {
   const p = PLACES[(i * 5) % PLACES.length];
   const d = doorOf(p);
   return {
     id: `npc-${i}`,
     name,
-    look: randomLook(),
+    look: npcLook(name, i < 6),
     st: { x: d.x, z: d.z + 0.5, ry: 0, speed: 0, path: [], waitUntil: Math.random() * 6000, place: p.id, nextChat: Date.now() + 8000 + Math.random() * 15000 },
   };
 });
@@ -100,12 +109,20 @@ export const NPCS: Npc[] = NAMES.slice(0, 8).map((name, i) => {
 function NpcActor({ index }: { index: number }) {
   const npcLook = NPCS[index].look;
   const g = useRef<THREE.Group>(null);
-  const motion = useRef({ speed: 0 });
+  const motion = useRef<{ speed: number; eat: "bowl" | null }>({ speed: 0, eat: null });
   useFrame((_, rawDt) => {
     const dt = Math.min(rawDt, 0.05);
     const npc = NPCS[index];
     const st = npc.st;
     const now = Date.now();
+    const gs = useGame.getState();
+    motion.current.eat = gs.dateWith && gs.selected?.id === npc.id ? "bowl" : null;
+    if (gs.selected?.type === "npc" && gs.selected.id === npc.id && Math.hypot(me.x - st.x, me.z - st.z) < 3.2) {
+      // she stops to talk and turns towards you
+      st.path = [];
+      st.waitUntil = now + 4000;
+      st.ry += angleDiff(st.ry, Math.atan2(me.x - st.x, me.z - st.z)) * Math.min(1, dt * 8);
+    }
     if (!st.path.length && now > st.waitUntil) {
       const dest = PLACES[Math.floor(Math.random() * PLACES.length)];
       if (dest.id !== st.place) {
@@ -158,6 +175,20 @@ function NpcActor({ index }: { index: number }) {
   return (
     <group ref={g}>
       <Avatar look={npcLook} motion={motion} scale={AVATAR_SCALE} />
+      {/* generous invisible hit area so a tap finds her */}
+      <mesh
+        position-y={0.5}
+        onClick={(e) => {
+          if (e.delta > 6) return;
+          e.stopPropagation();
+          useGame.getState().select({ type: "npc", id: NPCS[index].id });
+          const st = NPCS[index].st;
+          walkTo(st.x, st.z + 0.9);
+        }}
+      >
+        <cylinderGeometry args={[0.32, 0.32, 1.1, 8]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+      </mesh>
     </group>
   );
 }

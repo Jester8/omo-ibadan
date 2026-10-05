@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Landmark, Drumstick, DoorOpen, House, ListChecks, Moon, Phone, PartyPopper, Sun, Target, UserRound, Users, Zap, ZapOff, Wifi, WifiOff, Volume2, VolumeX } from "lucide-react";
+import { CarFront, Landmark, Drumstick, DoorOpen, House, ListChecks, Moon, Phone, PartyPopper, Sun, Target, UserRound, Users, Zap, ZapOff, Wifi, WifiOff, Volume2, VolumeX } from "lucide-react";
 import { useGame } from "@/lib/store";
 import { useClock } from "@/lib/hooks";
 import { formatClock, periodLabel } from "@/lib/time";
@@ -31,6 +31,7 @@ export default function Hud() {
   const muted = useSound((s) => s.muted);
   const setSound = useSound((s) => s.set);
   const setSheet = useGame((s) => s.setSheet);
+  const driving = useGame((s) => s.driving);
   const { minutes, hour, day, nepa } = useClock();
   const title = TITLES[titleIndex(rep)];
   const nextQuest = QUESTS.find((q) => !questsDone.includes(q.id));
@@ -134,6 +135,23 @@ export default function Hud() {
         >
           <Phone className="size-5" />
           {call !== "idle" && <span className="absolute right-1.5 top-1.5 size-2.5 animate-pulse rounded-full bg-emerald-500" />}
+        </button>
+        <button
+          onClick={() => {
+            const s = useGame.getState();
+            if (s.cars.length && !s.sheet) {
+              const err = s.toggleDrive();
+              if (err) s.toast(err, "bad");
+            } else setSheet("garage");
+          }}
+          onContextMenu={(e) => {
+            e.preventDefault();
+            setSheet("garage");
+          }}
+          className={`relative grid size-11 place-items-center rounded-2xl shadow-xl ring-1 ring-black/5 backdrop-blur-xl transition active:scale-95 ${driving ? "bg-sky-600 text-white" : "bg-white/85 text-stone-700 hover:bg-white"}`}
+          aria-label="Car: drive or park (long-press for dealer)"
+        >
+          <CarFront className="size-5" />
         </button>
         <button
           onClick={() => setSheet("election")}

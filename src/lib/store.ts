@@ -4,6 +4,8 @@ import type { Look } from "./look";
 import { type ActionDef, type Needs } from "./places";
 import { TIERS, plotById, RENT_CAP_MIN, naira, PLOTS, NPC_PLOTS } from "./plots";
 import type { InteriorRef } from "./interiors";
+import type { Rel } from "./romance";
+import { carById } from "./cars";
 import { decorById, MAX_PER_KIND, withDecor } from "./decor";
 import { layoutFor } from "./layouts";
 import type { Election, PeerInfo, PlotState } from "./protocol";
@@ -26,15 +28,24 @@ export type ChatMsg = {
   fromId?: string;
   fromPid?: string;
 };
-export type Selection = { type: "place" | "plot"; id: string } | null;
-export type Busy = { label: string; start: number; secs: number } | null;
+export type Selection = { type: "place" | "plot" | "npc"; id: string } | null;
+export type Food = "bowl" | "cup" | "snack";
+export type Busy = { label: string; start: number; secs: number; food?: Food } | null;
+
+/** What the player is seen eating or drinking during an action, if anything. */
+export function foodFor(a: { id: string; gain?: { hunger?: number } }): Food | undefined {
+  if ((a.gain?.hunger ?? 0) < 3) return undefined;
+  if (/water|drink|zobo|juice|beer|palmwine/.test(a.id)) return "cup";
+  if (/snack|provisions|suya|puffpuff|chin|bread|meatpie/.test(a.id)) return "snack";
+  return "bowl";
+}
 export type CallState = {
   phase: "idle" | "calling" | "ringing" | "live";
   peerId: string | null;
   peerName: string;
   room: string | null;
 };
-export type Sheet = "phone" | "profile" | "quests" | "election" | null;
+export type Sheet = "phone" | "profile" | "quests" | "election" | "garage" | null;
 
 const START_MONEY = 25000;
 const START_NEEDS: Needs = { hunger: 80, energy: 90, fun: 65, social: 55 };
@@ -81,6 +92,16 @@ type State = {
   generatorUntil: number;
   election: Election | null;
   decor: Record<string, string[]>;
+  romance: Record<string, Rel>;
+  cars: string[];
+  carColors: Record<string, string>;
+  activeCar: string | null;
+  driving: boolean;
+  buyCar: (id: string) => string | null;
+  setCarColor: (id: string, color: string) => void;
+  toggleDrive: (id?: string) => string | null;
+  dateWith: string | null;
+  adjustNeeds: (d: Partial<Record<"hunger" | "energy" | "fun" | "social", number>>) => void;
   decorRev: number;
   buyDecor: (homeId: string, decorId: string, tier: number) => string | null;
   myVote: string | null;
@@ -91,6 +112,7 @@ type State = {
   clockOverride: number | null;
   timeMode: "auto" | "day" | "night";
   placesOnly: boolean;
+  panelFlip: string | null;
   editingAvatar: boolean;
   sheet: Sheet;
   net: "offline" | "connecting" | "online";
@@ -153,6 +175,41 @@ export const useGame = create<State>()(
       generatorUntil: 0,
       election: null,
       decor: {},
+      romance: {},
+      cars: [],
+      carColors: {},
+      activeCar: null,
+      driving: false,
+      buyCar: (id) => {
+        const s = get();
+        const c = carById(id);
+        if (!c) return "Not available.";
+        if (s.cars.includes(id)) return "You already own it.";
+        if (s.money < c.price) return `You need ${naira(c.price)}.`;
+        set({ money: s.money - c.price, cars: [...s.cars, id], activeCar: id, carColors: { ...s.carColors, [id]: c.colors[0] } });
+        return null;
+      },
+      setCarColor: (id, color) => set((s) => ({ carColors: { ...s.carColors, [id]: color } })),
+      toggleDrive: (id) => {
+        const s = get();
+        if (s.interior) return "Step outside first.";
+        if (s.busy) return "Finish what you're doing first.";
+        const want = id ?? s.activeCar;
+        if (!want || !s.cars.includes(want)) return "Buy a car first.";
+        if (s.driving && (!id || id === s.activeCar)) {
+          set({ driving: false });
+          return null;
+        }
+        set({ driving: true, activeCar: want });
+        return null;
+      },
+      dateWith: null,
+      adjustNeeds: (d) =>
+        set((s) => {
+          const needs = { ...s.needs };
+          for (const k of Object.keys(d) as (keyof typeof needs)[]) needs[k] = Math.max(0, Math.min(100, needs[k] + (d[k] ?? 0)));
+          return { needs };
+        }),
       decorRev: 0,
       myVote: null,
 
@@ -163,6 +220,7 @@ export const useGame = create<State>()(
       clockOverride: null,
       timeMode: "auto",
       placesOnly: false,
+      panelFlip: null,
       editingAvatar: false,
       sheet: null,
       net: "offline",
@@ -220,7 +278,7 @@ export const useGame = create<State>()(
         const price = (a.cost ?? 0) * (policy === "food" && (a.gain?.hunger ?? 0) > 0 ? 0.8 : 1);
         if (price && s.money < price) return `You need ${naira(price)}.`;
         const scale = opts?.gainScale ?? 1;
-        set({ busy: { label: a.label, start: Date.now(), secs: a.secs }, money: s.money - Math.round(price) });
+        set({ busy: { label: a.label, start: Date.now(), secs: a.secs, food: foodFor(a) }, money: s.money - Math.round(price) });
         if (busyTimer) clearTimeout(busyTimer);
         busyTimer = setTimeout(() => {
           const cur = get();
@@ -381,6 +439,10 @@ export const useGame = create<State>()(
         muted: s.muted,
         savedAt: s.savedAt,
         decor: s.decor,
+        romance: s.romance,
+        cars: s.cars,
+        carColors: s.carColors,
+        activeCar: s.activeCar,
       }),
       // while you were away your needs keep dropping, at a gentler rate (capped at 20 minutes)
       merge: (persisted, current) => {

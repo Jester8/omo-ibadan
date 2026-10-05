@@ -234,7 +234,8 @@ function tube(a: THREE.Vector3, b: THREE.Vector3, r0: number, r1: number, mat: T
 
 /* ---------------------------------- dress ---------------------------------- */
 
-export type Dressed = { dispose: () => void };
+/** Long skirts and gowns do not fold when seated, so they swap for the legs underneath while sitting. */
+export type Dressed = { dispose: () => void; skirts: THREE.Object3D[]; legs: THREE.Object3D[] };
 
 export function dressAvatar(root: THREE.Object3D, look: Look, base: BaseId): Dressed {
   const roles = ROLES[base];
@@ -261,6 +262,8 @@ export function dressAvatar(root: THREE.Object3D, look: Look, base: BaseId): Dre
   // the model's own hair stays only for "Natural" with no hat; otherwise we draw hair ourselves
   const hairBaked = style === "lowcut" && roles.baked && !wearsHat;
   const dressBase = base === "f-casual-a";
+  const skirts: THREE.Object3D[] = [];
+  const skirtLegs: THREE.Object3D[] = [];
   const hideLegs = look.top === "ankara" || look.top === "gown" || look.top === "asooke";
 
   /* 1. recolour the model's own materials */
@@ -294,7 +297,10 @@ export function dressAvatar(root: THREE.Object3D, look: Look, base: BaseId): Dre
       mat.color.set(look.bottomColor);
     } else if (part === "Legs" && roles.legs.includes(n)) {
       mat.color.set(dressBase ? look.topColor : look.bottomColor);
-      if (hideLegs) m.visible = false; // hidden under the long wrapper or gown
+      if (hideLegs) {
+        m.visible = false; // hidden under the long wrapper or gown
+        skirtLegs.push(m);
+      }
     } else if (part === "Feet" && roles.feet.includes(n)) {
       mat.color.set(look.shoeColor);
     }
@@ -825,6 +831,7 @@ export function dressAvatar(root: THREE.Object3D, look: Look, base: BaseId): Dre
     g.add(sash);
     g.position.set(hips.x, 0, hips.z + 0.01);
     mount(g, "Hips");
+    skirts.push(g);
     capSleeve("L", 0.06, 0.07, 0.62, wrap);
     capSleeve("R", 0.06, 0.07, 0.62, wrap);
   };
@@ -874,11 +881,14 @@ export function dressAvatar(root: THREE.Object3D, look: Look, base: BaseId): Dre
       ),
     );
     place(g, "Abdomen", abd);
+    skirts.push(g);
     capSleeve("L", 0.06, 0.07, 0.55, cloth);
     capSleeve("R", 0.06, 0.07, 0.55, cloth);
   }
 
   return {
     dispose: () => toDispose.forEach((d) => d.dispose()),
+    skirts,
+    legs: skirtLegs,
   };
 }

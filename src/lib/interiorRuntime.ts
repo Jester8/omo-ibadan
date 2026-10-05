@@ -94,8 +94,11 @@ export function enterInterior(ref: InteriorRef): boolean {
     me.use = null;
     me.pendingUse = null;
     me.pendingExit = false;
-    cam.dist = Math.min(16, Math.max(8, Math.max(layout.w, layout.d) * S * 1.15));
-    useGame.setState({ interior: ref, selected: null, atPlace: ref.kind === "place" ? ref.id : null });
+    // phones are tall and narrow: pull back so the whole room fits above the bottom panel
+    const aspect = typeof window !== "undefined" ? Math.min(1.7, window.innerWidth / Math.max(1, window.innerHeight)) : 1.6;
+    const fit = (Math.max(layout.w, layout.d) * S) / (0.536 * aspect) * 0.8;
+    cam.dist = Math.min(28, Math.max(8, fit));
+    useGame.setState({ driving: false, interior: ref, selected: null, atPlace: ref.kind === "place" ? ref.id : null });
     useGame.getState().recordStat("entered");
   });
   return true;

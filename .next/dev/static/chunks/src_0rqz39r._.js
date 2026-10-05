@@ -26,6 +26,68 @@ var _s = __turbopack_context__.k.signature();
 ;
 const SIT_THIGH = new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$three$2f$build$2f$three$2e$core$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Quaternion"]().setFromAxisAngle(new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$three$2f$build$2f$three$2e$core$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Vector3"](1, 0, 0), -1.45);
 const SIT_KNEE = new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$three$2f$build$2f$three$2e$core$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Quaternion"]().setFromAxisAngle(new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$three$2f$build$2f$three$2e$core$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Vector3"](1, 0, 0), 1.5);
+const _ax = new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$three$2f$build$2f$three$2e$core$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Vector3"](1, 0, 0);
+const _eatUp = new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$three$2f$build$2f$three$2e$core$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Quaternion"]();
+const _eatFore = new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$three$2f$build$2f$three$2e$core$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Quaternion"]();
+const _eatIn = new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$three$2f$build$2f$three$2e$core$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Quaternion"]();
+const _az = new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$three$2f$build$2f$three$2e$core$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Vector3"](0, 0, 1);
+const _wp = new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$three$2f$build$2f$three$2e$core$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Vector3"]();
+const _up = new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$three$2f$build$2f$three$2e$core$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Vector3"]();
+/** Little props held in the hand while eating: a bowl of food, a cup, a snack. */ function makeFood() {
+    const g = new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$three$2f$build$2f$three$2e$core$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Group"]();
+    const mat = (c, r = 0.6)=>new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$three$2f$build$2f$three$2e$core$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["MeshStandardMaterial"]({
+            color: c,
+            roughness: r
+        });
+    const bowl = new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$three$2f$build$2f$three$2e$core$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Group"]();
+    const b = new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$three$2f$build$2f$three$2e$core$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Mesh"](new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$three$2f$build$2f$three$2e$core$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CylinderGeometry"](0.075, 0.045, 0.05, 20), mat("#f5f3ee"));
+    const m = new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$three$2f$build$2f$three$2e$core$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Mesh"](new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$three$2f$build$2f$three$2e$core$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SphereGeometry"](0.058, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2), mat("#d9a441", 0.9));
+    m.position.y = 0.02;
+    const soup = new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$three$2f$build$2f$three$2e$core$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Mesh"](new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$three$2f$build$2f$three$2e$core$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CylinderGeometry"](0.06, 0.06, 0.006, 16), mat("#2f7d32", 0.8));
+    soup.position.set(0, 0.026, 0);
+    bowl.add(b, m);
+    const cup = new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$three$2f$build$2f$three$2e$core$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Group"]();
+    cup.add(new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$three$2f$build$2f$three$2e$core$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Mesh"](new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$three$2f$build$2f$three$2e$core$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CylinderGeometry"](0.04, 0.032, 0.1, 14), mat("#2f6fd6", 0.4)));
+    const snack = new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$three$2f$build$2f$three$2e$core$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Group"]();
+    const bar = new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$three$2f$build$2f$three$2e$core$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Mesh"](new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$three$2f$build$2f$three$2e$core$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["BoxGeometry"](0.11, 0.035, 0.05), mat("#c98b3a", 0.9));
+    bar.rotation.z = 0.35;
+    snack.add(bar);
+    void soup;
+    g.add(bowl, cup, snack);
+    return g;
+}
+const _pw = new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$three$2f$build$2f$three$2e$core$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Quaternion"]();
+const _rw = new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$three$2f$build$2f$three$2e$core$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Quaternion"]();
+const _pr = new __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$three$2f$build$2f$three$2e$core$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Quaternion"]();
+/**
+ * Rotate a bone by `r`, expressed in the avatar's own frame (x = sideways, z = forward), whatever the
+ * bone's local axes are. Bone-local axes in this rig differ left to right, so a plain local rotation
+ * swings the legs out sideways.
+ */ function rotateInRootFrame(bone, root, r) {
+    if (!bone?.parent) return;
+    bone.parent.updateWorldMatrix(true, false);
+    root.getWorldQuaternion(_rw);
+    bone.parent.getWorldQuaternion(_pw);
+    _pr.copy(_rw).invert().multiply(_pw); // bone parent's rotation relative to the avatar root
+    // local' = parent^-1 * r * parent * local
+    bone.quaternion.premultiply(_pr).premultiply(r).premultiply(_pr.invert());
+}
+/** Raise the right arm to the mouth and show the food in hand. */ function applyEat(built, eat, pose, t) {
+    const food = built.food;
+    food.visible = !!eat && pose !== "lie";
+    if (!eat || pose === "lie") return;
+    const bite = (Math.sin(t * 4.2) + 1) / 2; // 0 = plate out, 1 = at the mouth
+    // upper arm forward and a little inward, forearm folding up towards the mouth
+    _eatUp.setFromAxisAngle(_ax, -0.5 - 0.12 * bite).premultiply(_eatIn.setFromAxisAngle(_az, 0.38));
+    rotateInRootFrame(built.legs.ar, built.root, _eatUp);
+    rotateInRootFrame(built.legs.lar, built.root, _eatFore.setFromAxisAngle(_ax, -0.95 - 0.7 * bite));
+    if (!built.wrist) return;
+    built.root.updateWorldMatrix(true, true);
+    built.wrist.getWorldPosition(_wp);
+    built.root.worldToLocal(_wp);
+    food.position.copy(_wp).add(_up.set(0, 0.07, 0.07));
+    food.children.forEach((c, i)=>c.visible = eat === "bowl" && i === 0 || eat === "cup" && i === 1 || eat === "snack" && i === 2);
+}
 const AVATAR_HEIGHT = 1.81;
 Object.values(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$avatar$2f$rig$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["BASE_URL"]).forEach((u)=>__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$react$2d$three$2f$drei$2f$core$2f$Gltf$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGLTF"].preload(u));
 function Inner({ look: lookIn, motion, scale }) {
@@ -55,14 +117,21 @@ function Inner({ look: lookIn, motion, scale }) {
                 chest: bone("Chest"),
                 head: bone("Head"),
                 al: bone("UpperArmL"),
-                ar: bone("UpperArmR")
+                ar: bone("UpperArmR"),
+                lar: bone("LowerArmR")
             };
+            const wrist = bone("WristR");
+            const food = makeFood();
+            food.visible = false;
+            root.add(food);
             return {
                 root,
                 dressed,
                 mixer,
                 actions,
-                legs
+                legs,
+                wrist,
+                food
             };
         }
     }["Inner.useMemo[built]"], [
@@ -125,11 +194,19 @@ function Inner({ look: lookIn, motion, scale }) {
                 built.legs.ul?.quaternion.multiply(q(1, 0, 0, Math.sin(t) * 0.3));
                 built.legs.ur?.quaternion.multiply(q(1, 0, 0, -Math.sin(t) * 0.3));
             }
+            applyEat(built, motion?.current.eat ?? null, pose ?? null, state.clock.elapsedTime);
+            const seated = pose === "sit";
+            built.dressed.skirts.forEach({
+                "Inner.useFrame": (o)=>o.visible = !seated
+            }["Inner.useFrame"]);
+            built.dressed.legs.forEach({
+                "Inner.useFrame": (o)=>o.visible = seated
+            }["Inner.useFrame"]);
             if (pose === "sit") {
-                built.legs.ul?.quaternion.multiply(SIT_THIGH);
-                built.legs.ur?.quaternion.multiply(SIT_THIGH);
-                built.legs.ll?.quaternion.multiply(SIT_KNEE);
-                built.legs.lr?.quaternion.multiply(SIT_KNEE);
+                rotateInRootFrame(built.legs.ul, built.root, SIT_THIGH);
+                rotateInRootFrame(built.legs.ur, built.root, SIT_THIGH);
+                rotateInRootFrame(built.legs.ll, built.root, SIT_KNEE);
+                rotateInRootFrame(built.legs.lr, built.root, SIT_KNEE);
             }
         }
     }["Inner.useFrame"]);
@@ -144,12 +221,12 @@ function Inner({ look: lookIn, motion, scale }) {
             object: built.root
         }, void 0, false, {
             fileName: "[project]/src/components/avatar/Avatar.tsx",
-            lineNumber: 100,
+            lineNumber: 178,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/components/avatar/Avatar.tsx",
-        lineNumber: 99,
+        lineNumber: 177,
         columnNumber: 5
     }, this);
 }
@@ -175,7 +252,7 @@ function Avatar({ look, motion, scale = 1 }) {
                         ]
                     }, void 0, false, {
                         fileName: "[project]/src/components/avatar/Avatar.tsx",
-                        lineNumber: 110,
+                        lineNumber: 188,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("meshBasicMaterial", {
@@ -185,13 +262,13 @@ function Avatar({ look, motion, scale = 1 }) {
                         depthWrite: false
                     }, void 0, false, {
                         fileName: "[project]/src/components/avatar/Avatar.tsx",
-                        lineNumber: 111,
+                        lineNumber: 189,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/avatar/Avatar.tsx",
-                lineNumber: 109,
+                lineNumber: 187,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Suspense"], {
@@ -202,18 +279,18 @@ function Avatar({ look, motion, scale = 1 }) {
                     scale: scale
                 }, void 0, false, {
                     fileName: "[project]/src/components/avatar/Avatar.tsx",
-                    lineNumber: 114,
+                    lineNumber: 192,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/avatar/Avatar.tsx",
-                lineNumber: 113,
+                lineNumber: 191,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/avatar/Avatar.tsx",
-        lineNumber: 107,
+        lineNumber: 185,
         columnNumber: 5
     }, this);
 }
@@ -1266,6 +1343,8 @@ function dressAvatar(root, look, base) {
     // the model's own hair stays only for "Natural" with no hat; otherwise we draw hair ourselves
     const hairBaked = style === "lowcut" && roles.baked && !wearsHat;
     const dressBase = base === "f-casual-a";
+    const skirts = [];
+    const skirtLegs = [];
     const hideLegs = look.top === "ankara" || look.top === "gown" || look.top === "asooke";
     /* 1. recolour the model's own materials */ root.traverse((o)=>{
         const m = o;
@@ -1297,7 +1376,10 @@ function dressAvatar(root, look, base) {
             mat.color.set(look.bottomColor);
         } else if (part === "Legs" && roles.legs.includes(n)) {
             mat.color.set(dressBase ? look.topColor : look.bottomColor);
-            if (hideLegs) m.visible = false; // hidden under the long wrapper or gown
+            if (hideLegs) {
+                m.visible = false; // hidden under the long wrapper or gown
+                skirtLegs.push(m);
+            }
         } else if (part === "Feet" && roles.feet.includes(n)) {
             mat.color.set(look.shoeColor);
         }
@@ -1976,6 +2058,7 @@ function dressAvatar(root, look, base) {
         g.add(sash);
         g.position.set(hips.x, 0, hips.z + 0.01);
         mount(g, "Hips");
+        skirts.push(g);
         capSleeve("L", 0.06, 0.07, 0.62, wrap);
         capSleeve("R", 0.06, 0.07, 0.62, wrap);
     };
@@ -2053,11 +2136,14 @@ function dressAvatar(root, look, base) {
             ]
         ], cloth, 0.82, 40));
         place(g, "Abdomen", abd);
+        skirts.push(g);
         capSleeve("L", 0.06, 0.07, 0.55, cloth);
         capSleeve("R", 0.06, 0.07, 0.55, cloth);
     }
     return {
-        dispose: ()=>toDispose.forEach((d)=>d.dispose())
+        dispose: ()=>toDispose.forEach((d)=>d.dispose()),
+        skirts,
+        legs: skirtLegs
     };
 }
 if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
@@ -4356,10 +4442,20 @@ function SidePanel() {
         "SidePanel.useGame[interior]": (s)=>s.interior
     }["SidePanel.useGame[interior]"]);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$hooks$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useClock"])();
+    // phones: rooms start with the panel folded away so the room itself is visible
+    const flip = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"])({
+        "SidePanel.useGame[flip]": (s)=>s.panelFlip
+    }["SidePanel.useGame[flip]"]);
+    const setFlip = (v)=>__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"].getState().patch({
+            panelFlip: v
+        });
     const shown = interior ? {
         type: "interior",
         id: `${interior.kind}:${interior.id}`
     } : selected;
+    const key = shown ? `${shown.type}:${shown.id}` : "";
+    const min = interior ? flip !== key : flip === key;
+    const setMin = ()=>setFlip(flip === key ? null : key);
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$components$2f$AnimatePresence$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AnimatePresence"], {
         mode: "wait",
         children: shown && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$motion$2f$dist$2f$es$2f$react$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$locals$3e$__["motion"].aside, {
@@ -4383,40 +4479,62 @@ function SidePanel() {
                 stiffness: 260,
                 damping: 26
             },
-            className: `absolute inset-x-3 bottom-3 z-20 ${interior ? "max-h-[44dvh]" : "max-h-[62dvh]"} overflow-y-auto rounded-3xl bg-white/92 p-5 shadow-2xl ring-1 ring-black/5 backdrop-blur-xl sm:inset-x-auto sm:bottom-auto sm:right-5 sm:top-20 sm:max-h-[calc(100dvh-7rem)] sm:w-[24rem]`,
-            children: interior ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$InteriorPanel$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
-                fileName: "[project]/src/components/ui/PlacePanel.tsx",
-                lineNumber: 118,
-                columnNumber: 23
-            }, this) : selected?.type === "place" ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(PlaceBody, {
-                id: selected.id
-            }, void 0, false, {
-                fileName: "[project]/src/components/ui/PlacePanel.tsx",
-                lineNumber: 118,
-                columnNumber: 72
-            }, this) : selected ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$PlotPanel$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
-                id: selected.id
-            }, void 0, false, {
-                fileName: "[project]/src/components/ui/PlacePanel.tsx",
-                lineNumber: 118,
-                columnNumber: 116
-            }, this) : null
-        }, `${shown.type}:${shown.id}`, false, {
+            className: `absolute inset-x-3 bottom-3 z-20 ${min ? "max-sm:max-h-12 max-sm:overflow-hidden max-sm:py-2" : interior ? "max-h-[44dvh]" : "max-h-[62dvh]"} overflow-y-auto rounded-3xl bg-white/92 p-5 shadow-2xl ring-1 ring-black/5 backdrop-blur-xl sm:inset-x-auto sm:bottom-auto sm:right-5 sm:top-20 sm:max-h-[calc(100dvh-7rem)] sm:w-[24rem]`,
+            children: [
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                    onClick: setMin,
+                    "aria-label": min ? "Show panel" : "Hide panel",
+                    className: "mx-auto -mt-2 mb-2 flex w-full items-center justify-center gap-1 text-[11px] font-semibold text-stone-400 sm:hidden",
+                    children: [
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                            className: "h-1 w-10 rounded-full bg-stone-300"
+                        }, void 0, false, {
+                            fileName: "[project]/src/components/ui/PlacePanel.tsx",
+                            lineNumber: 129,
+                            columnNumber: 13
+                        }, this),
+                        min ? "Show panel" : ""
+                    ]
+                }, void 0, true, {
+                    fileName: "[project]/src/components/ui/PlacePanel.tsx",
+                    lineNumber: 124,
+                    columnNumber: 11
+                }, this),
+                min ? null : interior ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$InteriorPanel$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
+                    fileName: "[project]/src/components/ui/PlacePanel.tsx",
+                    lineNumber: 132,
+                    columnNumber: 36
+                }, this) : selected?.type === "place" ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(PlaceBody, {
+                    id: selected.id
+                }, void 0, false, {
+                    fileName: "[project]/src/components/ui/PlacePanel.tsx",
+                    lineNumber: 132,
+                    columnNumber: 85
+                }, this) : selected ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$PlotPanel$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                    id: selected.id
+                }, void 0, false, {
+                    fileName: "[project]/src/components/ui/PlacePanel.tsx",
+                    lineNumber: 132,
+                    columnNumber: 129
+                }, this) : null
+            ]
+        }, `${shown.type}:${shown.id}`, true, {
             fileName: "[project]/src/components/ui/PlacePanel.tsx",
-            lineNumber: 110,
+            lineNumber: 116,
             columnNumber: 9
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/components/ui/PlacePanel.tsx",
-        lineNumber: 108,
+        lineNumber: 114,
         columnNumber: 5
     }, this);
 }
-_s1(SidePanel, "ydgeNgJD/5ir9mv6BdAdLGbODrs=", false, function() {
+_s1(SidePanel, "FElvfJmxfh6ZyPwa4xitkzioA60=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"],
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"],
-        __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$hooks$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useClock"]
+        __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$hooks$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useClock"],
+        __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"]
     ];
 });
 _c1 = SidePanel;
@@ -6516,6 +6634,13 @@ function ViewControls() {
     const setView = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"])({
         "ViewControls.useGame[setView]": (s)=>s.patch
     }["ViewControls.useGame[setView]"]);
+    const interior = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"])({
+        "ViewControls.useGame[interior]": (s)=>s.interior
+    }["ViewControls.useGame[interior]"]);
+    const flip = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"])({
+        "ViewControls.useGame[flip]": (s)=>s.panelFlip
+    }["ViewControls.useGame[flip]"]);
+    const inside = !!interior && flip === `interior:${interior.kind}:${interior.id}`;
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "ViewControls.useEffect": ()=>{
             const keys = new Set();
@@ -6559,27 +6684,12 @@ function ViewControls() {
     const nextTime = timeMode === "auto" ? "day" : timeMode === "day" ? "night" : "auto";
     const TimeIcon = timeMode === "day" ? __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$sun$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Sun$3e$__["Sun"] : timeMode === "night" ? __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$moon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Moon$3e$__["Moon"] : __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$sun$2d$moon$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__SunMoon$3e$__["SunMoon"];
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        className: "absolute bottom-[4.5rem] left-3 z-10 flex flex-col gap-1.5 sm:bottom-14 sm:left-5",
+        className: `absolute left-3 z-[25] flex ${inside ? "max-sm:bottom-[47dvh] max-sm:flex-row" : "max-sm:bottom-[4.5rem]"} bottom-[4.5rem] flex-col gap-1.5 sm:bottom-14 sm:left-5`,
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Hold, {
                 label: "Rotate left",
                 onTick: (dt)=>__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cam"].az += dt * 1.8,
                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$rotate$2d$ccw$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__RotateCcw$3e$__["RotateCcw"], {
-                    className: "size-5"
-                }, void 0, false, {
-                    fileName: "[project]/src/components/ui/ViewControls.tsx",
-                    lineNumber: 70,
-                    columnNumber: 9
-                }, this)
-            }, void 0, false, {
-                fileName: "[project]/src/components/ui/ViewControls.tsx",
-                lineNumber: 69,
-                columnNumber: 7
-            }, this),
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Hold, {
-                label: "Rotate right",
-                onTick: (dt)=>__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cam"].az -= dt * 1.8,
-                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$rotate$2d$cw$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__RotateCw$3e$__["RotateCw"], {
                     className: "size-5"
                 }, void 0, false, {
                     fileName: "[project]/src/components/ui/ViewControls.tsx",
@@ -6592,9 +6702,9 @@ function ViewControls() {
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Hold, {
-                label: "Tilt up",
-                onTick: (dt)=>__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cam"].el = Math.min(1.25, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cam"].el + dt),
-                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chevrons$2d$up$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ChevronsUp$3e$__["ChevronsUp"], {
+                label: "Rotate right",
+                onTick: (dt)=>__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cam"].az -= dt * 1.8,
+                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$rotate$2d$cw$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__RotateCw$3e$__["RotateCw"], {
                     className: "size-5"
                 }, void 0, false, {
                     fileName: "[project]/src/components/ui/ViewControls.tsx",
@@ -6607,9 +6717,9 @@ function ViewControls() {
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Hold, {
-                label: "Tilt down",
-                onTick: (dt)=>__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cam"].el = Math.max(0.35, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cam"].el - dt),
-                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chevrons$2d$down$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ChevronsDown$3e$__["ChevronsDown"], {
+                label: "Tilt up",
+                onTick: (dt)=>__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cam"].el = Math.min(1.25, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cam"].el + dt),
+                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chevrons$2d$up$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ChevronsUp$3e$__["ChevronsUp"], {
                     className: "size-5"
                 }, void 0, false, {
                     fileName: "[project]/src/components/ui/ViewControls.tsx",
@@ -6619,6 +6729,21 @@ function ViewControls() {
             }, void 0, false, {
                 fileName: "[project]/src/components/ui/ViewControls.tsx",
                 lineNumber: 78,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Hold, {
+                label: "Tilt down",
+                onTick: (dt)=>__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cam"].el = Math.max(0.35, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cam"].el - dt),
+                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chevrons$2d$down$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ChevronsDown$3e$__["ChevronsDown"], {
+                    className: "size-5"
+                }, void 0, false, {
+                    fileName: "[project]/src/components/ui/ViewControls.tsx",
+                    lineNumber: 82,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "[project]/src/components/ui/ViewControls.tsx",
+                lineNumber: 81,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -6632,18 +6757,18 @@ function ViewControls() {
                     className: "size-5"
                 }, void 0, false, {
                     fileName: "[project]/src/components/ui/ViewControls.tsx",
-                    lineNumber: 87,
+                    lineNumber: 90,
                     columnNumber: 23
                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$eye$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Eye$3e$__["Eye"], {
                     className: "size-5"
                 }, void 0, false, {
                     fileName: "[project]/src/components/ui/ViewControls.tsx",
-                    lineNumber: 87,
+                    lineNumber: 90,
                     columnNumber: 55
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/ui/ViewControls.tsx",
-                lineNumber: 81,
+                lineNumber: 84,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -6658,23 +6783,25 @@ function ViewControls() {
                     className: "size-5"
                 }, void 0, false, {
                     fileName: "[project]/src/components/ui/ViewControls.tsx",
-                    lineNumber: 95,
+                    lineNumber: 98,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/ui/ViewControls.tsx",
-                lineNumber: 89,
+                lineNumber: 92,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/ui/ViewControls.tsx",
-        lineNumber: 68,
+        lineNumber: 71,
         columnNumber: 5
     }, this);
 }
-_s1(ViewControls, "Vho5Fem5bhZQr5mp9C6idlOSJTo=", false, function() {
+_s1(ViewControls, "fokgIqmaHJ1Mu+Rzk8Is5Fo02Tk=", false, function() {
     return [
+        __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"],
+        __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"],
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"],
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"],
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"]
@@ -7470,11 +7597,13 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$places$2e$ts__
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$pathing$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/pathing.ts [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$interiors$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/interiors.ts [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$look$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/look.ts [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$movement$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/movement.ts [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/playerState.ts [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/store.ts [app-client] (ecmascript)");
 ;
 var _s = __turbopack_context__.k.signature(), _s1 = __turbopack_context__.k.signature(), _s2 = __turbopack_context__.k.signature();
 "use client";
+;
 ;
 ;
 ;
@@ -7526,12 +7655,12 @@ const angleDiff = (a, b)=>{
             scale: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$world$2f$Player$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AVATAR_SCALE"]
         }, void 0, false, {
             fileName: "[project]/src/components/world/People.tsx",
-            lineNumber: 45,
+            lineNumber: 46,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/components/world/People.tsx",
-        lineNumber: 44,
+        lineNumber: 45,
         columnNumber: 5
     }, this);
 }
@@ -7556,12 +7685,12 @@ function RemotePlayers() {
                 id: r.id
             }, r.id, false, {
                 fileName: "[project]/src/components/world/People.tsx",
-                lineNumber: 61,
+                lineNumber: 62,
                 columnNumber: 11
             }, this))
     }, void 0, false, {
         fileName: "[project]/src/components/world/People.tsx",
-        lineNumber: 57,
+        lineNumber: 58,
         columnNumber: 5
     }, this);
 }
@@ -7572,18 +7701,30 @@ _s1(RemotePlayers, "OJmIo4Jx0km0IjqHvBZHNAk4zc8=", false, function() {
     ];
 });
 _c1 = RemotePlayers;
-const NAMES = [
-    "Kunle",
+/** Six women (ids npc-0..5, see romance.ts) and four men. */ const NAMES = [
     "Bisi",
     "Kemi",
+    "Ngozi",
+    "Funke",
+    "Yetunde",
+    "Tolani",
+    "Kunle",
     "Femi",
     "Ayo",
-    "Sola",
-    "Dami",
-    "Ngozi",
-    "Seun",
-    "Yemi"
+    "Seun"
 ];
+function npcLook(name, female) {
+    const frame = female ? "f" : "m";
+    const look = {
+        ...(0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$look$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["seededLook"])(`npc-${name}`),
+        frame
+    };
+    const tops = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$look$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["topsFor"])(frame);
+    return tops.some((t)=>t.id === look.top) ? look : {
+        ...look,
+        top: tops[0].id
+    };
+}
 const LINES = {
     default: [
         "How far? Una dey alright?",
@@ -7623,13 +7764,13 @@ const LINES = {
         "Fresh air, finally."
     ]
 };
-const NPCS = NAMES.slice(0, 8).map(_c2 = (name, i)=>{
+const NPCS = NAMES.map(_c2 = (name, i)=>{
     const p = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$places$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["PLACES"][i * 5 % __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$places$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["PLACES"].length];
     const d = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$places$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["doorOf"])(p);
     return {
         id: `npc-${i}`,
         name,
-        look: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$look$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["randomLook"])(),
+        look: npcLook(name, i < 6),
         st: {
             x: d.x,
             z: d.z + 0.5,
@@ -7648,7 +7789,8 @@ function NpcActor({ index }) {
     const npcLook = NPCS[index].look;
     const g = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(null);
     const motion = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])({
-        speed: 0
+        speed: 0,
+        eat: null
     });
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$react$2d$three$2f$fiber$2f$dist$2f$events$2d$9ce18a08$2e$esm$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__F__as__useFrame$3e$__["useFrame"])({
         "NpcActor.useFrame": (_, rawDt)=>{
@@ -7656,6 +7798,14 @@ function NpcActor({ index }) {
             const npc = NPCS[index];
             const st = npc.st;
             const now = Date.now();
+            const gs = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"].getState();
+            motion.current.eat = gs.dateWith && gs.selected?.id === npc.id ? "bowl" : null;
+            if (gs.selected?.type === "npc" && gs.selected.id === npc.id && Math.hypot(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["me"].x - st.x, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["me"].z - st.z) < 3.2) {
+                // she stops to talk and turns towards you
+                st.path = [];
+                st.waitUntil = now + 4000;
+                st.ry += angleDiff(st.ry, Math.atan2(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["me"].x - st.x, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["me"].z - st.z)) * Math.min(1, dt * 8);
+            }
             if (!st.path.length && now > st.waitUntil) {
                 const dest = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$places$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["PLACES"][Math.floor(Math.random() * __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$places$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["PLACES"].length)];
                 if (dest.id !== st.place) {
@@ -7714,18 +7864,60 @@ function NpcActor({ index }) {
     }["NpcActor.useFrame"]);
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("group", {
         ref: g,
-        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$avatar$2f$Avatar$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
-            look: npcLook,
-            motion: motion,
-            scale: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$world$2f$Player$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AVATAR_SCALE"]
-        }, void 0, false, {
-            fileName: "[project]/src/components/world/People.tsx",
-            lineNumber: 160,
-            columnNumber: 7
-        }, this)
-    }, void 0, false, {
+        children: [
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$avatar$2f$Avatar$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                look: npcLook,
+                motion: motion,
+                scale: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$world$2f$Player$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AVATAR_SCALE"]
+            }, void 0, false, {
+                fileName: "[project]/src/components/world/People.tsx",
+                lineNumber: 177,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("mesh", {
+                "position-y": 0.5,
+                onClick: (e)=>{
+                    if (e.delta > 6) return;
+                    e.stopPropagation();
+                    __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"].getState().select({
+                        type: "npc",
+                        id: NPCS[index].id
+                    });
+                    const st = NPCS[index].st;
+                    (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$movement$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["walkTo"])(st.x, st.z + 0.9);
+                },
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("cylinderGeometry", {
+                        args: [
+                            0.32,
+                            0.32,
+                            1.1,
+                            8
+                        ]
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/world/People.tsx",
+                        lineNumber: 189,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("meshBasicMaterial", {
+                        transparent: true,
+                        opacity: 0,
+                        depthWrite: false
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/world/People.tsx",
+                        lineNumber: 190,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/world/People.tsx",
+                lineNumber: 179,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
         fileName: "[project]/src/components/world/People.tsx",
-        lineNumber: 159,
+        lineNumber: 176,
         columnNumber: 5
     }, this);
 }
@@ -7741,12 +7933,12 @@ function Npcs() {
                 index: i
             }, n.id, false, {
                 fileName: "[project]/src/components/world/People.tsx",
-                lineNumber: 169,
+                lineNumber: 200,
                 columnNumber: 9
             }, this))
     }, void 0, false, {
         fileName: "[project]/src/components/world/People.tsx",
-        lineNumber: 167,
+        lineNumber: 198,
         columnNumber: 5
     }, this);
 }
@@ -7754,7 +7946,7 @@ _c5 = Npcs;
 var _c, _c1, _c2, _c3, _c4, _c5;
 __turbopack_context__.k.register(_c, "Remote");
 __turbopack_context__.k.register(_c1, "RemotePlayers");
-__turbopack_context__.k.register(_c2, "NPCS$NAMES.slice(0, 8).map");
+__turbopack_context__.k.register(_c2, "NPCS$NAMES.map");
 __turbopack_context__.k.register(_c3, "NPCS");
 __turbopack_context__.k.register(_c4, "NpcActor");
 __turbopack_context__.k.register(_c5, "Npcs");
@@ -7825,7 +8017,8 @@ function Player() {
     const motion = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])({
         speed: 0,
         pose: null,
-        emote: null
+        emote: null,
+        eat: null
     });
     const keys = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(new Set());
     const sent = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])({
@@ -7871,6 +8064,7 @@ function Player() {
             const s = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"].getState();
             if (!s.profile || !group.current) return;
             const dt = Math.min(rawDt, 0.05);
+            motion.current.eat = s.busy?.food ?? null;
             // seated or sleeping on furniture: hold the pose until the action finishes
             if (__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["me"].use) {
                 if (!s.busy) {
@@ -8004,12 +8198,12 @@ function Player() {
                     scale: AVATAR_SCALE
                 }, void 0, false, {
                     fileName: "[project]/src/components/world/Player.tsx",
-                    lineNumber: 206,
+                    lineNumber: 207,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/world/Player.tsx",
-                lineNumber: 205,
+                lineNumber: 206,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("mesh", {
@@ -8025,7 +8219,7 @@ function Player() {
                         ]
                     }, void 0, false, {
                         fileName: "[project]/src/components/world/Player.tsx",
-                        lineNumber: 209,
+                        lineNumber: 210,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("meshBasicMaterial", {
@@ -8034,19 +8228,19 @@ function Player() {
                         opacity: 0.9
                     }, void 0, false, {
                         fileName: "[project]/src/components/world/Player.tsx",
-                        lineNumber: 210,
+                        lineNumber: 211,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/world/Player.tsx",
-                lineNumber: 208,
+                lineNumber: 209,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/world/Player.tsx",
-        lineNumber: 204,
+        lineNumber: 205,
         columnNumber: 5
     }, this);
 }
@@ -8070,6 +8264,7 @@ __turbopack_context__.s([
     "default",
     ()=>WorldClient
 ]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$polyfills$2f$process$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = /*#__PURE__*/ __turbopack_context__.i("[project]/node_modules/next/dist/build/polyfills/process.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/jsx-dev-runtime.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/index.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$shared$2f$lib$2f$app$2d$dynamic$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/shared/lib/app-dynamic.js [app-client] (ecmascript)");
@@ -8094,10 +8289,12 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$hooks$2e$ts__$
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$net$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/net.ts [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$voice$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/voice.ts [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$interiorRuntime$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/interiorRuntime.ts [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/playerState.ts [app-client] (ecmascript)");
 ;
 ;
 var _s = __turbopack_context__.k.signature(), _s1 = __turbopack_context__.k.signature();
 "use client";
+;
 ;
 ;
 ;
@@ -8132,7 +8329,7 @@ const CityScene = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modul
             children: "Loading Ibadan…"
         }, void 0, false, {
             fileName: "[project]/src/components/world/WorldClient.tsx",
-            lineNumber: 28,
+            lineNumber: 29,
             columnNumber: 18
         }, ("TURBOPACK compile-time value", void 0))
 });
@@ -8162,6 +8359,14 @@ _c = CityScene;
             const id = setInterval({
                 "Runtime.useEffect.id": ()=>__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"].getState().tick(1)
             }["Runtime.useEffect.id"], 1000);
+            if ("TURBOPACK compile-time truthy", 1) window.__omo = {
+                useGame: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"],
+                me: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["me"],
+                cam: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cam"],
+                startUse: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$interiorRuntime$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["startUse"],
+                walkToFurn: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$interiorRuntime$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["walkToFurn"],
+                rt: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$interiorRuntime$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["rt"]
+            };
             const hour = new URLSearchParams(location.search).get("hour");
             if (hour !== null && !Number.isNaN(Number(hour))) __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"].getState().patch({
                 clockOverride: Number(hour)
@@ -8308,60 +8513,60 @@ function WorldClient() {
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(CityScene, {}, void 0, false, {
                 fileName: "[project]/src/components/world/WorldClient.tsx",
-                lineNumber: 116,
+                lineNumber: 118,
                 columnNumber: 7
             }, this),
             mounted && profile && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
                 children: [
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$world$2f$Overlay$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                         fileName: "[project]/src/components/world/WorldClient.tsx",
-                        lineNumber: 119,
+                        lineNumber: 121,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Hud$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                         fileName: "[project]/src/components/world/WorldClient.tsx",
-                        lineNumber: 120,
+                        lineNumber: 122,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$PlacePanel$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                         fileName: "[project]/src/components/world/WorldClient.tsx",
-                        lineNumber: 121,
+                        lineNumber: 123,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$ChatDock$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                         fileName: "[project]/src/components/world/WorldClient.tsx",
-                        lineNumber: 122,
+                        lineNumber: 124,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Sheets$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                         fileName: "[project]/src/components/world/WorldClient.tsx",
-                        lineNumber: 123,
+                        lineNumber: 125,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Floating$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["VoiceBar"], {}, void 0, false, {
                         fileName: "[project]/src/components/world/WorldClient.tsx",
-                        lineNumber: 124,
+                        lineNumber: 126,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Minimap$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                         fileName: "[project]/src/components/world/WorldClient.tsx",
-                        lineNumber: 125,
+                        lineNumber: 127,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$ViewControls$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                         fileName: "[project]/src/components/world/WorldClient.tsx",
-                        lineNumber: 126,
+                        lineNumber: 128,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Floating$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Hint"], {}, void 0, false, {
                         fileName: "[project]/src/components/world/WorldClient.tsx",
-                        lineNumber: 127,
+                        lineNumber: 129,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/world/WorldClient.tsx",
-                lineNumber: 118,
+                lineNumber: 120,
                 columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$components$2f$AnimatePresence$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AnimatePresence"], {
@@ -8381,32 +8586,32 @@ function WorldClient() {
                     className: "pointer-events-none absolute inset-0 z-[70] bg-stone-950"
                 }, "fade", false, {
                     fileName: "[project]/src/components/world/WorldClient.tsx",
-                    lineNumber: 132,
+                    lineNumber: 134,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/world/WorldClient.tsx",
-                lineNumber: 130,
+                lineNumber: 132,
                 columnNumber: 7
             }, this),
             mounted && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Floating$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Toasts"], {}, void 0, false, {
                 fileName: "[project]/src/components/world/WorldClient.tsx",
-                lineNumber: 135,
+                lineNumber: 137,
                 columnNumber: 19
             }, this),
             mounted && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Floating$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["IncomingCall"], {}, void 0, false, {
                 fileName: "[project]/src/components/world/WorldClient.tsx",
-                lineNumber: 136,
+                lineNumber: 138,
                 columnNumber: 19
             }, this),
             mounted && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Runtime, {}, void 0, false, {
                 fileName: "[project]/src/components/world/WorldClient.tsx",
-                lineNumber: 137,
+                lineNumber: 139,
                 columnNumber: 19
             }, this),
             mounted && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$AudioBridge$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                 fileName: "[project]/src/components/world/WorldClient.tsx",
-                lineNumber: 138,
+                lineNumber: 140,
                 columnNumber: 19
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$components$2f$AnimatePresence$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AnimatePresence"], {
@@ -8427,12 +8632,12 @@ function WorldClient() {
                     }
                 }, "creator", false, {
                     fileName: "[project]/src/components/world/WorldClient.tsx",
-                    lineNumber: 141,
+                    lineNumber: 143,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/world/WorldClient.tsx",
-                lineNumber: 139,
+                lineNumber: 141,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -8443,20 +8648,20 @@ function WorldClient() {
                         className: "size-4"
                     }, void 0, false, {
                         fileName: "[project]/src/components/world/WorldClient.tsx",
-                        lineNumber: 158,
+                        lineNumber: 160,
                         columnNumber: 9
                     }, this),
                     " Home"
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/world/WorldClient.tsx",
-                lineNumber: 154,
+                lineNumber: 156,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/world/WorldClient.tsx",
-        lineNumber: 115,
+        lineNumber: 117,
         columnNumber: 5
     }, this);
 }
@@ -10182,7 +10387,10 @@ function enterInterior(ref) {
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["me"].use = null;
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["me"].pendingUse = null;
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["me"].pendingExit = false;
-        __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cam"].dist = Math.min(16, Math.max(8, Math.max(layout.w, layout.d) * __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$furniture$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["S"] * 1.15));
+        // phones are tall and narrow: pull back so the whole room fits above the bottom panel
+        const aspect = ("TURBOPACK compile-time truthy", 1) ? Math.min(1.7, window.innerWidth / Math.max(1, window.innerHeight)) : "TURBOPACK unreachable";
+        const fit = Math.max(layout.w, layout.d) * __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$furniture$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["S"] / (0.536 * aspect) * 0.8;
+        __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$playerState$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cam"].dist = Math.min(28, Math.max(8, fit));
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useGame"].setState({
             interior: ref,
             selected: null,
@@ -14857,7 +15065,8 @@ const EMPTY_STATS = {
     calls: 0,
     entered: 0,
     slept: 0,
-    used: 0
+    used: 0,
+    dates: 0
 };
 const mine = (s)=>Object.values(s.plots).filter((p)=>p.ownerId === s.pid);
 const has = (s, ids)=>ids.every((id)=>s.stats.visited.includes(id));
@@ -14923,6 +15132,16 @@ const QUESTS = [
             rep: 2
         },
         done: (s)=>(s.stats.slept ?? 0) >= 1
+    },
+    {
+        id: "romance",
+        title: "Love in Ibadan",
+        blurb: "Talk to a lady, ask her out, and take her on a date.",
+        reward: {
+            money: 3000,
+            rep: 3
+        },
+        done: (s)=>(s.stats.dates ?? 0) >= 1
     },
     {
         id: "culture",
@@ -15034,6 +15253,8 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
 "use strict";
 
 __turbopack_context__.s([
+    "foodFor",
+    ()=>foodFor,
     "hooks",
     ()=>hooks,
     "ownedBy",
@@ -15061,6 +15282,12 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$quests$2e$ts__
 ;
 ;
 ;
+function foodFor(a) {
+    if ((a.gain?.hunger ?? 0) < 3) return undefined;
+    if (/water|drink|zobo|juice|beer|palmwine/.test(a.id)) return "cup";
+    if (/snack|provisions|suya|puffpuff|chin|bread|meatpie/.test(a.id)) return "snack";
+    return "bowl";
+}
 const START_MONEY = 25000;
 const START_NEEDS = {
     hunger: 80,
@@ -15118,6 +15345,17 @@ const useGame = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules
         generatorUntil: 0,
         election: null,
         decor: {},
+        romance: {},
+        dateWith: null,
+        adjustNeeds: (d)=>set((s)=>{
+                const needs = {
+                    ...s.needs
+                };
+                for (const k of Object.keys(d))needs[k] = Math.max(0, Math.min(100, needs[k] + (d[k] ?? 0)));
+                return {
+                    needs
+                };
+            }),
         decorRev: 0,
         myVote: null,
         selected: null,
@@ -15127,6 +15365,7 @@ const useGame = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules
         clockOverride: null,
         timeMode: "auto",
         placesOnly: false,
+        panelFlip: null,
         editingAvatar: false,
         sheet: null,
         net: "offline",
@@ -15220,7 +15459,8 @@ const useGame = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules
                 busy: {
                     label: a.label,
                     start: Date.now(),
-                    secs: a.secs
+                    secs: a.secs,
+                    food: foodFor(a)
                 },
                 money: s.money - Math.round(price)
             });
@@ -15483,7 +15723,8 @@ const useGame = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules
             questsDone: s.questsDone,
             muted: s.muted,
             savedAt: s.savedAt,
-            decor: s.decor
+            decor: s.decor,
+            romance: s.romance
         }),
     // while you were away your needs keep dropping, at a gentler rate (capped at 20 minutes)
     merge: (persisted, current)=>{

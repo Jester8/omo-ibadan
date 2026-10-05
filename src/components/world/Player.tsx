@@ -3,6 +3,8 @@
 import { useEffect, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { carById } from "@/lib/cars";
+import CarModel from "./CarModel";
 import Avatar from "@/components/avatar/Avatar";
 import { useGame } from "@/lib/store";
 import { PLACES, doorOf } from "@/lib/places";
@@ -37,9 +39,12 @@ const angleDiff = (a: number, b: number) => {
 
 export default function Player() {
   const profile = useGame((s) => s.profile);
+  const driving = useGame((s) => s.driving && !s.interior);
+  const car = useGame((s) => carById(s.activeCar));
+  const carColor = useGame((s) => (s.activeCar ? s.carColors[s.activeCar] : undefined));
   const group = useRef<THREE.Group>(null);
   const marker = useRef<THREE.Mesh>(null);
-  const motion = useRef<{ speed: number; pose: "sit" | "lie" | null; emote: "wave" | "dance" | null }>({ speed: 0, pose: null, emote: null });
+  const motion = useRef<{ speed: number; pose: "sit" | "lie" | null; emote: "wave" | "dance" | null; eat: "bowl" | "cup" | "snack" | null }>({ speed: 0, pose: null, emote: null, eat: null });
   const keys = useRef(new Set<string>());
   const sent = useRef({ t: 0, x: 0, z: 0, s: 0 });
 
@@ -70,6 +75,7 @@ export default function Player() {
     const s = useGame.getState();
     if (!s.profile || !group.current) return;
     const dt = Math.min(rawDt, 0.05);
+    motion.current.eat = s.busy?.food ?? null;
 
     // seated or sleeping on furniture: hold the pose until the action finishes
     if (me.use) {
@@ -96,7 +102,8 @@ export default function Player() {
 
     const energy = s.needs.energy;
     const tired = energy < 3 ? 0.4 : energy < 15 ? 0.65 : 1;
-    const base = s.interior ? 2.2 * tired : me.ride ? 8.5 : Date.now() < boost.until ? 6.5 : 3.1 * tired;
+    const ownCar = s.driving && !s.interior ? carById(s.activeCar) : undefined;
+    const base = s.interior ? 2.2 * tired : ownCar ? ownCar.speed : me.ride ? 8.5 : Date.now() < boost.until ? 6.5 : 3.1 * tired;
     let moving = false;
     let tx = me.ry;
 
@@ -203,7 +210,10 @@ export default function Player() {
   return (
     <>
       <group ref={group}>
-        <Avatar look={profile.look} motion={motion} scale={AVATAR_SCALE} />
+        <group visible={!driving}>
+          <Avatar look={profile.look} motion={motion} scale={AVATAR_SCALE} />
+        </group>
+        {driving && car && <CarModel kind={car.kind} color={carColor ?? car.colors[0]} />}
       </group>
       <mesh ref={marker} rotation-x={-Math.PI / 2} visible={false}>
         <ringGeometry args={[0.22, 0.3, 28]} />

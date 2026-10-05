@@ -48,5 +48,14 @@
 ## Home decor (done)
 Owners can buy decor (plants, lamps, rugs, adire wall hangings, calabash, carved stools, ibeji) for their flat or house from the interior panel. Up to 3 of each; placed automatically along walls with clearance from doors and partitions, and `npm run check:interiors` verifies fully decorated homes stay walkable. Stored per device (visitors don't see it yet).
 
+## Round 5 (done)
+- View controls: hold-to-rotate and tilt buttons (also Q/E and arrow keys, drag to rotate/tilt), a "locations only" toggle that hides trees, cars, plots and people, and an Auto/Day/Night switch.
+- Phones: rooms are fitted to the viewport, the info panel folds away (and while you are busy) so you can see your character.
+- Seated avatars are posed in their own frame, skirts swap for legs while sitting, and the camera follows the seat.
+- Eating and drinking show an arm animation with a bowl, cup or snack in hand.
+- Lekan Salami Stadium hosts a continuous five-a-side match.
+- Dating: six women with friend/dating/girlfriend stages, chat, compliments, drinks, gifts, asking out, four date venues.
+- Cars: Ibadan Autos garage (keke, Corolla, RX 350, G-Wagon), colours, drive/park from the HUD.
+
 ## Ideas next
 Billboards/ads revenue, furniture and interiors, jobs with skills, events (match day, festivals), pets, daily quests, sound and music, avatar visual polish after a hands-on review.

@@ -1,5 +1,6 @@
 "use client";
 
+import NpcPanel from "./NpcPanel";
 import { AnimatePresence, motion } from "motion/react";
 import { DoorOpen, Footprints, X } from "lucide-react";
 import { PLACES, KIND_COLORS } from "@/lib/places";
@@ -103,7 +104,15 @@ export default function SidePanel() {
   const selected = useGame((s) => s.selected);
   const interior = useGame((s) => s.interior);
   useClock();
+  // phones: rooms start with the panel folded away so the room itself is visible
+  const flip = useGame((s) => s.panelFlip);
+  const setFlip = (v: string | null) => useGame.getState().patch({ panelFlip: v });
   const shown = interior ? { type: "interior", id: `${interior.kind}:${interior.id}` } : selected;
+  const key = shown ? `${shown.type}:${shown.id}` : "";
+  const busy = useGame((s) => !!s.busy);
+  // folded on phones while you are doing something, so you can watch your character
+  const min = busy || (interior ? flip !== key : flip === key);
+  const setMin = () => setFlip(flip === key ? null : key);
   return (
     <AnimatePresence mode="wait">
       {shown && (
@@ -113,9 +122,19 @@ export default function SidePanel() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 40, scale: 0.97 }}
           transition={{ type: "spring", stiffness: 260, damping: 26 }}
-          className={`absolute inset-x-3 bottom-3 z-20 ${interior ? "max-h-[44dvh]" : "max-h-[62dvh]"} overflow-y-auto rounded-3xl bg-white/92 p-5 shadow-2xl ring-1 ring-black/5 backdrop-blur-xl sm:inset-x-auto sm:bottom-auto sm:right-5 sm:top-20 sm:max-h-[calc(100dvh-7rem)] sm:w-[24rem]`}
+          className={`absolute inset-x-3 bottom-3 z-20 ${min ? "max-sm:max-h-12 max-sm:overflow-hidden max-sm:py-2" : interior ? "max-h-[44dvh]" : "max-h-[62dvh]"} overflow-y-auto rounded-3xl bg-white/92 p-5 shadow-2xl ring-1 ring-black/5 backdrop-blur-xl sm:inset-x-auto sm:bottom-auto sm:right-5 sm:top-20 sm:max-h-[calc(100dvh-7rem)] sm:w-[24rem]`}
         >
-          {interior ? <InteriorPanel /> : selected?.type === "place" ? <PlaceBody id={selected.id} /> : selected ? <PlotPanelBody id={selected.id} /> : null}
+          <button
+            onClick={setMin}
+            aria-label={min ? "Show panel" : "Hide panel"}
+            className="mx-auto -mt-2 mb-2 flex w-full items-center justify-center gap-1 text-[11px] font-semibold text-stone-400 sm:hidden"
+          >
+            <span className="h-1 w-10 rounded-full bg-stone-300" />
+            {min && !busy ? "Show panel" : ""}
+          </button>
+          <div className={min ? "max-sm:hidden" : ""}>
+            {interior ? <InteriorPanel /> : selected?.type === "place" ? <PlaceBody id={selected.id} /> : selected?.type === "npc" ? <NpcPanel id={selected.id} /> : selected ? <PlotPanelBody id={selected.id} /> : null}
+          </div>
         </motion.aside>
       )}
     </AnimatePresence>

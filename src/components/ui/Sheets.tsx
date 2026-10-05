@@ -13,6 +13,7 @@ import AvatarPreview from "@/components/avatar/AvatarPreview";
 import { MuteButton } from "./parts";
 import { useSecond } from "@/lib/hooks";
 import type { Policy } from "@/lib/protocol";
+import { CARS } from "@/lib/cars";
 import { useSound } from "@/lib/soundStore";
 
 function Frame({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
@@ -403,6 +404,75 @@ function ElectionSheet() {
   );
 }
 
+function GarageSheet() {
+  const money = useGame((s) => s.money);
+  const owned = useGame((s) => s.cars);
+  const active = useGame((s) => s.activeCar);
+  const driving = useGame((s) => s.driving);
+  const colors = useGame((s) => s.carColors);
+  const speedLabel = (n: number) => (n >= 12 ? "Very fast" : n >= 10 ? "Fast" : n >= 8 ? "Quick" : "Nippy");
+  return (
+    <>
+      <div className="rounded-2xl bg-sky-50 p-4 ring-1 ring-sky-100">
+        <p className="text-sm font-bold text-sky-950">Ibadan Autos</p>
+        <p className="mt-1 text-xs text-sky-900/80">Buy a ride, then drive anywhere in the city. No more keke fares, and you move much faster than on foot.</p>
+      </div>
+      <ul className="mt-4 space-y-3">
+        {CARS.map((c) => {
+          const have = owned.includes(c.id);
+          const on = driving && active === c.id;
+          const color = colors[c.id] ?? c.colors[0];
+          return (
+            <li key={c.id} className="rounded-2xl bg-stone-50 p-3.5 ring-1 ring-black/5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-stone-900">{c.name}</p>
+                  <p className="text-xs text-stone-500">{c.blurb}</p>
+                  <p className="mt-1 text-[11px] font-semibold text-stone-600">{speedLabel(c.speed)} · {c.speed} u/s</p>
+                </div>
+                <span className="mt-0.5 size-6 shrink-0 rounded-full ring-2 ring-white shadow" style={{ background: color }} />
+              </div>
+              {have && (
+                <div className="mt-2 flex items-center gap-1.5">
+                  {c.colors.map((col) => (
+                    <button key={col} aria-label={`Paint ${col}`} onClick={() => useGame.getState().setCarColor(c.id, col)} className={`size-6 rounded-full ring-2 transition ${color === col ? "ring-stone-900" : "ring-white"}`} style={{ background: col }} />
+                  ))}
+                </div>
+              )}
+              <div className="mt-3">
+                {have ? (
+                  <button
+                    onClick={() => {
+                      const err = useGame.getState().toggleDrive(c.id);
+                      if (err) useGame.getState().toast(err, "bad");
+                      else useGame.getState().setSheet(null);
+                    }}
+                    className={`w-full rounded-xl py-2 text-sm font-semibold transition active:scale-95 ${on ? "bg-stone-900 text-white" : "bg-emerald-600 text-white"}`}
+                  >
+                    {on ? "Park it" : "Drive"}
+                  </button>
+                ) : (
+                  <button
+                    disabled={money < c.price}
+                    onClick={() => {
+                      const err = useGame.getState().buyCar(c.id);
+                      if (err) useGame.getState().toast(err, "bad");
+                      else useGame.getState().toast(`${c.name} is yours!`, "good");
+                    }}
+                    className="w-full rounded-xl bg-sky-600 py-2 text-sm font-semibold text-white transition active:scale-95 disabled:bg-stone-200 disabled:text-stone-400"
+                  >
+                    Buy · {naira(c.price)}
+                  </button>
+                )}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </>
+  );
+}
+
 export default function Sheets() {
   const sheet = useGame((s) => s.sheet);
   const setSheet = useGame((s) => s.setSheet);
@@ -416,6 +486,11 @@ export default function Sheets() {
       {sheet === "quests" && (
         <Frame key="quests" title="Goals" onClose={() => setSheet(null)}>
           <QuestsSheet />
+        </Frame>
+      )}
+      {sheet === "garage" && (
+        <Frame key="garage" title="Ibadan Autos" onClose={() => setSheet(null)}>
+          <GarageSheet />
         </Frame>
       )}
       {sheet === "election" && (

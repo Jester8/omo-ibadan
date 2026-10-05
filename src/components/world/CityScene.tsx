@@ -16,10 +16,10 @@ import { walkTo } from "@/lib/movement";
 import InteriorScene from "@/components/interior/InteriorScene";
 
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
-const limits = (): [number, number] => (useGame.getState().interior ? [4, 20] : [9, 44]);
+const limits = (): [number, number] => (useGame.getState().interior ? [4, 30] : [9, 44]);
 
 function CameraRig() {
-  const { camera, gl } = useThree();
+  const { camera, gl, size } = useThree();
   const target = useRef(new THREE.Vector3(me.x, 0.5, me.z));
   const dist = useRef(36);
 
@@ -72,7 +72,7 @@ function CameraRig() {
       cam.az += dt * 0.05;
       target.current.lerp(new THREE.Vector3(0, 0, 0), k);
     } else {
-      target.current.lerp(new THREE.Vector3(me.x, 0.5, me.z), k);
+      target.current.lerp(new THREE.Vector3(me.use ? me.use.x : me.x, 0.5, me.use ? me.use.z : me.z), k);
     }
     const wantDist = hasProfile ? cam.dist : 40;
     dist.current += (wantDist - dist.current) * (1 - Math.exp(-3 * dt));
@@ -84,6 +84,12 @@ function CameraRig() {
       target.current.z + Math.cos(cam.az) * Math.cos(el) * d,
     );
     camera.lookAt(target.current);
+    // phones: the status card covers the top of the screen, so push the scene down a little
+    const cam_ = camera as THREE.PerspectiveCamera;
+    const w = size.width;
+    const h = size.height;
+    if (w < 640 && useGame.getState().profile) cam_.setViewOffset(w, h, 0, -h * 0.1, w, h);
+    else if (cam_.view?.enabled) cam_.clearViewOffset();
   });
   return null;
 }

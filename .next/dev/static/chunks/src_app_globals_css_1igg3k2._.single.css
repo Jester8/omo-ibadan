@@ -98,7 +98,12 @@
     --color-emerald-700: #007956;
     --color-emerald-800: #005f46;
     --color-emerald-900: #004e3b;
+    --color-sky-50: #f0f9ff;
+    --color-sky-100: #dff2fe;
     --color-sky-500: #00a5ef;
+    --color-sky-600: #0084cc;
+    --color-sky-900: #024a70;
+    --color-sky-950: #052f4a;
     --color-indigo-50: #eef2ff;
     --color-indigo-100: #e0e7ff;
     --color-indigo-400: #7d87ff;
@@ -111,8 +116,10 @@
     --color-fuchsia-500: #e12afb;
     --color-rose-50: #fff1f2;
     --color-rose-100: #ffe4e6;
+    --color-rose-500: #ff2357;
     --color-rose-600: #e70044;
     --color-rose-700: #c20039;
+    --color-rose-950: #4d0218;
     --color-stone-50: #fafaf9;
     --color-stone-100: #f5f5f4;
     --color-stone-200: #e7e5e4;
@@ -160,6 +167,7 @@
     --leading-tight: 1.25;
     --leading-snug: 1.375;
     --leading-relaxed: 1.625;
+    --radius-sm: .25rem;
     --radius-md: .375rem;
     --radius-xl: .75rem;
     --radius-2xl: 1rem;
@@ -199,7 +207,12 @@
       --color-emerald-700: lab(44.4871% -41.0396 11.0361);
       --color-emerald-800: lab(35.3675% -33.1188 8.04002);
       --color-emerald-900: lab(28.8637% -26.9249 5.45986);
+      --color-sky-50: lab(97.3623% -2.33802 -4.13098);
+      --color-sky-100: lab(94.3709% -4.56053 -8.23453);
       --color-sky-500: lab(63.3038% -18.433 -51.0407);
+      --color-sky-600: lab(51.7754% -11.4712 -49.8349);
+      --color-sky-900: lab(29.1959% -8.34689 -28.2453);
+      --color-sky-950: lab(17.8299% -5.31271 -21.1584);
       --color-indigo-50: lab(95.4818% .411302 -6.78529);
       --color-indigo-100: lab(91.6577% 1.04591 -12.7199);
       --color-indigo-400: lab(59.866% 22.4834 -64.4485);
@@ -212,8 +225,10 @@
       --color-fuchsia-500: lab(56.4256% 83.132 -64.639);
       --color-rose-50: lab(96.2369% 4.94155 1.28011);
       --color-rose-100: lab(92.8221% 9.86832 2.60075);
+      --color-rose-500: lab(56.101% 79.4328 31.4532);
       --color-rose-600: lab(49.1882% 81.577 36.0311);
       --color-rose-700: lab(41.1651% 71.6251 30.3087);
+      --color-rose-950: lab(14.2323% 34.0086 9.80922);
       --color-stone-50: lab(98.2686% -.0991821 .364304);
       --color-stone-100: lab(96.5286% -.0991821 .364268);
       --color-stone-200: lab(91.055% .663072 .865579);
@@ -622,6 +637,10 @@
     z-index: 5;
   }
 
+  .z-\[25\] {
+    z-index: 25;
+  }
+
   .z-\[70\] {
     z-index: 70;
   }
@@ -632,6 +651,10 @@
 
   .mx-auto {
     margin-inline: auto;
+  }
+
+  .-mt-2 {
+    margin-top: calc(var(--spacing) * -2);
   }
 
   .-mt-5 {
@@ -696,6 +719,10 @@
 
   .mb-5 {
     margin-bottom: calc(var(--spacing) * 5);
+  }
+
+  .ml-2 {
+    margin-left: calc(var(--spacing) * 2);
   }
 
   .block {
@@ -806,6 +833,10 @@
     height: 100%;
   }
 
+  .h-1 {
+    height: var(--spacing);
+  }
+
   .h-1\.5 {
     height: calc(var(--spacing) * 1.5);
   }
@@ -856,6 +887,10 @@
 
   .min-h-full {
     min-height: 100%;
+  }
+
+  .w-10 {
+    width: calc(var(--spacing) * 10);
   }
 
   .w-32 {
@@ -1037,6 +1072,12 @@
     margin-block-end: calc(calc(var(--spacing) * 2) * calc(1 - var(--tw-space-y-reverse)));
   }
 
+  :where(.space-y-3 > :not(:last-child)) {
+    --tw-space-y-reverse: 0;
+    margin-block-start: calc(calc(var(--spacing) * 3) * var(--tw-space-y-reverse));
+    margin-block-end: calc(calc(var(--spacing) * 3) * calc(1 - var(--tw-space-y-reverse)));
+  }
+
   :where(.space-y-5 > :not(:last-child)) {
     --tw-space-y-reverse: 0;
     margin-block-start: calc(calc(var(--spacing) * 5) * var(--tw-space-y-reverse));
@@ -1087,6 +1128,10 @@
 
   .rounded-xl {
     border-radius: var(--radius-xl);
+  }
+
+  .rounded-tl-sm {
+    border-top-left-radius: var(--radius-sm);
   }
 
   .rounded-bl-md {
@@ -1234,8 +1279,16 @@
     background-color: var(--color-rose-600);
   }
 
+  .bg-sky-50 {
+    background-color: var(--color-sky-50);
+  }
+
   .bg-sky-500 {
     background-color: var(--color-sky-500);
+  }
+
+  .bg-sky-600 {
+    background-color: var(--color-sky-600);
   }
 
   .bg-stone-50 {
@@ -1248,6 +1301,10 @@
 
   .bg-stone-200 {
     background-color: var(--color-stone-200);
+  }
+
+  .bg-stone-300 {
+    background-color: var(--color-stone-300);
   }
 
   .bg-stone-900 {
@@ -1381,6 +1438,10 @@
   .to-amber-50 {
     --tw-gradient-to: var(--color-amber-50);
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+  }
+
+  .fill-rose-500 {
+    fill: var(--color-rose-500);
   }
 
   .p-1 {
@@ -1778,8 +1839,30 @@
     color: var(--color-red-500);
   }
 
+  .text-rose-500 {
+    color: var(--color-rose-500);
+  }
+
   .text-rose-600 {
     color: var(--color-rose-600);
+  }
+
+  .text-rose-950 {
+    color: var(--color-rose-950);
+  }
+
+  .text-sky-900\/80 {
+    color: #024a70cc;
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .text-sky-900\/80 {
+      color: color-mix(in oklab, var(--color-sky-900) 80%, transparent);
+    }
+  }
+
+  .text-sky-950 {
+    color: var(--color-sky-950);
   }
 
   .text-stone-300 {
@@ -2006,8 +2089,16 @@
     --tw-ring-color: var(--color-indigo-600);
   }
 
+  .ring-rose-100 {
+    --tw-ring-color: var(--color-rose-100);
+  }
+
   .ring-rose-700 {
     --tw-ring-color: var(--color-rose-700);
+  }
+
+  .ring-sky-100 {
+    --tw-ring-color: var(--color-sky-100);
   }
 
   .ring-stone-900 {
@@ -2016,6 +2107,10 @@
 
   .ring-transparent {
     --tw-ring-color: transparent;
+  }
+
+  .ring-white {
+    --tw-ring-color: var(--color-white);
   }
 
   .ring-offset-2 {
@@ -2288,6 +2383,34 @@
     .max-sm\:bottom-\[4\.5rem\] {
       bottom: 4.5rem;
     }
+
+    .max-sm\:bottom-\[47dvh\] {
+      bottom: 47dvh;
+    }
+
+    .max-sm\:bottom-\[63dvh\] {
+      bottom: 63dvh;
+    }
+
+    .max-sm\:hidden {
+      display: none;
+    }
+
+    .max-sm\:max-h-12 {
+      max-height: calc(var(--spacing) * 12);
+    }
+
+    .max-sm\:flex-row {
+      flex-direction: row;
+    }
+
+    .max-sm\:overflow-hidden {
+      overflow: hidden;
+    }
+
+    .max-sm\:py-2 {
+      padding-block: calc(var(--spacing) * 2);
+    }
   }
 
   @media (min-width: 40rem) {
@@ -2341,6 +2464,10 @@
 
     .sm\:block {
       display: block;
+    }
+
+    .sm\:hidden {
+      display: none;
     }
 
     .sm\:h-auto {

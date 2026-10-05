@@ -15,13 +15,15 @@ import AudioBridge from "@/components/ui/AudioBridge";
 import { Hint, IncomingCall, Toasts, VoiceBar } from "@/components/ui/Floating";
 import AvatarCreator from "@/components/avatar/AvatarCreator";
 import Overlay from "./Overlay";
+import { NPCS } from "./People";
 import { ownedBy, pendingRent, useGame } from "@/lib/store";
 import { QUESTS } from "@/lib/quests";
 import { naira } from "@/lib/plots";
 import { useMounted } from "@/lib/hooks";
 import { net, roomOf } from "@/lib/net";
 import { voice } from "@/lib/voice";
-import { enterInterior, homeRef } from "@/lib/interiorRuntime";
+import { enterInterior, homeRef, rt, startUse, walkToFurn } from "@/lib/interiorRuntime";
+import { cam, me } from "@/lib/playerState";
 
 const CityScene = dynamic(() => import("./CityScene"), {
   ssr: false,
@@ -38,6 +40,7 @@ function Runtime() {
 
   useEffect(() => {
     const id = setInterval(() => useGame.getState().tick(1), 1000);
+    if (process.env.NODE_ENV !== "production") (window as unknown as { __omo: unknown }).__omo = { useGame, me, cam, startUse, walkToFurn, rt, NPCS };
     const hour = new URLSearchParams(location.search).get("hour");
     if (hour !== null && !Number.isNaN(Number(hour))) useGame.getState().patch({ clockOverride: Number(hour) });
     return () => clearInterval(id);

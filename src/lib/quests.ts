@@ -11,9 +11,10 @@ export type Stats = {
   entered: number;
   slept: number;
   used: number;
+  dates: number;
 };
 
-export const EMPTY_STATS: Stats = { visited: [], worked: 0, ate: 0, chats: 0, voiceJoins: 0, calls: 0, entered: 0, slept: 0, used: 0 };
+export const EMPTY_STATS: Stats = { visited: [], worked: 0, ate: 0, chats: 0, voiceJoins: 0, calls: 0, entered: 0, slept: 0, used: 0, dates: 0 };
 
 export type QuestState = { stats: Stats; plots: Record<string, PlotState>; pid: string | undefined };
 
@@ -74,6 +75,13 @@ export const QUESTS: Quest[] = [
     blurb: "Sleep in a bed, at home or anywhere with one.",
     reward: { money: 2000, rep: 2 },
     done: (s) => (s.stats.slept ?? 0) >= 1,
+  },
+  {
+    id: "romance",
+    title: "Love in Ibadan",
+    blurb: "Talk to a lady, ask her out, and take her on a date.",
+    reward: { money: 3000, rep: 3 },
+    done: (s) => (s.stats.dates ?? 0) >= 1,
   },
   {
     id: "culture",

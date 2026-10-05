@@ -1,5 +1,6 @@
 "use client";
 
+import Match from "./Match";
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
@@ -217,15 +218,12 @@ function Stadium({ size: [w, h], color }: SP) {
         <circleGeometry args={[r - 0.9, 48]} />
         <meshStandardMaterial color="#58b66a" roughness={0.9} />
       </mesh>
-      <mesh position={[0, 0.125, 0]} rotation-x={-Math.PI / 2}>
-        <ringGeometry args={[0.55, 0.6, 40]} />
-        <meshBasicMaterial color="#e9f7ec" />
-      </mesh>
       <Cyl p={[0, 0.1, 0]} r={r} h={h * 0.6} c={color} seg={48} open />
       <Cyl p={[0, 0.1, 0]} r={r - 0.8} h={h * 0.25} c="#e9efef" seg={48} open />
       <mesh position={[0, 0.1 + h * 0.6, 0]} rotation-x={-Math.PI / 2} material={mat("#3b4a52")}>
         <ringGeometry args={[r - 0.8, r, 48]} />
       </mesh>
+      <Match />
       {[0, 1, 2, 3].map((i) => {
         const a = (i / 4) * Math.PI * 2 + Math.PI / 4;
         const x = Math.cos(a) * (r + 0.15);
