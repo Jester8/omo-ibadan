@@ -981,6 +981,10 @@
     min-height: 100%;
   }
 
+  .w-32 {
+    width: calc(var(--spacing) * 32);
+  }
+
   .w-\[min\(20rem\,calc\(100vw-1\.5rem\)\)\] {
     width: min(20rem, 100vw - 1.5rem);
   }
@@ -1911,6 +1915,10 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  .accent-emerald-600 {
+    accent-color: var(--color-emerald-600);
+  }
+
   .opacity-75 {
     opacity: .75;
   }
@@ -2153,6 +2161,10 @@
 
   .placeholder\:text-stone-400::placeholder {
     color: var(--color-stone-400);
+  }
+
+  .last\:mb-0:last-child {
+    margin-bottom: 0;
   }
 
   @media (hover: hover) {

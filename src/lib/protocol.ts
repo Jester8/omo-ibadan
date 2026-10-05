@@ -31,7 +31,8 @@ export type C2S =
   | { t: "call"; to: string }
   | { t: "callReply"; to: string; accept: boolean }
   | { t: "hangup"; to: string }
-  | { t: "report"; id: string; reason: string };
+  | { t: "report"; id: string; reason: string }
+  | { t: "emote"; e: "wave" | "dance" };
 
 export type S2C =
   | { t: "welcome"; id: string; peers: PeerInfo[]; plots: Record<string, PlotState> }
@@ -49,4 +50,5 @@ export type S2C =
   | { t: "incomingCall"; from: string; name: string }
   | { t: "callReply"; from: string; accept: boolean }
   | { t: "hangup"; from: string }
-  | { t: "online"; n: number };
+  | { t: "online"; n: number }
+  | { t: "emote"; id: string; e: "wave" | "dance" };

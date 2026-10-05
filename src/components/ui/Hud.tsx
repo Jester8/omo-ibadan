@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Drumstick, DoorOpen, House, ListChecks, Moon, Phone, PartyPopper, Sun, Target, UserRound, Users, Zap, ZapOff, Wifi, WifiOff } from "lucide-react";
+import { Drumstick, DoorOpen, House, ListChecks, Moon, Phone, PartyPopper, Sun, Target, UserRound, Users, Zap, ZapOff, Wifi, WifiOff, Volume2, VolumeX } from "lucide-react";
 import { useGame } from "@/lib/store";
 import { useClock } from "@/lib/hooks";
 import { formatClock, periodLabel } from "@/lib/time";
@@ -9,6 +9,7 @@ import { naira } from "@/lib/plots";
 import { TITLES, titleIndex } from "@/lib/titles";
 import { QUESTS } from "@/lib/quests";
 import { enterInterior, exitInterior, homeRef } from "@/lib/interiorRuntime";
+import { useSound } from "@/lib/soundStore";
 
 const NEEDS = [
   { key: "hunger", label: "Hunger", icon: Drumstick, color: "bg-orange-500" },
@@ -27,6 +28,8 @@ export default function Hud() {
   const call = useGame((s) => s.call.phase);
   const questsDone = useGame((s) => s.questsDone);
   const inside = useGame((s) => !!s.interior);
+  const muted = useSound((s) => s.muted);
+  const setSound = useSound((s) => s.set);
   const setSheet = useGame((s) => s.setSheet);
   const { minutes, hour, day, nepa } = useClock();
   const title = TITLES[titleIndex(rep)];
@@ -116,6 +119,13 @@ export default function Hud() {
           title={inside ? "Leave" : "Go home"}
         >
           {inside ? <DoorOpen className="size-5" /> : <House className="size-5" />}
+        </button>
+        <button
+          onClick={() => setSound({ muted: !muted })}
+          className="grid size-11 place-items-center rounded-2xl bg-white/85 text-stone-700 shadow-xl ring-1 ring-black/5 backdrop-blur-xl transition hover:bg-white active:scale-95"
+          aria-label={muted ? "Unmute" : "Mute"}
+        >
+          {muted ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}
         </button>
         <button
           onClick={() => setSheet("phone")}

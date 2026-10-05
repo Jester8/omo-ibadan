@@ -11,6 +11,7 @@ import { QUESTS } from "@/lib/quests";
 import { walkTo } from "@/lib/movement";
 import AvatarPreview from "@/components/avatar/AvatarPreview";
 import { MuteButton } from "./parts";
+import { useSound } from "@/lib/soundStore";
 
 function Frame({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   return (
@@ -162,6 +163,28 @@ function QuestsSheet() {
   );
 }
 
+function SoundSliders() {
+  const music = useSound((s) => s.music);
+  const sfx = useSound((s) => s.sfx);
+  const set = useSound((s) => s.set);
+  return (
+    <div className="mt-5 rounded-2xl bg-stone-50 p-4 ring-1 ring-black/5">
+      <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-stone-400">Sound</p>
+      {(
+        [
+          ["Music", music, (v: number) => set({ music: v })],
+          ["Effects and street", sfx, (v: number) => set({ sfx: v })],
+        ] as const
+      ).map(([label, value, onChange]) => (
+        <label key={label} className="mb-2 flex items-center gap-3 text-sm text-stone-600 last:mb-0">
+          <span className="w-32 shrink-0">{label}</span>
+          <input type="range" min={0} max={1} step={0.05} value={value} onChange={(e) => onChange(Number(e.target.value))} className="h-1.5 w-full accent-emerald-600" />
+        </label>
+      ))}
+    </div>
+  );
+}
+
 function ProfileSheet() {
   const profile = useGame((s) => s.profile)!;
   const rep = useGame((s) => s.rep);
@@ -253,6 +276,8 @@ function ProfileSheet() {
           </button>
         </div>
       )}
+
+      <SoundSliders />
 
       <p className="mb-2 mt-5 text-xs font-semibold uppercase tracking-wider text-stone-400">The ladder</p>
       <ol className="space-y-1.5">

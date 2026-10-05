@@ -27,6 +27,9 @@ export type RemoteMotion = { x: number; z: number; ry: number; speed: number; tx
 
 export const remoteMotion = new Map<string, RemoteMotion>();
 
+/** Active emotes (wave, dance) by player id; "me" is the local player. */
+export const emotes = new Map<string, { e: "wave" | "dance"; until: number }>();
+
 /** Camera orbit state; wheel/drag handlers write here. */
 export const cam = { az: Math.PI / 4, dist: 24 };
 

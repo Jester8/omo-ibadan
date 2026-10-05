@@ -177,6 +177,12 @@ wss.on("connection", (ws) => {
         appendFileSync(REPORTS_FILE, line);
         break;
       }
+      case "emote": {
+        if (m.e !== "wave" && m.e !== "dance") break;
+        const msg: S2C = { t: "emote", id, e: m.e };
+        for (const other of clients.values()) if (other.info.room === c.info.room && other.info.id !== id) tx(other.ws, msg);
+        break;
+      }
       case "hangup": {
         const target = clients.get(m.to);
         if (target) tx(target.ws, { t: "hangup", from: id });

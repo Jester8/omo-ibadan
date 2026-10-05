@@ -9,7 +9,7 @@ import { PLACES, doorOf } from "@/lib/places";
 import { findWorldPath, type Pt } from "@/lib/pathing";
 import { interiorKey } from "@/lib/interiors";
 import { randomLook, type Look } from "@/lib/look";
-import { remoteMotion } from "@/lib/playerState";
+import { emotes, remoteMotion } from "@/lib/playerState";
 import { useGame } from "@/lib/store";
 
 const angleDiff = (a: number, b: number) => {
@@ -24,8 +24,10 @@ const angleDiff = (a: number, b: number) => {
 function Remote({ id }: { id: string }) {
   const look = useGame((s) => s.remotes[id]?.look);
   const g = useRef<THREE.Group>(null);
-  const motion = useRef({ speed: 0 });
+  const motion = useRef<{ speed: number; emote: "wave" | "dance" | null }>({ speed: 0, emote: null });
   useFrame((_, dt) => {
+    const em = emotes.get(id);
+    motion.current.emote = em && em.until > Date.now() ? em.e : null;
     const r = remoteMotion.get(id);
     if (!r || !g.current) return;
     const k = Math.min(1, dt * 9);

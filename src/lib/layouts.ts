@@ -88,7 +88,7 @@ function flat(p: Palette): Layout {
       I("stove", 2.1, 3.55, R),
       I("counter", 3.0, 3.6, R, { w: 1.1 }),
       I("sink", 3.95, 3.6, R),
-      I("fridge", 4.65, 2.4, -H),
+      I("fridge", 4.65, 2.4, -H), I("mortar", 4.7, 3.5), I("radio", -2.7, -0.9, 0, { y: 0.42 }), I("meterbox", 4.88, -0.7, -H, { y: 1.3 }), I("calendar", -4.93, 0.6, H, { y: 1.4, c: p.accent }), I("carvedstool", -1.1, -3.3),
     ],
     lines: ["NEPA don take light again o.", "This flat na small but e be mine."],
   });
@@ -130,6 +130,7 @@ function bungalow(p: Palette, owner?: string): Layout {
       // kitchen and dining
       I("stove", 2.0, 4.1, R), I("counter", 3.1, 4.15, R, { w: 1.2 }), I("sink", 4.2, 4.15, R), I("fridge", 5.5, 3.3, -H),
       I("diningtable", 3.9, 1.0), ...around("chair", 3.9, 1.0, 0.95, 4, 0.8),
+      I("mortar", 1.7, 3.4), I("calendar", -5.93, 0.9, H, { y: 1.4, c: p.accent }), I("meterbox", -2.0, -0.72, R, { y: 1.3 }), I("radio", -3.0, 1.7, 0, { y: 0.42 }), I("carvedstool", -0.6, 0.5),
     ],
     lines: ["Ile mi, ile yin.", "Welcome, make yourself at home."],
   });
@@ -182,6 +183,7 @@ function duplex(p: Palette, owner?: string): Layout {
       // kitchen
       I("stove", 1.4, 5.0, R), I("counter", 2.5, 5.05, R, { w: 1.5 }), I("sink", 3.7, 5.05, R), I("fridge", 7.3, 4.4, -H),
       I("counter", 6.2, 5.05, R, { w: 1.6 }), I("waterdispenser", 7.4, 1.4, -H),
+      I("sewingmachine", 7.0, -5.0, 0), I("mortar", 4.7, 4.9), I("radio", -5.0, 2.1, 0, { y: 0.42 }), I("calendar", 0.2, -5.43, 0, { y: 1.5, c: p.accent }), I("carvedstool", -3.0, 0.3),
     ],
     lines: ["Make yourself at home, abeg.", "The generator is behind the sofa."],
   });
@@ -248,6 +250,7 @@ function mansion(p: Palette, owner?: string): Layout {
       // home cinema
       I("tv", 9.0, 2.75, R, { w: 3.0 }), I("sofa", 7.0, 6.0, R, { w: 2.4 }), I("sofa", 9.6, 6.0, R, { w: 2.4 }), I("armchair", 6.0, 4.3, H), I("armchair", 10.4, 4.3, -H),
       I("coffeetable", 8.3, 4.3), I("plant", 5.6, 6.6),
+      I("agbadastand", 0.9, -6.4), I("calabash", 3.1, 6.6, R, { y: 0.95 }), I("ibeji", 3.8, 6.6, R, { y: 0.95 }), I("radio", -6.0, 3.0, 0, { y: 0.42 }), I("gascooker", 9.1, -1.2, -H), I("meterbox", -10.93, 1.4, H, { y: 1.3 }),
     ],
     lines: ["Welcome, welcome. Sit down, let me bring you a drink.", "Chief is not around but make yourself comfortable."],
   });
@@ -310,6 +313,7 @@ const PLACE_LAYOUTS: Record<string, Layout> = {
       I("crates", -7.4, -5.0), I("crates", 7.2, -5.0, 0, { c: RUST }), I("sacks", -7.3, 3.5), I("sacks", 7.2, 3.6), I("sacks", 6.4, 3.6),
       I("umbrella", -2, -3.8), I("umbrella", 2, -3.8), I("umbrella", 6, -3.8), I("umbrella", -6, -3.8),
       I("rack", 6.5, 0.6, -H), I("crates", -7.2, 0.4), I("ceilingfan", -3, 2), I("ceilingfan", 3, 2),
+      I("provisions", 7.7, -2.4, -H), I("cooler", 6.6, 2.6, 0), I("mortar", 5.4, 4.3), I("calabash", -7.0, 2.2, 0, { y: 0 }),
     ],
     residents: [res("Mama Ngozi", -6, -2.7, { seed: "ngozi", lines: ["Come buy tomato, fresh from farm!", "Oga, last price!"] }), res("Alhaji Musa", 0, 1.5, { seed: "musa", lines: ["Pepper! Pepper!"] })],
   }),
@@ -321,7 +325,7 @@ const PLACE_LAYOUTS: Record<string, Layout> = {
     items: [
       I("bar", -1.6, -1.7, 0, { w: 4.0 }), I("stove", -3.5, -4.2, 0), I("stove", -2.5, -4.2, 0), I("sink", 0.2, -4.2, 0), I("fridge", 4.9, -3.9, R), I("counter", 2.2, -4.2, 0, { w: 1.6 }),
       ...[[-3.6, 0.8], [0, 1.0], [3.6, 0.8], [-3.0, 3.4], [3.0, 3.4]].flatMap(([x, z]) => [I("roundtable", x, z), ...around("plasticchair", x, z, 0.85, 3, 0.6)]),
-      I("tv", 5.75, 1.0, -H), I("ceilingfan", -2, 2), I("ceilingfan", 3, 2), I("plant", -5.4, 3.8), I("wallart", -5.9, 1.0, H, { y: 1.7, c: OCHRE }),
+      I("tv", 5.75, 1.0, -H), I("cooler", 5.5, 3.3, -H), I("mortar", 3.8, -4.2), I("provisions", -5.2, -4.2, 0), I("ceilingfan", -2, 2), I("ceilingfan", 3, 2), I("plant", -5.4, 3.8), I("wallart", -5.9, 1.0, H, { y: 1.7, c: OCHRE }),
     ],
     residents: [res("Mama Amala", 0, -2.8, { seed: "mamaamala", lines: ["Gbegiri and ewedu, hot and fresh!", "Abula for you?"] }), res("Tolu", -3.6, 1.7, { pose: "sit", seatH: 0.45, seed: "tolu" })],
   }),
@@ -382,6 +386,7 @@ const PLACE_LAYOUTS: Record<string, Layout> = {
       ...row("rack", -6.5, -4.5, 6, 2.6, 0), ...row("stall", -5, -1.2, 3, 5, 0), ...row("rack", -6, 2.2, 5, 3, R),
       I("umbrella", -5, -1.2), I("umbrella", 0, -1.2), I("umbrella", 5, -1.2), I("crates", 7.2, 4.4), I("crates", -7.4, 4.4), I("ceilingfan", -3, 3), I("ceilingfan", 3, 3),
       I("rug", 0, 4.2, 0, { w: 4, d: 1.4, c: INDIGO }),
+      I("sewingmachine", -5.5, 4.7, R), I("sewingmachine", -3.5, 4.7, R), I("mannequin", 2.5, 4.6), I("mannequin", 4.2, 4.6), I("agbadastand", 5.8, 4.6),
     ],
     residents: [res("Iya Alaso", -5, 0.0, { seed: "alaso", lines: ["Adire, aso-oke, ankara! Come and see!"] }), res("Customer", 1.5, 3.6, { seed: "cust" })],
   }),
@@ -418,7 +423,8 @@ const PLACE_LAYOUTS: Record<string, Layout> = {
       I("stage", 0, -4.2, 0, { w: 6.5, d: 2.8 }), ...row("drum", -1.8, -4.4, 4, 1.2, 0, { y: 0.5 }), I("rug", 0, -1.2, 0, { w: 4.5, d: 1.6, c: INDIGO }),
       ...col("displaycase", -6.4, -2.4, 3, 2.0, H, { w: 1.5 }), ...col("displaycase", 6.4, -2.4, 3, 2.0, -H, { w: 1.5 }),
       ...row("bench", -3, 1.2, 2, 3.6, 0, { w: 2.4 }), ...row("bench", -3, 3.2, 2, 3.6, 0, { w: 2.4 }),
-      I("wallart", -6.9, 3.2, H, { y: 1.8, c: INDIGO }), I("wallart", 6.9, 3.2, -H, { y: 1.8, c: INDIGO }), I("wallart", -3.5, -5.4, 0, { y: 2, c: INDIGO, w: 1.4 }), I("wallart", 3.5, -5.4, 0, { y: 2, c: RUST, w: 1.4 }),
+      I("wallart", -6.9, 3.2, H, { y: 1.8, c: INDIGO }), I("wallart", 6.9, 3.2, -H, { y: 1.8, c: INDIGO }),
+      I("carvedstool", -0.7, 1.7), I("carvedstool", 0.7, 1.7), I("ibeji", -3.0, -4.4, 0, { y: 0.3 }), I("ibeji", 3.0, -4.4, 0, { y: 0.3 }), I("calabash", -6.0, 4.4, 0), I("calabash", 6.0, 4.4, 0), I("wallart", -3.5, -5.4, 0, { y: 2, c: INDIGO, w: 1.4 }), I("wallart", 3.5, -5.4, 0, { y: 2, c: RUST, w: 1.4 }),
       I("plant", -6.4, -4.8), I("plant", 6.4, -4.8), I("ceilingfan", -3, 0), I("ceilingfan", 3, 0),
     ],
     residents: [res("Baba Alagbe", 0, -3.4, { seed: "alagbe", lines: ["Gangan speaks. Listen with your heart.", "My grandfather played for the Olubadan."] })],

@@ -6,6 +6,7 @@ import { cam, me } from "./playerState";
 import { naira } from "./plots";
 import { useGame } from "./store";
 import { nepaOut } from "./time";
+import { audio } from "./audio";
 
 /** Everything about the interior the player is standing in (kept outside React). */
 export const rt = {
@@ -171,6 +172,7 @@ export function startUse(index: number) {
   if (def.pose) {
     me.use = { pose: def.pose, x: it.x * S, z: it.z * S, ry: it.rot ?? 0, seatH: def.seatH ?? 0.45, standX: me.x, standZ: me.z };
   }
+  if (action.id === "drum") audio.drum();
   s.recordStat("used");
   if (sleeping && action.id === "sleep") s.recordStat("slept");
 }

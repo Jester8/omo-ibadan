@@ -24,7 +24,12 @@
   - Multiplayer: you can see and chat with others who are in the same room; each interior has its own chat and voice room
   - `npm run check:interiors` validates every layout (free spawn, every usable item reachable, no overlapping furniture)
 
+- **Sound:** a live-synthesised Nigerian soundscape (no audio files): Afrobeat/highlife groove with log-drum bass, shekere, congas, guitar and talking-drum fills; muffled indoors, silent in the mosque, cathedral and hospital. Street ambience (danfo horns, keke engines, birds, night crickets), neighbours' generators when NEPA takes light, stadium crowd and market chatter, plus UI, coin, door, NEPA on/off and phone-ring sounds. Mute button and volume sliders.
+- **Emotes:** wave (Z) and dance (X), shown to everyone in the room.
+- **More furniture:** mortar and pestle, sewing machine, gas cooker, radio, Ibeji statues, calabashes, carved stool, agbada stand, mannequins, prepaid meter, wall calendar, provisions shelf, cooler, water tank.
+
 ## Not verified yet
+- **Sound by ear.** The browser pane can't play audio, so levels and the groove still need a listen.
 - **Interiors on a phone:** only checked on a desktop-size window plus one narrow view.
 - **Audio itself.** Signalling, ringing and room joins are tested; microphone capture was blocked in the preview browser, so test two real devices on https.
 

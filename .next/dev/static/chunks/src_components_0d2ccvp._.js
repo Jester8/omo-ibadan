@@ -3658,6 +3658,1009 @@ _c8 = Books;
                     columnNumber: 9
                 }, this);
             }
+        case "mortar":
+            return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Cy, {
+                        r: 0.2,
+                        r2: 0.14,
+                        h: 0.5,
+                        c: "#6b4a2f",
+                        seg: 14
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 610,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Cy, {
+                        p: [
+                            0,
+                            0.5,
+                            0
+                        ],
+                        r: 0.24,
+                        r2: 0.2,
+                        h: 0.12,
+                        c: "#7a5436",
+                        seg: 14
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 611,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Cy, {
+                        p: [
+                            0.18,
+                            0.2,
+                            0.05
+                        ],
+                        r: 0.035,
+                        h: 0.85,
+                        c: "#a8794a",
+                        seg: 8,
+                        rot: [
+                            0.1,
+                            0,
+                            -0.25
+                        ]
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 612,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/interior/Furniture.tsx",
+                lineNumber: 609,
+                columnNumber: 9
+            }, this);
+        case "calabash":
+            return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Sp, {
+                        p: [
+                            0,
+                            0.16,
+                            0
+                        ],
+                        r: 0.22,
+                        c: "#c9a24a",
+                        sc: [
+                            1,
+                            0.7,
+                            1
+                        ]
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 618,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Sp, {
+                        p: [
+                            0.3,
+                            0.1,
+                            0.1
+                        ],
+                        r: 0.14,
+                        c: "#b8893a",
+                        sc: [
+                            1,
+                            0.7,
+                            1
+                        ]
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 619,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/interior/Furniture.tsx",
+                lineNumber: 617,
+                columnNumber: 9
+            }, this);
+        case "ibeji":
+            return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
+                        s: [
+                            0.4,
+                            0.06,
+                            0.3
+                        ],
+                        c: "#3b2a1d"
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 625,
+                        columnNumber: 11
+                    }, this),
+                    [
+                        -1,
+                        1
+                    ].map((s)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("group", {
+                            position: [
+                                s * 0.1,
+                                0.06,
+                                0
+                            ],
+                            children: [
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Cy, {
+                                    r: 0.07,
+                                    r2: 0.05,
+                                    h: 0.3,
+                                    c: "#6b4a2f",
+                                    seg: 10
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/interior/Furniture.tsx",
+                                    lineNumber: 628,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Sp, {
+                                    p: [
+                                        0,
+                                        0.4,
+                                        0
+                                    ],
+                                    r: 0.075,
+                                    c: "#6b4a2f"
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/interior/Furniture.tsx",
+                                    lineNumber: 629,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
+                                    p: [
+                                        0,
+                                        0.12,
+                                        0.05
+                                    ],
+                                    s: [
+                                        0.1,
+                                        0.02,
+                                        0.03
+                                    ],
+                                    c: "#c9a24a"
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/interior/Furniture.tsx",
+                                    lineNumber: 630,
+                                    columnNumber: 15
+                                }, this)
+                            ]
+                        }, s, true, {
+                            fileName: "[project]/src/components/interior/Furniture.tsx",
+                            lineNumber: 627,
+                            columnNumber: 13
+                        }, this))
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/interior/Furniture.tsx",
+                lineNumber: 624,
+                columnNumber: 9
+            }, this);
+        case "mannequin":
+            return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Cy, {
+                        r: 0.18,
+                        h: 0.03,
+                        c: DARK,
+                        seg: 14
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 638,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Cy, {
+                        r: 0.015,
+                        h: 1.0,
+                        c: METAL,
+                        seg: 6
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 639,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Cy, {
+                        p: [
+                            0,
+                            0.85,
+                            0
+                        ],
+                        r: 0.2,
+                        r2: 0.14,
+                        h: 0.55,
+                        c: c,
+                        seg: 14,
+                        rough: 0.8
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 640,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Sp, {
+                        p: [
+                            0,
+                            1.5,
+                            0
+                        ],
+                        r: 0.09,
+                        c: "#e8d9b0"
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 641,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
+                        p: [
+                            0,
+                            0.85,
+                            0.12
+                        ],
+                        s: [
+                            0.3,
+                            0.45,
+                            0.01
+                        ],
+                        m: artMat(c)
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 642,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/interior/Furniture.tsx",
+                lineNumber: 637,
+                columnNumber: 9
+            }, this);
+        case "carvedstool":
+            return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Cy, {
+                        p: [
+                            0,
+                            0.34,
+                            0
+                        ],
+                        r: 0.22,
+                        h: 0.07,
+                        c: "#6b4a2f",
+                        seg: 16
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 648,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Cy, {
+                        p: [
+                            0,
+                            0.07,
+                            0
+                        ],
+                        r: 0.09,
+                        h: 0.27,
+                        c: "#5a3a24",
+                        seg: 10
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 649,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Cy, {
+                        r: 0.2,
+                        h: 0.07,
+                        c: "#6b4a2f",
+                        seg: 16
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 650,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/interior/Furniture.tsx",
+                lineNumber: 647,
+                columnNumber: 9
+            }, this);
+        case "gascooker":
+            return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
+                        s: [
+                            W,
+                            0.85,
+                            D
+                        ],
+                        c: WHITE,
+                        r: 0.4
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 656,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
+                        p: [
+                            0,
+                            0.85,
+                            0
+                        ],
+                        s: [
+                            W - 0.04,
+                            0.04,
+                            D - 0.04
+                        ],
+                        c: "#2a2c32"
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 657,
+                        columnNumber: 11
+                    }, this),
+                    [
+                        -1,
+                        1
+                    ].map((s)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Cy, {
+                            p: [
+                                s * 0.17,
+                                0.89,
+                                0
+                            ],
+                            r: 0.08,
+                            h: 0.015,
+                            c: METAL,
+                            seg: 14
+                        }, s, false, {
+                            fileName: "[project]/src/components/interior/Furniture.tsx",
+                            lineNumber: 658,
+                            columnNumber: 31
+                        }, this)),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
+                        p: [
+                            0,
+                            0.2,
+                            D / 2 + 0.005
+                        ],
+                        s: [
+                            W - 0.12,
+                            0.4,
+                            0.015
+                        ],
+                        c: "#2a2c32",
+                        r: 0.3
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 659,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Cy, {
+                        p: [
+                            W / 2 + 0.2,
+                            0,
+                            0
+                        ],
+                        r: 0.13,
+                        h: 0.55,
+                        c: "#c24a3a",
+                        seg: 14
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 660,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Cy, {
+                        p: [
+                            W / 2 + 0.2,
+                            0.55,
+                            0
+                        ],
+                        r: 0.05,
+                        h: 0.08,
+                        c: METAL,
+                        seg: 8
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 661,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/interior/Furniture.tsx",
+                lineNumber: 655,
+                columnNumber: 9
+            }, this);
+        case "radio":
+            return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
+                        s: [
+                            W,
+                            0.26,
+                            D
+                        ],
+                        c: "#3b2a1d",
+                        r: 0.6
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 667,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
+                        p: [
+                            -0.08,
+                            0.05,
+                            D / 2 + 0.005
+                        ],
+                        s: [
+                            0.18,
+                            0.14,
+                            0.01
+                        ],
+                        c: "#d9c98a"
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 668,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Cy, {
+                        p: [
+                            0.12,
+                            0.05,
+                            D / 2
+                        ],
+                        r: 0.04,
+                        h: 0.02,
+                        c: METAL,
+                        seg: 10,
+                        rot: [
+                            Math.PI / 2,
+                            0,
+                            0
+                        ]
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 669,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Cy, {
+                        p: [
+                            0.15,
+                            0.26,
+                            0
+                        ],
+                        r: 0.006,
+                        h: 0.4,
+                        c: METAL,
+                        seg: 5,
+                        rot: [
+                            0,
+                            0,
+                            -0.5
+                        ]
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 670,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/interior/Furniture.tsx",
+                lineNumber: 666,
+                columnNumber: 9
+            }, this);
+        case "sewingmachine":
+            return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
+                        p: [
+                            0,
+                            0.55,
+                            0
+                        ],
+                        s: [
+                            W,
+                            0.04,
+                            D
+                        ],
+                        c: DARK
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 676,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
+                        p: [
+                            -W / 2 + 0.05,
+                            0,
+                            0
+                        ],
+                        s: [
+                            0.05,
+                            0.55,
+                            D - 0.1
+                        ],
+                        c: "#2a2c32"
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 677,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
+                        p: [
+                            W / 2 - 0.05,
+                            0,
+                            0
+                        ],
+                        s: [
+                            0.05,
+                            0.55,
+                            D - 0.1
+                        ],
+                        c: "#2a2c32"
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 678,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
+                        p: [
+                            0.2,
+                            0.59,
+                            0
+                        ],
+                        s: [
+                            0.3,
+                            0.2,
+                            0.14
+                        ],
+                        c: "#1b1d22"
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 679,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
+                        p: [
+                            -0.05,
+                            0.59,
+                            -0.05
+                        ],
+                        s: [
+                            0.4,
+                            0.18,
+                            0.08
+                        ],
+                        c: "#1b1d22"
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 680,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Cy, {
+                        p: [
+                            -0.25,
+                            0.7,
+                            -0.02
+                        ],
+                        r: 0.05,
+                        h: 0.04,
+                        c: METAL,
+                        seg: 10
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 681,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
+                        p: [
+                            0,
+                            0.6,
+                            0.18
+                        ],
+                        s: [
+                            0.4,
+                            0.01,
+                            0.1
+                        ],
+                        m: artMat(c)
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 682,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/interior/Furniture.tsx",
+                lineNumber: 675,
+                columnNumber: 9
+            }, this);
+        case "meterbox":
+            return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("group", {
+                position: [
+                    0,
+                    item.y ?? 1.3,
+                    0
+                ],
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
+                        s: [
+                            W,
+                            H,
+                            D
+                        ],
+                        c: "#8c9096",
+                        r: 0.4
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 688,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("mesh", {
+                        position: [
+                            0,
+                            0.3,
+                            D / 2 + 0.005
+                        ],
+                        material: glow.bulb,
+                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("boxGeometry", {
+                            args: [
+                                0.2,
+                                0.07,
+                                0.01
+                            ]
+                        }, void 0, false, {
+                            fileName: "[project]/src/components/interior/Furniture.tsx",
+                            lineNumber: 690,
+                            columnNumber: 13
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 689,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
+                        p: [
+                            0,
+                            0.08,
+                            D / 2
+                        ],
+                        s: [
+                            0.2,
+                            0.12,
+                            0.01
+                        ],
+                        c: "#2a2c32"
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 692,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/interior/Furniture.tsx",
+                lineNumber: 687,
+                columnNumber: 9
+            }, this);
+        case "calendar":
+            return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("group", {
+                position: [
+                    0,
+                    item.y ?? 1.5,
+                    0
+                ],
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
+                        s: [
+                            W,
+                            H,
+                            D
+                        ],
+                        c: "#f4f0e4"
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 698,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
+                        p: [
+                            0,
+                            H - 0.12,
+                            D / 2
+                        ],
+                        s: [
+                            W,
+                            0.12,
+                            0.01
+                        ],
+                        c: "#b5533c"
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 699,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
+                        p: [
+                            0,
+                            0.1,
+                            D / 2
+                        ],
+                        s: [
+                            W - 0.1,
+                            0.26,
+                            0.01
+                        ],
+                        m: artMat(c)
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 700,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/interior/Furniture.tsx",
+                lineNumber: 697,
+                columnNumber: 9
+            }, this);
+        case "provisions":
+            {
+                const cols = [
+                    "#d94a3a",
+                    "#e2a233",
+                    "#2f8f83",
+                    "#f0e8d6",
+                    "#2f3b82",
+                    "#8a2f3c"
+                ];
+                return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                    children: [
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
+                            s: [
+                                W,
+                                H,
+                                D
+                            ],
+                            c: DARK
+                        }, void 0, false, {
+                            fileName: "[project]/src/components/interior/Furniture.tsx",
+                            lineNumber: 707,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
+                            p: [
+                                0,
+                                0.04,
+                                0.03
+                            ],
+                            s: [
+                                W - 0.06,
+                                H - 0.1,
+                                D - 0.04
+                            ],
+                            c: "#3a2618"
+                        }, void 0, false, {
+                            fileName: "[project]/src/components/interior/Furniture.tsx",
+                            lineNumber: 708,
+                            columnNumber: 11
+                        }, this),
+                        [
+                            0.15,
+                            0.55,
+                            0.95,
+                            1.35
+                        ].flatMap((y)=>Array.from({
+                                length: 7
+                            }).map((_, i)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
+                                    p: [
+                                        -W / 2 + 0.12 + i * ((W - 0.24) / 6),
+                                        y + 0.03,
+                                        0.03
+                                    ],
+                                    s: [
+                                        0.1,
+                                        0.18 + i % 3 * 0.04,
+                                        0.1
+                                    ],
+                                    c: cols[(i + Math.round(y * 5)) % cols.length],
+                                    r: 0.6
+                                }, `${y}${i}`, false, {
+                                    fileName: "[project]/src/components/interior/Furniture.tsx",
+                                    lineNumber: 710,
+                                    columnNumber: 53
+                                }, this)))
+                    ]
+                }, void 0, true, {
+                    fileName: "[project]/src/components/interior/Furniture.tsx",
+                    lineNumber: 706,
+                    columnNumber: 9
+                }, this);
+            }
+        case "cooler":
+            return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
+                        s: [
+                            W,
+                            H - 0.05,
+                            D
+                        ],
+                        c: "#2f6fb8",
+                        r: 0.5
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 718,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
+                        p: [
+                            0,
+                            H - 0.05,
+                            0
+                        ],
+                        s: [
+                            W + 0.02,
+                            0.05,
+                            D + 0.02
+                        ],
+                        c: "#f4f4f2",
+                        r: 0.5
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 719,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
+                        p: [
+                            0,
+                            H - 0.2,
+                            D / 2
+                        ],
+                        s: [
+                            0.12,
+                            0.04,
+                            0.03
+                        ],
+                        c: "#d8d4c8"
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 720,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/interior/Furniture.tsx",
+                lineNumber: 717,
+                columnNumber: 9
+            }, this);
+        case "watertank":
+            return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Cy, {
+                        r: 0.4,
+                        h: 1.15,
+                        c: "#2f6fb8",
+                        seg: 20,
+                        rough: 0.5
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 726,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Cy, {
+                        p: [
+                            0,
+                            1.15,
+                            0
+                        ],
+                        r: 0.36,
+                        r2: 0.3,
+                        h: 0.15,
+                        c: "#2f6fb8",
+                        seg: 20,
+                        rough: 0.5
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 727,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Cy, {
+                        p: [
+                            0,
+                            1.3,
+                            0
+                        ],
+                        r: 0.1,
+                        h: 0.04,
+                        c: "#f4f4f2",
+                        seg: 12
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 728,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/interior/Furniture.tsx",
+                lineNumber: 725,
+                columnNumber: 9
+            }, this);
+        case "agbadastand":
+            return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Cy, {
+                        r: 0.2,
+                        h: 0.03,
+                        c: DARK,
+                        seg: 14
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 734,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Cy, {
+                        r: 0.015,
+                        h: 1.6,
+                        c: DARK,
+                        seg: 6
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 735,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
+                        p: [
+                            0,
+                            1.4,
+                            0
+                        ],
+                        s: [
+                            0.7,
+                            0.03,
+                            0.03
+                        ],
+                        c: DARK
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 736,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Cy, {
+                        p: [
+                            0,
+                            0.25,
+                            0
+                        ],
+                        r: 0.36,
+                        r2: 0.1,
+                        h: 1.1,
+                        c: c,
+                        seg: 18,
+                        rough: 0.8
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 737,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
+                        p: [
+                            0,
+                            1.2,
+                            0.0
+                        ],
+                        s: [
+                            0.1,
+                            0.18,
+                            0.2
+                        ],
+                        c: "#f4f0e4"
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/interior/Furniture.tsx",
+                        lineNumber: 738,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/interior/Furniture.tsx",
+                lineNumber: 733,
+                columnNumber: 9
+            }, this);
         case "curtain":
             return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
                 p: [
@@ -3674,7 +4677,7 @@ _c8 = Books;
                 r: 0.9
             }, void 0, false, {
                 fileName: "[project]/src/components/interior/Furniture.tsx",
-                lineNumber: 608,
+                lineNumber: 742,
                 columnNumber: 14
             }, this);
         case "flag":
@@ -3689,7 +4692,7 @@ _c8 = Books;
                             seg: 6
                         }, void 0, false, {
                             fileName: "[project]/src/components/interior/Furniture.tsx",
-                            lineNumber: 613,
+                            lineNumber: 747,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
@@ -3707,7 +4710,7 @@ _c8 = Books;
                             r: 0.9
                         }, void 0, false, {
                             fileName: "[project]/src/components/interior/Furniture.tsx",
-                            lineNumber: 614,
+                            lineNumber: 748,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
@@ -3725,7 +4728,7 @@ _c8 = Books;
                             r: 0.9
                         }, void 0, false, {
                             fileName: "[project]/src/components/interior/Furniture.tsx",
-                            lineNumber: 615,
+                            lineNumber: 749,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
@@ -3743,13 +4746,13 @@ _c8 = Books;
                             r: 0.9
                         }, void 0, false, {
                             fileName: "[project]/src/components/interior/Furniture.tsx",
-                            lineNumber: 616,
+                            lineNumber: 750,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/interior/Furniture.tsx",
-                    lineNumber: 612,
+                    lineNumber: 746,
                     columnNumber: 9
                 }, this);
             }
@@ -3765,7 +4768,7 @@ _c8 = Books;
                         c: DARK
                     }, void 0, false, {
                         fileName: "[project]/src/components/interior/Furniture.tsx",
-                        lineNumber: 623,
+                        lineNumber: 757,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("mesh", {
@@ -3783,12 +4786,12 @@ _c8 = Books;
                             ]
                         }, void 0, false, {
                             fileName: "[project]/src/components/interior/Furniture.tsx",
-                            lineNumber: 625,
+                            lineNumber: 759,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/interior/Furniture.tsx",
-                        lineNumber: 624,
+                        lineNumber: 758,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
@@ -3805,7 +4808,7 @@ _c8 = Books;
                         c: DARK
                     }, void 0, false, {
                         fileName: "[project]/src/components/interior/Furniture.tsx",
-                        lineNumber: 627,
+                        lineNumber: 761,
                         columnNumber: 11
                     }, this),
                     [
@@ -3830,7 +4833,7 @@ _c8 = Books;
                                         seg: 10
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/interior/Furniture.tsx",
-                                        lineNumber: 630,
+                                        lineNumber: 764,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Cy, {
@@ -3845,7 +4848,7 @@ _c8 = Books;
                                         seg: 8
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/interior/Furniture.tsx",
-                                        lineNumber: 631,
+                                        lineNumber: 765,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Cy, {
@@ -3862,19 +4865,19 @@ _c8 = Books;
                                         rough: 0.3
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/interior/Furniture.tsx",
-                                        lineNumber: 632,
+                                        lineNumber: 766,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, `${r}${i}`, true, {
                                 fileName: "[project]/src/components/interior/Furniture.tsx",
-                                lineNumber: 629,
+                                lineNumber: 763,
                                 columnNumber: 13
                             }, this)))
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/interior/Furniture.tsx",
-                lineNumber: 622,
+                lineNumber: 756,
                 columnNumber: 9
             }, this);
         case "goalpost":
@@ -3895,7 +4898,7 @@ _c8 = Books;
                             seg: 8
                         }, s, false, {
                             fileName: "[project]/src/components/interior/Furniture.tsx",
-                            lineNumber: 640,
+                            lineNumber: 774,
                             columnNumber: 31
                         }, this)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Cy, {
@@ -3915,7 +4918,7 @@ _c8 = Books;
                         ]
                     }, void 0, false, {
                         fileName: "[project]/src/components/interior/Furniture.tsx",
-                        lineNumber: 641,
+                        lineNumber: 775,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("mesh", {
@@ -3933,18 +4936,18 @@ _c8 = Books;
                             ]
                         }, void 0, false, {
                             fileName: "[project]/src/components/interior/Furniture.tsx",
-                            lineNumber: 643,
+                            lineNumber: 777,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/interior/Furniture.tsx",
-                        lineNumber: 642,
+                        lineNumber: 776,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/interior/Furniture.tsx",
-                lineNumber: 639,
+                lineNumber: 773,
                 columnNumber: 9
             }, this);
         case "ticketbooth":
@@ -3959,7 +4962,7 @@ _c8 = Books;
                         c: "#c75c3a"
                     }, void 0, false, {
                         fileName: "[project]/src/components/interior/Furniture.tsx",
-                        lineNumber: 650,
+                        lineNumber: 784,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("mesh", {
@@ -3977,12 +4980,12 @@ _c8 = Books;
                             ]
                         }, void 0, false, {
                             fileName: "[project]/src/components/interior/Furniture.tsx",
-                            lineNumber: 652,
+                            lineNumber: 786,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/interior/Furniture.tsx",
-                        lineNumber: 651,
+                        lineNumber: 785,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
@@ -3999,7 +5002,7 @@ _c8 = Books;
                         c: DARK
                     }, void 0, false, {
                         fileName: "[project]/src/components/interior/Furniture.tsx",
-                        lineNumber: 654,
+                        lineNumber: 788,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
@@ -4016,7 +5019,7 @@ _c8 = Books;
                         c: "#e2a233"
                     }, void 0, false, {
                         fileName: "[project]/src/components/interior/Furniture.tsx",
-                        lineNumber: 655,
+                        lineNumber: 789,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
@@ -4033,7 +5036,7 @@ _c8 = Books;
                         c: "#c75c3a"
                     }, void 0, false, {
                         fileName: "[project]/src/components/interior/Furniture.tsx",
-                        lineNumber: 656,
+                        lineNumber: 790,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
@@ -4050,13 +5053,13 @@ _c8 = Books;
                         c: "#c75c3a"
                     }, void 0, false, {
                         fileName: "[project]/src/components/interior/Furniture.tsx",
-                        lineNumber: 657,
+                        lineNumber: 791,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/interior/Furniture.tsx",
-                lineNumber: 649,
+                lineNumber: 783,
                 columnNumber: 9
             }, this);
         case "tank":
@@ -4071,7 +5074,7 @@ _c8 = Books;
                         c: DARK
                     }, void 0, false, {
                         fileName: "[project]/src/components/interior/Furniture.tsx",
-                        lineNumber: 663,
+                        lineNumber: 797,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("mesh", {
@@ -4089,12 +5092,12 @@ _c8 = Books;
                             ]
                         }, void 0, false, {
                             fileName: "[project]/src/components/interior/Furniture.tsx",
-                            lineNumber: 665,
+                            lineNumber: 799,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/interior/Furniture.tsx",
-                        lineNumber: 664,
+                        lineNumber: 798,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
@@ -4111,7 +5114,7 @@ _c8 = Books;
                         c: DARK
                     }, void 0, false, {
                         fileName: "[project]/src/components/interior/Furniture.tsx",
-                        lineNumber: 667,
+                        lineNumber: 801,
                         columnNumber: 11
                     }, this),
                     Array.from({
@@ -4135,7 +5138,7 @@ _c8 = Books;
                             ]
                         }, i, false, {
                             fileName: "[project]/src/components/interior/Furniture.tsx",
-                            lineNumber: 668,
+                            lineNumber: 802,
                             columnNumber: 52
                         }, this)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
@@ -4152,13 +5155,13 @@ _c8 = Books;
                         c: "#c9b88a"
                     }, void 0, false, {
                         fileName: "[project]/src/components/interior/Furniture.tsx",
-                        lineNumber: 669,
+                        lineNumber: 803,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/interior/Furniture.tsx",
-                lineNumber: 662,
+                lineNumber: 796,
                 columnNumber: 9
             }, this);
         case "stairs":
@@ -4180,7 +5183,7 @@ _c8 = Books;
                             c: i % 2 ? WOOD : LIGHT
                         }, i, false, {
                             fileName: "[project]/src/components/interior/Furniture.tsx",
-                            lineNumber: 675,
+                            lineNumber: 809,
                             columnNumber: 52
                         }, this)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
@@ -4198,13 +5201,13 @@ _c8 = Books;
                         m: glass
                     }, void 0, false, {
                         fileName: "[project]/src/components/interior/Furniture.tsx",
-                        lineNumber: 676,
+                        lineNumber: 810,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/interior/Furniture.tsx",
-                lineNumber: 674,
+                lineNumber: 808,
                 columnNumber: 9
             }, this);
         case "wallart":
@@ -4229,7 +5232,7 @@ _c8 = Books;
                         c: "#3b2a1d"
                     }, void 0, false, {
                         fileName: "[project]/src/components/interior/Furniture.tsx",
-                        lineNumber: 682,
+                        lineNumber: 816,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("mesh", {
@@ -4246,18 +5249,18 @@ _c8 = Books;
                             ]
                         }, void 0, false, {
                             fileName: "[project]/src/components/interior/Furniture.tsx",
-                            lineNumber: 684,
+                            lineNumber: 818,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/interior/Furniture.tsx",
-                        lineNumber: 683,
+                        lineNumber: 817,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/interior/Furniture.tsx",
-                lineNumber: 681,
+                lineNumber: 815,
                 columnNumber: 9
             }, this);
         case "clock":
@@ -4276,7 +5279,7 @@ _c8 = Books;
                         seg: 20
                     }, void 0, false, {
                         fileName: "[project]/src/components/interior/Furniture.tsx",
-                        lineNumber: 691,
+                        lineNumber: 825,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Cy, {
@@ -4291,7 +5294,7 @@ _c8 = Books;
                         seg: 20
                     }, void 0, false, {
                         fileName: "[project]/src/components/interior/Furniture.tsx",
-                        lineNumber: 692,
+                        lineNumber: 826,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
@@ -4308,7 +5311,7 @@ _c8 = Books;
                         c: "#111"
                     }, void 0, false, {
                         fileName: "[project]/src/components/interior/Furniture.tsx",
-                        lineNumber: 693,
+                        lineNumber: 827,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
@@ -4325,13 +5328,13 @@ _c8 = Books;
                         c: "#111"
                     }, void 0, false, {
                         fileName: "[project]/src/components/interior/Furniture.tsx",
-                        lineNumber: 694,
+                        lineNumber: 828,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/interior/Furniture.tsx",
-                lineNumber: 690,
+                lineNumber: 824,
                 columnNumber: 9
             }, this);
         case "pitch":
@@ -4352,7 +5355,7 @@ _c8 = Books;
                                 ]
                             }, void 0, false, {
                                 fileName: "[project]/src/components/interior/Furniture.tsx",
-                                lineNumber: 701,
+                                lineNumber: 835,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("meshStandardMaterial", {
@@ -4360,13 +5363,13 @@ _c8 = Books;
                                 roughness: 1
                             }, void 0, false, {
                                 fileName: "[project]/src/components/interior/Furniture.tsx",
-                                lineNumber: 702,
+                                lineNumber: 836,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/interior/Furniture.tsx",
-                        lineNumber: 700,
+                        lineNumber: 834,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Bx, {
@@ -4383,7 +5386,7 @@ _c8 = Books;
                         c: "#e9f7ec"
                     }, void 0, false, {
                         fileName: "[project]/src/components/interior/Furniture.tsx",
-                        lineNumber: 704,
+                        lineNumber: 838,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("mesh", {
@@ -4402,26 +5405,26 @@ _c8 = Books;
                                 ]
                             }, void 0, false, {
                                 fileName: "[project]/src/components/interior/Furniture.tsx",
-                                lineNumber: 706,
+                                lineNumber: 840,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("meshBasicMaterial", {
                                 color: "#e9f7ec"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/interior/Furniture.tsx",
-                                lineNumber: 707,
+                                lineNumber: 841,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/interior/Furniture.tsx",
-                        lineNumber: 705,
+                        lineNumber: 839,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/interior/Furniture.tsx",
-                lineNumber: 699,
+                lineNumber: 833,
                 columnNumber: 9
             }, this);
         case "liftdoor":
@@ -4437,7 +5440,7 @@ _c8 = Books;
                         r: 0.4
                     }, void 0, false, {
                         fileName: "[project]/src/components/interior/Furniture.tsx",
-                        lineNumber: 714,
+                        lineNumber: 848,
                         columnNumber: 11
                     }, this),
                     [
@@ -4458,13 +5461,13 @@ _c8 = Books;
                             r: 0.3
                         }, s, false, {
                             fileName: "[project]/src/components/interior/Furniture.tsx",
-                            lineNumber: 715,
+                            lineNumber: 849,
                             columnNumber: 31
                         }, this))
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/interior/Furniture.tsx",
-                lineNumber: 713,
+                lineNumber: 847,
                 columnNumber: 9
             }, this);
         default:
@@ -4477,7 +5480,7 @@ _c8 = Books;
                 c: WOOD
             }, void 0, false, {
                 fileName: "[project]/src/components/interior/Furniture.tsx",
-                lineNumber: 719,
+                lineNumber: 853,
                 columnNumber: 14
             }, this);
     }
@@ -4499,7 +5502,7 @@ function FurnitureItem({ item, accent, trim, onUse }) {
                 c2: c2
             }, void 0, false, {
                 fileName: "[project]/src/components/interior/Furniture.tsx",
-                lineNumber: 729,
+                lineNumber: 863,
                 columnNumber: 30
             }, this)
     }["FurnitureItem.useMemo[body]"], [
@@ -4512,7 +5515,7 @@ function FurnitureItem({ item, accent, trim, onUse }) {
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("group", {
         position: [
             item.x,
-            0,
+            item.kind === "radio" || item.kind === "calabash" || item.kind === "ibeji" ? item.y ?? 0 : 0,
             item.z
         ],
         "rotation-y": item.rot ?? 0,
@@ -4531,7 +5534,7 @@ function FurnitureItem({ item, accent, trim, onUse }) {
         children: body
     }, void 0, false, {
         fileName: "[project]/src/components/interior/Furniture.tsx",
-        lineNumber: 731,
+        lineNumber: 865,
         columnNumber: 5
     }, this);
 }

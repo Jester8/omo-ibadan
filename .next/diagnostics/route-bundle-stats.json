@@ -1,12 +1,12 @@
 [
   {
     "route": "/play",
-    "firstLoadUncompressedJsBytes": 1782205,
+    "firstLoadUncompressedJsBytes": 1797414,
     "firstLoadChunkPaths": [
       ".next/static/chunks/0h2qsuyze9ds1.js",
-      ".next/static/chunks/39xp6oojxxfo9.js",
-      ".next/static/chunks/33l_ziu3m2-16.js",
-      ".next/static/chunks/2d4wm5_ti-spg.js",
+      ".next/static/chunks/06iy3sr_lkg1l.js",
+      ".next/static/chunks/2_d-3jwl9f9qt.js",
+      ".next/static/chunks/3e0gc2f7f5tmi.js",
       ".next/static/chunks/3ty9m5wf1mxbz.js",
       ".next/static/chunks/310vm2bl3xxpt.js",
       ".next/static/chunks/19mx3mg6lkumu.js",

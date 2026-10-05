@@ -8,7 +8,7 @@ import { clone as cloneSkinned } from "three/examples/jsm/utils/SkeletonUtils.js
 import type { Look } from "@/lib/look";
 import { ANIM_URL, BASE_URL, baseFor, dressAvatar } from "./rig";
 
-export type Motion = { current: { speed: number; pose?: "sit" | "lie" | null } };
+export type Motion = { current: { speed: number; pose?: "sit" | "lie" | null; emote?: "wave" | "dance" | null } };
 
 const SIT_THIGH = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -1.45);
 const SIT_KNEE = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), 1.5);
@@ -33,7 +33,7 @@ function Inner({ look: lookIn, motion, scale }: { look: Look; motion?: Motion; s
     const actions: Record<string, THREE.AnimationAction> = {};
     for (const clip of anim.animations) actions[clip.name] = mixer.clipAction(clip);
     const bone = (n: string) => root.getObjectByName(n) ?? null;
-    const legs = { ul: bone("UpperLegL"), ur: bone("UpperLegR"), ll: bone("LowerLegL"), lr: bone("LowerLegR") };
+    const legs = { ul: bone("UpperLegL"), ur: bone("UpperLegR"), ll: bone("LowerLegL"), lr: bone("LowerLegR"), hips: bone("Hips"), chest: bone("Chest"), head: bone("Head"), al: bone("UpperArmL"), ar: bone("UpperArmR") };
     return { root, dressed, mixer, actions, legs };
   }, [gltf, anim, key, base]);
 
@@ -45,12 +45,14 @@ function Inner({ look: lookIn, motion, scale }: { look: Look; motion?: Motion; s
     [built],
   );
 
-  useFrame((_, dt) => {
+  useFrame((state, dt) => {
     const speed = motion?.current.speed ?? 0;
     const ms = speed / scale; // speed in the model's own metres per second
     const pose = motion?.current.pose;
     let want = "Idle_Neutral";
     let timeScale = 1;
+    const emote = motion?.current.emote;
+    if (emote === "wave" && !pose && ms <= 0.15) want = "Wave";
     if (ms > 0.15 && !pose) {
       if (ms < 3) {
         want = "Walk";
@@ -73,6 +75,17 @@ function Inner({ look: lookIn, motion, scale }: { look: Look; motion?: Motion; s
       next.setEffectiveTimeScale(timeScale);
     }
     built.mixer.update(dt);
+    if (emote === "dance" && !pose && ms <= 0.15) {
+      const t = state.clock.elapsedTime * 6.5;
+      const q = (x: number, y: number, z: number, a: number) => new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(x, y, z), a);
+      built.legs.hips?.quaternion.multiply(q(0, 0, 1, Math.sin(t) * 0.22)).multiply(q(0, 1, 0, Math.sin(t * 0.5) * 0.3));
+      built.legs.chest?.quaternion.multiply(q(0, 1, 0, -Math.sin(t * 0.5) * 0.35));
+      built.legs.head?.quaternion.multiply(q(1, 0, 0, Math.abs(Math.sin(t)) * 0.2));
+      built.legs.al?.quaternion.multiply(q(0, 0, 1, -1.3 + Math.sin(t) * 0.5));
+      built.legs.ar?.quaternion.multiply(q(0, 0, 1, 1.3 - Math.sin(t + 1.6) * 0.5));
+      built.legs.ul?.quaternion.multiply(q(1, 0, 0, Math.sin(t) * 0.3));
+      built.legs.ur?.quaternion.multiply(q(1, 0, 0, -Math.sin(t) * 0.3));
+    }
     if (pose === "sit") {
       built.legs.ul?.quaternion.multiply(SIT_THIGH);
       built.legs.ur?.quaternion.multiply(SIT_THIGH);

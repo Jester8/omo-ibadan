@@ -11,6 +11,7 @@ export type FurnKind =
   | "toilet" | "shower" | "basin"
   | "podium" | "blackboard" | "studentdesk" | "altar" | "pulpit" | "mimbar" | "prayermat"
   | "displaycase" | "arcade" | "clawmachine" | "fountain" | "stage" | "drum" | "rack" | "crates" | "sacks" | "umbrella"
+  | "mortar" | "calabash" | "ibeji" | "mannequin" | "carvedstool" | "gascooker" | "radio" | "sewingmachine" | "meterbox" | "calendar" | "provisions" | "cooler" | "watertank" | "agbadastand"
   | "curtain" | "flag" | "trophycase" | "goalpost" | "ticketbooth" | "tank" | "stairs" | "wallart" | "clock" | "pitch" | "liftdoor";
 
 export type Pose = "sit" | "lie";
@@ -146,6 +147,38 @@ export const FURN: Record<FurnKind, FurnDef> = {
   crates: { w: 0.8, d: 0.6, h: 0.7, solid: true },
   sacks: { w: 0.7, d: 0.5, h: 0.7, solid: true },
   umbrella: { w: 2.2, d: 2.2, h: 0, solid: false },
+  mortar: {
+    w: 0.6, d: 0.6, h: 0.7, solid: true,
+    use: { verb: "Pound yam", action: { id: "pound", label: "Pound yam", secs: 5, cost: 600, gain: { hunger: 35, energy: -6 } } },
+  },
+  calabash: { w: 0.5, d: 0.5, h: 0.3, solid: false },
+  ibeji: { w: 0.4, d: 0.3, h: 0.55, solid: false },
+  mannequin: { w: 0.5, d: 0.4, h: 1.6, solid: true },
+  carvedstool: { w: 0.45, d: 0.45, h: 0.45, solid: true, use: sit(0.45) },
+  gascooker: {
+    w: 0.7, d: 0.55, h: 0.9, solid: true,
+    use: { verb: "Cook on gas", action: { id: "gascook", label: "Cook on the gas cooker", secs: 5, cost: 700, gain: { hunger: 40, fun: 3 } } },
+  },
+  radio: {
+    w: 0.4, d: 0.2, h: 0.3, solid: false,
+    use: { verb: "Listen to the radio", needsPower: true, action: { id: "radio", label: "Listen to the radio", secs: 4, gain: { fun: 8, energy: 2 } } },
+  },
+  sewingmachine: {
+    w: 0.9, d: 0.5, h: 0.9, solid: true,
+    use: { verb: "Sew an outfit", action: { id: "sew", label: "Sew an outfit", secs: 6, gain: { energy: -18 }, pay: 3500, rep: 1 } },
+  },
+  meterbox: { w: 0.4, d: 0.12, h: 0.5, solid: false },
+  calendar: { w: 0.45, d: 0.04, h: 0.6, solid: false },
+  provisions: {
+    w: 1.2, d: 0.4, h: 1.7, solid: true,
+    use: { verb: "Buy provisions", action: { id: "provisions", label: "Buy provisions", secs: 3, cost: 400, gain: { hunger: 10 } } },
+  },
+  cooler: {
+    w: 0.6, d: 0.4, h: 0.5, solid: true,
+    use: { verb: "Cold drink", action: { id: "colddrink", label: "Take a cold drink", secs: 2, cost: 300, gain: { hunger: 3, fun: 6 } } },
+  },
+  watertank: { w: 0.8, d: 0.8, h: 1.3, solid: true },
+  agbadastand: { w: 0.7, d: 0.4, h: 1.7, solid: true },
   curtain: { w: 1.5, d: 0.08, h: 1.8, solid: false },
   flag: { w: 0.3, d: 0.3, h: 2.4, solid: true },
   trophycase: { w: 1.0, d: 0.4, h: 1.8, solid: true },

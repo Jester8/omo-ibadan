@@ -604,6 +604,140 @@ function Body({ item, W, D, c, c2 }: { item: Item; W: number; D: number; c: stri
         </group>
       );
     }
+    case "mortar":
+      return (
+        <>
+          <Cy r={0.2} r2={0.14} h={0.5} c="#6b4a2f" seg={14} />
+          <Cy p={[0, 0.5, 0]} r={0.24} r2={0.2} h={0.12} c="#7a5436" seg={14} />
+          <Cy p={[0.18, 0.2, 0.05]} r={0.035} h={0.85} c="#a8794a" seg={8} rot={[0.1, 0, -0.25]} />
+        </>
+      );
+    case "calabash":
+      return (
+        <>
+          <Sp p={[0, 0.16, 0]} r={0.22} c="#c9a24a" sc={[1, 0.7, 1]} />
+          <Sp p={[0.3, 0.1, 0.1]} r={0.14} c="#b8893a" sc={[1, 0.7, 1]} />
+        </>
+      );
+    case "ibeji":
+      return (
+        <>
+          <Bx s={[0.4, 0.06, 0.3]} c="#3b2a1d" />
+          {[-1, 1].map((s) => (
+            <group key={s} position={[s * 0.1, 0.06, 0]}>
+              <Cy r={0.07} r2={0.05} h={0.3} c="#6b4a2f" seg={10} />
+              <Sp p={[0, 0.4, 0]} r={0.075} c="#6b4a2f" />
+              <Bx p={[0, 0.12, 0.05]} s={[0.1, 0.02, 0.03]} c="#c9a24a" />
+            </group>
+          ))}
+        </>
+      );
+    case "mannequin":
+      return (
+        <>
+          <Cy r={0.18} h={0.03} c={DARK} seg={14} />
+          <Cy r={0.015} h={1.0} c={METAL} seg={6} />
+          <Cy p={[0, 0.85, 0]} r={0.2} r2={0.14} h={0.55} c={c} seg={14} rough={0.8} />
+          <Sp p={[0, 1.5, 0]} r={0.09} c="#e8d9b0" />
+          <Bx p={[0, 0.85, 0.12]} s={[0.3, 0.45, 0.01]} m={artMat(c)} />
+        </>
+      );
+    case "carvedstool":
+      return (
+        <>
+          <Cy p={[0, 0.34, 0]} r={0.22} h={0.07} c="#6b4a2f" seg={16} />
+          <Cy p={[0, 0.07, 0]} r={0.09} h={0.27} c="#5a3a24" seg={10} />
+          <Cy r={0.2} h={0.07} c="#6b4a2f" seg={16} />
+        </>
+      );
+    case "gascooker":
+      return (
+        <>
+          <Bx s={[W, 0.85, D]} c={WHITE} r={0.4} />
+          <Bx p={[0, 0.85, 0]} s={[W - 0.04, 0.04, D - 0.04]} c="#2a2c32" />
+          {[-1, 1].map((s) => <Cy key={s} p={[s * 0.17, 0.89, 0]} r={0.08} h={0.015} c={METAL} seg={14} />)}
+          <Bx p={[0, 0.2, D / 2 + 0.005]} s={[W - 0.12, 0.4, 0.015]} c="#2a2c32" r={0.3} />
+          <Cy p={[W / 2 + 0.2, 0, 0]} r={0.13} h={0.55} c="#c24a3a" seg={14} />
+          <Cy p={[W / 2 + 0.2, 0.55, 0]} r={0.05} h={0.08} c={METAL} seg={8} />
+        </>
+      );
+    case "radio":
+      return (
+        <>
+          <Bx s={[W, 0.26, D]} c="#3b2a1d" r={0.6} />
+          <Bx p={[-0.08, 0.05, D / 2 + 0.005]} s={[0.18, 0.14, 0.01]} c="#d9c98a" />
+          <Cy p={[0.12, 0.05, D / 2]} r={0.04} h={0.02} c={METAL} seg={10} rot={[Math.PI / 2, 0, 0]} />
+          <Cy p={[0.15, 0.26, 0]} r={0.006} h={0.4} c={METAL} seg={5} rot={[0, 0, -0.5]} />
+        </>
+      );
+    case "sewingmachine":
+      return (
+        <>
+          <Bx p={[0, 0.55, 0]} s={[W, 0.04, D]} c={DARK} />
+          <Bx p={[-W / 2 + 0.05, 0, 0]} s={[0.05, 0.55, D - 0.1]} c="#2a2c32" />
+          <Bx p={[W / 2 - 0.05, 0, 0]} s={[0.05, 0.55, D - 0.1]} c="#2a2c32" />
+          <Bx p={[0.2, 0.59, 0]} s={[0.3, 0.2, 0.14]} c="#1b1d22" />
+          <Bx p={[-0.05, 0.59, -0.05]} s={[0.4, 0.18, 0.08]} c="#1b1d22" />
+          <Cy p={[-0.25, 0.7, -0.02]} r={0.05} h={0.04} c={METAL} seg={10} />
+          <Bx p={[0, 0.6, 0.18]} s={[0.4, 0.01, 0.1]} m={artMat(c)} />
+        </>
+      );
+    case "meterbox":
+      return (
+        <group position={[0, item.y ?? 1.3, 0]}>
+          <Bx s={[W, H, D]} c="#8c9096" r={0.4} />
+          <mesh position={[0, 0.3, D / 2 + 0.005]} material={glow.bulb}>
+            <boxGeometry args={[0.2, 0.07, 0.01]} />
+          </mesh>
+          <Bx p={[0, 0.08, D / 2]} s={[0.2, 0.12, 0.01]} c="#2a2c32" />
+        </group>
+      );
+    case "calendar":
+      return (
+        <group position={[0, item.y ?? 1.5, 0]}>
+          <Bx s={[W, H, D]} c="#f4f0e4" />
+          <Bx p={[0, H - 0.12, D / 2]} s={[W, 0.12, 0.01]} c="#b5533c" />
+          <Bx p={[0, 0.1, D / 2]} s={[W - 0.1, 0.26, 0.01]} m={artMat(c)} />
+        </group>
+      );
+    case "provisions": {
+      const cols = ["#d94a3a", "#e2a233", "#2f8f83", "#f0e8d6", "#2f3b82", "#8a2f3c"];
+      return (
+        <>
+          <Bx s={[W, H, D]} c={DARK} />
+          <Bx p={[0, 0.04, 0.03]} s={[W - 0.06, H - 0.1, D - 0.04]} c="#3a2618" />
+          {[0.15, 0.55, 0.95, 1.35].flatMap((y) =>
+            Array.from({ length: 7 }).map((_, i) => <Bx key={`${y}${i}`} p={[-W / 2 + 0.12 + i * ((W - 0.24) / 6), y + 0.03, 0.03]} s={[0.1, 0.18 + (i % 3) * 0.04, 0.1]} c={cols[(i + Math.round(y * 5)) % cols.length]} r={0.6} />),
+          )}
+        </>
+      );
+    }
+    case "cooler":
+      return (
+        <>
+          <Bx s={[W, H - 0.05, D]} c="#2f6fb8" r={0.5} />
+          <Bx p={[0, H - 0.05, 0]} s={[W + 0.02, 0.05, D + 0.02]} c="#f4f4f2" r={0.5} />
+          <Bx p={[0, H - 0.2, D / 2]} s={[0.12, 0.04, 0.03]} c="#d8d4c8" />
+        </>
+      );
+    case "watertank":
+      return (
+        <>
+          <Cy r={0.4} h={1.15} c="#2f6fb8" seg={20} rough={0.5} />
+          <Cy p={[0, 1.15, 0]} r={0.36} r2={0.3} h={0.15} c="#2f6fb8" seg={20} rough={0.5} />
+          <Cy p={[0, 1.3, 0]} r={0.1} h={0.04} c="#f4f4f2" seg={12} />
+        </>
+      );
+    case "agbadastand":
+      return (
+        <>
+          <Cy r={0.2} h={0.03} c={DARK} seg={14} />
+          <Cy r={0.015} h={1.6} c={DARK} seg={6} />
+          <Bx p={[0, 1.4, 0]} s={[0.7, 0.03, 0.03]} c={DARK} />
+          <Cy p={[0, 0.25, 0]} r={0.36} r2={0.1} h={1.1} c={c} seg={18} rough={0.8} />
+          <Bx p={[0, 1.2, 0.0]} s={[0.1, 0.18, 0.2]} c="#f4f0e4" />
+        </>
+      );
     case "curtain":
       return <Bx p={[0, 0, 0]} s={[W, H, 0.04]} c="#bcd7e2" r={0.9} />;
     case "flag": {
@@ -729,7 +863,7 @@ export default function FurnitureItem({ item, accent, trim, onUse }: { item: Ite
   const body = useMemo(() => <Body item={item} W={W} D={D} c={c} c2={c2} />, [item, W, D, c, c2]);
   return (
     <group
-      position={[item.x, 0, item.z]}
+      position={[item.x, item.kind === "radio" || item.kind === "calabash" || item.kind === "ibeji" ? (item.y ?? 0) : 0, item.z]}
       rotation-y={item.rot ?? 0}
       onClick={
         onUse && def.use

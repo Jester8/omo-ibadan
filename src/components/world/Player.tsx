@@ -6,7 +6,7 @@ import * as THREE from "three";
 import Avatar from "@/components/avatar/Avatar";
 import { useGame } from "@/lib/store";
 import { PLACES, doorOf } from "@/lib/places";
-import { boost, cam, me } from "@/lib/playerState";
+import { boost, cam, emotes, me } from "@/lib/playerState";
 import { isBlockedAt } from "@/lib/pathing";
 import { net } from "@/lib/net";
 import { S } from "@/lib/furniture";
@@ -39,7 +39,7 @@ export default function Player() {
   const profile = useGame((s) => s.profile);
   const group = useRef<THREE.Group>(null);
   const marker = useRef<THREE.Mesh>(null);
-  const motion = useRef<{ speed: number; pose: "sit" | "lie" | null }>({ speed: 0, pose: null });
+  const motion = useRef<{ speed: number; pose: "sit" | "lie" | null; emote: "wave" | "dance" | null }>({ speed: 0, pose: null, emote: null });
   const keys = useRef(new Set<string>());
   const sent = useRef({ t: 0, x: 0, z: 0, s: 0 });
 
@@ -49,6 +49,8 @@ export default function Player() {
       return el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement;
     };
     const down = (e: KeyboardEvent) => {
+      if (!typing() && (e.key === "z" || e.key === "Z")) net.emote("wave");
+      if (!typing() && (e.key === "x" || e.key === "X")) net.emote("dance");
       const k = KEY_MAP[e.key.toLowerCase()];
       if (k && !typing()) keys.current.add(k);
     };
@@ -89,6 +91,8 @@ export default function Player() {
       }
     }
     motion.current.pose = null;
+    const em = emotes.get("me");
+    motion.current.emote = em && em.until > Date.now() && !me.path.length ? em.e : null;
 
     const energy = s.needs.energy;
     const tired = energy < 3 ? 0.4 : energy < 15 ? 0.65 : 1;

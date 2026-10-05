@@ -48,6 +48,10 @@ export default function ChatDock() {
                 <p className="text-sm font-semibold text-stone-900">{label}</p>
                 <p className="text-[11px] text-stone-400">Chat with everyone here</p>
               </div>
+              <div className="flex items-center gap-1">
+                <button onClick={() => net.emote("wave")} title="Wave (Z)" className="rounded-full px-2 py-1 text-base transition hover:bg-stone-100 active:scale-90">👋</button>
+                <button onClick={() => net.emote("dance")} title="Dance (X)" className="rounded-full px-2 py-1 text-base transition hover:bg-stone-100 active:scale-90">💃</button>
+              </div>
               <button onClick={() => setOpen(false)} aria-label="Hide chat" className="rounded-full p-1 text-stone-400 hover:bg-stone-100">
                 <X className="size-4" />
               </button>
