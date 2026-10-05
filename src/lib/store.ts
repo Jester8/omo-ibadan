@@ -4,7 +4,7 @@ import type { Look } from "./look";
 import { type ActionDef, type Needs } from "./places";
 import { TIERS, plotById, RENT_CAP_MIN, naira, PLOTS, NPC_PLOTS } from "./plots";
 import type { InteriorRef } from "./interiors";
-import type { PeerInfo, PlotState } from "./protocol";
+import type { Election, PeerInfo, PlotState, Policy } from "./protocol";
 import { titleIndex, TITLES } from "./titles";
 import { boost } from "./playerState";
 import { rebuildGrid } from "./pathing";
@@ -77,6 +77,8 @@ type State = {
   fade: boolean;
   /** epoch ms until which the generator keeps the lights on */
   generatorUntil: number;
+  election: Election | null;
+  myVote: string | null;
   selected: Selection;
   atPlace: string | null;
   busy: Busy;
@@ -142,6 +144,8 @@ export const useGame = create<State>()(
       interior: null,
       fade: false,
       generatorUntil: 0,
+      election: null,
+      myVote: null,
 
       selected: null,
       atPlace: null,
@@ -201,8 +205,11 @@ export const useGame = create<State>()(
         if (a.minRep && s.rep < a.minRep) return `Needs ${a.minRep} reputation (${TITLES[titleIndex(a.minRep)].name}).`;
         if (a.cost && s.money < a.cost) return `You need ${naira(a.cost)}.`;
         if (a.gain?.energy && a.gain.energy < 0 && s.needs.energy + a.gain.energy < 0) return "Too tired. Eat or rest first.";
+        const policy = s.election?.governor?.policy;
+        const price = (a.cost ?? 0) * (policy === "food" && (a.gain?.hunger ?? 0) > 0 ? 0.8 : 1);
+        if (price && s.money < price) return `You need ${naira(price)}.`;
         const scale = opts?.gainScale ?? 1;
-        set({ busy: { label: a.label, start: Date.now(), secs: a.secs }, money: s.money - (a.cost ?? 0) });
+        set({ busy: { label: a.label, start: Date.now(), secs: a.secs }, money: s.money - Math.round(price) });
         if (busyTimer) clearTimeout(busyTimer);
         busyTimer = setTimeout(() => {
           const cur = get();
@@ -214,7 +221,7 @@ export const useGame = create<State>()(
           }
           let money = cur.money;
           if (a.pay) {
-            const pay = Math.round(a.pay * (1 + 0.08 * titleIndex(cur.rep)));
+            const pay = Math.round(a.pay * (1 + 0.08 * titleIndex(cur.rep)) * (cur.election?.governor?.policy === "wages" ? 1.15 : 1));
             money += pay;
             parts.push(`+${naira(pay)}`);
           }

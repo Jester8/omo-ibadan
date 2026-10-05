@@ -8,6 +8,15 @@ export type PlotState = {
   collectedAt: number;
 };
 
+export type Policy = "none" | "transport" | "food" | "wages";
+
+export type Election = {
+  term: number;
+  endsAt: number;
+  candidates: { pid: string; name: string; slogan: string; votes: number }[];
+  governor: { pid: string; name: string; slogan: string; policy: Policy } | null;
+};
+
 export type PeerInfo = {
   id: string; // connection id (changes every connection)
   pid: string; // persistent player id
@@ -32,7 +41,10 @@ export type C2S =
   | { t: "callReply"; to: string; accept: boolean }
   | { t: "hangup"; to: string }
   | { t: "report"; id: string; reason: string }
-  | { t: "emote"; e: "wave" | "dance" };
+  | { t: "emote"; e: "wave" | "dance" }
+  | { t: "run"; slogan: string }
+  | { t: "vote"; pid: string }
+  | { t: "policy"; policy: Policy };
 
 export type S2C =
   | { t: "welcome"; id: string; peers: PeerInfo[]; plots: Record<string, PlotState> }
@@ -51,4 +63,5 @@ export type S2C =
   | { t: "callReply"; from: string; accept: boolean }
   | { t: "hangup"; from: string }
   | { t: "online"; n: number }
-  | { t: "emote"; id: string; e: "wave" | "dance" };
+  | { t: "emote"; id: string; e: "wave" | "dance" }
+  | { t: "election"; e: Election; myVote: string | null };

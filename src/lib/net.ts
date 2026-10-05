@@ -2,6 +2,7 @@ import type { C2S, PeerInfo, S2C } from "./protocol";
 import { hooks, useGame } from "./store";
 import { emotes, remoteMotion } from "./playerState";
 import { audio } from "./audio";
+import type { Policy } from "./protocol";
 import { voice } from "./voice";
 import { cleanChat } from "./moderation";
 import { interiorKey, type InteriorRef } from "./interiors";
@@ -88,6 +89,9 @@ function handle(m: S2C) {
       break; // the server follows up with the authoritative `plots` snapshot
     case "online":
       useGame.setState({ online: m.n });
+      break;
+    case "election":
+      useGame.setState({ election: m.e, myVote: m.myVote });
       break;
     case "emote":
       emotes.set(m.id, { e: m.e, until: Date.now() + (m.e === "wave" ? 2200 : 6000) });
@@ -221,6 +225,15 @@ export const net = {
       s.recordStat("calls");
       void joinCallVoice(room);
     }
+  },
+  run(slogan: string) {
+    send({ t: "run", slogan });
+  },
+  vote(pid: string) {
+    send({ t: "vote", pid });
+  },
+  policy(policy: Policy) {
+    send({ t: "policy", policy });
   },
   /** Wave or dance. Shown locally and to everyone in the same room. */
   emote(e: "wave" | "dance") {

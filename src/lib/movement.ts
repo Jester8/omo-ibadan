@@ -39,15 +39,16 @@ export const KEKE_FARE = 300;
 /** Hop in a keke: same route as walking, at speed, for a fare. */
 export function rideToPlace(id: string): boolean {
   const s = useGame.getState();
-  if (s.money < KEKE_FARE) {
+  const fare = s.election?.governor?.policy === "transport" ? 0 : KEKE_FARE;
+  if (s.money < fare) {
     s.toast(`A keke costs ₦${KEKE_FARE}.`, "bad");
     return false;
   }
   if (s.atPlace === id) return true;
   if (!walkToPlace(id)) return false;
   me.ride = true;
-  useGame.setState({ money: s.money - KEKE_FARE });
-  s.toast(`Keke! −₦${KEKE_FARE}`, "info");
+  useGame.setState({ money: s.money - fare });
+  s.toast(fare ? `Keke! −₦${fare}` : "Free keke, courtesy of the Governor!", "info");
   return true;
 }
 

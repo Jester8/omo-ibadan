@@ -11,7 +11,7 @@ import { randomUUID } from "node:crypto";
 import { join } from "node:path";
 import { appendFileSync } from "node:fs";
 import { cleanChat } from "../src/lib/moderation";
-import type { C2S, PeerInfo, PlotState, S2C } from "../src/lib/protocol";
+import type { C2S, Election, PeerInfo, PlotState, Policy, S2C } from "../src/lib/protocol";
 
 const PORT = Number(process.env.PORT ?? 8787);
 const PLOTS_FILE = join(__dirname, "plots.json");
@@ -55,6 +55,37 @@ function leaveVoice(c: Client) {
   c.voiceRoom = null;
 }
 
+/* ------------------------------- governor election ------------------------------- */
+const TERM_MS = 20 * 60 * 1000;
+const POLICIES: Policy[] = ["none", "transport", "food", "wages"];
+let term = 1;
+let endsAt = Date.now() + TERM_MS;
+let governor: Election["governor"] = null;
+const candidates = new Map<string, { name: string; slogan: string }>();
+const votes = new Map<string, string>(); // voter pid -> candidate pid
+
+const snapshot = (): Election => ({
+  term,
+  endsAt,
+  governor,
+  candidates: [...candidates.entries()].map(([pid, c]) => ({ pid, ...c, votes: [...votes.values()].filter((v) => v === pid).length })),
+});
+function pushElection() {
+  const e = snapshot();
+  for (const c of clients.values()) tx(c.ws, { t: "election", e, myVote: votes.get(c.info.pid) ?? null });
+}
+setInterval(() => {
+  if (Date.now() < endsAt) return;
+  const e = snapshot();
+  const win = [...e.candidates].sort((a, b) => b.votes - a.votes)[0];
+  if (win && win.votes > 0) governor = { pid: win.pid, name: win.name, slogan: win.slogan, policy: "none" };
+  term++;
+  endsAt = Date.now() + TERM_MS;
+  candidates.clear();
+  votes.clear();
+  pushElection();
+}, 3000);
+
 const wss = new WebSocketServer({ port: PORT });
 
 wss.on("connection", (ws) => {
@@ -84,6 +115,7 @@ wss.on("connection", (ws) => {
         client = { ws, info, moved: false, speed: 0, voiceRoom: null, lastChat: 0 };
         clients.set(id, client);
         tx(ws, { t: "welcome", id, peers: [...clients.values()].filter((c) => c.info.id !== id).map((c) => c.info), plots });
+        tx(ws, { t: "election", e: snapshot(), myVote: votes.get(info.pid) ?? null });
       } else {
         client.info = { ...client.info, name: info.name, look: info.look };
       }
@@ -175,6 +207,25 @@ wss.on("connection", (ws) => {
         const target = clients.get(m.id);
         const line = `${new Date().toISOString()} reporter=${c.info.pid}(${c.info.name}) target=${target ? `${target.info.pid}(${target.info.name})` : m.id} reason=${clean(m.reason, 120)}\n`;
         appendFileSync(REPORTS_FILE, line);
+        break;
+      }
+      case "run": {
+        if (!c.info.pid || candidates.size >= 8) break;
+        candidates.set(c.info.pid, { name: c.info.name, slogan: clean(m.slogan, 60) || "Good Ibadan ahead" });
+        pushElection();
+        break;
+      }
+      case "vote": {
+        if (!candidates.has(m.pid)) break;
+        votes.set(c.info.pid, m.pid);
+        pushElection();
+        break;
+      }
+      case "policy": {
+        if (governor?.pid === c.info.pid && POLICIES.includes(m.policy)) {
+          governor = { ...governor, policy: m.policy };
+          pushElection();
+        }
         break;
       }
       case "emote": {
