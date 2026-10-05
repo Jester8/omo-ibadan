@@ -1,9 +1,0 @@
-{
-  "[project]/src/components/world/CityScene.tsx [app-client] (ecmascript, next/dynamic entry)": {
-    "id": "[project]/src/components/world/CityScene.tsx [app-client] (ecmascript, next/dynamic entry)",
-    "files": [
-      "static/chunks/src_components_1y6uvxq._.js",
-      "static/chunks/node_modules_@react-three_0zu2hba._.js"
-    ]
-  }
-}
