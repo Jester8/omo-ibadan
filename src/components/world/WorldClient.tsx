@@ -2,9 +2,7 @@
 
 import { useEffect } from "react";
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowLeft } from "lucide-react";
 import Hud from "@/components/ui/Hud";
 import SidePanel from "@/components/ui/PlacePanel";
 import ChatDock from "@/components/ui/ChatDock";
@@ -22,12 +20,24 @@ import { naira } from "@/lib/plots";
 import { useMounted } from "@/lib/hooks";
 import { net, roomOf } from "@/lib/net";
 import { voice } from "@/lib/voice";
+import { streetRoom } from "@/lib/voiceRoom";
+import TalkButton from "@/components/ui/TalkButton";
 import { enterInterior, homeRef, rt, startUse, walkToFurn } from "@/lib/interiorRuntime";
 import { cam, me } from "@/lib/playerState";
 
 const CityScene = dynamic(() => import("./CityScene"), {
   ssr: false,
-  loading: () => <div className="grid h-full place-items-center text-sm text-stone-500">Loading Ibadan…</div>,
+  loading: () => (
+    <div className="grid h-full place-items-center bg-gradient-to-b from-[#eef6ee] to-[#dfeadf]">
+      <div className="flex flex-col items-center gap-4">
+        <div className="grid size-16 place-items-center rounded-3xl bg-emerald-600 text-2xl font-black text-white shadow-xl shadow-emerald-600/30">O</div>
+        <p className="text-lg font-bold tracking-tight text-stone-900">Omo Ibadan</p>
+        <div className="h-1.5 w-40 overflow-hidden rounded-full bg-emerald-900/10">
+          <div className="h-full w-1/2 animate-[load_1.1s_ease-in-out_infinite] rounded-full bg-emerald-600" />
+        </div>
+      </div>
+    </div>
+  ),
 });
 
 /** Non-visual glue: needs decay, networking, room sync and test hooks. */
@@ -101,7 +111,21 @@ function Runtime() {
     const room = useGame.getState().voice.room;
     if (room?.startsWith("place:") && room !== `place:${atPlace}`) voice.leave();
     if (room?.startsWith("home:") && !interior) voice.leave();
+    // walking indoors or into a venue leaves the street conversation
+    if (room?.startsWith("street:") && (interior || atPlace)) voice.leave();
   }, [atPlace, interior]);
+
+  // a street conversation follows you from block to block
+  useEffect(() => {
+    const id = setInterval(() => {
+      const s = useGame.getState();
+      const room = s.voice.room;
+      if (!room?.startsWith("street:") || s.interior || s.atPlace) return;
+      const here = streetRoom();
+      if (room !== here) void voice.join(here);
+    }, 1500);
+    return () => clearInterval(id);
+  }, []);
 
   return null;
 }
@@ -124,6 +148,7 @@ export default function WorldClient() {
           <Hud />
           <SidePanel />
           {!hideIcons && <ChatDock />}
+          {!hideIcons && <TalkButton />}
           <Sheets />
           <VoiceBar />
           {!hideIcons && <Minimap />}
@@ -155,12 +180,6 @@ export default function WorldClient() {
           />
         )}
       </AnimatePresence>
-      <Link
-        href="/"
-        className="absolute bottom-5 left-1/2 z-10 hidden -translate-x-1/2 items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-sm font-medium text-stone-600 shadow-lg ring-1 ring-black/5 backdrop-blur-xl transition hover:bg-white xl:inline-flex"
-      >
-        <ArrowLeft className="size-4" /> Home
-      </Link>
     </div>
   );
 }
