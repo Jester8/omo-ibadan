@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { CarFront, Landmark, Drumstick, DoorOpen, House, ListChecks, Moon, Phone, PartyPopper, Sun, Target, UserRound, Users, Zap, ZapOff, Wifi, WifiOff, Volume2, VolumeX } from "lucide-react";
+import { ChevronUp, EyeOff, Eye, CarFront, Landmark, Drumstick, DoorOpen, House, ListChecks, Moon, Phone, PartyPopper, Sun, Target, UserRound, Users, Zap, ZapOff, Wifi, WifiOff, Volume2, VolumeX } from "lucide-react";
 import { useGame } from "@/lib/store";
 import { useClock } from "@/lib/hooks";
 import { formatClock, periodLabel } from "@/lib/time";
@@ -32,18 +32,36 @@ export default function Hud() {
   const setSound = useSound((s) => s.set);
   const setSheet = useGame((s) => s.setSheet);
   const driving = useGame((s) => s.driving);
+  const hideCard = useGame((s) => s.hideCard);
+  const hideIcons = useGame((s) => s.hideIcons);
+  const patch = useGame((s) => s.patch);
   const { minutes, hour, day, nepa } = useClock();
   const title = TITLES[titleIndex(rep)];
   const nextQuest = QUESTS.find((q) => !questsDone.includes(q.id));
 
+  const small = "grid size-9 place-items-center rounded-full bg-white/85 text-stone-600 shadow-lg ring-1 ring-black/5 backdrop-blur-xl transition hover:bg-white active:scale-95";
+
   return (
     <>
-      <motion.div
+      {hideCard && (
+        <button onClick={() => patch({ hideCard: false })} className={`${small} absolute left-3 top-3 z-10 sm:left-5 sm:top-5`} aria-label="Show profile card" title="Show profile card">
+          <UserRound className="size-4" />
+        </button>
+      )}
+      {hideIcons && (
+        <button onClick={() => patch({ hideIcons: false })} className={`${small} absolute right-3 top-3 z-10 sm:right-5 sm:top-5`} aria-label="Show icons" title="Show icons">
+          <Eye className="size-4" />
+        </button>
+      )}
+      {!hideCard && <motion.div
         initial={{ opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, type: "spring", stiffness: 200, damping: 22 }}
         className="absolute left-3 top-3 z-10 w-[min(21rem,calc(100vw-5.5rem))] sm:w-[21rem] rounded-3xl bg-white/85 p-3.5 shadow-xl ring-1 ring-black/5 backdrop-blur-xl sm:left-5 sm:top-5"
       >
+        <button onClick={() => patch({ hideCard: true })} className="absolute -bottom-2.5 left-1/2 grid h-5 w-10 -translate-x-1/2 place-items-center rounded-full bg-white/90 text-stone-400 shadow ring-1 ring-black/5 hover:text-stone-700" aria-label="Hide card" title="Hide card">
+          <ChevronUp className="size-3.5" />
+        </button>
         <div className="flex items-center justify-between gap-3">
           <button onClick={() => setSheet("profile")} className="flex min-w-0 items-center gap-2.5 text-left">
             <span className="grid size-9 shrink-0 place-items-center rounded-2xl bg-emerald-100 text-emerald-700">
@@ -105,14 +123,17 @@ export default function Hud() {
             <ZapOff className="size-3.5" /> NEPA took light. Sleep restores half.
           </motion.div>
         )}
-      </motion.div>
+      </motion.div>}
 
-      <motion.div
+      {!hideIcons && <motion.div
         initial={{ opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, type: "spring", stiffness: 200, damping: 22 }}
         className="absolute right-3 top-3 z-10 flex flex-col gap-2 sm:right-5 sm:top-5 sm:flex-row"
       >
+        <button onClick={() => patch({ hideIcons: true })} className="grid size-11 place-items-center rounded-2xl bg-white/85 text-stone-500 shadow-xl ring-1 ring-black/5 backdrop-blur-xl transition hover:bg-white active:scale-95" aria-label="Hide icons" title="Hide icons">
+          <EyeOff className="size-5" />
+        </button>
         <button
           onClick={() => (inside ? exitInterior() : enterInterior(homeRef()))}
           className="grid size-11 place-items-center rounded-2xl bg-amber-500 text-white shadow-xl ring-1 ring-black/5 transition hover:bg-amber-600 active:scale-95"
@@ -174,7 +195,7 @@ export default function Hud() {
         >
           <UserRound className="size-5" />
         </button>
-      </motion.div>
+      </motion.div>}
     </>
   );
 }

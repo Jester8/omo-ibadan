@@ -112,6 +112,8 @@ type State = {
   clockOverride: number | null;
   timeMode: "auto" | "day" | "night";
   placesOnly: boolean;
+  hideCard: boolean;
+  hideIcons: boolean;
   panelFlip: string | null;
   editingAvatar: boolean;
   sheet: Sheet;
@@ -220,6 +222,8 @@ export const useGame = create<State>()(
       clockOverride: null,
       timeMode: "auto",
       placesOnly: false,
+      hideCard: false,
+      hideIcons: false,
       panelFlip: null,
       editingAvatar: false,
       sheet: null,

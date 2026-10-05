@@ -113,6 +113,7 @@ export default function WorldClient() {
   const setProfile = useGame((s) => s.setProfile);
   const patch = useGame((s) => s.patch);
   const fade = useGame((s) => s.fade);
+  const hideIcons = useGame((s) => s.hideIcons);
 
   return (
     <div className="relative h-dvh w-full overflow-hidden bg-[#eef3ec]">
@@ -122,11 +123,11 @@ export default function WorldClient() {
           <Overlay />
           <Hud />
           <SidePanel />
-          <ChatDock />
+          {!hideIcons && <ChatDock />}
           <Sheets />
           <VoiceBar />
-          <Minimap />
-          <ViewControls />
+          {!hideIcons && <Minimap />}
+          {!hideIcons && <ViewControls />}
           <Hint />
         </>
       )}
