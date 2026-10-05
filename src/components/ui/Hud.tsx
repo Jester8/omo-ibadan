@@ -6,6 +6,8 @@ import { useGame } from "@/lib/store";
 import { useClock } from "@/lib/hooks";
 import { formatClock } from "@/lib/time";
 import { naira } from "@/lib/plots";
+import { eventsAt } from "@/lib/events";
+import { walkToPlace } from "@/lib/movement";
 import { TITLES, titleIndex } from "@/lib/titles";
 import { QUESTS } from "@/lib/quests";
 import { enterInterior, exitInterior, homeRef } from "@/lib/interiorRuntime";
@@ -35,7 +37,8 @@ export default function Hud() {
   const hideCard = useGame((s) => s.hideCard);
   const hideIcons = useGame((s) => s.hideIcons);
   const patch = useGame((s) => s.patch);
-  const { minutes, day, nepa } = useClock();
+  const { minutes, hour, day, nepa } = useClock();
+  const live = eventsAt(hour);
   const title = TITLES[titleIndex(rep)];
   const nextQuest = QUESTS.find((q) => !questsDone.includes(q.id));
 
@@ -108,6 +111,21 @@ export default function Hud() {
             {net === "online" ? `${online} online` : net === "connecting" ? "connecting…" : "offline"}
           </span>
         </div>
+
+        {!inside &&
+          live.map((e) => (
+            <button
+              key={e.id}
+              onClick={() => {
+                useGame.getState().select({ type: "place", id: e.placeId });
+                walkToPlace(e.placeId);
+              }}
+              className="mt-2 flex w-full items-center gap-1.5 rounded-xl bg-rose-500/10 px-2.5 py-1 text-left text-[11px] font-semibold text-rose-700 transition hover:bg-rose-500/20"
+            >
+              <span>{e.emoji}</span>
+              <span className="truncate">Live now: {e.title}</span>
+            </button>
+          ))}
 
         {nextQuest && (
           <button

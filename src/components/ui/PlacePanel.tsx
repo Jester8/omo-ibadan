@@ -1,5 +1,6 @@
 "use client";
 
+import { eventFor } from "@/lib/events";
 import NpcPanel from "./NpcPanel";
 import { AnimatePresence, motion } from "motion/react";
 import { DoorOpen, Footprints, X } from "lucide-react";
@@ -20,6 +21,8 @@ function PlaceBody({ id }: { id: string }) {
   const busy = useGame((s) => s.busy);
   const select = useGame((s) => s.select);
   const color = KIND_COLORS[place.kind];
+  const { hour } = useClock();
+  const ev = eventFor(id, hour);
 
   return (
     <>
@@ -72,6 +75,16 @@ function PlaceBody({ id }: { id: string }) {
           <p className="text-sm font-semibold text-emerald-800">{busy.label}…</p>
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-emerald-100">
             <motion.div key={busy.start} className="h-full rounded-full bg-emerald-500" initial={{ width: 0 }} animate={{ width: "100%" }} transition={{ duration: busy.secs, ease: "linear" }} />
+          </div>
+        </div>
+      )}
+
+      {ev && (
+        <div className="mt-3 flex items-start gap-2.5 rounded-2xl bg-rose-50 px-3.5 py-2.5 ring-1 ring-rose-100">
+          <span className="text-lg">{ev.emoji}</span>
+          <div>
+            <p className="text-sm font-bold text-rose-800">{ev.title} is on!</p>
+            <p className="text-xs text-rose-700/80">{ev.blurb}</p>
           </div>
         </div>
       )}
