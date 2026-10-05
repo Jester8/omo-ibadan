@@ -6,6 +6,8 @@ import { TIERS, plotById, RENT_CAP_MIN, naira, PLOTS, NPC_PLOTS } from "./plots"
 import type { InteriorRef } from "./interiors";
 import type { Rel } from "./romance";
 import { carById } from "./cars";
+import { eventFor } from "./events";
+import { gameMinutes } from "./time";
 import { decorById, MAX_PER_KIND, withDecor } from "./decor";
 import { layoutFor } from "./layouts";
 import type { Election, PeerInfo, PlotState } from "./protocol";
@@ -288,13 +290,15 @@ export const useGame = create<State>()(
           const cur = get();
           const needs = { ...cur.needs };
           const parts: string[] = [];
+          const ev = eventFor(cur.atPlace, gameMinutes(Date.now(), cur.clockOverride) / 60);
+          if (ev) parts.push(`${ev.emoji} ${ev.title}`);
           for (const k of Object.keys(a.gain ?? {}) as (keyof Needs)[]) {
-            const d = (a.gain![k] ?? 0) * (a.gain![k]! > 0 ? scale : 1);
+            const d = (a.gain![k] ?? 0) * (a.gain![k]! > 0 ? scale * (ev?.gainMul ?? 1) : 1);
             needs[k] = clamp(needs[k] + d);
           }
           let money = cur.money;
           if (a.pay) {
-            const pay = Math.round(a.pay * (1 + 0.08 * titleIndex(cur.rep)) * (cur.election?.governor?.policy === "wages" ? 1.15 : 1));
+            const pay = Math.round(a.pay * (1 + 0.08 * titleIndex(cur.rep)) * (cur.election?.governor?.policy === "wages" ? 1.15 : 1) * (ev?.payMul ?? 1));
             money += pay;
             parts.push(`+${naira(pay)}`);
           }
