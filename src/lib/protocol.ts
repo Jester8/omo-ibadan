@@ -26,6 +26,8 @@ export type PeerInfo = {
   x: number;
   z: number;
   ry: number;
+  /** the car they are currently driving, if any */
+  car?: { id: string; color: string } | null;
 };
 
 export type C2S =
@@ -42,6 +44,7 @@ export type C2S =
   | { t: "hangup"; to: string }
   | { t: "report"; id: string; reason: string }
   | { t: "emote"; e: "wave" | "dance" }
+  | { t: "car"; car: { id: string; color: string } | null }
   | { t: "run"; slogan: string }
   | { t: "vote"; pid: string }
   | { t: "policy"; policy: Policy };

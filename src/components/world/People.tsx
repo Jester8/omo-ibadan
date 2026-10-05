@@ -3,6 +3,8 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { carById } from "@/lib/cars";
+import CarModel from "./CarModel";
 import Avatar from "@/components/avatar/Avatar";
 import { AVATAR_SCALE } from "./Player";
 import { PLACES, doorOf } from "@/lib/places";
@@ -24,6 +26,8 @@ const angleDiff = (a: number, b: number) => {
 
 function Remote({ id }: { id: string }) {
   const look = useGame((s) => s.remotes[id]?.look);
+  const car = useGame((s) => s.remotes[id]?.car);
+  const carDef = carById(car?.id);
   const g = useRef<THREE.Group>(null);
   const motion = useRef<{ speed: number; emote: "wave" | "dance" | null }>({ speed: 0, emote: null });
   useFrame((_, dt) => {
@@ -43,7 +47,10 @@ function Remote({ id }: { id: string }) {
   if (!look) return null;
   return (
     <group ref={g}>
-      <Avatar look={look} motion={motion} scale={AVATAR_SCALE} />
+      <group visible={!carDef}>
+        <Avatar look={look} motion={motion} scale={AVATAR_SCALE} />
+      </group>
+      {carDef && car && <CarModel kind={carDef.kind} color={car.color} remoteId={id} />}
     </group>
   );
 }

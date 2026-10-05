@@ -158,6 +158,7 @@ function connect() {
   ws.onopen = () => {
     retry = 0;
     send({ t: "hello", pid: profile.id, name: profile.name, look: profile.look });
+    sendCar();
   };
   ws.onmessage = (e) => {
     try {
@@ -178,6 +179,19 @@ function connect() {
     }
   };
 }
+
+/** Tell everyone which car (if any) we are driving. */
+function sendCar() {
+  const s = useGame.getState();
+  send({ t: "car", car: s.driving && s.activeCar ? { id: s.activeCar, color: s.carColors[s.activeCar] ?? "#cccccc" } : null });
+}
+let lastCar = "";
+useGame.subscribe((s) => {
+  const key = `${s.driving}|${s.activeCar}|${s.activeCar ? s.carColors[s.activeCar] : ""}`;
+  if (key === lastCar) return;
+  lastCar = key;
+  if (ws?.readyState === WebSocket.OPEN) sendCar();
+});
 
 export const net = {
   connect,

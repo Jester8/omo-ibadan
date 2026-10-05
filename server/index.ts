@@ -209,6 +209,12 @@ wss.on("connection", (ws) => {
         appendFileSync(REPORTS_FILE, line);
         break;
       }
+      case "car": {
+        const ok = m.car && /^[a-z0-9]{1,20}$/.test(m.car.id) && /^#[0-9a-fA-F]{6}$/.test(m.car.color);
+        c.info.car = ok ? { id: m.car!.id, color: m.car!.color } : null;
+        broadcast({ t: "join", peer: c.info }, id);
+        break;
+      }
       case "run": {
         if (!c.info.pid || candidates.size >= 8) break;
         candidates.set(c.info.pid, { name: c.info.name, slogan: clean(m.slogan, 60) || "Good Ibadan ahead" });
