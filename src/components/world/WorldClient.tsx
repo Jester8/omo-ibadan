@@ -10,6 +10,7 @@ import SidePanel from "@/components/ui/PlacePanel";
 import ChatDock from "@/components/ui/ChatDock";
 import Sheets from "@/components/ui/Sheets";
 import Minimap from "@/components/ui/Minimap";
+import ViewControls from "@/components/ui/ViewControls";
 import AudioBridge from "@/components/ui/AudioBridge";
 import { Hint, IncomingCall, Toasts, VoiceBar } from "@/components/ui/Floating";
 import AvatarCreator from "@/components/avatar/AvatarCreator";
@@ -122,6 +123,7 @@ export default function WorldClient() {
           <Sheets />
           <VoiceBar />
           <Minimap />
+          <ViewControls />
           <Hint />
         </>
       )}

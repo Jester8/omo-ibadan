@@ -289,7 +289,7 @@ function Vehicle({ car }: { car: Car }) {
   );
 }
 
-export default function Terrain() {
+export default function Terrain({ placesOnly = false }: { placesOnly?: boolean }) {
   return (
     <>
       <mesh rotation-x={-Math.PI / 2} receiveShadow raycast={noRaycast}>
@@ -298,12 +298,10 @@ export default function Terrain() {
       </mesh>
       <Lots />
       <Roads />
-      <Trees />
-      <Lamps />
+      {!placesOnly && <Trees />}
+      {!placesOnly && <Lamps />}
       <Surroundings />
-      {CARS.map((c, i) => (
-        <Vehicle key={i} car={c} />
-      ))}
+      {!placesOnly && CARS.map((c, i) => <Vehicle key={i} car={c} />)}
     </>
   );
 }

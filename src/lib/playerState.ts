@@ -31,7 +31,7 @@ export const remoteMotion = new Map<string, RemoteMotion>();
 export const emotes = new Map<string, { e: "wave" | "dance"; until: number }>();
 
 /** Camera orbit state; wheel/drag handlers write here. */
-export const cam = { az: Math.PI / 4, dist: 24 };
+export const cam = { az: Math.PI / 4, dist: 24, el: 0.85 };
 
 /** Keke boost expiry (ms epoch). */
 export const boost = { until: 0 };

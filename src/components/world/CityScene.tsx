@@ -33,6 +33,7 @@ function CameraRig() {
       if (!p) return;
       if (pts.size === 1) {
         cam.az -= (e.clientX - p.x) * 0.006;
+        cam.el = clamp(cam.el + (e.clientY - p.y) * 0.004, 0.35, 1.25);
       } else if (pts.size === 2) {
         const [a, b] = [...pts.values()];
         const d = Math.hypot(a.x - b.x, a.y - b.y);
@@ -75,7 +76,7 @@ function CameraRig() {
     }
     const wantDist = hasProfile ? cam.dist : 40;
     dist.current += (wantDist - dist.current) * (1 - Math.exp(-3 * dt));
-    const el = 0.85;
+    const el = cam.el;
     const d = dist.current;
     camera.position.set(
       target.current.x + Math.sin(cam.az) * Math.cos(el) * d,
@@ -113,13 +114,14 @@ function LabelProjector() {
 
 /** Everything outside: streets, buildings, plots, citizens, click-to-walk ground. */
 function WorldContent() {
+  const placesOnly = useGame((s) => s.placesOnly);
   return (
     <>
       <Lighting />
-      <Terrain />
+      <Terrain placesOnly={placesOnly} />
       <Buildings />
-      <PlotsLayer />
-      <Npcs />
+      {!placesOnly && <PlotsLayer />}
+      {!placesOnly && <Npcs />}
       {/* invisible ground: click anywhere to walk */}
       <mesh
         rotation-x={-Math.PI / 2}
@@ -140,17 +142,18 @@ function WorldContent() {
 
 export default function CityScene() {
   const inside = useGame((s) => !!s.interior);
+  const placesOnly = useGame((s) => s.placesOnly);
   return (
     <Canvas
       dpr={[1, 2]}
       shadows="percentage"
       camera={{ fov: 30, near: 0.5, far: 300, position: [24, 28, 24] }}
       gl={{ antialias: true }}
-      className="!absolute inset-0"
+      className="!absolute inset-0 touch-none"
     >
       {inside ? <InteriorScene /> : <WorldContent />}
       <Player />
-      <RemotePlayers />
+      {!placesOnly && <RemotePlayers />}
       <CameraRig />
       <LabelProjector />
     </Canvas>

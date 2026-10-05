@@ -89,6 +89,8 @@ type State = {
   busy: Busy;
   toasts: Toast[];
   clockOverride: number | null;
+  timeMode: "auto" | "day" | "night";
+  placesOnly: boolean;
   editingAvatar: boolean;
   sheet: Sheet;
   net: "offline" | "connecting" | "online";
@@ -159,6 +161,8 @@ export const useGame = create<State>()(
       busy: null,
       toasts: [],
       clockOverride: null,
+      timeMode: "auto",
+      placesOnly: false,
       editingAvatar: false,
       sheet: null,
       net: "offline",
