@@ -8,12 +8,17 @@ import { useClock } from "@/lib/hooks";
 import { exitInterior, GENERATOR_FUEL, powerOn, rt, walkToFurn } from "@/lib/interiorRuntime";
 import { naira, plotById } from "@/lib/plots";
 import { ActionRow, VoiceRoomCard } from "./parts";
+import { DECOR, MAX_PER_KIND } from "@/lib/decor";
+import { refreshInterior } from "@/lib/interiorRuntime";
 
 export default function InteriorPanel() {
   const interior = useGame((s) => s.interior);
   const busy = useGame((s) => s.busy);
   const generatorUntil = useGame((s) => s.generatorUntil);
   const plots = useGame((s) => s.plots);
+  const decor = useGame((s) => s.decor);
+  const money = useGame((s) => s.money);
+  const pid = useGame((s) => s.profile?.id);
   const { now } = useClock();
   const layout = interior ? rt.layout : null;
   if (!interior || !layout) return null;
@@ -89,6 +94,43 @@ export default function InteriorPanel() {
             </li>
           ))}
         </ul>
+      )}
+
+      {interior.kind === "home" && (interior.id === "flat" || plot?.ownerId === pid) && (
+        <details className="mt-3 rounded-2xl bg-stone-50 ring-1 ring-black/5">
+          <summary className="cursor-pointer select-none px-4 py-3 text-sm font-semibold text-stone-800">Decorate your home</summary>
+          <ul className="space-y-2 px-3 pb-3">
+            {DECOR.map((d) => {
+              const owned = (decor[interior.id] ?? []).filter((x) => x === d.id).length;
+              const locked = !!d.minTier && (plot?.tier ?? 0) < d.minTier;
+              return (
+                <li key={d.id} className="flex items-center justify-between gap-3 rounded-xl bg-white p-3 ring-1 ring-black/5">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-stone-900">
+                      {d.name} {owned > 0 && <span className="text-xs font-medium text-emerald-600">×{owned}</span>}
+                    </p>
+                    <p className="text-xs text-stone-500">{locked ? "Needs a built house" : d.blurb}</p>
+                  </div>
+                  <button
+                    disabled={locked || owned >= MAX_PER_KIND || money < d.price}
+                    onClick={() => {
+                      const st = useGame.getState();
+                      const err = st.buyDecor(interior.id, d.id, plot?.tier ?? 0);
+                      if (err) st.toast(err, "bad");
+                      else {
+                        refreshInterior();
+                        st.toast(`${d.name} added`, "good");
+                      }
+                    }}
+                    className="shrink-0 rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition active:scale-95 disabled:bg-stone-200 disabled:text-stone-400"
+                  >
+                    {naira(d.price)}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </details>
       )}
 
       <div className="mt-3">

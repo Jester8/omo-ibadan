@@ -1,5 +1,6 @@
 import { ALL_PLACE_LAYOUT_IDS, homeLayout, placeLayout } from "../src/lib/layouts";
 import { buildInteriorGrid, footprint, spawnOf, type Layout } from "../src/lib/interiors";
+import { DECOR, withDecor } from "../src/lib/decor";
 import { FURN, S } from "../src/lib/furniture";
 
 const layouts: Layout[] = [
@@ -9,6 +10,9 @@ const layouts: Layout[] = [
   homeLayout(2, "b", "Alhaji"),
   homeLayout(3, "c", "Chief"),
 ];
+// every home with the full decor set (3 of each) must stay walkable
+const allDecor = DECOR.flatMap((d) => [d.id, d.id, d.id]);
+for (const l of [...layouts.slice(-4)]) layouts.push({ ...withDecor(l, allDecor), id: `${l.id}+decor` });
 
 let bad = 0;
 for (const l of layouts) {

@@ -397,6 +397,7 @@ function Room({ layout }: { layout: Layout }) {
 
 export default function InteriorScene() {
   const interior = useGame((s) => s.interior);
+  useGame((s) => s.decorRev);
   if (!interior || !rt.layout) return null;
   return <Room key={interiorKey(interior)} layout={rt.layout} />;
 }

@@ -4,6 +4,8 @@ import type { Look } from "./look";
 import { type ActionDef, type Needs } from "./places";
 import { TIERS, plotById, RENT_CAP_MIN, naira, PLOTS, NPC_PLOTS } from "./plots";
 import type { InteriorRef } from "./interiors";
+import { decorById, MAX_PER_KIND, withDecor } from "./decor";
+import { layoutFor } from "./layouts";
 import type { Election, PeerInfo, PlotState } from "./protocol";
 import { titleIndex, TITLES } from "./titles";
 import { boost } from "./playerState";
@@ -78,6 +80,9 @@ type State = {
   /** epoch ms until which the generator keeps the lights on */
   generatorUntil: number;
   election: Election | null;
+  decor: Record<string, string[]>;
+  decorRev: number;
+  buyDecor: (homeId: string, decorId: string, tier: number) => string | null;
   myVote: string | null;
   selected: Selection;
   atPlace: string | null;
@@ -145,6 +150,8 @@ export const useGame = create<State>()(
       fade: false,
       generatorUntil: 0,
       election: null,
+      decor: {},
+      decorRev: 0,
       myVote: null,
 
       selected: null,
@@ -245,6 +252,20 @@ export const useGame = create<State>()(
         return null;
       },
 
+      buyDecor: (homeId, decorId, tier) => {
+        const s = get();
+        const def = decorById(decorId);
+        if (!def) return "Not available.";
+        const have = s.decor[homeId] ?? [];
+        if (def.minTier && tier < def.minTier) return "Build a house first.";
+        if (have.filter((d) => d === decorId).length >= MAX_PER_KIND) return `You already have ${MAX_PER_KIND} of those.`;
+        if (s.money < def.price) return `You need ${naira(def.price)}.`;
+        const l = layoutFor({ kind: "home", id: homeId }, (id) => s.plots[id]);
+        if (!l) return "Can't decorate here.";
+        if (withDecor(l, [...have, decorId]).items.length === withDecor(l, have).items.length) return "No room left for that.";
+        set({ money: s.money - def.price, decor: { ...s.decor, [homeId]: [...have, decorId] }, decorRev: s.decorRev + 1 });
+        return null;
+      },
       buyPlot: (id) => {
         const s = get();
         const plot = plotById(id);
@@ -355,6 +376,7 @@ export const useGame = create<State>()(
         questsDone: s.questsDone,
         muted: s.muted,
         savedAt: s.savedAt,
+        decor: s.decor,
       }),
       // while you were away your needs keep dropping, at a gentler rate (capped at 20 minutes)
       merge: (persisted, current) => {

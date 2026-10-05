@@ -7,6 +7,7 @@ import { naira } from "./plots";
 import { useGame } from "./store";
 import { nepaOut } from "./time";
 import { audio } from "./audio";
+import { withDecor } from "./decor";
 
 /** Everything about the interior the player is standing in (kept outside React). */
 export const rt = {
@@ -30,6 +31,26 @@ export function homeRef(): InteriorRef {
   return mine.length ? { kind: "home", id: mine[0][0] } : { kind: "home", id: FLAT.id };
 }
 
+/** The layout for a room, with the viewer's own decor added to homes they own. */
+export function loadLayout(ref: InteriorRef): Layout | null {
+  const base = layoutFor(ref, plotInfo);
+  if (!base || ref.kind !== "home") return base;
+  const s = useGame.getState();
+  const mine = ref.id === FLAT.id || s.plots[ref.id]?.ownerId === s.profile?.id;
+  return mine ? withDecor(base, s.decor[ref.id] ?? []) : base;
+}
+
+/** Rebuild the current room after its decor changed. */
+export function refreshInterior() {
+  const ref = rt.ref;
+  if (!ref) return;
+  const layout = loadLayout(ref);
+  if (!layout) return;
+  rt.layout = layout;
+  rt.grid = buildInteriorGrid(layout);
+  setActiveGrid(rt.grid);
+}
+
 const sameRef = (a: InteriorRef | null, b: InteriorRef) => !!a && a.kind === b.kind && a.id === b.id;
 
 function fadeThen(fn: () => void) {
@@ -50,7 +71,7 @@ export function enterInterior(ref: InteriorRef): boolean {
     return false;
   }
   if (sameRef(s.interior, ref)) return true;
-  const layout = layoutFor(ref, plotInfo);
+  const layout = loadLayout(ref);
   if (!layout) {
     s.toast("That door is locked.", "bad");
     return false;

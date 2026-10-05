@@ -45,5 +45,8 @@
 ## Governor election (done)
 20-minute terms, players run with a slogan, everyone votes (one vote, changeable). The winner picks a policy that applies to all players: free keke, 20% cheaper food, or +15% wages. Server-held state (resets on server restart); policy effects are applied client-side.
 
+## Home decor (done)
+Owners can buy decor (plants, lamps, rugs, adire wall hangings, calabash, carved stools, ibeji) for their flat or house from the interior panel. Up to 3 of each; placed automatically along walls with clearance from doors and partitions, and `npm run check:interiors` verifies fully decorated homes stay walkable. Stored per device (visitors don't see it yet).
+
 ## Ideas next
 Billboards/ads revenue, furniture and interiors, jobs with skills, events (match day, festivals), pets, daily quests, sound and music, avatar visual polish after a hands-on review.
