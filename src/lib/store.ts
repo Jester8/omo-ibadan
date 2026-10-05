@@ -4,7 +4,7 @@ import type { Look } from "./look";
 import { type ActionDef, type Needs } from "./places";
 import { TIERS, plotById, RENT_CAP_MIN, naira, PLOTS, NPC_PLOTS } from "./plots";
 import type { InteriorRef } from "./interiors";
-import type { Election, PeerInfo, PlotState, Policy } from "./protocol";
+import type { Election, PeerInfo, PlotState } from "./protocol";
 import { titleIndex, TITLES } from "./titles";
 import { boost } from "./playerState";
 import { rebuildGrid } from "./pathing";
@@ -32,7 +32,7 @@ export type CallState = {
   peerName: string;
   room: string | null;
 };
-export type Sheet = "phone" | "profile" | "quests" | null;
+export type Sheet = "phone" | "profile" | "quests" | "election" | null;
 
 const START_MONEY = 25000;
 const START_NEEDS: Needs = { hunger: 80, energy: 90, fun: 65, social: 55 };

@@ -42,5 +42,8 @@
 6. **Verify the title ladder** with someone local; the order here is simplified for gameplay.
 7. **Art pass.** Buildings are procedural; swap in CC0/purchased glTF models for landmarks (Cocoa House, Mapo Hall).
 
+## Governor election (done)
+20-minute terms, players run with a slogan, everyone votes (one vote, changeable). The winner picks a policy that applies to all players: free keke, 20% cheaper food, or +15% wages. Server-held state (resets on server restart); policy effects are applied client-side.
+
 ## Ideas next
-Governor election, billboards/ads revenue, furniture and interiors, jobs with skills, events (match day, festivals), pets, daily quests, sound and music, avatar visual polish after a hands-on review.
+Billboards/ads revenue, furniture and interiors, jobs with skills, events (match day, festivals), pets, daily quests, sound and music, avatar visual polish after a hands-on review.

@@ -11,6 +11,8 @@ import { QUESTS } from "@/lib/quests";
 import { walkTo } from "@/lib/movement";
 import AvatarPreview from "@/components/avatar/AvatarPreview";
 import { MuteButton } from "./parts";
+import { useSecond } from "@/lib/hooks";
+import type { Policy } from "@/lib/protocol";
 import { useSound } from "@/lib/soundStore";
 
 function Frame({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
@@ -292,6 +294,115 @@ function ProfileSheet() {
   );
 }
 
+const POLICY_INFO: { id: Policy; label: string; blurb: string }[] = [
+  { id: "none", label: "No policy", blurb: "Business as usual." },
+  { id: "transport", label: "Free keke", blurb: "Every keke ride in Ibadan costs nothing." },
+  { id: "food", label: "Cheap food", blurb: "20% off everything that fills your stomach." },
+  { id: "wages", label: "Pay rise", blurb: "Every job pays 15% more." },
+];
+
+function ElectionSheet() {
+  const e = useGame((s) => s.election);
+  const myVote = useGame((s) => s.myVote);
+  const pid = useGame((s) => s.profile?.id);
+  const [slogan, setSlogan] = useState("");
+  const sec = useSecond();
+  if (!e) return <p className="text-sm text-stone-500">Connect to the city to see the election.</p>;
+  const left = Math.max(0, Math.round(e.endsAt / 1000 - sec));
+  const mm = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`;
+  const running = e.candidates.some((c) => c.pid === pid);
+  const total = e.candidates.reduce((n, c) => n + c.votes, 0) || 1;
+  const isGov = e.governor?.pid === pid;
+  const sorted = [...e.candidates].sort((a, b) => b.votes - a.votes);
+
+  return (
+    <>
+      <div className="rounded-2xl bg-indigo-50 p-4 ring-1 ring-indigo-100">
+        <p className="text-xs font-semibold uppercase tracking-wide text-indigo-500">Governor · term {e.term}</p>
+        {e.governor ? (
+          <>
+            <p className="mt-1 text-lg font-bold text-indigo-950">{isGov ? "You" : e.governor.name}</p>
+            <p className="text-xs italic text-indigo-800/80">“{e.governor.slogan}”</p>
+            <p className="mt-2 text-xs text-indigo-900">
+              Policy: <b>{POLICY_INFO.find((p) => p.id === e.governor!.policy)?.label}</b>
+            </p>
+          </>
+        ) : (
+          <p className="mt-1 text-sm text-indigo-900">Seat is empty. Be the first to rule Oyo State.</p>
+        )}
+        <p className="mt-2 text-[11px] text-indigo-700">Next election in {mm}</p>
+      </div>
+
+      {isGov && (
+        <div className="mt-4">
+          <p className="mb-2 text-sm font-bold text-stone-900">Your policy</p>
+          <div className="space-y-1.5">
+            {POLICY_INFO.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => net.policy(p.id)}
+                className={`w-full rounded-xl p-3 text-left ring-1 transition ${e.governor?.policy === p.id ? "bg-indigo-600 text-white ring-indigo-600" : "bg-white ring-black/10 hover:bg-stone-50"}`}
+              >
+                <p className="text-sm font-semibold">{p.label}</p>
+                <p className={`text-xs ${e.governor?.policy === p.id ? "text-indigo-100" : "text-stone-500"}`}>{p.blurb}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <p className="mb-2 mt-5 text-sm font-bold text-stone-900">Candidates</p>
+      {sorted.length === 0 && <p className="text-xs text-stone-500">Nobody is running yet.</p>}
+      <ul className="space-y-2">
+        {sorted.map((c) => (
+          <li key={c.pid} className="rounded-2xl bg-stone-50 p-3 ring-1 ring-black/5">
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-stone-900">{c.pid === pid ? `${c.name} (you)` : c.name}</p>
+                <p className="truncate text-xs italic text-stone-500">“{c.slogan}”</p>
+              </div>
+              <button
+                onClick={() => net.vote(c.pid)}
+                disabled={myVote === c.pid}
+                className="shrink-0 rounded-full bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white transition active:scale-95 disabled:bg-emerald-600"
+              >
+                {myVote === c.pid ? "Voted" : "Vote"}
+              </button>
+            </div>
+            <div className="mt-2 flex items-center gap-2">
+              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-stone-200">
+                <div className="h-full rounded-full bg-indigo-500 transition-all" style={{ width: `${(c.votes / total) * 100}%` }} />
+              </div>
+              <span className="text-[11px] font-semibold text-stone-500">{c.votes}</span>
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      {!running && (
+        <div className="mt-4 rounded-2xl bg-white p-3 ring-1 ring-black/10">
+          <p className="text-sm font-bold text-stone-900">Run for Governor</p>
+          <input
+            value={slogan}
+            onChange={(ev) => setSlogan(ev.target.value.slice(0, 60))}
+            placeholder="Your slogan, e.g. Ibadan First!"
+            className="mt-2 w-full rounded-xl bg-stone-50 px-3 py-2 text-sm outline-none ring-1 ring-black/10 focus:ring-indigo-400"
+          />
+          <button
+            onClick={() => {
+              net.run(slogan.trim());
+              setSlogan("");
+            }}
+            className="mt-2 w-full rounded-xl bg-indigo-600 py-2 text-sm font-semibold text-white transition active:scale-95"
+          >
+            Join the race
+          </button>
+        </div>
+      )}
+    </>
+  );
+}
+
 export default function Sheets() {
   const sheet = useGame((s) => s.sheet);
   const setSheet = useGame((s) => s.setSheet);
@@ -305,6 +416,11 @@ export default function Sheets() {
       {sheet === "quests" && (
         <Frame key="quests" title="Goals" onClose={() => setSheet(null)}>
           <QuestsSheet />
+        </Frame>
+      )}
+      {sheet === "election" && (
+        <Frame key="election" title="Governor election" onClose={() => setSheet(null)}>
+          <ElectionSheet />
         </Frame>
       )}
       {sheet === "profile" && (

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Drumstick, DoorOpen, House, ListChecks, Moon, Phone, PartyPopper, Sun, Target, UserRound, Users, Zap, ZapOff, Wifi, WifiOff, Volume2, VolumeX } from "lucide-react";
+import { Landmark, Drumstick, DoorOpen, House, ListChecks, Moon, Phone, PartyPopper, Sun, Target, UserRound, Users, Zap, ZapOff, Wifi, WifiOff, Volume2, VolumeX } from "lucide-react";
 import { useGame } from "@/lib/store";
 import { useClock } from "@/lib/hooks";
 import { formatClock, periodLabel } from "@/lib/time";
@@ -134,6 +134,13 @@ export default function Hud() {
         >
           <Phone className="size-5" />
           {call !== "idle" && <span className="absolute right-1.5 top-1.5 size-2.5 animate-pulse rounded-full bg-emerald-500" />}
+        </button>
+        <button
+          onClick={() => setSheet("election")}
+          className="relative grid size-11 place-items-center rounded-2xl bg-white/85 text-stone-700 shadow-xl ring-1 ring-black/5 backdrop-blur-xl transition hover:bg-white active:scale-95"
+          aria-label="Governor election"
+        >
+          <Landmark className="size-5" />
         </button>
         <button
           onClick={() => setSheet("quests")}
