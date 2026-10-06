@@ -144,7 +144,7 @@ export default function Player() {
     }
     motion.current.pose = s.ride === "okada" && !s.interior ? "sit" : null;
     const em = emotes.get("me");
-    motion.current.emote = em && em.until > Date.now() && !me.path.length ? em.e : null;
+    motion.current.emote = s.busy?.emote ?? (em && em.until > Date.now() && !me.path.length ? em.e : null);
 
     const energy = s.needs.energy;
     const tired = energy < 3 ? 0.4 : energy < 15 ? 0.65 : 1;

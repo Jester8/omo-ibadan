@@ -509,7 +509,69 @@ function Cultural({ size: [w, h, d], color }: SP) {
   );
 }
 
+function Airport({ size: [w, h, d], color }: SP) {
+  return (
+    <>
+      {/* apron and runway in front of the terminal */}
+      <Box s={[w + 1.2, 0.06, d + 4.2]} c="#a3abb5" />
+      <Box p={[0, 0.06, d / 2 + 2.9]} s={[w + 1, 0.03, 1.3]} c="#3a3f47" />
+      {Array.from({ length: 7 }, (_, i) => (
+        <Box key={i} p={[-w / 2 + 0.4 + i * (w / 6.4), 0.09, d / 2 + 2.9]} s={[0.35, 0.01, 0.05]} c="#f4f1e6" />
+      ))}
+      {/* terminal */}
+      <Box p={[0, 0.06, 0]} s={[w, h, d]} c={color} />
+      <Box p={[0, 0.06 + h, 0]} s={[w + 0.3, 0.08, d + 0.3]} c="#e8edf3" />
+      <Box p={[0, 0.06 + h * 0.3, d / 2 + 0.02]} s={[w * 0.9, h * 0.5, 0.04]} c="#7cc4e8" />
+      <Awning p={[0, h * 0.75, d / 2 + 0.3]} w={w * 0.5} colors={["#0ea5e9", "#f8f3e8"]} />
+      {/* control tower */}
+      <Cyl p={[w / 2 - 0.7, 0.06, -d / 2 + 0.5]} r={0.26} h={h * 1.9} c="#dfe5ec" seg={12} />
+      <Cyl p={[w / 2 - 0.7, 0.06 + h * 1.9, -d / 2 + 0.5]} r={0.5} r2={0.38} h={0.38} c="#7cc4e8" seg={12} />
+      <Cyl p={[w / 2 - 0.7, 0.06 + h * 1.9 + 0.38, -d / 2 + 0.5]} r={0.55} h={0.07} c="#e8edf3" seg={12} />
+      <Glow p={[w / 2 - 0.7, 0.06 + h * 1.9 + 0.5, -d / 2 + 0.5]} s={[0.08, 0.08, 0.08]} c="#ff4d4d" />
+      {/* a parked plane */}
+      <group position={[-w * 0.18, 0.2, d / 2 + 2.9]}>
+        <mesh rotation-z={Math.PI / 2} material={mat("#f5f7fa")} castShadow>
+          <cylinderGeometry args={[0.2, 0.2, 2.3, 14]} />
+        </mesh>
+        <mesh position={[1.2, 0, 0]} material={mat("#f5f7fa")}>
+          <sphereGeometry args={[0.2, 14, 10]} />
+        </mesh>
+        <Box p={[-0.1, -0.05, -0.02]} s={[0.55, 0.04, 2.3]} c="#d7dde4" />
+        <Box p={[-1.0, 0.1, 0]} s={[0.1, 0.5, 0.05]} c="#0ea5e9" />
+        <Box p={[-1.0, 0.1, 0]} s={[0.34, 0.04, 0.9]} c="#d7dde4" />
+        <Box p={[0, 0.02, 0.2]} s={[2.0, 0.05, 0.01]} c="#0ea5e9" />
+      </group>
+    </>
+  );
+}
+
+function Club({ size: [w, h, d], color }: SP) {
+  return (
+    <>
+      <Box s={[w + 0.5, 0.08, d + 0.8]} c="#2a2330" />
+      <Box p={[0, 0.08, 0]} s={[w, h, d]} c="#241c2e" />
+      <Box p={[0, 0.08 + h, 0]} s={[w + 0.15, 0.1, d + 0.15]} c="#15101c" />
+      {/* neon bands and a sign */}
+      <Glow p={[0, 0.08 + h * 0.82, d / 2 + 0.03]} s={[w * 0.9, 0.12, 0.04]} c={color} />
+      <Glow p={[0, 0.08 + h * 0.18, d / 2 + 0.03]} s={[w * 0.9, 0.08, 0.04]} c="#22d3ee" />
+      <Glow p={[0, 0.08 + h * 0.5, d / 2 + 0.03]} s={[w * 0.5, 0.3, 0.04]} c={color} />
+      <Awning p={[0, h * 0.62, d / 2 + 0.3]} w={1.4} colors={[color, "#15101c"]} />
+      {/* rooftop disco ball and speakers */}
+      <mesh position={[0, 0.08 + h + 0.34, 0]} material={mat("#d9d9e6", 0.15)} castShadow>
+        <sphereGeometry args={[0.24, 16, 12]} />
+      </mesh>
+      <Cyl p={[0, 0.08 + h, 0]} r={0.02} h={0.12} c="#6b6b7a" seg={6} />
+      <Box p={[-w / 2 - 0.12, 0.08, d / 2 - 0.2]} s={[0.22, 0.5, 0.22]} c="#0f0b14" />
+      <Box p={[w / 2 + 0.12, 0.08, d / 2 - 0.2]} s={[0.22, 0.5, 0.22]} c="#0f0b14" />
+      <Glow p={[-w / 2 - 0.12, 0.38, d / 2 - 0.08]} s={[0.12, 0.12, 0.02]} c="#22d3ee" />
+      <Glow p={[w / 2 + 0.12, 0.38, d / 2 - 0.08]} s={[0.12, 0.12, 0.02]} c="#22d3ee" />
+    </>
+  );
+}
+
 const STYLES: Record<Place["style"], (p: SP) => React.ReactNode> = {
+  airport: Airport,
+  club: Club,
   tower: Tower,
   hall: Hall,
   market: Market,

@@ -9,6 +9,7 @@ import Buildings from "./Buildings";
 import Gates from "./Gates";
 import Estates from "./Estates";
 import CabRanks from "./CabRanks";
+import MarketWomen from "./MarketWomen";
 import PlotsLayer from "./PlotsLayer";
 import Player from "./Player";
 import { Npcs, RemotePlayers } from "./People";
@@ -138,6 +139,7 @@ function WorldContent() {
       <CabRanks />
       {!placesOnly && <PlotsLayer />}
       {!placesOnly && <Npcs />}
+      {!placesOnly && <MarketWomen />}
       {/* invisible ground: click anywhere to walk */}
       <mesh
         rotation-x={-Math.PI / 2}

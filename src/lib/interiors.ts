@@ -35,6 +35,8 @@ export type Resident = {
   /** look seed (stable per resident) */
   seed?: string;
   lines?: string[];
+  /** a market woman or aunty: dressed in wrapper and gele */
+  woman?: boolean;
 };
 
 export type Zone = { x: number; z: number; w: number; d: number; floor: FloorKind; color?: string };

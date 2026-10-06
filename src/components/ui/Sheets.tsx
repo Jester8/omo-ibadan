@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { Car, Check, CheckCircle2, Circle, Copy, Eye, Footprints, Heart, Landmark, Moon, PencilLine, PhoneCall, PhoneOff, Sun, SunMoon, Volume2, VolumeX, X } from "lucide-react";
+import { LogOut, Car, Music2, Check, CheckCircle2, Circle, Copy, Eye, Footprints, Heart, Landmark, Moon, PencilLine, PhoneCall, PhoneOff, Sun, SunMoon, Volume2, VolumeX, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useGame, ownedBy } from "@/lib/store";
 import { net } from "@/lib/net";
@@ -18,6 +18,9 @@ import { useSecond } from "@/lib/hooks";
 import type { Policy } from "@/lib/protocol";
 import { CARS } from "@/lib/cars";
 import JobsPanel from "./JobsPanel";
+import { signOut } from "@/lib/api";
+import MusicSheet from "./MusicSheet";
+import FlightsSheet from "./FlightsSheet";
 import { useSound } from "@/lib/soundStore";
 
 function Frame({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
@@ -251,6 +254,12 @@ function ViewSettings() {
             {soundMuted ? <VolumeX className="size-4 text-stone-500" /> : <Volume2 className="size-4 text-stone-500" />} Sound
           </span>
           <span className={`rounded-full px-2.5 py-0.5 text-xs ${soundMuted ? "bg-stone-200 text-stone-600" : "bg-emerald-600 text-white"}`}>{soundMuted ? "Off" : "On"}</span>
+        </button>
+        <button onClick={() => useGame.getState().setSheet("music")} className={row}>
+          <span className="flex items-center gap-2.5">
+            <Music2 className="size-4 text-stone-500" /> Music &amp; sounds
+          </span>
+          <span className="text-stone-400">›</span>
         </button>
         <button onClick={() => useGame.getState().setSheet("election")} className={row}>
           <span className="flex items-center gap-2.5">
@@ -533,6 +542,15 @@ function ProfileSheet() {
 
       <ViewSettings />
 
+      <button
+        onClick={() => {
+          if (confirm("Sign out of Omo Ibadan? Your progress is saved to your account.")) void signOut();
+        }}
+        className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-rose-50 py-3 text-sm font-semibold text-rose-700 ring-1 ring-rose-100 transition active:scale-[0.98]"
+      >
+        <LogOut className="size-4" /> Sign out
+      </button>
+
       <SoundSliders />
 
       <p className="mb-2 mt-5 text-xs font-semibold uppercase tracking-wider text-stone-400">The ladder</p>
@@ -739,6 +757,16 @@ export default function Sheets() {
       {sheet === "quests" && (
         <Frame key="quests" title="Goals" onClose={() => setSheet(null)}>
           <QuestsSheet />
+        </Frame>
+      )}
+      {sheet === "flights" && (
+        <Frame key="flights" title="Ibadan Airport" onClose={() => setSheet(null)}>
+          <FlightsSheet />
+        </Frame>
+      )}
+      {sheet === "music" && (
+        <Frame key="music" title="Music & sounds" onClose={() => setSheet(null)}>
+          <MusicSheet />
         </Frame>
       )}
       {sheet === "buy" && (

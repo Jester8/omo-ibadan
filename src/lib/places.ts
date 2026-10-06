@@ -1,6 +1,6 @@
 export type Needs = { hunger: number; energy: number; fun: number; social: number };
 
-export type PlaceKind = "food" | "work" | "fun" | "culture" | "health" | "learn" | "shop" | "faith" | "gov" | "transport";
+export type PlaceKind = "night" | "air" | "food" | "work" | "fun" | "culture" | "health" | "learn" | "shop" | "faith" | "gov" | "transport";
 
 export type PlaceStyle =
   | "tower"
@@ -21,7 +21,9 @@ export type PlaceStyle =
   | "terminal"
   | "golf"
   | "govt"
-  | "cultural";
+  | "cultural"
+  | "airport"
+  | "club";
 
 export type ActionDef = {
   id: string;
@@ -35,6 +37,8 @@ export type ActionDef = {
   minRep?: number;
   /** grants a temporary keke speed boost (ms) */
   boostMs?: number;
+  /** the character plays this emote while the action runs */
+  emote?: "dance";
   /** raw foodstuff portions added (+) or used (-) */
   pantry?: number;
   /** cooked meals added (+) or eaten (-) */
@@ -102,8 +106,8 @@ export const PLACES: Place[] = [
     kind: "shop",
     district: "Bodija",
     blurb: "Foodstuff, fabric and fierce bargaining.",
-    pos: [-6.5, -16.5],
-    size: [4, 1.3, 3],
+    pos: [-5, -15.5],
+    size: [8, 1.4, 6.4],
     color: "#e0663a",
     style: "market",
     voice: true,
@@ -510,6 +514,8 @@ export const KIND_COLORS: Record<PlaceKind, string> = {
   faith: "#a68a4f",
   gov: "#5b7088",
   transport: "#d98a1f",
+  night: "#a21caf",
+  air: "#0ea5e9",
 };
 
 /** Parks and greens are walkable; everything else is solid. */
@@ -552,6 +558,19 @@ PLACES.push(
     actions: [A("teller", "Teller shift", 6, { gain: { energy: -26 }, pay: 8500, rep: 3 }), A("audit", "Assist the auditors", 8, { gain: { energy: -30 }, pay: 11000, rep: 5, minRep: 30 })] },
   { id: "oje-mosque", name: "Oje Central Mosque", emoji: "🕌", kind: "faith", district: "Oje", blurb: "A grand domed mosque in the old city.", pos: [25, 16], size: [2.4, 2.2, 2.4], color: "#e9e1cc", style: "mosque", voice: true,
     actions: [A("pray", "Pray", 4, { gain: { energy: 10, fun: 5, social: 5 }, rep: 1 })] },
+  { id: "airport", name: "Ibadan Airport", emoji: "✈️", kind: "air", district: "Samonda", blurb: "Book a ticket, board a plane, see the world and fly home.", pos: [35, 34], size: [7, 1.6, 3], color: "#cfd8e3", style: "airport", voice: true,
+    actions: [A("book", "Book a ticket", 1, {}), A("board", "Board your flight", 1, {}), A("porter", "Baggage handler shift", 6, { gain: { energy: -26 }, pay: 4800, rep: 1 })] },
+  { id: "club-afrobeat", name: "Afrobeat Lounge", emoji: "🪩", kind: "night", district: "Jericho Nights", blurb: "Live DJ, talking drums and a floor that never empties.", pos: [35, -15], size: [3.4, 1.8, 2.8], color: "#7a2fa8", style: "club", voice: true,
+    actions: [A("dance", "Hit the dance floor", 8, { cost: 2000, gain: { fun: 45, social: 20, energy: -20 }, emote: "dance" }), A("drinks", "Buy a round of drinks", 4, { cost: 4500, gain: { fun: 24, social: 18 } }), A("spray", "Spray money", 5, { cost: 15000, gain: { fun: 30, social: 25 }, rep: 4, emote: "dance" }), A("vip", "Reserve a VIP table", 8, { cost: 40000, gain: { fun: 60, social: 35, hunger: 10 }, rep: 6 })] },
+  { id: "club-rooftop", name: "Sky Bar & Lounge", emoji: "🍸", kind: "night", district: "Jericho Nights", blurb: "Cocktails, city lights and slow afrosoul.", pos: [35, -36], size: [3, 2.6, 2.6], color: "#1f5f8a", style: "club", voice: true,
+    actions: [A("cocktail", "Order cocktails", 4, { cost: 6000, gain: { fun: 28, social: 16 } }), A("dance", "Dance under the stars", 8, { cost: 2500, gain: { fun: 40, social: 18, energy: -18 }, emote: "dance" }), A("vip", "Reserve a VIP table", 8, { cost: 45000, gain: { fun: 60, social: 35 }, rep: 6 })] },
+  { id: "club-owambe", name: "Owambe Garden & Dance Hall", emoji: "🥁", kind: "night", district: "Akobo", blurb: "Aso ebi, jollof, a live band and money-spraying aunties.", pos: [35, 26], size: [4, 1.6, 3], color: "#d9a22b", style: "club", voice: true,
+    actions: [A("dance", "Dance with the aso ebi crew", 8, { cost: 1500, gain: { fun: 42, social: 24, energy: -18 }, emote: "dance" }), A("jollof", "Eat jollof and small chops", 4, { cost: 3000, gain: { hunger: 40, fun: 8 } }), A("spray", "Spray money for the band", 5, { cost: 12000, gain: { fun: 28, social: 22 }, rep: 4, emote: "dance" })] },
+  { id: "palmwine", name: "Palmwine Joint, Bere", emoji: "🍶", kind: "night", district: "Bere", blurb: "Fresh palmwine, pepper soup and old-school fuji.", pos: [-35, 36], size: [2.6, 1.4, 2.2], color: "#c98b3a", style: "club", voice: true,
+    actions: [A("palmwine", "Drink palmwine", 4, { cost: 1500, gain: { fun: 22, social: 16 } }), A("pepper", "Pepper soup", 4, { cost: 2000, gain: { hunger: 32, fun: 8 } }), A("dance", "Dance to fuji", 7, { cost: 1000, gain: { fun: 34, social: 20, energy: -16 }, emote: "dance" })] },
+  { id: "suya-lounge", name: "Suya Spot & Shisha Lounge", emoji: "🍢", kind: "night", district: "Iyaganku", blurb: "Smoky suya, cold drinks and loud football talk.", pos: [24, 36], size: [2.8, 1.5, 2.4], color: "#b8401f", style: "club", voice: true,
+    actions: [A("suya", "Suya and a cold drink", 4, { cost: 2500, gain: { hunger: 30, fun: 10 } }), A("shisha", "Chill at the shisha lounge", 6, { cost: 4000, gain: { fun: 28, social: 20 } }), A("dance", "Dance to the DJ", 7, { cost: 1500, gain: { fun: 36, social: 18, energy: -16 }, emote: "dance" })] },
+
 );
 
 export const isSolid = (p: Place) => p.style !== "park" && p.style !== "golf" && p.style !== "zoo";
@@ -594,5 +613,8 @@ export const DISTRICTS: { name: string; pos: [number, number] }[] = [
   { name: "Moniya", pos: [5, 36] },
   { name: "Iwo Road", pos: [30, -10] },
   { name: "Ring Road", pos: [-5, 26] },
+  { name: "Jericho Nights", pos: [35, -25] },
+  { name: "Samonda", pos: [35, 31] },
+  { name: "Bere", pos: [-35, 31] },
 ];
 

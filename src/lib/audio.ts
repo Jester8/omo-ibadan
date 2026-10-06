@@ -124,6 +124,14 @@ class Engine {
   }
 
   /** Smoothly retune music and ambience for where the player is. */
+  /** An artist's track is playing: tuck the built-in groove right down. */
+  setDuck(on: boolean) {
+    this.ducked = on;
+    this.apply();
+  }
+
+  private ducked = false;
+
   private apply(instant = false) {
     if (!this.ctx) return;
     const t = this.ctx.currentTime;
@@ -131,7 +139,7 @@ class Engine {
     const c = this.ctxState;
     const sacred = c.place === "mosque" || c.place === "cathedral";
     const hush = sacred || c.place === "uch";
-    const musicLevel = hush ? 0 : (c.indoors ? 0.35 : 0.55) * (1 - c.night * 0.35);
+    const musicLevel = (hush ? 0 : (c.indoors ? 0.35 : 0.55) * (1 - c.night * 0.35)) * (this.ducked ? 0.06 : 1);
     this.musicBus.gain.setTargetAtTime(musicLevel * this.settings.music * 1.6, t, k);
     this.musicFilter.frequency.setTargetAtTime(c.indoors ? 900 : 16000, t, k);
 

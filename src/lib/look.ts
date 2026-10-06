@@ -156,6 +156,16 @@ export function seededLook(seed: string): Look {
   return makeLook(r);
 }
 
+/** A market woman or aunty: always a woman, in wrapper and blouse or gown, usually with a gele. */
+export function womanLook(seed: string): Look {
+  const base = seededLook(seed);
+  let h = 7;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  const tops = ["ankara", "asooke", "gown", "ankara"] as const;
+  const hair = ["gele", "gele", "twists", "cornrows", "gele"] as const;
+  return { ...base, frame: "f", top: tops[h % tops.length], hairStyle: hair[(h >> 3) % hair.length], accessory: "none" };
+}
+
 /** Stable pastel-ish colour for a player id (used for land ownership tint). */
 export function colorFor(id: string): string {
   let h = 0;

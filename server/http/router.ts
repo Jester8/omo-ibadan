@@ -1,11 +1,14 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { randomUUID } from "node:crypto";
 import { config } from "../config";
-import { getState, putState, signUp, touchPlayer } from "../db/repo";
+import { findByEmail, getState, putState, signUp, touchPlayer } from "../db/repo";
 import { issueToken, verifyToken } from "./auth";
+import { handleTracks } from "./tracks";
+import { handleIntro } from "./intro";
 
 type Handler = (ctx: { req: IncomingMessage; body: unknown; pid: string | null; url: URL }) => { status?: number; json: unknown } | Promise<{ status?: number; json: unknown }>;
 
+const fails = new Map<string, { n: number; until: number }>();
 const hits = new Map<string, { n: number; reset: number }>();
 const limited = (ip: string) => {
   const now = Date.now();
@@ -60,8 +63,31 @@ const routes: Record<string, Handler> = {
     const email = String(b.email ?? "").trim().toLowerCase();
     const name = String(b.name ?? "").replace(/[\u0000-\u001f<>]/g, "").trim().slice(0, 16);
     if (!pid || name.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || email.length > 80) return { status: 400, json: { error: "invalid details" } };
-    if (!signUp(pid, name, email)) return { status: 409, json: { error: "email already registered" } };
+    const look = b && typeof (b as { look?: unknown }).look === "object" ? (b as { look: unknown }).look : null;
+    if (!signUp(pid, name, email, look)) return { status: 409, json: { error: "email already registered" } };
     return { json: { pid, token: issueToken(pid) } };
+  },
+
+  /**
+   * Log back in with the email and the name you signed up with.
+   * NOTE: no password and no email verification yet, so anyone who knows both can log in as you.
+   * Add a one-time email code before a public launch.
+   */
+  "POST /api/auth/login": ({ body, req }) => {
+    const b = (body ?? {}) as { email?: unknown; name?: unknown };
+    const email = String(b.email ?? "").trim().toLowerCase();
+    const name = String(b.name ?? "").trim().toLowerCase();
+    const key = `${req.socket.remoteAddress}|${email}`;
+    const now = Date.now();
+    const f = fails.get(key);
+    if (f && f.n >= 6 && now < f.until) return { status: 429, json: { error: "Too many tries. Wait a few minutes." } };
+    const row = email ? findByEmail(email) : undefined;
+    if (!row || row.name.toLowerCase() !== name) {
+      fails.set(key, { n: (f && now < f.until ? f.n : 0) + 1, until: now + 10 * 60_000 });
+      return { status: 401, json: { error: "We could not find that email and name together." } };
+    }
+    fails.delete(key);
+    return { json: { pid: row.pid, name: row.name, look: row.profile_json ? JSON.parse(row.profile_json) : null, token: issueToken(row.pid) } };
   },
 
   "GET /api/state": ({ pid }) => {
@@ -71,8 +97,8 @@ const routes: Record<string, Handler> = {
 
   "PUT /api/state": ({ pid, body }) => {
     if (!pid) return { status: 401, json: { error: "unauthorised" } };
-    const b = (body ?? {}) as { name?: unknown; state?: unknown };
-    putState(pid, String(b.name ?? "Guest").slice(0, 16), sanitizeState(b.state));
+    const b = (body ?? {}) as { name?: unknown; state?: unknown; look?: unknown };
+    putState(pid, String(b.name ?? "Guest").slice(0, 16), sanitizeState(b.state), b.look && typeof b.look === "object" ? b.look : undefined);
     return { json: { ok: true } };
   },
 };
@@ -82,8 +108,8 @@ function cors(req: IncomingMessage, res: ServerResponse) {
   if (origin && (config.origins.includes("*") || config.origins.includes(origin))) {
     res.setHeader("Access-Control-Allow-Origin", origin);
     res.setHeader("Vary", "Origin");
-    res.setHeader("Access-Control-Allow-Headers", "authorization, content-type");
-    res.setHeader("Access-Control-Allow-Methods", "GET, PUT, POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "authorization, content-type, x-admin-token, range");
+    res.setHeader("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS");
   }
 }
 
@@ -94,11 +120,18 @@ export async function handleHttp(req: IncomingMessage, res: ServerResponse) {
     return;
   }
   const url = new URL(req.url ?? "/", "http://localhost");
+  if (limited(req.socket.remoteAddress ?? "?")) return void res.writeHead(429, { "content-type": "application/json" }).end(JSON.stringify({ error: "slow down" }));
+  if (handleIntro(req, res, url)) return;
+  try {
+    if (await handleTracks(req, res, url)) return;
+  } catch (e) {
+    console.error("[tracks]", e);
+    if (!res.headersSent) res.writeHead(500, { "content-type": "application/json" }).end(JSON.stringify({ error: "server error" }));
+    return;
+  }
   const handler = routes[`${req.method} ${url.pathname}`];
   const send = (status: number, json: unknown) => res.writeHead(status, { "content-type": "application/json" }).end(JSON.stringify(json));
   if (!handler) return send(404, { error: "not found" });
-  if (limited(req.socket.remoteAddress ?? "?")) return send(429, { error: "slow down" });
-
   let body: unknown = undefined;
   if (req.method === "POST" || req.method === "PUT") {
     const chunks: Buffer[] = [];

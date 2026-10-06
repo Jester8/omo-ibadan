@@ -64,13 +64,24 @@ const HOURS: Record<string, [number, number]> = {
   "challenge-eatery": [8, 23],
   "akobo-chapel": [6, 21],
   "central-bank": [8, 16],
+  airport: [5, 23],
+  // nightlife runs past midnight (an end above 24 means "into the next morning")
+  "club-afrobeat": [20, 28],
+  "club-rooftop": [18, 27],
+  "club-owambe": [14, 26],
+  palmwine: [16, 26],
+  "suya-lounge": [17, 27],
 };
 
 export const isOpen = (placeId: string, hour: number) => {
   const h = HOURS[placeId];
-  return !h || (hour >= h[0] && hour < h[1]);
+  if (!h) return true;
+  return h[1] > 24 ? hour >= h[0] || hour < h[1] - 24 : hour >= h[0] && hour < h[1];
 };
 
-const fmt = (h: number) => `${h % 12 === 0 ? 12 : h % 12}${h >= 12 ? "pm" : "am"}`;
+const fmt = (n: number) => {
+  const h = n % 24;
+  return `${h % 12 === 0 ? 12 : h % 12}${h >= 12 ? "pm" : "am"}`;
+};
 export const opensAt = (placeId: string) => (HOURS[placeId] ? fmt(HOURS[placeId][0]) : "");
 export const closesAt = (placeId: string) => (HOURS[placeId] ? fmt(HOURS[placeId][1]) : "");

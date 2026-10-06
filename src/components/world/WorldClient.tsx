@@ -9,12 +9,15 @@ import ChatDock from "@/components/ui/ChatDock";
 import Sheets from "@/components/ui/Sheets";
 import DeckPanel from "@/components/ui/DeckPanel";
 import BottomBar from "@/components/ui/BottomBar";
+import NowPlaying from "@/components/ui/NowPlaying";
+import FlightScreen from "@/components/ui/FlightScreen";
 import ComputerScreen from "@/components/ui/ComputerScreen";
 import Minimap from "@/components/ui/Minimap";
 import ViewControls from "@/components/ui/ViewControls";
 import AudioBridge from "@/components/ui/AudioBridge";
 import { Hint, IncomingCall, Toasts, VoiceBar } from "@/components/ui/Floating";
 import AvatarCreator from "@/components/avatar/AvatarCreator";
+import AuthScreen from "@/components/ui/AuthScreen";
 import Overlay from "./Overlay";
 import { NPCS } from "./People";
 import { ownedBy, pendingRent, useGame } from "@/lib/store";
@@ -158,6 +161,7 @@ export default function WorldClient() {
   const patch = useGame((s) => s.patch);
   const fade = useGame((s) => s.fade);
   const hideIcons = useGame((s) => s.hideIcons);
+  const [creating, setCreating] = useState(false);
   const [signupError, setSignupError] = useState("");
   const [signingUp, setSigningUp] = useState(false);
 
@@ -174,7 +178,9 @@ export default function WorldClient() {
           <Sheets />
           <DeckPanel />
           <ComputerScreen />
+          <FlightScreen />
           {!hideIcons && <BottomBar />}
+          {!hideIcons && <NowPlaying />}
           <VoiceBar />
           {!hideIcons && <Minimap />}
           {!hideIcons && <ViewControls />}
@@ -191,13 +197,27 @@ export default function WorldClient() {
       {mounted && <Runtime />}
       {mounted && <AudioBridge />}
       <AnimatePresence>
-        {mounted && (!profile || editing) && (
+        {mounted && !profile && !creating && (
+          <AuthScreen
+            key="auth"
+            onSignup={() => setCreating(true)}
+            onLoggedIn={(p) => {
+              // an account made before looks were stored falls back to the creator, keeping the name
+              if (!p.look) {
+                setCreating(true);
+                return;
+              }
+              setProfile({ id: p.id, name: p.name, look: p.look, email: p.email });
+            }}
+          />
+        )}
+        {mounted && ((!profile && creating) || editing) && (
           <AvatarCreator
             key="creator"
             initialName={profile?.name}
             initialLook={profile?.look}
             isEdit={!!profile}
-            onCancel={profile ? () => patch({ editingAvatar: false }) : undefined}
+            onCancel={profile ? () => patch({ editingAvatar: false }) : () => setCreating(false)}
             askEmail={!profile}
             error={signupError}
             busy={signingUp}
@@ -206,7 +226,7 @@ export default function WorldClient() {
               const id = crypto.randomUUID().replace(/-/g, "").slice(0, 20);
               setSigningUp(true);
               setSignupError("");
-              const r = await signUp(id, name, email);
+              const r = await signUp(id, name, email, look);
               setSigningUp(false);
               if (r === "taken") return setSignupError("That email is already registered. Use a different one.");
               setProfile({ id, name, look, email });

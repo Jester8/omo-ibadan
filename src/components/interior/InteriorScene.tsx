@@ -6,7 +6,7 @@ import * as THREE from "three";
 import Avatar from "@/components/avatar/Avatar";
 import { FURN, S } from "@/lib/furniture";
 import { interiorKey, type Layout, type Resident } from "@/lib/interiors";
-import { seededLook } from "@/lib/look";
+import { seededLook, womanLook } from "@/lib/look";
 import { cam, me } from "@/lib/playerState";
 import { rt, powerOn, walkToExit, walkToFurn } from "@/lib/interiorRuntime";
 import { useGame } from "@/lib/store";
@@ -326,7 +326,7 @@ function ExitMat({ layout }: { layout: Layout }) {
 const CHATTER = ["How far?", "E kaaro!", "Abeg, make yourself comfortable.", "Wetin dey happen?"];
 
 function ResidentActor({ r, layout }: { r: Resident; layout: Layout }) {
-  const look = useMemo(() => seededLook(r.seed ?? r.name), [r.seed, r.name]);
+  const look = useMemo(() => (r.woman ? womanLook(r.seed ?? r.name) : seededLook(r.seed ?? r.name)), [r.seed, r.name]);
   const motion = useRef({ speed: 0, pose: r.pose ?? null });
   const next = useRef(0);
   const ry = r.ry ?? Math.atan2(-r.x, -r.z);

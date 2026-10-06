@@ -7,6 +7,7 @@ import type { InteriorRef } from "./interiors";
 import type { Rel } from "./romance";
 import { carById, type RideId } from "./cars";
 import { PASS_MS } from "./estates";
+import { destById, FLIGHT_SECS } from "./flights";
 import { ESTATE_BY_ID } from "./world";
 import { eventFor, isOpen, opensAt } from "./events";
 import { gameMinutes } from "./time";
@@ -34,7 +35,7 @@ export type ChatMsg = {
 };
 export type Selection = { type: "place" | "plot" | "npc" | "gate" | "cab"; id: string } | null;
 export type Food = "bowl" | "cup" | "snack";
-export type Busy = { label: string; start: number; secs: number; food?: Food } | null;
+export type Busy = { label: string; start: number; secs: number; food?: Food; emote?: "dance" } | null;
 
 /** What the player is seen eating or drinking during an action, if anything. */
 export function foodFor(a: { id: string; gain?: { hunger?: number } }): Food | undefined {
@@ -49,7 +50,7 @@ export type CallState = {
   peerName: string;
   room: string | null;
 };
-export type Sheet = "phone" | "profile" | "quests" | "election" | "garage" | "buy" | "friends" | null;
+export type Sheet = "phone" | "profile" | "quests" | "election" | "garage" | "buy" | "friends" | "music" | "flights" | null;
 
 const START_MONEY = 25000;
 const START_NEEDS: Needs = { hunger: 80, energy: 90, fun: 65, social: 55 };
@@ -117,6 +118,10 @@ type State = {
   timeMode: "auto" | "day" | "night";
   placesOnly: boolean;
   deck: boolean;
+  ticket: string | null;
+  flight: { dest: string } | null;
+  bookTicket: (destId: string) => string | null;
+  boardFlight: () => string | null;
   passes: Record<string, number>;
   campus: boolean;
   buyPass: (estateId: string) => string | null;
@@ -235,6 +240,28 @@ export const useGame = create<State>()(
       timeMode: "auto",
       placesOnly: false,
       deck: false,
+      ticket: null,
+      flight: null,
+      bookTicket: (destId) => {
+        const s = get();
+        const d = destById(destId);
+        if (!d) return "No such destination.";
+        if (s.ticket) return `You already hold a ticket to ${destById(s.ticket)?.city}. Board it first.`;
+        if (s.money < d.price) return `A ticket to ${d.city} costs ${naira(d.price)}.`;
+        set({ money: s.money - d.price, ticket: d.id });
+        return null;
+      },
+      boardFlight: () => {
+        const s = get();
+        const d = destById(s.ticket ?? "");
+        if (!d) return "Book a ticket first.";
+        if (s.atPlace !== "airport" && !(s.interior?.kind === "place" && s.interior.id === "airport")) return "Go to Ibadan Airport to board.";
+        const err = s.runAction({ id: "flight", label: `Flight to ${d.city}`, secs: FLIGHT_SECS, gain: { fun: 40, social: 8, energy: -10 }, rep: 3 });
+        if (err) return err;
+        set({ ticket: null, flight: { dest: d.id } });
+        get().recordStat("flights");
+        return null;
+      },
       passes: {},
       campus: false,
       buyPass: (estateId) => {
@@ -313,7 +340,7 @@ export const useGame = create<State>()(
         const price = (a.cost ?? 0) * (policy === "food" && (a.gain?.hunger ?? 0) > 0 ? 0.8 : 1);
         if (price && s.money < price) return `You need ${naira(price)}.`;
         const scale = opts?.gainScale ?? 1;
-        set({ busy: { label: a.label, start: Date.now(), secs: a.secs, food: foodFor(a) }, money: s.money - Math.round(price) });
+        set({ busy: { label: a.label, start: Date.now(), secs: a.secs, food: foodFor(a), emote: a.emote }, money: s.money - Math.round(price) });
         if (busyTimer) clearTimeout(busyTimer);
         busyTimer = setTimeout(() => {
           const cur = get();
@@ -490,6 +517,7 @@ export const useGame = create<State>()(
         pantry: s.pantry,
         plates: s.plates,
         passes: s.passes,
+        ticket: s.ticket,
         decor: s.decor,
         romance: s.romance,
         cars: s.cars,

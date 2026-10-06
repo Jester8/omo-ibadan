@@ -12,8 +12,17 @@ export const config = {
   requireAuth: process.env.REQUIRE_AUTH === "1",
   origins: list(process.env.ALLOWED_ORIGINS, "http://localhost:3000,http://localhost:3100"),
   production: process.env.NODE_ENV === "production",
+  /** reviews uploaded tracks; MUST be set to something long and secret in production */
+  adminToken: process.env.ADMIN_TOKEN ?? "dev-admin-token",
+  /** the intro song lives outside git; in production it is only served when you assert you hold the licence */
+  introDir: process.env.INTRO_DIR ?? join(__dirname, "data", "intro"),
+  introLicensed: process.env.INTRO_LICENSED === "1",
+  tracksDir: process.env.TRACKS_DIR ?? join(__dirname, "data", "tracks"),
 };
 
+if (config.production && config.adminToken === "dev-admin-token") {
+  throw new Error("ADMIN_TOKEN must be set in production");
+}
 if (config.production && config.authSecret === "dev-secret-change-me") {
   throw new Error("AUTH_SECRET must be set in production");
 }

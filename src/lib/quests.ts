@@ -12,9 +12,10 @@ export type Stats = {
   slept: number;
   used: number;
   dates: number;
+  flights: number;
 };
 
-export const EMPTY_STATS: Stats = { visited: [], worked: 0, ate: 0, chats: 0, voiceJoins: 0, calls: 0, entered: 0, slept: 0, used: 0, dates: 0 };
+export const EMPTY_STATS: Stats = { visited: [], worked: 0, ate: 0, chats: 0, voiceJoins: 0, calls: 0, entered: 0, slept: 0, used: 0, dates: 0, flights: 0 };
 
 export type QuestState = { stats: Stats; plots: Record<string, PlotState>; pid: string | undefined };
 
@@ -82,6 +83,13 @@ export const QUESTS: Quest[] = [
     blurb: "Talk to a lady, ask her out, and take her on a date.",
     reward: { money: 3000, rep: 3 },
     done: (s) => (s.stats.dates ?? 0) >= 1,
+  },
+  {
+    id: "fly",
+    title: "Up, up and away",
+    blurb: "Book a ticket at Ibadan Airport and take a flight.",
+    reward: { money: 5000, rep: 4 },
+    done: (s) => (s.stats.flights ?? 0) >= 1,
   },
   {
     id: "culture",

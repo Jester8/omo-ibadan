@@ -39,13 +39,15 @@ export function touchPlayer(pid: string, name: string) {
 }
 
 /** Registers an email for a player. Returns false if another player already owns that email. */
-export function signUp(pid: string, name: string, email: string): boolean {
+export function signUp(pid: string, name: string, email: string, look?: unknown): boolean {
   const owner = db.prepare("SELECT pid FROM players WHERE email = ?").get(email) as { pid: string } | undefined;
   if (owner && owner.pid !== pid) return false;
   touchPlayer(pid, name);
-  db.prepare("UPDATE players SET email = ? WHERE pid = ?").run(email, pid);
+  db.prepare("UPDATE players SET email = ?, profile_json = COALESCE(?, profile_json) WHERE pid = ?").run(email, look ? JSON.stringify(look) : null, pid);
   return true;
 }
+
+export const findByEmail = (email: string) => db.prepare("SELECT pid, name, profile_json FROM players WHERE email = ?").get(email) as { pid: string; name: string; profile_json: string | null } | undefined;
 
 export function getState(pid: string): { state: unknown; updatedAt: number } | null {
   const r = db.prepare("SELECT state_json, state_updated FROM players WHERE pid = ?").get(pid) as { state_json: string | null; state_updated: number | null } | undefined;
@@ -53,9 +55,9 @@ export function getState(pid: string): { state: unknown; updatedAt: number } | n
   return { state: JSON.parse(r.state_json), updatedAt: r.state_updated ?? 0 };
 }
 
-export function putState(pid: string, name: string, state: unknown) {
+export function putState(pid: string, name: string, state: unknown, look?: unknown) {
   touchPlayer(pid, name);
-  db.prepare("UPDATE players SET state_json = ?, state_updated = ? WHERE pid = ?").run(JSON.stringify(state), Date.now(), pid);
+  db.prepare("UPDATE players SET state_json = ?, state_updated = ?, profile_json = COALESCE(?, profile_json) WHERE pid = ?").run(JSON.stringify(state), Date.now(), look ? JSON.stringify(look) : null, pid);
 }
 
 export function addReport(reporter: string, target: string, reason: string) {
@@ -72,3 +74,37 @@ export function recordElection(term: number, winner: { pid: string; name: string
     Date.now(),
   );
 }
+
+/* ------------------------------------ tracks ------------------------------------ */
+
+export type TrackRow = {
+  id: string;
+  title: string;
+  artist: string;
+  owner_pid: string;
+  rights_holder: string;
+  rights_statement: string;
+  license: string;
+  status: "pending" | "approved" | "rejected";
+  mime: string | null;
+  size: number | null;
+  file: string | null;
+  created_at: number;
+  reviewed_at: number | null;
+  review_note: string | null;
+};
+
+export function createTrack(t: { id: string; title: string; artist: string; ownerPid: string; rightsHolder: string; statement: string }) {
+  db.prepare("INSERT INTO tracks (id, title, artist, owner_pid, rights_holder, rights_statement, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)").run(t.id, t.title, t.artist, t.ownerPid, t.rightsHolder, t.statement, Date.now());
+}
+export const getTrack = (id: string) => db.prepare("SELECT * FROM tracks WHERE id = ?").get(id) as TrackRow | undefined;
+export const listTracks = (status: string) => db.prepare("SELECT * FROM tracks WHERE status = ? ORDER BY created_at DESC").all(status) as TrackRow[];
+export const tracksOf = (pid: string) => db.prepare("SELECT * FROM tracks WHERE owner_pid = ? ORDER BY created_at DESC").all(pid) as TrackRow[];
+export const countRecentTracks = (pid: string, since: number) => (db.prepare("SELECT COUNT(*) AS n FROM tracks WHERE owner_pid = ? AND created_at > ?").get(pid, since) as { n: number }).n;
+export function setTrackFile(id: string, file: string, mime: string, size: number) {
+  db.prepare("UPDATE tracks SET file = ?, mime = ?, size = ?, status = 'pending' WHERE id = ?").run(file, mime, size, id);
+}
+export function reviewTrack(id: string, status: "approved" | "rejected", note: string) {
+  db.prepare("UPDATE tracks SET status = ?, review_note = ?, reviewed_at = ? WHERE id = ?").run(status, note, Date.now(), id);
+}
+export const deleteTrackRow = (id: string) => db.prepare("DELETE FROM tracks WHERE id = ?").run(id);

@@ -1,4 +1,5 @@
 import { useGame } from "./store";
+import type { Look } from "./look";
 
 /** HTTP API lives beside the websocket on the same port unless NEXT_PUBLIC_API_URL says otherwise. */
 export const apiBase = () =>
@@ -33,9 +34,9 @@ export async function ensureToken(): Promise<string | null> {
 export const currentToken = () => cached;
 
 /** Create the account. "taken" means that email already belongs to someone; "offline" lets play continue locally. */
-export async function signUp(pid: string, name: string, email: string): Promise<"ok" | "taken" | "offline"> {
+export async function signUp(pid: string, name: string, email: string, look?: unknown): Promise<"ok" | "taken" | "offline"> {
   try {
-    const res = await fetch(`${apiBase()}/api/auth/signup`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ pid, name, email }), signal: AbortSignal.timeout(3500) });
+    const res = await fetch(`${apiBase()}/api/auth/signup`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ pid, name, email, look }), signal: AbortSignal.timeout(3500) });
     if (res.status === 409) return "taken";
     if (!res.ok) return "offline";
     const out = (await res.json()) as { pid: string; token: string };
@@ -46,6 +47,44 @@ export async function signUp(pid: string, name: string, email: string): Promise<
     return "offline";
   }
 }
+
+/** Log back in with email + name. Returns the stored profile, or an error message to show. */
+export async function logIn(email: string, name: string): Promise<{ ok: true; profile: { id: string; name: string; look: Look | null; email: string } } | { ok: false; error: string }> {
+  try {
+    const res = await fetch(`${apiBase()}/api/auth/login`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, name }), signal: AbortSignal.timeout(5000) });
+    const j = (await res.json().catch(() => ({}))) as { pid?: string; name?: string; look?: Look | null; token?: string; error?: string };
+    if (!res.ok || !j.pid || !j.token) return { ok: false, error: j.error ?? "Could not log in." };
+    localStorage.setItem(KEY, JSON.stringify({ pid: j.pid, token: j.token }));
+    cached = j.token;
+    return { ok: true, profile: { id: j.pid, name: j.name ?? name, look: j.look ?? null, email } };
+  } catch {
+    return { ok: false, error: "Can't reach the server. Check your connection and try again." };
+  }
+}
+
+/** Save progress, forget this device, and return to the sign-in screen. */
+export async function signOut() {
+  await pushState();
+  try {
+    localStorage.removeItem(KEY);
+    useGame.persist.clearStorage();
+  } catch {
+    /* ignore */
+  }
+  cached = null;
+  location.href = "/play";
+}
+
+export type IntroInfo = { available: boolean; title?: string; artist?: string; rightsHolder?: string };
+export async function introInfo(): Promise<IntroInfo> {
+  try {
+    const r = await fetch(`${apiBase()}/api/intro`, { signal: AbortSignal.timeout(2500) });
+    return r.ok ? ((await r.json()) as IntroInfo) : { available: false };
+  } catch {
+    return { available: false };
+  }
+}
+export const introUrl = () => `${apiBase()}/api/intro/audio`;
 
 const snapshot = () => {
   const s = useGame.getState();
@@ -58,7 +97,7 @@ export async function pushState() {
   const profile = useGame.getState().profile;
   if (!token || !profile) return;
   try {
-    await fetch(`${apiBase()}/api/state`, { method: "PUT", headers: { "content-type": "application/json", authorization: `Bearer ${token}` }, body: JSON.stringify({ name: profile.name, state: snapshot() }), signal: AbortSignal.timeout(4000) });
+    await fetch(`${apiBase()}/api/state`, { method: "PUT", headers: { "content-type": "application/json", authorization: `Bearer ${token}` }, body: JSON.stringify({ name: profile.name, look: profile.look, state: snapshot() }), signal: AbortSignal.timeout(4000) });
   } catch {
     /* offline: the next autosave will try again */
   }

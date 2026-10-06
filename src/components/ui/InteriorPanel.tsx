@@ -89,6 +89,7 @@ export default function InteriorPanel() {
                 a={a}
                 enabled={!busy}
                 onRun={() => {
+                  if (place.id === "airport" && (a.id === "book" || a.id === "board")) return useGame.getState().setSheet("flights");
                   const err = useGame.getState().runAction(a);
                   if (err) useGame.getState().toast(err, "bad");
                 }}

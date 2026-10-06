@@ -143,6 +143,7 @@ function PlaceBody({ id }: { id: string }) {
               enabled={at && !busy && open}
               onRun={() => {
                 if (a.id === "climb") return climbTower();
+                if (id === "airport" && (a.id === "book" || a.id === "board")) return useGame.getState().setSheet("flights");
                 const err = useGame.getState().runAction(a);
                 if (err) useGame.getState().toast(err, "bad");
               }}

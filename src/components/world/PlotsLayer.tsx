@@ -44,6 +44,8 @@ function Fence({ s = 2.9, c = "#f3efe6" }: { s?: number; c?: string }) {
   );
 }
 
+const RUST_ROOF = "#a0512f";
+
 function House({ tier, accent }: { tier: number; accent: string }) {
   if (tier === 1)
     return (
@@ -52,7 +54,7 @@ function House({ tier, accent }: { tier: number; accent: string }) {
         <mesh position={[0, 0.06 + 0.3, 0]} material={mat("#f4ead7")} castShadow>
           <boxGeometry args={[1.5, 0.6, 1.2]} />
         </mesh>
-        <mesh position={[0, 0.06 + 0.6 + 0.28, 0]} rotation-y={Math.PI / 4} scale={[1.25, 1, 1]} material={mat(accent, 0.6)} castShadow>
+        <mesh position={[0, 0.06 + 0.6 + 0.28, 0]} rotation-y={Math.PI / 4} scale={[1.25, 1, 1]} material={mat(RUST_ROOF, 0.7)} castShadow>
           <coneGeometry args={[1.0, 0.56, 4]} />
         </mesh>
         <mesh position={[0, 0.06 + 0.24, 0.61]} material={mat("#7a5a40")}>
@@ -70,6 +72,9 @@ function House({ tier, accent }: { tier: number; accent: string }) {
         <Wall tint="#f2ecdf" w={1.7} h={1.25} d={1.3} p={[0, 0.06, -0.1]} />
         <mesh position={[0, 0.06 + 1.25 + 0.04, -0.1]} material={mat(accent)} castShadow>
           <boxGeometry args={[1.8, 0.09, 1.4]} />
+        </mesh>
+        <mesh position={[0, 0.06 + 1.25 + 0.3, -0.1]} rotation-y={Math.PI / 4} scale={[1.3, 1, 1]} material={mat(RUST_ROOF, 0.7)} castShadow>
+          <coneGeometry args={[0.95, 0.5, 4]} />
         </mesh>
         <mesh position={[0, 0.06 + 0.7, 0.62]} material={mat("#e9e3d4")} castShadow>
           <boxGeometry args={[1.2, 0.05, 0.4]} />
@@ -90,6 +95,9 @@ function House({ tier, accent }: { tier: number; accent: string }) {
         <Wall tint="#eef0f3" w={1.1} h={0.85} d={1.0} p={[0.8, 0.06, 0.15]} />
         <mesh position={[-0.2, 0.06 + 1.5 + 0.04, -0.35]} material={mat(accent)} castShadow>
           <boxGeometry args={[2.1, 0.09, 1.45]} />
+        </mesh>
+        <mesh position={[-0.2, 0.06 + 1.5 + 0.34, -0.35]} rotation-y={Math.PI / 4} scale={[1.5, 1, 1.05]} material={mat(RUST_ROOF, 0.7)} castShadow>
+          <coneGeometry args={[1.0, 0.58, 4]} />
         </mesh>
         {[-0.45, -0.15, 0.15].map((x) => (
           <mesh key={x} position={[x, 0.06 + 0.4, 0.4]} material={mat("#fbf9f4")} castShadow>

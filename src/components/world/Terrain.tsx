@@ -1,8 +1,12 @@
 "use client";
 
 import Skyline from "./Skyline";
+import Roofscape from "./Roofscape";
 import { BLOCKS, ROAD_LINES, WORLD_HALF } from "@/lib/world";
 import CarModel from "./CarModel";
+import Avatar from "@/components/avatar/Avatar";
+import { AVATAR_SCALE } from "./Player";
+import { seededLook } from "@/lib/look";
 import { audio } from "@/lib/audio";
 import { me, traffic } from "@/lib/playerState";
 import { useGame } from "@/lib/store";
@@ -221,15 +225,19 @@ const CARS: Car[] = [
   { hx: 0, hz: 10, speed: 3.2, offset: 25, color: "#4a90e2", danfo: false, ccw: true, bike: true },
 ];
 
+/** Traffic crawls through the streets at about half the old speed. */
+const TRAFFIC_PACE = 0.5;
+
 function Vehicle({ car, index }: { car: Car; index: number }) {
   const g = useRef<THREE.Group>(null);
+  const rider = useRef({ speed: car.speed * TRAFFIC_PACE, pose: "sit" as const });
   const lane = 0.42;
   useFrame((state) => {
     const { hx, hz } = car;
     const w = (hx - lane) * 2;
     const h = (hz - lane) * 2;
     const per = 2 * (w + h);
-    let s = (state.clock.elapsedTime * car.speed + car.offset) % per;
+    let s = (state.clock.elapsedTime * car.speed * TRAFFIC_PACE + car.offset) % per;
     if (car.ccw) s = per - s;
     let x: number;
     let z: number;
@@ -276,7 +284,11 @@ function Vehicle({ car, index }: { car: Car; index: number }) {
   if (car.bike) {
     return (
       <group ref={g}>
-        <CarModel kind="okada" color={car.color} fixed={car.speed} />
+        <CarModel kind="okada" color={car.color} fixed={car.speed * TRAFFIC_PACE} />
+        {/* the okada man, sitting on his bike */}
+        <group position-y={-0.18}>
+          <Avatar look={{ ...seededLook(`okada-${index}`), frame: "m", top: "tee", accessory: index % 2 ? "cap" : "none" }} motion={rider} scale={AVATAR_SCALE} />
+        </group>
       </group>
     );
   }
@@ -317,6 +329,7 @@ export default function Terrain({ placesOnly = false }: { placesOnly?: boolean }
       </mesh>
       <Lots />
       <Roads />
+      {!placesOnly && <Roofscape />}
       {!placesOnly && <Trees />}
       {!placesOnly && <Lamps />}
       <Surroundings />

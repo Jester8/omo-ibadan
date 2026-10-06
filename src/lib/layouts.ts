@@ -306,16 +306,31 @@ const PLACE_LAYOUTS: Record<string, Layout> = {
   }),
 
   "bodija-market": lay({
-    id: "bodija-market", name: "Bodija Market Hall", w: 16, d: 11, floor: "concrete", wall: SAND, trim: COCOA, accent: RUST, exitX: 0,
+    id: "bodija-market", name: "Bodija Market", w: 30, d: 22, floor: "concrete", wall: SAND, trim: COCOA, accent: RUST, exitX: 0,
     walls: [],
     items: [
-      ...row("stall", -6, -3.8, 4, 4, 0), ...row("stall", -4, 0.4, 3, 4, 0),
-      I("crates", -7.4, -5.0), I("crates", 7.2, -5.0, 0, { c: RUST }), I("sacks", -7.3, 3.5), I("sacks", 7.2, 3.6), I("sacks", 6.4, 3.6),
-      I("umbrella", -2, -3.8), I("umbrella", 2, -3.8), I("umbrella", 6, -3.8), I("umbrella", -6, -3.8),
-      I("rack", 6.5, 0.6, -H), I("crates", -7.2, 0.4), I("ceilingfan", -3, 2), I("ceilingfan", 3, 2),
-      I("provisions", 7.7, -2.4, -H), I("cooler", 6.6, 2.6, 0), I("mortar", 5.4, 4.3), I("calabash", -7.0, 2.2, 0, { y: 0 }),
+      ...row("stall", -11.2, -8, 8, 3.2, 0), ...row("stall", -11.2, -4.4, 8, 3.2, 0), ...row("stall", -11.2, -0.8, 8, 3.2, 0), ...row("stall", -11.2, 2.8, 8, 3.2, 0),
+      ...row("umbrella", -11.2, -8.9, 8, 3.2), ...row("umbrella", -11.2, -5.3, 8, 3.2), ...row("umbrella", -11.2, -1.7, 8, 3.2), ...row("umbrella", -11.2, 1.9, 8, 3.2),
+      ...col("crates", -14.1, -8, 4, 3.6, 0), ...col("sacks", 14.1, -8, 4, 3.6, 0),
+      I("rack", -13.8, 8.2, 0, { w: 2 }), I("rack", 13.8, 8.2, 0, { w: 2 }), I("cooler", -9, 7.4), I("cooler", 9, 7.4),
+      I("mortar", -5, 7.2), I("mortar", 5, 7.2), I("calabash", -2.5, 7.4), I("calabash", 2.5, 7.4), I("provisions", 14.3, 6.2, -H), I("provisions", -14.3, 6.2, H),
+      I("ceilingfan", -6, 5), I("ceilingfan", 6, 5), I("ceilingfan", -6, -2.5), I("ceilingfan", 6, -2.5), I("plant", -14.2, 9.6), I("plant", 14.2, 9.6),
     ],
-    residents: [res("Mama Ngozi", -6, -2.7, { seed: "ngozi", lines: ["Come buy tomato, fresh from farm!", "Oga, last price!"] }), res("Alhaji Musa", 0, 1.5, { seed: "musa", lines: ["Pepper! Pepper!"] })],
+    residents: [
+      res("Mama Ngozi", -11.2, -9.2, { seed: "ngozi", woman: true, lines: ["Come buy tomato, fresh from farm!", "Oga, last price!", "Madam, see good pepper!"] }),
+      res("Iya Sidikat", -8, -9.2, { seed: "sidikat", woman: true, lines: ["Ata rodo! Ata rodo!", "Come, taste am first."] }),
+      res("Mama Chinelo", -4.8, -9.2, { seed: "chinelo", woman: true, lines: ["Fresh fish o! Just came from the lake!", "Customer, what you dey find?"] }),
+      res("Iya Bose", -1.6, -9.2, { seed: "bose", woman: true, lines: ["Ewedu, efo, gbegiri, everything dey!", "Aunty, I go give you discount."] }),
+      res("Mama Tunde", 1.6, -9.2, { seed: "mamatunde", woman: true, lines: ["Yam! Big big yam!", "Sir, make you buy for your wife."] }),
+      res("Iya Alaso", 4.8, -9.2, { seed: "alaso", woman: true, lines: ["Aso oke and ankara, original!", "Madam, try am, e fit you."] }),
+      res("Mama Kemi", 8, -9.2, { seed: "mamakemi", woman: true, lines: ["Palm oil, pure and fresh!", "Come, come, no be today."] }),
+      res("Iya Moji", 11.2, -9.2, { seed: "moji", woman: true, lines: ["Iru and ogiri! Local seasoning!", "Oya, buy something."] }),
+      res("Mama Amaka", -9.6, -5.6, { seed: "amaka", woman: true, lines: ["Onions! Cheap cheap onions!", "Customer, how many?"] }),
+      res("Iya Dupe", -3.2, -5.6, { seed: "dupe", woman: true, lines: ["Egusi, ground and ready!", "My price is final, abeg."] }),
+      res("Mama Ify", 3.2, -5.6, { seed: "ify", woman: true, lines: ["Crayfish and stockfish here!", "God bless you as you buy."] }),
+      res("Iya Risi", 9.6, -5.6, { seed: "risi", woman: true, lines: ["Gari, beans, rice! Come and see!", "Oga, na wholesale or retail?"] }),
+      res("Alhaji Musa", 0, 0.8, { seed: "musa", lines: ["Pepper! Pepper!", "Customer, this market na for everybody."] }),
+    ],
   }),
 
   "amala-skye": lay({
@@ -388,7 +403,7 @@ const PLACE_LAYOUTS: Record<string, Layout> = {
       I("rug", 0, 4.2, 0, { w: 4, d: 1.4, c: INDIGO }),
       I("sewingmachine", -5.5, 4.7, R), I("sewingmachine", -3.5, 4.7, R), I("mannequin", 2.5, 4.6), I("mannequin", 4.2, 4.6), I("agbadastand", 5.8, 4.6),
     ],
-    residents: [res("Iya Alaso", -5, 0.0, { seed: "alaso", lines: ["Adire, aso-oke, ankara! Come and see!"] }), res("Customer", 1.5, 3.6, { seed: "cust" })],
+    residents: [res("Iya Alaso", -5, 0.0, { seed: "alaso", woman: true, lines: ["Adire, aso-oke, ankara! Come and see!"] }), res("Mama Shola", 4.4, -3.2, { seed: "shola", woman: true, lines: ["Madam, see fine lace!", "Buy two, I go add one."] }), res("Customer", 1.5, 3.6, { seed: "cust" })],
   }),
 
   ventura: lay({
@@ -530,6 +545,33 @@ reuse("cathedral", "methodist", "Oke-Bola Methodist Church", { accent: "#3a5a3a"
 reuse("cocoa-house", "secretariat", "State Secretariat Offices", { accent: "#47657f" });
 reuse("cocoa-house", "trustbank", "Trust Bank Banking Hall", { accent: "#1f5f8a", wall: "#e6edf2" });
 reuse("cocoa-house", "cathay", "Cathay Heights Lobby", { accent: "#2b7a8a", wall: "#eef2f4" });
+
+/* Nightlife: a dance floor, a stage with a DJ, a long bar and VIP booths. */
+PLACE_LAYOUTS["club"] = lay({
+  id: "club", name: "Afrobeat Lounge", w: 18, d: 13, floor: "tile", wall: "#2a1740", trim: "#150a24", accent: "#c026d3", light: "cool", exitX: -5,
+  walls: [],
+  zones: [{ x: 0, z: -0.5, w: 10, d: 7, floor: "tile", color: "#3b1d5a" }],
+  items: [
+    I("stage", 0, -5.2, 0, { w: 8, d: 2.2 }), I("drum", -3.2, -5.1), I("drum", 3.2, -5.1),
+    I("bar", 7.4, 0, -H, { w: 7 }), ...col("barstool", 6.2, -2.5, 6, 1.0, 0),
+    ...col("loveseat", -7.9, -2.6, 3, 2.6, H, { c: "#7a1fa2" }), ...col("coffeetable", -6.7, -2.6, 3, 2.6),
+    I("chandelier", 0, -0.5), I("chandelier", -4, 1.5), I("chandelier", 4, 1.5), I("lantern", -8.4, 5.2), I("lantern", 8.4, 5.2),
+    I("plant", -8.4, -5.6), I("plant", 8.4, -5.6), I("wallart", -4, -6.42, 0, { y: 1.9, c: "#c026d3" }), I("wallart", 4, -6.42, 0, { y: 1.9, c: "#22d3ee" }),
+  ],
+  residents: [
+    res("DJ Kollington", 0, -5.2, { seed: "dj-kollington", lines: ["Make some noise for Ibadan!", "This one na for the ladies!", "Who wan hear Amapiano?"] }),
+    res("Tola", -2, 0.2, { seed: "tola", woman: true, lines: ["This song is my life!", "Dance with me na!"] }),
+    res("Bisola", 1.6, 1.4, { seed: "bisola", woman: true, lines: ["Spray the money o!", "Ibadan girls know how to party."] }),
+    res("Kunle", 3, -0.6, { seed: "kunle-club", lines: ["I came to dance, not to talk!", "Wetin dey?"] }),
+    res("Bartender Gbenga", 8.25, 0, { seed: "gbenga", lines: ["What are you drinking?", "Cold Chapman coming up."] }),
+  ],
+});
+reuse("club", "club-afrobeat", "Afrobeat Lounge", { accent: "#c026d3" });
+reuse("club", "club-rooftop", "Sky Bar & Lounge", { accent: "#0ea5e9", wall: "#12263a" });
+reuse("club", "club-owambe", "Owambe Garden & Dance Hall", { accent: "#d9a22b", wall: "#3a2a12", floor: "wood" });
+reuse("club", "palmwine", "Palmwine Joint, Bere", { accent: "#c98b3a", wall: "#3a2410", floor: "wood" });
+reuse("club", "suya-lounge", "Suya Spot & Shisha Lounge", { accent: "#b8401f", wall: "#2a1410" });
+reuse("ring-road", "airport", "Ibadan Airport Terminal", { accent: "#0ea5e9", wall: "#e6edf4", floor: "tile" });
 
 reuse("ui", "ui-library", "Kenneth Dike Library", { accent: "#8a5a2a", wall: "#e8dcc6" });
 reuse("ui", "ui-science", "Faculty of Science", { accent: "#2b5a8a" });
