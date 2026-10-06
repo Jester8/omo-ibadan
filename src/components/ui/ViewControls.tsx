@@ -37,7 +37,7 @@ export default function ViewControls() {
   const interior = useGame((s) => s.interior);
   const selected = useGame((s) => s.selected);
   const flip = useGame((s) => s.panelFlip);
-  const busy = useGame((s) => !!s.busy);
+  const busy = useGame((s) => !!s.busy || !!s.ride);
   // on phones the info panel covers the bottom of the screen: ride above it, as a row
   const roomOpen = !busy && !!interior && flip === `interior:${interior.kind}:${interior.id}`;
   const selOpen = !busy && !interior && !!selected && flip !== `${selected.type}:${selected.id}`;

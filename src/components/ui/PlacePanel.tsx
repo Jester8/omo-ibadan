@@ -4,11 +4,14 @@ import { climbTower } from "@/lib/interiorRuntime";
 import { closesAt, eventFor, isOpen, opensAt } from "@/lib/events";
 import NpcPanel from "./NpcPanel";
 import { AnimatePresence, motion } from "motion/react";
-import { DoorOpen, Footprints, X } from "lucide-react";
+import { DoorOpen, Footprints, MapPin, X } from "lucide-react";
 import { PLACES, KIND_COLORS } from "@/lib/places";
 import { useGame } from "@/lib/store";
 import { useClock } from "@/lib/hooks";
-import { KEKE_FARE, rideToPlace, walkToPlace } from "@/lib/movement";
+import { quoteRide, rideToPlace, walkToPlace } from "@/lib/movement";
+import { RIDES, type RideId } from "@/lib/cars";
+import { me } from "@/lib/playerState";
+import { useMemo } from "react";
 import { naira } from "@/lib/plots";
 import { ActionRow, VoiceRoomCard } from "./parts";
 import PlotPanelBody from "./PlotPanel";
@@ -25,6 +28,20 @@ function PlaceBody({ id }: { id: string }) {
   const { hour } = useClock();
   const ev = eventFor(id, hour);
   const open = isOpen(id, hour);
+  const money = useGame((s) => s.money);
+  const px = Math.round(me.x);
+  const pz = Math.round(me.z);
+  const quotes = useMemo(() => {
+    void px;
+    void pz;
+    const rides = {} as Record<RideId, { fare: number; metres: number } | null>;
+    let walk = 0;
+    for (const r of RIDES) {
+      rides[r.id] = quoteRide(id, r.id);
+      if (rides[r.id]) walk = rides[r.id]!.metres;
+    }
+    return walk ? { rides, walk } : null;
+  }, [id, px, pz]);
 
   return (
     <>
@@ -47,19 +64,39 @@ function PlaceBody({ id }: { id: string }) {
       <p className="mt-3 text-sm text-stone-600">{place.blurb}</p>
 
       {!at && (
-        <div className="mt-4 grid grid-cols-[1fr_auto] gap-2">
+        <div className="mt-4">
+          <div className="flex items-start gap-2 rounded-2xl bg-stone-100 px-3.5 py-2.5 text-sm text-stone-700 ring-1 ring-black/5">
+            <MapPin className="mt-0.5 size-4 shrink-0 text-stone-500" />
+            <p>
+              <b className="font-semibold text-stone-900">{place.name}</b>, {place.district}, Ibadan, Oyo State
+              {quotes && <span className="text-stone-500"> · about {Math.round(quotes.walk)} m away</span>}
+            </p>
+          </div>
           <button
             onClick={() => walkToPlace(id)}
-            className="flex items-center justify-center gap-2 rounded-2xl bg-stone-900 py-3 text-sm font-semibold text-white transition hover:bg-stone-700 active:scale-[0.98]"
+            className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-stone-900 py-3 text-sm font-semibold text-white transition hover:bg-stone-700 active:scale-[0.98]"
           >
-            <Footprints className="size-4" /> Walk here
+            <Footprints className="size-4" /> Walk here · free
           </button>
-          <button
-            onClick={() => rideToPlace(id)}
-            className="rounded-2xl bg-amber-100 px-4 py-3 text-sm font-semibold text-amber-900 ring-1 ring-amber-200 transition hover:bg-amber-200 active:scale-[0.98]"
-          >
-            🛺 Keke · {naira(KEKE_FARE)}
-          </button>
+          <p className="mb-1.5 mt-3 text-xs font-bold uppercase tracking-wide text-stone-400">Or pay for a ride</p>
+          <div className="grid grid-cols-3 gap-2">
+            {RIDES.map((r) => {
+              const q = quotes?.rides[r.id];
+              return (
+                <button
+                  key={r.id}
+                  disabled={!q || money < q.fare}
+                  onClick={() => rideToPlace(id, r.id)}
+                  className="flex flex-col items-center gap-0.5 rounded-2xl bg-amber-50 px-2 py-2.5 text-center ring-1 ring-amber-200 transition hover:bg-amber-100 active:scale-[0.97] disabled:opacity-45"
+                >
+                  <span className="text-xl leading-none">{r.emoji}</span>
+                  <span className="text-xs font-bold text-amber-950">{r.name}</span>
+                  <span className="text-[11px] font-semibold text-amber-800">{q ? (q.fare ? naira(q.fare) : "Free") : "-"}</span>
+                  <span className="text-[10px] text-amber-700/80">{q ? `${Math.max(1, Math.round(q.metres / (r.speed * 25)))} min` : ""}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
 
@@ -130,7 +167,7 @@ export default function SidePanel() {
   const setFlip = (v: string | null) => useGame.getState().patch({ panelFlip: v });
   const shown = interior ? { type: "interior", id: `${interior.kind}:${interior.id}` } : selected;
   const key = shown ? `${shown.type}:${shown.id}` : "";
-  const busy = useGame((s) => !!s.busy);
+  const busy = useGame((s) => !!s.busy || !!s.ride);
   // folded on phones while you are doing something, so you can watch your character
   const min = busy || (interior ? flip !== key : flip === key);
   const setMin = () => setFlip(flip === key ? null : key);

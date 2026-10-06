@@ -8,12 +8,11 @@ import { DISTRICTS, PLACES } from "@/lib/places";
 import { PLOTS, naira } from "@/lib/plots";
 import { me, remoteMotion } from "@/lib/playerState";
 import { useGame } from "@/lib/store";
-import { walkToPlace } from "@/lib/movement";
 import { colorFor } from "@/lib/look";
 import { NPCS, sameSpace } from "./People";
-import { FURN, S } from "@/lib/furniture";
+import { S } from "@/lib/furniture";
 import { interiorKey } from "@/lib/interiors";
-import { rt, walkToExit, walkToFurn } from "@/lib/interiorRuntime";
+import { rt, walkToExit } from "@/lib/interiorRuntime";
 import { TAG_Y } from "./Player";
 import { useClock } from "@/lib/hooks";
 import { isOpen } from "@/lib/events";
@@ -60,11 +59,8 @@ function PlaceLabels() {
         return (
           <Anchored key={p.id} id={`place:${p.id}`} get={(o) => o.set(p.pos[0], p.size[1] + 0.9, p.pos[1])} maxCam={46}>
             <button
-              onClick={() => {
-                useGame.getState().select({ type: "place", id: p.id });
-                walkToPlace(p.id);
-              }}
-              className={`pointer-events-auto flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] font-semibold shadow-lg ring-1 backdrop-blur transition-all duration-300 hover:scale-105 ${
+              onClick={() => useGame.getState().select({ type: "place", id: p.id })}
+              className={`${sel || here ? "" : "max-sm:hidden"} pointer-events-auto flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] font-semibold shadow-lg ring-1 backdrop-blur transition-all duration-300 hover:scale-105 ${
                 sel
                   ? "scale-110 bg-amber-500 text-white ring-amber-600"
                   : here
@@ -97,7 +93,7 @@ function PlotLabels() {
           <Anchored key={p.id} id={`plot:${p.id}`} get={(o) => o.set(p.pos[0], state && state.tier > 0 ? 2.1 : 1.15, p.pos[1])} maxCam={28}>
             <button
               onClick={() => useGame.getState().select({ type: "plot", id: p.id })}
-              className={`pointer-events-auto whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-bold shadow-md ring-1 transition hover:scale-105 ${
+              className={`${sel ? "" : "max-sm:hidden"} pointer-events-auto whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-bold shadow-md ring-1 transition hover:scale-105 ${
                 sel ? "bg-amber-500 text-white ring-amber-600" : state ? "text-white ring-black/10" : "bg-emerald-50 text-emerald-800 ring-emerald-200"
               }`}
               style={state && !sel ? { background: colorFor(state.ownerId) } : undefined}
@@ -116,7 +112,7 @@ function DistrictLabels() {
     <>
       {DISTRICTS.map((d) => (
         <Anchored key={d.name} id={`district:${d.name}`} get={(o) => o.set(d.pos[0], 0.1, d.pos[1])} minCam={15}>
-          <span className="whitespace-nowrap text-[10px] font-bold uppercase tracking-[0.25em] text-stone-900/35">{d.name}</span>
+          <span className="whitespace-nowrap text-[10px] font-bold uppercase tracking-[0.25em] text-stone-900/35 max-sm:hidden">{d.name}</span>
         </Anchored>
       ))}
     </>
@@ -201,20 +197,6 @@ function InteriorLabels() {
           ↩ Exit
         </button>
       </Anchored>
-      {layout.items.map((it, i) => {
-        const def = FURN[it.kind];
-        if (!def.use) return null;
-        return (
-          <Anchored key={`f${i}`} id={`furn:${i}`} get={(o) => o.set(it.x * S, ((def.h || 0.9) + 0.3) * S, it.z * S)} maxDist={3.2}>
-            <button
-              onClick={() => walkToFurn(i)}
-              className="pointer-events-auto whitespace-nowrap rounded-full bg-white/92 px-2.5 py-1 text-[11px] font-semibold text-stone-800 shadow-md ring-1 ring-black/5 transition hover:scale-105 hover:bg-emerald-50"
-            >
-              {it.verb ?? def.use.verb}
-            </button>
-          </Anchored>
-        );
-      })}
       {(layout.residents ?? []).map((r) => (
         <Anchored key={`r${r.name}`} id={`res:${r.name}`} get={(o) => o.set(r.x * S, TAG_Y, r.z * S)} maxDist={9}>
           <NameTag name={r.name} bubbleId={`res:${r.name}`} tone="other" dim />

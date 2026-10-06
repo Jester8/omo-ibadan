@@ -64,10 +64,40 @@ export default function CarModel({ kind, color, remoteId }: { kind: CarKind; col
     );
   }
 
+  if (kind === "okada") {
+    return (
+      <group>
+        <mesh position={[0, 0.2, 0]} castShadow>
+          <boxGeometry args={[0.09, 0.09, 0.52]} />
+          {paintEl}
+        </mesh>
+        <mesh position={[0, 0.31, 0.1]} castShadow>
+          <boxGeometry args={[0.15, 0.1, 0.22]} />
+          {paintEl}
+        </mesh>
+        <mesh position={[0, 0.26, -0.12]} material={dark} castShadow>
+          <boxGeometry args={[0.13, 0.04, 0.3]} />
+        </mesh>
+        <mesh position={[0, 0.4, 0.24]} material={dark}>
+          <boxGeometry args={[0.34, 0.025, 0.025]} />
+        </mesh>
+        <mesh position={[0, 0.26, 0.28]} rotation-x={-0.35} material={dark}>
+          <boxGeometry args={[0.03, 0.3, 0.03]} />
+        </mesh>
+        <mesh position={[0, 0.34, 0.31]} material={head}>
+          <boxGeometry args={[0.07, 0.07, 0.03]} />
+        </mesh>
+        <Wheel remoteId={remoteId} x={0} y={0.09} z={0.34} r={0.09} />
+        <Wheel remoteId={remoteId} x={0} y={0.09} z={-0.3} r={0.09} />
+      </group>
+    );
+  }
+
+  const micra = kind === "micra";
   const suv = kind === "suv";
-  const L = suv ? 1.15 : 1.05;
-  const W = suv ? 0.58 : 0.52;
-  const H = suv ? 0.26 : 0.2;
+  const L = micra ? 0.86 : suv ? 1.15 : 1.05;
+  const W = micra ? 0.5 : suv ? 0.58 : 0.52;
+  const H = suv ? 0.26 : micra ? 0.19 : 0.2;
   const r = suv ? 0.1 : 0.085;
   return (
     <group>
@@ -76,11 +106,11 @@ export default function CarModel({ kind, color, remoteId }: { kind: CarKind; col
         {paintEl}
         </mesh>
       <mesh position={[0, 0.1 + H + 0.04 + (suv ? 0.12 : 0.085), suv ? -0.04 : -0.06]} castShadow>
-        <boxGeometry args={[W - 0.06, suv ? 0.24 : 0.17, suv ? L * 0.68 : L * 0.5]} />
+        <boxGeometry args={[W - 0.06, suv ? 0.24 : 0.17, suv ? L * 0.68 : micra ? L * 0.62 : L * 0.5]} />
         {paintEl}
         </mesh>
       <mesh position={[0, 0.1 + H + 0.04 + (suv ? 0.13 : 0.09), suv ? -0.04 : -0.06]} material={glass}>
-        <boxGeometry args={[W - 0.02, suv ? 0.15 : 0.1, suv ? L * 0.69 : L * 0.46]} />
+        <boxGeometry args={[W - 0.02, suv ? 0.15 : 0.1, suv ? L * 0.69 : micra ? L * 0.63 : L * 0.46]} />
       </mesh>
       <mesh position={[0, 0.1 + H * 0.6, L / 2]} material={head}>
         <boxGeometry args={[W - 0.08, 0.04, 0.02]} />

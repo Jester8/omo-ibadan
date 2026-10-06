@@ -6,7 +6,6 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { PLACES, type Place } from "@/lib/places";
 import { useGame } from "@/lib/store";
-import { walkToPlace } from "@/lib/movement";
 import { facadeMaterials, lampMat, mat, signMat, windowMats } from "./materials";
 
 type V3 = [number, number, number];
@@ -566,7 +565,6 @@ function PlaceBuilding({ place }: { place: Place }) {
           if (e.delta > 6) return;
           e.stopPropagation();
           useGame.getState().select({ type: "place", id: place.id });
-          walkToPlace(place.id);
         }}
       >
         <Style size={place.size} color={place.color} />

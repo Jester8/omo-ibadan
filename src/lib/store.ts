@@ -5,7 +5,7 @@ import { type ActionDef, type Needs } from "./places";
 import { TIERS, plotById, RENT_CAP_MIN, naira, PLOTS, NPC_PLOTS } from "./plots";
 import type { InteriorRef } from "./interiors";
 import type { Rel } from "./romance";
-import { carById } from "./cars";
+import { carById, type RideId } from "./cars";
 import { eventFor, isOpen, opensAt } from "./events";
 import { gameMinutes } from "./time";
 import { decorById, MAX_PER_KIND, withDecor } from "./decor";
@@ -115,6 +115,8 @@ type State = {
   timeMode: "auto" | "day" | "night";
   placesOnly: boolean;
   deck: boolean;
+  computer: boolean;
+  ride: RideId | null;
   hideCard: boolean;
   hideIcons: boolean;
   panelFlip: string | null;
@@ -226,6 +228,8 @@ export const useGame = create<State>()(
       timeMode: "auto",
       placesOnly: false,
       deck: false,
+      computer: false,
+      ride: null,
       hideCard: false,
       hideIcons: false,
       panelFlip: null,

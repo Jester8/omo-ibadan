@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { carById } from "@/lib/cars";
+import { vehicleKind } from "@/lib/cars";
 import CarModel from "./CarModel";
 import Avatar from "@/components/avatar/Avatar";
 import { AVATAR_SCALE } from "./Player";
@@ -27,10 +27,11 @@ const angleDiff = (a: number, b: number) => {
 function Remote({ id }: { id: string }) {
   const look = useGame((s) => s.remotes[id]?.look);
   const car = useGame((s) => s.remotes[id]?.car);
-  const carDef = carById(car?.id);
+  const kind = vehicleKind(car?.id);
   const g = useRef<THREE.Group>(null);
-  const motion = useRef<{ speed: number; emote: "wave" | "dance" | null }>({ speed: 0, emote: null });
+  const motion = useRef<{ speed: number; emote: "wave" | "dance" | null; pose: "sit" | null }>({ speed: 0, emote: null, pose: null });
   useFrame((_, dt) => {
+    motion.current.pose = useGame.getState().remotes[id]?.car?.id === "okada" ? "sit" : null;
     const em = emotes.get(id);
     motion.current.emote = em && em.until > Date.now() ? em.e : null;
     const r = remoteMotion.get(id);
@@ -47,10 +48,10 @@ function Remote({ id }: { id: string }) {
   if (!look) return null;
   return (
     <group ref={g}>
-      <group visible={!carDef}>
+      <group visible={!kind} position-y={car?.id === "okada" ? -0.18 : 0}>
         <Avatar look={look} motion={motion} scale={AVATAR_SCALE} />
       </group>
-      {carDef && car && <CarModel kind={carDef.kind} color={car.color} remoteId={id} />}
+      {kind && car && <CarModel kind={kind} color={car.color} remoteId={id} />}
     </group>
   );
 }

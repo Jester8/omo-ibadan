@@ -23,7 +23,7 @@ export type UseDef = {
   seatH?: number;
   needsPower?: boolean;
   action?: ActionDef;
-  special?: "generator" | "deck";
+  special?: "generator" | "deck" | "computer";
 };
 
 export type FurnDef = {
@@ -57,7 +57,7 @@ export const FURN: Record<FurnKind, FurnDef> = {
   desk: { w: 1.3, d: 0.65, h: 0.75, solid: true },
   pcdesk: {
     w: 1.3, d: 0.65, h: 1.1, solid: true,
-    use: { verb: "Work at the desk", needsPower: true, action: { id: "deskwork", label: "Work at the desk", secs: 6, gain: { energy: -18 }, pay: 3000, rep: 1 } },
+    use: { verb: "Use the computer", needsPower: true, special: "computer" },
   },
   counter: { w: 1.6, d: 0.65, h: 1.0, solid: true },
   bar: { w: 2.4, d: 0.7, h: 1.1, solid: true },

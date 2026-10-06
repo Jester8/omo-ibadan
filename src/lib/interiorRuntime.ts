@@ -247,6 +247,10 @@ export function startUse(index: number) {
     s.toast("No light. Fuel the generator or wait for NEPA.", "bad");
     return;
   }
+  if (def.special === "computer") {
+    useGame.setState({ computer: true });
+    return;
+  }
   if (def.special === "deck") {
     climbTower();
     return;

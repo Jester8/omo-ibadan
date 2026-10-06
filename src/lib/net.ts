@@ -2,6 +2,7 @@ import type { C2S, PeerInfo, S2C } from "./protocol";
 import { hooks, useGame } from "./store";
 import { emotes, remoteMotion } from "./playerState";
 import { audio } from "./audio";
+import { rideById } from "./cars";
 import { currentToken, ensureToken, pullState, pushState } from "./api";
 import type { Policy } from "./protocol";
 import { voice } from "./voice";
@@ -203,11 +204,12 @@ function openSocket() {
 /** Tell everyone which car (if any) we are driving. */
 function sendCar() {
   const s = useGame.getState();
-  send({ t: "car", car: s.driving && s.activeCar ? { id: s.activeCar, color: s.carColors[s.activeCar] ?? "#cccccc" } : null });
+  const hired = s.ride ? rideById(s.ride) : undefined;
+  send({ t: "car", car: s.driving && s.activeCar ? { id: s.activeCar, color: s.carColors[s.activeCar] ?? "#cccccc" } : hired ? { id: hired.id, color: hired.color } : null });
 }
 let lastCar = "";
 useGame.subscribe((s) => {
-  const key = `${s.driving}|${s.activeCar}|${s.activeCar ? s.carColors[s.activeCar] : ""}`;
+  const key = `${s.ride}|${s.driving}|${s.activeCar}|${s.activeCar ? s.carColors[s.activeCar] : ""}`;
   if (key === lastCar) return;
   lastCar = key;
   if (ws?.readyState === WebSocket.OPEN) sendCar();

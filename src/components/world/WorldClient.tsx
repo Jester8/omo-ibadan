@@ -8,6 +8,7 @@ import SidePanel from "@/components/ui/PlacePanel";
 import ChatDock from "@/components/ui/ChatDock";
 import Sheets from "@/components/ui/Sheets";
 import DeckPanel from "@/components/ui/DeckPanel";
+import ComputerScreen from "@/components/ui/ComputerScreen";
 import Minimap from "@/components/ui/Minimap";
 import ViewControls from "@/components/ui/ViewControls";
 import AudioBridge from "@/components/ui/AudioBridge";
@@ -152,6 +153,7 @@ export default function WorldClient() {
           {!hideIcons && <TalkButton />}
           <Sheets />
           <DeckPanel />
+          <ComputerScreen />
           <VoiceBar />
           {!hideIcons && <Minimap />}
           {!hideIcons && <ViewControls />}

@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { DECK_Y } from "@/lib/interiorRuntime";
-import { carById } from "@/lib/cars";
+import { carById, rideById } from "@/lib/cars";
 import CarModel from "./CarModel";
 import Avatar from "@/components/avatar/Avatar";
 import { useGame } from "@/lib/store";
@@ -42,6 +42,7 @@ export default function Player() {
   const profile = useGame((s) => s.profile);
   const driving = useGame((s) => s.driving && !s.interior);
   const car = useGame((s) => carById(s.activeCar));
+  const ride = useGame((s) => (s.ride && !s.interior ? s.ride : null));
   const carColor = useGame((s) => (s.activeCar ? s.carColors[s.activeCar] : undefined));
   const group = useRef<THREE.Group>(null);
   const marker = useRef<THREE.Mesh>(null);
@@ -108,14 +109,14 @@ export default function Player() {
         return;
       }
     }
-    motion.current.pose = null;
+    motion.current.pose = s.ride === "okada" && !s.interior ? "sit" : null;
     const em = emotes.get("me");
     motion.current.emote = em && em.until > Date.now() && !me.path.length ? em.e : null;
 
     const energy = s.needs.energy;
     const tired = energy < 3 ? 0.4 : energy < 15 ? 0.65 : 1;
     const ownCar = s.driving && !s.interior ? carById(s.activeCar) : undefined;
-    const base = s.interior ? 2.2 * tired : ownCar ? ownCar.speed : me.ride ? 8.5 : Date.now() < boost.until ? 6.5 : 3.1 * tired;
+    const base = s.interior ? 2.2 * tired : ownCar ? ownCar.speed : me.ride ? rideById(s.ride)?.speed ?? 8.5 : Date.now() < boost.until ? 6.5 : 3.1 * tired;
     let moving = false;
     let tx = me.ry;
 
@@ -181,6 +182,7 @@ export default function Player() {
     if (!me.path.length) {
       me.goalPlace = null;
       me.ride = false;
+      if (s.ride) useGame.setState({ ride: null });
       // arrived at a piece of furniture or the exit mat
       if (!s.busy && !moving) {
         if (me.pendingUse !== null) {
@@ -222,10 +224,11 @@ export default function Player() {
   return (
     <>
       <group ref={group}>
-        <group visible={!driving}>
+        <group visible={!driving && (!ride || ride === "okada")} position-y={ride === "okada" ? -0.18 : 0}>
           <Avatar look={profile.look} motion={motion} scale={AVATAR_SCALE} />
         </group>
         {driving && car && <CarModel kind={car.kind} color={carColor ?? car.colors[0]} />}
+        {!driving && ride && <CarModel kind={ride} color={rideById(ride)!.color} />}
       </group>
       <mesh ref={marker} rotation-x={-Math.PI / 2} visible={false}>
         <ringGeometry args={[0.22, 0.3, 28]} />
