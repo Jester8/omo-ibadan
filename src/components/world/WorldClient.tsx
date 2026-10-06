@@ -27,7 +27,9 @@ import { QUESTS } from "@/lib/quests";
 import { naira } from "@/lib/plots";
 import { useMounted } from "@/lib/hooks";
 import { net, roomOf } from "@/lib/net";
-import { introInfo, signUp } from "@/lib/api";
+import { introInfo, requestCode, type Verified } from "@/lib/api";
+import AuthCode from "@/components/ui/AuthCode";
+import type { Look } from "@/lib/look";
 import { introToGame, playIntroOnce } from "@/lib/music";
 import { voice } from "@/lib/voice";
 import { streetRoom } from "@/lib/voiceRoom";
@@ -179,6 +181,7 @@ export default function WorldClient() {
   const fade = useGame((s) => s.fade);
   const hideIcons = useGame((s) => s.hideIcons);
   const [creating, setCreating] = useState(false);
+  const [pending, setPending] = useState<{ name: string; look: Look; email: string; devCode?: string; cooldown: number } | null>(null);
   const [signupError, setSignupError] = useState("");
   const [signingUp, setSigningUp] = useState(false);
 
@@ -219,13 +222,28 @@ export default function WorldClient() {
           <AuthScreen
             key="auth"
             onSignup={() => setCreating(true)}
-            onLoggedIn={(p) => {
-              // an account made before looks were stored falls back to the creator, keeping the name
+            onLoggedIn={(p: Verified) => {
+              // an account made before looks were stored falls back to the creator
               if (!p.look) {
                 setCreating(true);
                 return;
               }
               setProfile({ id: p.id, name: p.name, look: p.look, email: p.email });
+            }}
+          />
+        )}
+        {mounted && !profile && pending && (
+          <AuthCode
+            key="code"
+            email={pending.email}
+            purpose="signup"
+            signup={{ name: pending.name, look: pending.look }}
+            devCode={pending.devCode}
+            cooldown={pending.cooldown}
+            onBack={() => setPending(null)}
+            onVerified={(p) => {
+              setProfile({ id: p.id, name: p.name, look: p.look ?? pending.look, email: p.email });
+              setPending(null);
             }}
           />
         )}
@@ -241,13 +259,12 @@ export default function WorldClient() {
             busy={signingUp}
             onDone={async (name, look, email) => {
               if (profile) return setProfile({ ...profile, name, look });
-              const id = crypto.randomUUID().replace(/-/g, "").slice(0, 20);
               setSigningUp(true);
               setSignupError("");
-              const r = await signUp(id, name, email, look);
+              const r = await requestCode(email, "signup");
               setSigningUp(false);
-              if (r === "taken") return setSignupError("That email is already registered. Use a different one.");
-              setProfile({ id, name, look, email });
+              if (!r.ok) return setSignupError(r.error);
+              setPending({ name, look, email, devCode: r.devCode, cooldown: r.cooldown });
             }}
           />
         )}

@@ -12,6 +12,12 @@ export const config = {
   requireAuth: process.env.REQUIRE_AUTH === "1",
   origins: list(process.env.ALLOWED_ORIGINS, "http://localhost:3000,http://localhost:3100"),
   production: process.env.NODE_ENV === "production",
+  /** e.g. smtps://user:pass@smtp.example.com:465 . Without it, codes are only printed to the server log (development). */
+  smtpUrl: process.env.SMTP_URL ?? "",
+  mailFrom: process.env.MAIL_FROM ?? "Omo Ibadan <no-reply@omoibadan.app>",
+  /** voice relay (coturn "use-auth-secret"). Leave empty to use STUN only. */
+  turnUrls: (process.env.TURN_URLS ?? "").split(",").map((s) => s.trim()).filter(Boolean),
+  turnSecret: process.env.TURN_SECRET ?? "",
   /** reviews uploaded tracks; MUST be set to something long and secret in production */
   adminToken: process.env.ADMIN_TOKEN ?? "dev-admin-token",
   /** the intro song lives outside git; in production it is only served when you assert you hold the licence */

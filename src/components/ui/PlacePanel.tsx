@@ -4,6 +4,7 @@ import { climbTower } from "@/lib/interiorRuntime";
 import { closesAt, eventFor, isOpen, opensAt } from "@/lib/events";
 import NpcPanel from "./NpcPanel";
 import GatePanel from "./GatePanel";
+import PlayerPanel from "./PlayerPanel";
 import CabPanel from "./CabPanel";
 import { AnimatePresence, motion } from "motion/react";
 import { DoorOpen, Footprints, MapPin, X } from "lucide-react";
@@ -194,7 +195,7 @@ export default function SidePanel() {
             {min && !busy ? "Show panel" : ""}
           </button>
           <div className={min ? "max-sm:hidden" : ""}>
-            {interior ? <InteriorPanel /> : selected?.type === "place" ? <PlaceBody id={selected.id} /> : selected?.type === "npc" ? <NpcPanel id={selected.id} /> : selected?.type === "gate" ? <GatePanel id={selected.id} /> : selected?.type === "cab" ? <CabPanel id={selected.id} /> : selected ? <PlotPanelBody id={selected.id} /> : null}
+            {interior ? <InteriorPanel /> : selected?.type === "place" ? <PlaceBody id={selected.id} /> : selected?.type === "npc" ? <NpcPanel id={selected.id} /> : selected?.type === "player" ? <PlayerPanel id={selected.id} /> : selected?.type === "gate" ? <GatePanel id={selected.id} /> : selected?.type === "cab" ? <CabPanel id={selected.id} /> : selected ? <PlotPanelBody id={selected.id} /> : null}
           </div>
         </motion.aside>
       )}

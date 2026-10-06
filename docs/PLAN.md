@@ -83,5 +83,11 @@ Owners can buy decor (plants, lamps, rugs, adire wall hangings, calabash, carved
 - Bodija Market is now very large with a crowd of market women inside and outside; Dugbe and Sango too.
 - Life guide PDF: docs/Omo-Ibadan-Life-Guide.pdf.
 
+## Round 9 (done)
+- Auth: emailed one-time codes for sign up and log in, 30-day tokens, no more name-based log in, guest tokens can no longer be requested for someone else's id.
+- Social: friends and requests, blocks, direct messages (saved, live, unread counts), presence, saved room chat with history, player profile cards (tap a player).
+- Voice: ICE settings from the server, with TURN credentials when configured.
+- Frontend: bottom bar is Home, Phone, Friends, Me with a sliding active indicator; the phone has a home screen with Jobs, News, Messages, Calls, Maps, Goals, Buy, Flights, Music, Family and Guide.
+
 ## Ideas next
 Billboards/ads revenue, furniture and interiors, jobs with skills, events (match day, festivals), pets, daily quests, sound and music, avatar visual polish after a hands-on review.

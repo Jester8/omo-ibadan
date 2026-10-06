@@ -33,32 +33,50 @@ export async function ensureToken(): Promise<string | null> {
 
 export const currentToken = () => cached;
 
-/** Create the account. "taken" means that email already belongs to someone; "offline" lets play continue locally. */
-export async function signUp(pid: string, name: string, email: string, look?: unknown): Promise<"ok" | "taken" | "offline"> {
+/** Step 1: email a six-digit code. In local development with no mail server, the server also returns the code (devCode). */
+export async function requestCode(email: string, purpose: "login" | "signup"): Promise<{ ok: true; devCode?: string; cooldown: number } | { ok: false; error: string }> {
   try {
-    const res = await fetch(`${apiBase()}/api/auth/signup`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ pid, name, email, look }), signal: AbortSignal.timeout(3500) });
-    if (res.status === 409) return "taken";
-    if (!res.ok) return "offline";
-    const out = (await res.json()) as { pid: string; token: string };
-    localStorage.setItem(KEY, JSON.stringify({ pid: out.pid, token: out.token }));
-    cached = out.token;
-    return "ok";
+    const res = await fetch(`${apiBase()}/api/auth/request-code`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, purpose }), signal: AbortSignal.timeout(8000) });
+    const j = (await res.json().catch(() => ({}))) as { devCode?: string; cooldown?: number; error?: string };
+    if (!res.ok) return { ok: false, error: j.error ?? "Could not send the code." };
+    return { ok: true, devCode: j.devCode, cooldown: j.cooldown ?? 30 };
   } catch {
-    return "offline";
+    return { ok: false, error: "Can't reach the server. Check your connection and try again." };
   }
 }
 
-/** Log back in with email + name. Returns the stored profile, or an error message to show. */
-export async function logIn(email: string, name: string): Promise<{ ok: true; profile: { id: string; name: string; look: Look | null; email: string } } | { ok: false; error: string }> {
+export type Verified = { id: string; name: string; look: Look | null; email: string; isNew: boolean };
+
+/** Step 2: check the code. An existing email logs in; a new one creates the account from the name and avatar. */
+export async function verifyCode(email: string, code: string, extra?: { name: string; look: Look }): Promise<{ ok: true; profile: Verified } | { ok: false; error: string }> {
   try {
-    const res = await fetch(`${apiBase()}/api/auth/login`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, name }), signal: AbortSignal.timeout(5000) });
-    const j = (await res.json().catch(() => ({}))) as { pid?: string; name?: string; look?: Look | null; token?: string; error?: string };
-    if (!res.ok || !j.pid || !j.token) return { ok: false, error: j.error ?? "Could not log in." };
+    const res = await fetch(`${apiBase()}/api/auth/verify`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, code, ...extra }), signal: AbortSignal.timeout(8000) });
+    const j = (await res.json().catch(() => ({}))) as { pid?: string; name?: string; look?: Look | null; token?: string; isNew?: boolean; error?: string };
+    if (!res.ok || !j.pid || !j.token) return { ok: false, error: j.error ?? "Could not verify the code." };
     localStorage.setItem(KEY, JSON.stringify({ pid: j.pid, token: j.token }));
     cached = j.token;
-    return { ok: true, profile: { id: j.pid, name: j.name ?? name, look: j.look ?? null, email } };
+    return { ok: true, profile: { id: j.pid, name: j.name ?? extra?.name ?? "", look: j.look ?? extra?.look ?? null, email, isNew: !!j.isNew } };
   } catch {
     return { ok: false, error: "Can't reach the server. Check your connection and try again." };
+  }
+}
+
+let ice: { at: number; cfg: RTCConfiguration } | null = null;
+
+/** STUN, plus a TURN relay with short-lived credentials when the server has one. Cached for an hour. */
+export async function getIce(): Promise<RTCConfiguration> {
+  if (ice && Date.now() - ice.at < 3600_000) return ice.cfg;
+  const fallback: RTCConfiguration = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun1.l.google.com:19302" }] };
+  try {
+    const token = cached ?? (await ensureToken());
+    if (!token) return fallback;
+    const r = await fetch(`${apiBase()}/api/rtc`, { headers: { authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(3000) });
+    if (!r.ok) return fallback;
+    const cfg = (await r.json()) as RTCConfiguration;
+    ice = { at: Date.now(), cfg };
+    return cfg;
+  } catch {
+    return fallback;
   }
 }
 

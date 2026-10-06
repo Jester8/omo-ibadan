@@ -1,5 +1,6 @@
 import type { C2S } from "./protocol";
 import { useGame } from "./store";
+import { getIce } from "./api";
 
 /**
  * Peer-to-peer voice using WebRTC, with the game server as the signalling channel.
@@ -37,8 +38,11 @@ class Voice {
     useGame.setState({ voice: { ...prev, room: this.room, muted: this.muted, peers: [...this.peers.keys()] } });
   }
 
+  private ice: RTCConfiguration = ICE;
+
   async join(room: string): Promise<boolean> {
     if (this.room === room) return true;
+    this.ice = await getIce();
     if (this.room) this.leave();
     if (!navigator.mediaDevices?.getUserMedia) {
       useGame.getState().toast("Voice needs a secure (https) page and a microphone.", "bad");
@@ -127,7 +131,7 @@ class Voice {
 
   private async connect(id: string, initiator: boolean): Promise<Peer | undefined> {
     if (this.peers.has(id) || !this.stream) return this.peers.get(id);
-    const pc = new RTCPeerConnection(ICE);
+    const pc = new RTCPeerConnection(this.ice);
     const audio = new Audio();
     audio.autoplay = true;
     const peer: Peer = { pc, audio, pending: [] };

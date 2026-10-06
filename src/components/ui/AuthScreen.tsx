@@ -3,20 +3,20 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowRight, ChevronLeft, Mail, Music2, UserRound, Volume2, VolumeX } from "lucide-react";
-import { introInfo, logIn, type IntroInfo } from "@/lib/api";
+import { ArrowRight, ChevronLeft, Mail, Music2, Volume2, VolumeX } from "lucide-react";
+import { introInfo, requestCode, type IntroInfo, type Verified } from "@/lib/api";
+import AuthCode from "./AuthCode";
 import { setIntroMuted, startIntro } from "@/lib/music";
-import type { Look } from "@/lib/look";
 
-type Step = "intro" | "choose" | "login";
+type Step = "intro" | "choose" | "login" | "code";
 
 /** First screen: the intro song, then Sign up (name, email, avatar) or Log in (email and name). */
-export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => void; onLoggedIn: (p: { id: string; name: string; look: Look | null; email: string }) => void }) {
+export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => void; onLoggedIn: (p: Verified) => void }) {
   const [step, setStep] = useState<Step>("intro");
   const [info, setInfo] = useState<IntroInfo>({ available: false });
   const [muted, setMuted] = useState(false);
   const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
+  const [devCode, setDevCode] = useState<string | undefined>();
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -38,13 +38,17 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
     e.preventDefault();
     setBusy(true);
     setErr("");
-    const r = await logIn(email.trim().toLowerCase(), name.trim());
+    const r = await requestCode(email.trim().toLowerCase(), "login");
     setBusy(false);
-    if (r.ok) onLoggedIn(r.profile);
-    else setErr(r.error);
+    if (r.ok) {
+      setDevCode(r.devCode);
+      setStep("code");
+    } else setErr(r.error);
   };
 
   const field = "w-full rounded-2xl border-0 bg-white/90 px-4 py-3.5 text-base font-medium text-stone-900 outline-none ring-2 ring-transparent transition placeholder:text-stone-400 focus:ring-amber-400";
+
+  if (step === "code") return <AuthCode email={email.trim().toLowerCase()} purpose="login" devCode={devCode} onVerified={onLoggedIn} onBack={() => setStep("login")} />;
 
   return (
     <div className="absolute inset-0 z-50 overflow-hidden bg-gradient-to-b from-[#1b1a2e] via-[#3a2a3a] to-[#7a3b22] text-white">
@@ -121,20 +125,16 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
                 <ChevronLeft className="size-5" strokeWidth={2.4} /> Back
               </button>
               <h2 className="text-3xl font-extrabold tracking-tight">Log in</h2>
-              <p className="mt-1 text-white/70">Use the email and name you signed up with.</p>
-              <div className="mt-6 space-y-3">
+              <p className="mt-1 text-white/70">We will email you a 6-digit code. No password to remember.</p>
+              <div className="mt-6">
                 <div className="relative">
                   <Mail className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
                   <input type="email" autoComplete="email" inputMode="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" className={`${field} pl-11`} />
                 </div>
-                <div className="relative">
-                  <UserRound className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
-                  <input required value={name} onChange={(e) => setName(e.target.value.slice(0, 16))} placeholder="Your name in the game" className={`${field} pl-11`} />
-                </div>
               </div>
               {err && <p className="mt-3 rounded-xl bg-rose-500/25 px-3.5 py-2.5 text-sm font-medium text-rose-100">{err}</p>}
-              <button disabled={busy || !email || !name} className="mt-5 w-full rounded-2xl bg-amber-500 py-4 text-base font-extrabold text-stone-900 shadow-xl transition active:scale-[0.98] disabled:opacity-50">
-                {busy ? "Logging in…" : "Log in"}
+              <button disabled={busy || !email} className="mt-5 w-full rounded-2xl bg-amber-500 py-4 text-base font-extrabold text-stone-900 shadow-xl transition active:scale-[0.98] disabled:opacity-50">
+                {busy ? "Sending…" : "Email me a code"}
               </button>
               <p className="mt-4 text-center text-xs text-white/50">New here?{" "}
                 <button type="button" onClick={onSignup} className="font-semibold text-amber-300 underline">

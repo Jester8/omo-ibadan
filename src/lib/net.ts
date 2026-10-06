@@ -3,7 +3,8 @@ import { hooks, useGame } from "./store";
 import { emotes, remoteMotion } from "./playerState";
 import { audio } from "./audio";
 import { rideById } from "./cars";
-import { currentToken, ensureToken, pullState, pushState } from "./api";
+import { loadSocial, openThread } from "./social";
+import { currentToken, ensureToken, pullState, pushState, signOut } from "./api";
 import type { Policy } from "./protocol";
 import { voice } from "./voice";
 import { cleanChat } from "./moderation";
@@ -81,6 +82,44 @@ function handle(m: S2C) {
       s.addChat({ room: m.room, from: m.name, text: m.text, at: m.at, self, fromId: m.id, fromPid: pid }, self ? "me" : m.id);
       break;
     }
+    case "history": {
+      // recent chat from before you arrived, shown once per room
+      if (s.chat.some((c) => c.room === m.room)) break;
+      for (const h of m.messages) s.addChat({ room: m.room, from: h.name, text: h.text, at: h.at, self: h.pid === s.profile?.id, fromPid: h.pid });
+      break;
+    }
+    case "dm": {
+      const me = s.profile?.id;
+      const other = m.from === me ? m.to : m.from;
+      const msg = { id: m.id, from: m.from, to: m.to, text: m.text, at: m.at };
+      const reading = s.openChat === other && s.sheet === "friends";
+      useGame.setState((st) => ({
+        dms: { ...st.dms, [other]: [...(st.dms[other] ?? []), msg] },
+        threads: st.threads.some((t) => t.pid === other)
+          ? st.threads.map((t) => (t.pid === other ? { ...t, last: { text: m.text, at: m.at, mine: m.from === me }, unread: m.from === me || reading ? t.unread : t.unread + 1 } : t))
+          : st.threads,
+      }));
+      if (m.from !== me) {
+        if (reading) void openThread(other);
+        else {
+          if (!s.threads.some((t) => t.pid === other)) void loadSocial();
+          s.toast(`${m.fromName}: ${m.text.slice(0, 60)}`, "info");
+          audio.pop();
+        }
+      }
+      break;
+    }
+    case "dmError":
+      s.toast(m.error, "bad");
+      break;
+    case "friendEvent":
+      void loadSocial();
+      if (m.kind === "request") s.toast(`${m.name} sent you a friend request`, "info");
+      if (m.kind === "accepted") s.toast(`${m.name} is now your friend`, "good");
+      break;
+    case "presence":
+      useGame.setState((st) => ({ friends: st.friends.map((f) => (f.pid === m.pid ? { ...f, online: m.online } : f)), threads: st.threads.map((t) => (t.pid === m.pid ? { ...t, online: m.online } : t)) }));
+      break;
     case "plots":
       s.setPlots(m.plots);
       break;
@@ -177,6 +216,7 @@ function openSocket() {
     send({ t: "hello", pid: profile.id, name: profile.name, look: profile.look, token: currentToken() ?? undefined });
     sendCar();
     void pullState().then(() => pushState());
+    void loadSocial();
     if (autosave) clearInterval(autosave);
     autosave = setInterval(() => void pushState(), 30_000);
   };
@@ -188,8 +228,13 @@ function openSocket() {
     }
   };
   ws.onerror = () => ws?.close();
-  ws.onclose = () => {
+  ws.onclose = (ev) => {
     ws = null;
+    if (ev.code === 4401) {
+      want = false;
+      useGame.getState().toast("Your session has ended. Please log in again.", "bad");
+      setTimeout(() => void signOut(), 1500);
+    }
     if (autosave) clearInterval(autosave);
     remoteMotion.clear();
     if (useGame.getState().call.phase !== "idle") endCallLocal();
@@ -222,6 +267,9 @@ export const net = {
     if (timer) clearTimeout(timer);
     ws?.close();
     ws = null;
+  },
+  dm(to: string, text: string) {
+    send({ t: "dm", to, text });
   },
   /** Re-announce name/look after the avatar is edited. */
   hello() {

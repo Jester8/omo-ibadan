@@ -17,31 +17,49 @@ Requires **Node 22.13+** (built-in `node:sqlite`). Run: `npm run server`, or `np
 
 ## REST API
 
-| Method | Path | Auth | Purpose |
-|---|---|---|---|
-| GET | `/health` | no | liveness |
-| POST | `/api/auth/guest` | no | `{pid?, name?}` → `{pid, token}` |
-| GET | `/api/state` | Bearer token | the player's cloud save |
-| PUT | `/api/state` | Bearer token | `{name, state}` store progress (validated and clamped) |
+All routes except `/health`, auth and the public track list need `Authorization: Bearer <token>`.
 
-The browser gets its guest token automatically, autosaves every 30 s while online, and pulls a newer cloud
-save when you open the game on another device.
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/health` | liveness |
+| POST | `/api/auth/request-code` | `{email, purpose: "login"|"signup"}` emails a 6-digit code (10 min, 30 s resend gap, 5 per hour) |
+| POST | `/api/auth/verify` | `{email, code, name?, look?}` existing email logs in; a new one creates the account. Returns a 30-day token |
+| POST | `/api/auth/guest` | legacy anonymous players only; refuses an id that already exists |
+| GET / PUT | `/api/state` | cloud save |
+| GET | `/api/rtc` | ICE servers for voice: STUN, plus TURN with short-lived credentials when `TURN_URLS` + `TURN_SECRET` are set |
+| GET | `/api/friends` | friends (with online flag), incoming and outgoing requests, blocked ids |
+| POST | `/api/friends/request`, `/api/friends/respond` | send, accept or decline; `DELETE /api/friends/:pid` removes |
+| GET / POST / DELETE | `/api/blocks` | block list; blocking also unfriends |
+| GET | `/api/dm/threads`, `/api/dm/:pid` | conversations and history (marks read); `POST /api/dm/:pid` sends |
+| GET | `/api/players/:pid` | public profile card with your friendship status |
+| GET / POST / DELETE | `/api/tracks…`, `/api/admin/tracks…` | artist music platform |
+
+### WebSocket messages (selected)
+
+`hello` (with token) · `room` → server replies with `history` · `chat` (saved, blocked senders filtered) · `dm` (friends only) →
+`dm` echoed to both sides · `presence` to friends on connect/disconnect · `friendEvent` · `call` / `signal` / `voiceJoin` (voice).
+
+## Authentication
+
+* Sign up and log in both use an **emailed one-time code**. There are no passwords.
+* Without `SMTP_URL` (local development) the code is printed in the server log and returned as `devCode` so you can test.
+  In production (`NODE_ENV=production`) it is **never** returned.
+* Accounts with a verified email can only connect over the websocket with a valid token. Tokens expire after 30 days
+  and the client sends the player back to log in.
 
 ## Data
 
-SQLite tables: `players` (identity + JSON save), `plots` (land, tier, decor), `reports`, `elections`.
+SQLite tables: `players`, `auth_codes`, `plots`, `friendships`, `blocks`, `dms`, `room_messages`, `tracks`, `reports`, `elections`.
 Add a migration by creating `db/migrations/002_whatever.sql`; never edit one that has shipped.
 The first start imports an old `server/plots.json` if it exists.
 
 ## Security status (read before a public launch)
 
-* Tokens are **guest** tokens: they prove "same browser as before", not a person. Add real accounts
-  (email/Google) behind `issueToken`.
-* Set `AUTH_SECRET` (the server refuses to start in production without it) and `REQUIRE_AUTH=1`.
-* **Money and needs are still computed in the browser.** `PUT /api/state` clamps values but cannot stop a
-  determined cheater. The next step is server-authoritative actions (`runAction`, rent, purchases) so the
-  client only sends intents.
-* Voice is peer-to-peer WebRTC with public STUN; add a TURN server for restrictive networks.
+* Email codes prove an email address belongs to the player. Set `SMTP_URL`, `AUTH_SECRET` and `REQUIRE_AUTH=1` in production.
+* **Money and needs are still computed in the browser.** `PUT /api/state` clamps values but cannot stop a determined cheater.
+  The next step is server-authoritative actions (`runAction`, rent, purchases).
+* Chat is filtered with a short word list (`src/lib/moderation.ts`). Extend it for Yoruba and Pidgin and add review tools.
+* Voice is peer-to-peer WebRTC. Run a **TURN server** (coturn) and set `TURN_URLS` + `TURN_SECRET` so calls work on strict networks.
 
 ## Deploy
 

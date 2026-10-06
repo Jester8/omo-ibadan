@@ -11,6 +11,7 @@ import type { ActionDef } from "@/lib/places";
 import { TITLES, titleIndex } from "@/lib/titles";
 import { pendingRent, useGame } from "@/lib/store";
 import JobsPanel from "./JobsPanel";
+import { NEWS } from "@/lib/news";
 
 type App = "browser" | "mail" | "work" | "food";
 
@@ -33,13 +34,6 @@ const MEALS: ActionDef[] = [
   { id: "order-zobo", label: "Chilled zobo", secs: 2, cost: 500, gain: { hunger: 4, fun: 6 } },
 ];
 
-const NEWS = [
-  "Ring Road flyover to reopen after weekend of repairs",
-  "Shooting Stars confident ahead of derby at Lekan Salami",
-  "Bodija market traders celebrate record tomato harvest",
-  "NEPA promises 'stable light' (again) for Oke-Ado",
-  "Cocoa House turns 60: city plans night of lights",
-];
 
 export default function ComputerScreen() {
   const open = useGame((s) => s.computer);

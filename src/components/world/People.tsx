@@ -48,6 +48,18 @@ function Remote({ id }: { id: string }) {
   if (!look) return null;
   return (
     <group ref={g}>
+      {/* tap another player to open their card */}
+      <mesh
+        position-y={0.5}
+        onClick={(e) => {
+          if (e.delta > 6) return;
+          e.stopPropagation();
+          useGame.getState().select({ type: "player", id });
+        }}
+      >
+        <cylinderGeometry args={[0.34, 0.34, 1.1, 8]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+      </mesh>
       <group visible={!kind} position-y={car?.id === "okada" ? -0.18 : 0}>
         <Avatar look={look} motion={motion} scale={AVATAR_SCALE} />
       </group>

@@ -7,6 +7,7 @@ import type { InteriorRef } from "./interiors";
 import type { Rel } from "./romance";
 import { carById, type RideId } from "./cars";
 import { PASS_MS } from "./estates";
+import type { DmMsg, Person, Thread } from "./social";
 import { destById, FLIGHT_SECS } from "./flights";
 import { ESTATE_BY_ID } from "./world";
 import { eventFor, isOpen, opensAt } from "./events";
@@ -33,7 +34,7 @@ export type ChatMsg = {
   fromId?: string;
   fromPid?: string;
 };
-export type Selection = { type: "place" | "plot" | "npc" | "gate" | "cab"; id: string } | null;
+export type Selection = { type: "place" | "plot" | "npc" | "gate" | "cab" | "player"; id: string } | null;
 export type Food = "bowl" | "cup" | "snack";
 export type Busy = { label: string; start: number; secs: number; food?: Food; emote?: "dance" } | null;
 
@@ -118,6 +119,13 @@ type State = {
   timeMode: "auto" | "day" | "night";
   placesOnly: boolean;
   deck: boolean;
+  friends: Person[];
+  requestsIn: Person[];
+  requestsOut: Person[];
+  blocked: string[];
+  threads: Thread[];
+  dms: Record<string, DmMsg[]>;
+  openChat: string | null;
   ticket: string | null;
   flight: { dest: string } | null;
   bookTicket: (destId: string) => string | null;
@@ -240,6 +248,13 @@ export const useGame = create<State>()(
       timeMode: "auto",
       placesOnly: false,
       deck: false,
+      friends: [],
+      requestsIn: [],
+      requestsOut: [],
+      blocked: [],
+      threads: [],
+      dms: {},
+      openChat: null,
       ticket: null,
       flight: null,
       bookTicket: (destId) => {

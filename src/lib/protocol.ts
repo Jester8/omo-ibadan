@@ -47,6 +47,7 @@ export type C2S =
   | { t: "report"; id: string; reason: string }
   | { t: "emote"; e: "wave" | "dance" }
   | { t: "car"; car: { id: string; color: string } | null }
+  | { t: "dm"; to: string; text: string }
   | { t: "run"; slogan: string }
   | { t: "vote"; pid: string }
   | { t: "policy"; policy: Policy };
@@ -69,4 +70,9 @@ export type S2C =
   | { t: "hangup"; from: string }
   | { t: "online"; n: number }
   | { t: "emote"; id: string; e: "wave" | "dance" }
-  | { t: "election"; e: Election; myVote: string | null };
+  | { t: "election"; e: Election; myVote: string | null }
+  | { t: "dm"; id: number; from: string; to: string; text: string; at: number; fromName: string }
+  | { t: "friendEvent"; kind: "request" | "accepted" | "removed"; pid: string; name: string }
+  | { t: "presence"; pid: string; online: boolean }
+  | { t: "dmError"; error: string }
+  | { t: "history"; room: string; messages: { pid: string; name: string; text: string; at: number }[] };

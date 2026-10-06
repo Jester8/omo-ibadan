@@ -1,14 +1,19 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { randomUUID } from "node:crypto";
 import { config } from "../config";
-import { findByEmail, getState, putState, signUp, touchPlayer } from "../db/repo";
-import { issueToken, verifyToken } from "./auth";
+import { bumpAttempts, createVerifiedPlayer, deleteCode, getCode, getPlayer, getPlayerByEmail, getState, putState, saveCode, touchPlayer } from "../db/repo";
+import { issueToken, turnCredential, verifyToken } from "./auth";
+import { createHmac, randomInt, randomUUID, timingSafeEqual } from "node:crypto";
+import { sendCode } from "../mail";
+import { handleSocial } from "./social";
 import { handleTracks } from "./tracks";
 import { handleIntro } from "./intro";
 
 type Handler = (ctx: { req: IncomingMessage; body: unknown; pid: string | null; url: URL }) => { status?: number; json: unknown } | Promise<{ status?: number; json: unknown }>;
 
-const fails = new Map<string, { n: number; until: number }>();
+const ipCodes = new Map<string, { n: number; until: number }>();
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const hashCode = (email: string, code: string) => createHmac("sha256", config.authSecret).update(`${email}:${code}`).digest("hex");
+const same = (a: string, b: string) => a.length === b.length && timingSafeEqual(Buffer.from(a), Buffer.from(b));
 const hits = new Map<string, { n: number; reset: number }>();
 const limited = (ip: string) => {
   const now = Date.now();
@@ -50,44 +55,81 @@ const routes: Record<string, Handler> = {
   /** Guests get an id + token. Send the old id to keep an identity that already exists. */
   "POST /api/auth/guest": ({ body }) => {
     const b = (body ?? {}) as { pid?: unknown; name?: unknown };
-    const pid = typeof b.pid === "string" && /^[a-zA-Z0-9]{8,40}$/.test(b.pid) ? b.pid : randomUUID().replace(/-/g, "").slice(0, 20);
+    const asked = typeof b.pid === "string" && /^[a-zA-Z0-9]{8,40}$/.test(b.pid) ? b.pid : null;
+    // an id that already exists belongs to somebody: never hand out a token for it
+    if (asked && getPlayer(asked)) return { status: 409, json: { error: "That player already exists. Log in with your email." } };
+    const pid = asked ?? randomUUID().replace(/-/g, "").slice(0, 20);
     const name = String(b.name ?? "Guest").replace(/[\u0000-\u001f<>]/g, "").slice(0, 16) || "Guest";
     touchPlayer(pid, name);
     return { json: { pid, token: issueToken(pid) } };
   },
 
-  /** Name + email sign-up. An email can only ever belong to one player. */
-  "POST /api/auth/signup": ({ body }) => {
-    const b = (body ?? {}) as { pid?: unknown; name?: unknown; email?: unknown };
-    const pid = typeof b.pid === "string" && /^[a-zA-Z0-9]{8,40}$/.test(b.pid) ? b.pid : null;
+  /**
+   * Step 1 of sign up or log in: email a six-digit code.
+   * Log in never reveals whether an address has an account.
+   */
+  "POST /api/auth/request-code": async ({ body, req }) => {
+    const b = (body ?? {}) as { email?: unknown; purpose?: unknown };
     const email = String(b.email ?? "").trim().toLowerCase();
-    const name = String(b.name ?? "").replace(/[\u0000-\u001f<>]/g, "").trim().slice(0, 16);
-    if (!pid || name.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || email.length > 80) return { status: 400, json: { error: "invalid details" } };
-    const look = b && typeof (b as { look?: unknown }).look === "object" ? (b as { look: unknown }).look : null;
-    if (!signUp(pid, name, email, look)) return { status: 409, json: { error: "email already registered" } };
-    return { json: { pid, token: issueToken(pid) } };
+    if (!EMAIL.test(email) || email.length > 80) return { status: 400, json: { error: "Enter a valid email address." } };
+    const signup = b.purpose === "signup";
+    const exists = getPlayerByEmail(email);
+    if (signup && exists) return { status: 409, json: { error: "That email already has an account. Log in instead." } };
+    const ip = String(req.socket.remoteAddress);
+    const ipHit = ipCodes.get(ip);
+    const nowMs = Date.now();
+    if (ipHit && nowMs < ipHit.until && ipHit.n >= 20) return { status: 429, json: { error: "Too many codes requested. Try again later." } };
+    ipCodes.set(ip, { n: ipHit && nowMs < ipHit.until ? ipHit.n + 1 : 1, until: ipHit && nowMs < ipHit.until ? ipHit.until : nowMs + 3600_000 });
+    const prev = getCode(email);
+    if (prev && nowMs - prev.sent_at < 30_000) return { status: 429, json: { error: "Please wait 30 seconds before asking for another code." } };
+    if (prev && nowMs - prev.window_start < 3600_000 && prev.sends_window >= 5) return { status: 429, json: { error: "Too many codes for this email. Try again in an hour." } };
+    if (!signup && !exists) return { json: { ok: true, cooldown: 30 } }; // look the same as a real send
+    const code = String(randomInt(0, 1_000_000)).padStart(6, "0");
+    saveCode(email, hashCode(email, code), nowMs + 10 * 60_000, nowMs);
+    let delivered = false;
+    try {
+      delivered = await sendCode(email, code);
+    } catch (e) {
+      console.error("[mail]", e);
+      return { status: 502, json: { error: "We could not send the email. Please try again." } };
+    }
+    // only in development, with no mail server set up, the code is handed back so you can test
+    return { json: { ok: true, cooldown: 30, ...(!delivered && !config.production ? { devCode: code } : {}) } };
   },
 
-  /**
-   * Log back in with the email and the name you signed up with.
-   * NOTE: no password and no email verification yet, so anyone who knows both can log in as you.
-   * Add a one-time email code before a public launch.
-   */
-  "POST /api/auth/login": ({ body, req }) => {
-    const b = (body ?? {}) as { email?: unknown; name?: unknown };
+  /** Step 2: check the code. An existing email logs in; a new one creates the account (name + avatar). */
+  "POST /api/auth/verify": ({ body }) => {
+    const b = (body ?? {}) as { email?: unknown; code?: unknown; name?: unknown; look?: unknown };
     const email = String(b.email ?? "").trim().toLowerCase();
-    const name = String(b.name ?? "").trim().toLowerCase();
-    const key = `${req.socket.remoteAddress}|${email}`;
-    const now = Date.now();
-    const f = fails.get(key);
-    if (f && f.n >= 6 && now < f.until) return { status: 429, json: { error: "Too many tries. Wait a few minutes." } };
-    const row = email ? findByEmail(email) : undefined;
-    if (!row || row.name.toLowerCase() !== name) {
-      fails.set(key, { n: (f && now < f.until ? f.n : 0) + 1, until: now + 10 * 60_000 });
-      return { status: 401, json: { error: "We could not find that email and name together." } };
+    const code = String(b.code ?? "").trim();
+    const row = getCode(email);
+    if (!row || Date.now() > row.expires_at) return { status: 400, json: { error: "That code has expired. Ask for a new one." } };
+    if (row.attempts >= 5) return { status: 429, json: { error: "Too many wrong tries. Ask for a new code." } };
+    if (!/^\d{6}$/.test(code) || !same(row.code_hash, hashCode(email, code))) {
+      bumpAttempts(email);
+      return { status: 401, json: { error: "That code is not right." } };
     }
-    fails.delete(key);
-    return { json: { pid: row.pid, name: row.name, look: row.profile_json ? JSON.parse(row.profile_json) : null, token: issueToken(row.pid) } };
+    deleteCode(email);
+    const existing = getPlayerByEmail(email);
+    if (existing) {
+      return { json: { isNew: false, pid: existing.pid, name: existing.name, look: existing.profile_json ? JSON.parse(existing.profile_json) : null, token: issueToken(existing.pid) } };
+    }
+    const name = String(b.name ?? "").replace(/[\u0000-\u001f<>]/g, "").trim().slice(0, 16);
+    if (name.length < 2) return { status: 400, json: { error: "Choose a name (2 to 16 characters)." } };
+    const pid = randomUUID().replace(/-/g, "").slice(0, 20);
+    createVerifiedPlayer(pid, name, email, b.look && typeof b.look === "object" ? b.look : null);
+    return { json: { isNew: true, pid, name, look: b.look ?? null, token: issueToken(pid) } };
+  },
+
+  /** Voice relay settings: STUN, plus TURN with short-lived credentials when configured. */
+  "GET /api/rtc": ({ pid }) => {
+    if (!pid) return { status: 401, json: { error: "unauthorised" } };
+    const iceServers: { urls: string | string[]; username?: string; credential?: string }[] = [{ urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] }];
+    if (config.turnUrls.length && config.turnSecret) {
+      const username = `${Math.floor(Date.now() / 1000) + 6 * 3600}:${pid}`;
+      iceServers.push({ urls: config.turnUrls, username, credential: turnCredential(username) });
+    }
+    return { json: { iceServers } };
   },
 
   "GET /api/state": ({ pid }) => {
@@ -124,6 +166,7 @@ export async function handleHttp(req: IncomingMessage, res: ServerResponse) {
   if (handleIntro(req, res, url)) return;
   try {
     if (await handleTracks(req, res, url)) return;
+    if (await handleSocial(req, res, url)) return;
   } catch (e) {
     console.error("[tracks]", e);
     if (!res.headersSent) res.writeHead(500, { "content-type": "application/json" }).end(JSON.stringify({ error: "server error" }));
