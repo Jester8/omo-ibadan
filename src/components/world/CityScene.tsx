@@ -6,6 +6,7 @@ import * as THREE from "three";
 import Lighting from "./Lighting";
 import Terrain from "./Terrain";
 import Buildings from "./Buildings";
+import Gates from "./Gates";
 import PlotsLayer from "./PlotsLayer";
 import Player from "./Player";
 import { Npcs, RemotePlayers } from "./People";
@@ -17,7 +18,7 @@ import { walkTo } from "@/lib/movement";
 import InteriorScene from "@/components/interior/InteriorScene";
 
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
-const limits = (): [number, number] => (useGame.getState().interior ? [4, 30] : useGame.getState().deck ? [6, 75] : [9, 44]);
+const limits = (): [number, number] => (useGame.getState().interior ? [4, 30] : useGame.getState().deck ? [6, 75] : [9, 60]);
 
 function CameraRig() {
   const { camera, gl, size } = useThree();
@@ -130,6 +131,7 @@ function WorldContent() {
       <Lighting />
       <Terrain placesOnly={placesOnly} />
       <Buildings />
+      <Gates />
       {!placesOnly && <PlotsLayer />}
       {!placesOnly && <Npcs />}
       {/* invisible ground: click anywhere to walk */}

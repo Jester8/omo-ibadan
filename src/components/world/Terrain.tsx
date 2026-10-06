@@ -1,6 +1,7 @@
 "use client";
 
 import Skyline from "./Skyline";
+import { BLOCKS, ROAD_LINES, WORLD_HALF } from "@/lib/world";
 import CarModel from "./CarModel";
 import { audio } from "@/lib/audio";
 import { me, traffic } from "@/lib/playerState";
@@ -15,25 +16,7 @@ import { lampMat, mat } from "./materials";
 
 const noRaycast = () => null;
 
-const ROADS = [-20, -10, 0, 10, 20];
-const BLOCKS: { c: [number, number]; tint: string }[] = [
-  { c: [-15, -15], tint: "#dfe6f4" },
-  { c: [-5, -15], tint: "#f1e6d6" },
-  { c: [5, -15], tint: "#e3eed9" },
-  { c: [15, -15], tint: "#e3eed9" },
-  { c: [-15, -5], tint: "#ebe9de" },
-  { c: [-5, -5], tint: "#d6eed0" },
-  { c: [5, -5], tint: "#f0ead8" },
-  { c: [15, -5], tint: "#ece6ef" },
-  { c: [-15, 5], tint: "#f0e5d3" },
-  { c: [-5, 5], tint: "#e9e7e1" },
-  { c: [5, 5], tint: "#ebe7dc" },
-  { c: [15, 5], tint: "#e0eee4" },
-  { c: [-15, 15], tint: "#f0e8d0" },
-  { c: [-5, 15], tint: "#e3eed9" },
-  { c: [5, 15], tint: "#d9eed2" },
-  { c: [15, 15], tint: "#e3eed9" },
-];
+const ROADS = ROAD_LINES;
 
 let roadTexture: THREE.CanvasTexture | null = null;
 function getRoadTexture() {
@@ -59,7 +42,7 @@ function getRoadTexture() {
 function Roads() {
   const mats = useMemo(() => {
     const t = getRoadTexture().clone();
-    t.repeat.set(1, 52 / 4);
+    t.repeat.set(1, (WORLD_HALF * 2) / 4);
     t.needsUpdate = true;
     return new THREE.MeshStandardMaterial({ map: t, roughness: 0.95 });
   }, []);
@@ -68,10 +51,10 @@ function Roads() {
       {ROADS.map((r) => (
         <group key={r}>
           <mesh position={[r, 0.07, 0]} rotation-x={-Math.PI / 2} material={mats} receiveShadow raycast={noRaycast}>
-            <planeGeometry args={[1.7, 52]} />
+            <planeGeometry args={[1.7, WORLD_HALF * 2]} />
           </mesh>
           <mesh position={[0, 0.072, r]} rotation={[-Math.PI / 2, 0, Math.PI / 2]} material={mats} receiveShadow raycast={noRaycast}>
-            <planeGeometry args={[1.7, 52]} />
+            <planeGeometry args={[1.7, WORLD_HALF * 2]} />
           </mesh>
         </group>
       ))}
@@ -105,7 +88,7 @@ function makeTrees() {
   };
   const out: { x: number; z: number; s: number }[] = [];
   for (const b of BLOCKS) {
-    for (let k = 0; k < 40 && out.length < 150; k++) {
+    for (let k = 0; k < 40 && out.length < 620; k++) {
       const x = b.c[0] + (rnd() - 0.5) * 8.2;
       const z = b.c[1] + (rnd() - 0.5) * 8.2;
       if (rects.some((r) => Math.abs(x - r.x) < r.hw && Math.abs(z - r.z) < r.hd)) continue;
@@ -156,7 +139,7 @@ function Lamps() {
   const spots = useMemo(() => {
     const out: [number, number][] = [];
     for (const r of ROADS) {
-      for (let t = -22; t <= 22; t += 5.5) {
+      for (let t = -44; t <= 44; t += 5.5) {
         if (ROADS.some((q) => Math.abs(t - q) < 1.8)) continue;
         out.push([r + 1.15, t]);
         out.push([t, r - 1.15]);
@@ -191,9 +174,9 @@ function Lamps() {
 function Surroundings() {
   const hills = useMemo(() => {
     const out: { x: number; z: number; r: number; h: number; c: string }[] = [];
-    for (let i = 0; i < 20; i++) {
-      const a = (i / 20) * Math.PI * 2;
-      const rad = 38 + ((i * 7) % 5) * 2.2;
+    for (let i = 0; i < 30; i++) {
+      const a = (i / 30) * Math.PI * 2;
+      const rad = 62 + ((i * 7) % 5) * 2.4;
       out.push({ x: Math.cos(a) * rad, z: Math.sin(a) * rad, r: 6 + ((i * 3) % 4) * 1.4, h: 2.2 + ((i * 5) % 3) * 0.9, c: ["#b8d6a4", "#a9cd98", "#c3dcae"][i % 3] });
     }
     return out;
@@ -205,7 +188,7 @@ function Surroundings() {
           <sphereGeometry args={[1, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2]} />
         </mesh>
       ))}
-      <mesh position={[-33, 0.02, -2]} rotation-x={-Math.PI / 2} scale={[7, 11, 1]} raycast={noRaycast}>
+      <mesh position={[-58, 0.02, -4]} rotation-x={-Math.PI / 2} scale={[9, 16, 1]} raycast={noRaycast}>
         <circleGeometry args={[1, 48]} />
         <meshStandardMaterial color="#79c3e6" roughness={0.15} metalness={0.2} />
       </mesh>
@@ -226,6 +209,13 @@ const CARS: Car[] = [
   { hx: 20, hz: 20, speed: 2.8, offset: 40, color: "#3aa57a", danfo: false, ccw: true },
   { hx: 0, hz: 10, speed: 2.0, offset: 5, color: "#f2b632", danfo: true, ccw: false },
   { hx: 10, hz: 0, speed: 2.2, offset: 12, color: "#8a5adf", danfo: false, ccw: false },
+  { hx: 30, hz: 30, speed: 3.2, offset: 0, color: "#f2b632", danfo: true, ccw: false },
+  { hx: 30, hz: 30, speed: 3.0, offset: 90, color: "#4a90e2", danfo: false, ccw: true },
+  { hx: 40, hz: 40, speed: 3.6, offset: 20, color: "#f4f4f2", danfo: false, ccw: false },
+  { hx: 40, hz: 40, speed: 3.4, offset: 150, color: "#e85d4a", danfo: true, ccw: true },
+  { hx: 30, hz: 20, speed: 3.0, offset: 10, color: "#3aa57a", danfo: false, ccw: false, bike: false },
+  { hx: 40, hz: 30, speed: 4.0, offset: 40, color: "#2f9e6b", danfo: false, ccw: false, bike: true },
+  { hx: 10, hz: 30, speed: 3.8, offset: 70, color: "#e85d4a", danfo: false, ccw: true, bike: true },
   { hx: 10, hz: 10, speed: 3.4, offset: 60, color: "#2f9e6b", danfo: false, ccw: true, bike: true },
   { hx: 20, hz: 20, speed: 3.6, offset: 20, color: "#e85d4a", danfo: false, ccw: false, bike: true },
   { hx: 0, hz: 10, speed: 3.2, offset: 25, color: "#4a90e2", danfo: false, ccw: true, bike: true },

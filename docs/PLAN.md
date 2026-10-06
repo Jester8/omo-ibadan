@@ -57,5 +57,12 @@ Owners can buy decor (plants, lamps, rugs, adire wall hangings, calabash, carved
 - Dating: six women with friend/dating/girlfriend stages, chat, compliments, drinks, gifts, asking out, four date venues.
 - Cars: Ibadan Autos garage (keke, Corolla, RX 350, G-Wagon), colours, drive/park from the HUD.
 
+## Round 6 (done)
+- Ibadan is now 90 x 90 units (about 2.25 km a side): 9 roads each way, 64 blocks, city gates and district archways, 17 new places (UI faculties, Kenneth Dike Library, Trenchard Hall, Adeoyo hospital, Polytechnic, Olubadan's palace, Sango market, Iwo Road garage and more), 34 more house plots, an outer skyline.
+- Traffic: cars and okadas honk when they come at you and knock you down if they hit you; press H to honk your own vehicle.
+- Hired Micra is always wine-red.
+- Sign-up with name, email and avatar (email is unique, not yet verified).
+- Searchable jobs board in the phone and on the computer; call friends from the Friends tab.
+
 ## Ideas next
 Billboards/ads revenue, furniture and interiors, jobs with skills, events (match day, festivals), pets, daily quests, sound and music, avatar visual polish after a hands-on review.

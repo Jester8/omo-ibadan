@@ -509,6 +509,47 @@ export const KIND_COLORS: Record<PlaceKind, string> = {
 };
 
 /** Parks and greens are walkable; everything else is solid. */
+/* ------------------------- the wider city: campus, districts, more places ------------------------- */
+
+const A = (id: string, label: string, secs: number, o: Partial<ActionDef> = {}): ActionDef => ({ id, label, secs, ...o });
+
+PLACES.push(
+  { id: "ui-library", name: "Kenneth Dike Library", emoji: "📚", kind: "learn", district: "UI Campus", blurb: "Ibadan's great reading room. Silence, please.", pos: [-25, -26], size: [3.2, 2.4, 2.6], color: "#b08a5a", style: "hall", voice: true,
+    actions: [A("read", "Study quietly", 6, { gain: { energy: -8, fun: 4 }, rep: 2 }), A("shelve", "Library assistant shift", 6, { gain: { energy: -18 }, pay: 3500, rep: 2 })] },
+  { id: "ui-science", name: "Faculty of Science", emoji: "🔬", kind: "learn", district: "UI Campus", blurb: "Labs, lecture rooms and long practicals.", pos: [-35, -26], size: [3.6, 2.4, 2.8], color: "#6f8fb0", style: "campus", voice: true,
+    actions: [A("lab", "Lab practical", 6, { gain: { energy: -18 }, rep: 3 }), A("teachlab", "Teach a lab class", 7, { gain: { energy: -25 }, pay: 4800, rep: 3 })] },
+  { id: "ui-arts", name: "Faculty of Arts", emoji: "🎭", kind: "culture", district: "UI Campus", blurb: "Drama, Yoruba literature and loud rehearsals.", pos: [-25, -36], size: [3.2, 1.8, 2.6], color: "#b0605a", style: "cultural", voice: true,
+    actions: [A("drama", "Drama rehearsal", 6, { gain: { fun: 28, social: 15, energy: -8 }, rep: 2 }), A("lit", "Lecture on Yoruba literature", 6, { gain: { energy: -10, fun: 6 }, rep: 3 })] },
+  { id: "ui-law", name: "Faculty of Law", emoji: "⚖️", kind: "learn", district: "UI Campus", blurb: "Moot court and very serious wigs.", pos: [-35, -36], size: [3.0, 2.6, 2.4], color: "#7a6a8a", style: "hall", voice: true,
+    actions: [A("moot", "Moot court", 7, { gain: { energy: -20 }, rep: 4 }), A("clinic", "Legal aid clinic", 7, { gain: { energy: -18, social: 8 }, rep: 5 })] },
+  { id: "ui-trenchard", name: "Trenchard Hall", emoji: "🏛️", kind: "culture", district: "UI Campus", blurb: "The Great Hall: convocations, concerts and debates.", pos: [-25, -16], size: [3.2, 2.2, 2.6], color: "#c4a86a", style: "hall", voice: true,
+    actions: [A("convo", "Attend a convocation", 6, { gain: { fun: 15, social: 20 }, rep: 3 }), A("usher", "Usher at the Great Hall", 6, { gain: { energy: -15 }, pay: 3000, rep: 1 })] },
+  { id: "adeoyo", name: "Adeoyo Teaching Hospital", emoji: "🏥", kind: "health", district: "Yemetu", blurb: "Wards, clinics and the busiest corridor in town.", pos: [25, -26], size: [4, 2.4, 2.8], color: "#7aa8b8", style: "hospital", voice: true,
+    actions: [A("ward", "Rest in the ward", 8, { cost: 2000, gain: { energy: 40 } }), A("aide", "Nurse's aide shift", 7, { gain: { energy: -28 }, pay: 5000, rep: 3 }), A("blood", "Donate blood", 5, { gain: { energy: -8, social: 6 }, rep: 4 })] },
+  { id: "sango-market", name: "Sango Market", emoji: "🧺", kind: "shop", district: "Sango", blurb: "Yams, cloth, pepper and every kind of bargain.", pos: [-35, -6], size: [4, 1.3, 3], color: "#d9a05a", style: "market", voice: true,
+    actions: [A("buy", "Buy foodstuff", 4, { cost: 2200, gain: { hunger: 32 } }), A("stall", "Run a stall", 6, { gain: { energy: -25 }, pay: 4200, rep: 1 })] },
+  { id: "iwo-road", name: "Iwo Road Garage", emoji: "🚌", kind: "transport", district: "Iwo Road", blurb: "Interstate buses, touts and the loudest horns in Oyo.", pos: [35, -6], size: [4.2, 0.9, 3.2], color: "#8a8f98", style: "terminal", voice: true,
+    actions: [A("tout", "Park attendant hustle", 6, { gain: { energy: -25 }, pay: 3500, rep: 1 }), A("pass", "Keke fast pass (5 min)", 2, { cost: 1500, boostMs: 5 * 60 * 1000 })] },
+  { id: "mokola-mall", name: "Mokola Plaza", emoji: "🛍️", kind: "shop", district: "Mokola", blurb: "Boutiques, a cinema and a food court.", pos: [-35, 4.5], size: [4, 1.9, 2.8], color: "#b07ab0", style: "mall", voice: true,
+    actions: [A("shop", "Shop for clothes", 5, { cost: 7000, gain: { fun: 24 }, rep: 1 }), A("film", "Watch a film", 7, { cost: 3500, gain: { fun: 40, energy: -5 } }), A("sales", "Shop assistant shift", 6, { gain: { energy: -22 }, pay: 3800, rep: 1 })] },
+  { id: "poly", name: "The Polytechnic, Ibadan", emoji: "🎓", kind: "learn", district: "Sapati", blurb: "Engineering workshops and a famously lively campus.", pos: [35, -26], size: [4.4, 2.2, 3], color: "#8fa86a", style: "campus", voice: true,
+    actions: [A("lecture", "Attend a lecture", 6, { gain: { energy: -16 }, rep: 3 }), A("workshop", "Workshop instructor", 7, { gain: { energy: -26 }, pay: 4000, rep: 2 })] },
+  { id: "palace", name: "Olubadan's Palace, Oja'ba", emoji: "👑", kind: "gov", district: "Oja'ba", blurb: "Chiefs in full regalia and centuries of tradition.", pos: [25, -36], size: [4, 2.6, 2.8], color: "#c8a24a", style: "govt", voice: true,
+    actions: [A("audience", "Seek an audience", 8, { gain: { energy: -10, social: 14 }, rep: 5, minRep: 40 }), A("guard", "Palace guard duty", 7, { gain: { energy: -24 }, pay: 4500, rep: 2 })] },
+  { id: "eleyele", name: "Eleyele Lake Park", emoji: "🛶", kind: "fun", district: "Eleyele", blurb: "Still water, paddle boats and a cool breeze.", pos: [-35, 16], size: [5, 0.25, 4.6], color: "#7ab87a", style: "park", voice: true,
+    actions: [A("boat", "Paddle-boat ride", 6, { cost: 1500, gain: { fun: 32, energy: -6 } }), A("picnic", "Lakeside picnic", 6, { cost: 1500, gain: { hunger: 25, fun: 18, social: 8 } })] },
+  { id: "oluyole-hotel", name: "Oluyole Hotel", emoji: "🏨", kind: "fun", district: "Iyaganku", blurb: "Chandeliers, a pool and a very polite doorman.", pos: [25, 26], size: [3, 3.4, 2.4], color: "#6a8aa8", style: "hotel", voice: true,
+    actions: [A("dinner", "Buffet dinner", 7, { cost: 9000, gain: { hunger: 65, fun: 20, social: 14 }, rep: 1 }), A("desk", "Concierge shift", 7, { gain: { energy: -28 }, pay: 6500, rep: 2 })] },
+  { id: "challenge-eatery", name: "Mama Put, Challenge", emoji: "🍲", kind: "food", district: "Challenge", blurb: "Iyan, efo riro and pepper soup at street prices.", pos: [-25, 16], size: [2.4, 1.5, 2], color: "#e0663a", style: "eatery", voice: true,
+    actions: [A("iyan", "Eat iyan & efo riro", 4, { cost: 1500, gain: { hunger: 55, fun: 5 } }), A("peppersoup", "Pepper soup", 4, { cost: 1200, gain: { hunger: 35, fun: 8 } }), A("serve", "Serve at the buka", 6, { gain: { energy: -20 }, pay: 3000, rep: 1 })] },
+  { id: "akobo-chapel", name: "Akobo Faith Chapel", emoji: "⛪", kind: "faith", district: "Akobo", blurb: "A lively neighbourhood church with a drum-heavy choir.", pos: [35, 16], size: [2.5, 2.6, 2.8], color: "#d9d1c0", style: "church", voice: true,
+    actions: [A("service", "Attend service", 6, { gain: { fun: 10, social: 15, energy: 5 }, rep: 2 }), A("choir", "Sing with the choir", 6, { gain: { fun: 22, social: 18, energy: -8 }, rep: 2 })] },
+  { id: "central-bank", name: "Ibadan Central Bank Tower", emoji: "🏦", kind: "work", district: "Odo-Ona", blurb: "Thirty floors of marble, money and nervous interns.", pos: [-25, 36], size: [2.4, 7.8, 2.4], color: "#5f7f9a", style: "tower", voice: true,
+    actions: [A("teller", "Teller shift", 6, { gain: { energy: -26 }, pay: 8500, rep: 3 }), A("audit", "Assist the auditors", 8, { gain: { energy: -30 }, pay: 11000, rep: 5, minRep: 30 })] },
+  { id: "oje-mosque", name: "Oje Central Mosque", emoji: "🕌", kind: "faith", district: "Oje", blurb: "A grand domed mosque in the old city.", pos: [25, 16], size: [2.4, 2.2, 2.4], color: "#e9e1cc", style: "mosque", voice: true,
+    actions: [A("pray", "Pray", 4, { gain: { energy: 10, fun: 5, social: 5 }, rep: 1 })] },
+);
+
 export const isSolid = (p: Place) => p.style !== "park" && p.style !== "golf" && p.style !== "zoo";
 
 /** Where the player stands to use a place. */
@@ -531,6 +572,23 @@ export const DISTRICTS: { name: string; pos: [number, number] }[] = [
   { name: "Oluyole Estate", pos: [-5, 10.4] },
   { name: "Oluyole", pos: [5, 10.4] },
   { name: "Iyaganku GRA", pos: [15, 10.4] },
+  // the wider city
+  { name: "UI Campus", pos: [-30, -30] },
+  { name: "Samonda", pos: [-15, -34] },
+  { name: "Ojoo", pos: [-5, -34] },
+  { name: "Akobo", pos: [5, -34] },
+  { name: "Oje", pos: [15, -34] },
+  { name: "Oja'ba", pos: [25, -34] },
+  { name: "Sapati", pos: [35, -30] },
+  { name: "Yemetu", pos: [25, -24] },
+  { name: "Sango", pos: [-35, -10] },
+  { name: "Beere", pos: [-25, 2] },
+  { name: "Eleyele", pos: [-35, 20] },
+  { name: "Apata", pos: [-35, 31] },
+  { name: "Odo-Ona", pos: [-20, 36] },
+  { name: "Iyaganku", pos: [20, 28] },
+  { name: "Moniya", pos: [5, 36] },
+  { name: "Iwo Road", pos: [30, -10] },
+  { name: "Ring Road", pos: [-5, 26] },
 ];
 
-export const WORLD_HALF = 24;

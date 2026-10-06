@@ -5,6 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { daylight, gameMinutes, nepaOut } from "@/lib/time";
 import { useGame } from "@/lib/store";
+import { me } from "@/lib/playerState";
 import { lampMat, signMat, windowMats } from "./materials";
 
 const SKY: [number, string][] = [
@@ -42,12 +43,15 @@ export default function Lighting() {
     skyAt(h, _a);
     scene.background = scene.background instanceof THREE.Color ? scene.background.copy(_a) : _a.clone();
     if (scene.fog instanceof THREE.Fog) scene.fog.color.copy(_a);
-    else scene.fog = new THREE.Fog(_a.clone(), 40, 85);
+    else scene.fog = new THREE.Fog(_a.clone(), 55, 130);
 
     const ang = ((h - 6) / 12) * Math.PI;
     if (sun.current) {
       const up = Math.max(Math.sin(ang), 0.18);
-      sun.current.position.set(Math.cos(ang) * 22, up * 24 + 4, 12);
+      // the sun's shadow box follows the player around the (large) city
+      sun.current.position.set(me.x + Math.cos(ang) * 22, up * 24 + 4, me.z + 12);
+      sun.current.target.position.set(me.x, 0, me.z);
+      sun.current.target.updateMatrixWorld();
       sun.current.intensity = 0.75 + day * 1.6;
       const warm = 1 - Math.min(1, Math.abs(Math.sin(ang)) * 2.2);
       sun.current.color.set(day > 0.1 ? "#ffffff" : "#a9bcff").lerp(_b.set("#ffb27a"), warm * day);

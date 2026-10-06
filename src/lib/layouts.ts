@@ -531,6 +531,24 @@ reuse("cocoa-house", "secretariat", "State Secretariat Offices", { accent: "#476
 reuse("cocoa-house", "trustbank", "Trust Bank Banking Hall", { accent: "#1f5f8a", wall: "#e6edf2" });
 reuse("cocoa-house", "cathay", "Cathay Heights Lobby", { accent: "#2b7a8a", wall: "#eef2f4" });
 
+reuse("ui", "ui-library", "Kenneth Dike Library", { accent: "#8a5a2a", wall: "#e8dcc6" });
+reuse("ui", "ui-science", "Faculty of Science", { accent: "#2b5a8a" });
+reuse("cultural", "ui-arts", "Faculty of Arts Theatre");
+reuse("mapo-hall", "ui-law", "Faculty of Law Moot Court", { accent: "#5a3a7a" });
+reuse("mapo-hall", "ui-trenchard", "Trenchard Hall", { accent: "#9a6a1a" });
+reuse("uch", "adeoyo", "Adeoyo Teaching Hospital");
+reuse("bodija-market", "sango-market", "Sango Market Stalls");
+reuse("ring-road", "iwo-road", "Iwo Road Garage Hall");
+reuse("ventura", "mokola-mall", "Mokola Plaza");
+reuse("ui", "poly", "Polytechnic Lecture Hall", { accent: "#4a6a2a" });
+reuse("govt-house", "palace", "Olubadan's Palace Court", { accent: "#8a6a1a" });
+reuse("agodi", "eleyele", "Eleyele Lake Pavilion");
+reuse("premier", "oluyole-hotel", "Oluyole Hotel Lobby");
+reuse("amala-skye", "challenge-eatery", "Mama Put Buka");
+reuse("cathedral", "akobo-chapel", "Akobo Faith Chapel", { accent: "#7a3a1a" });
+reuse("cocoa-house", "central-bank", "Central Bank Banking Hall", { accent: "#2b4a6a" });
+reuse("mosque", "oje-mosque", "Oje Central Mosque");
+
 export function placeLayout(id: string): Layout | null {
   return PLACE_LAYOUTS[id] ?? null;
 }

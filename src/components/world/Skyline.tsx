@@ -16,12 +16,12 @@ function makeSkyline(): Tower[] {
     return seed / 2147483647;
   };
   const out: Tower[] = [];
-  for (let i = 0; i < 46; i++) {
-    const a = (i / 46) * Math.PI * 2 + rnd() * 0.12;
-    const r = 34 + rnd() * 14;
+  for (let i = 0; i < 70; i++) {
+    const a = (i / 70) * Math.PI * 2 + rnd() * 0.12;
+    const r = 56 + rnd() * 16;
     const x = Math.cos(a) * r;
     const z = Math.sin(a) * r;
-    if (x < -25 && Math.abs(z) < 16) continue; // Eleyele lake
+    if (x < -46 && Math.abs(z) < 24) continue; // Eleyele lake
     const tall = rnd() > 0.7;
     out.push({ x, z, w: 1.6 + rnd() * 1.4, d: 1.6 + rnd() * 1.4, h: tall ? 8 + rnd() * 7 : 4 + rnd() * 4, tint: TINTS[Math.floor(rnd() * TINTS.length)], rot: rnd() * 0.5 });
   }

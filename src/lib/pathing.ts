@@ -1,3 +1,4 @@
+import { WORLD_HALF } from "./world";
 import { PLACES, isSolid } from "./places";
 import { PLOTS } from "./plots";
 
@@ -175,7 +176,7 @@ export class Grid {
 /* ------------------------------- city grid ------------------------------- */
 
 const MARGIN = 0.45;
-let world = new Grid(-27, -27, 54, 54, 1);
+let world = new Grid(-WORLD_HALF, -WORLD_HALF, WORLD_HALF * 2, WORLD_HALF * 2, 1);
 let active: Grid = world;
 
 function baseRects() {
@@ -184,7 +185,7 @@ function baseRects() {
 
 /** Rebuild the city walkability grid. `builtPlots` are plot ids that have a house on them. */
 export function rebuildGrid(builtPlots: Iterable<string>) {
-  const grid = new Grid(-27, -27, 54, 54, 1);
+  const grid = new Grid(-WORLD_HALF, -WORLD_HALF, WORLD_HALF * 2, WORLD_HALF * 2, 1);
   const built = new Set(builtPlots);
   const rects = baseRects();
   for (const p of PLOTS) if (built.has(p.id)) rects.push({ x: p.pos[0], z: p.pos[1], w: 1.9, d: 1.9 });

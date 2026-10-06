@@ -4,13 +4,14 @@ import { useEffect, useRef } from "react";
 import { cam, me, remoteMotion } from "@/lib/playerState";
 import { KIND_COLORS, PLACES } from "@/lib/places";
 import { PLOTS } from "@/lib/plots";
+import { ROAD_LINES } from "@/lib/world";
 import { colorFor } from "@/lib/look";
 import { useGame } from "@/lib/store";
 import { walkTo } from "@/lib/movement";
 
 const SIZE = 148;
 const SCALE = 2.6; // pixels per world unit
-const ROADS = [-20, -10, 0, 10, 20];
+const ROADS = ROAD_LINES;
 
 /** Rotation that puts the camera's forward direction at the top of the minimap. */
 const rotation = () => -Math.PI / 2 - Math.atan2(-Math.cos(cam.az), -Math.sin(cam.az));
@@ -60,10 +61,10 @@ function MinimapCanvas() {
       ctx.lineWidth = 1.6;
       ctx.beginPath();
       for (const r of ROADS) {
-        ctx.moveTo(r, -26);
-        ctx.lineTo(r, 26);
-        ctx.moveTo(-26, r);
-        ctx.lineTo(26, r);
+        ctx.moveTo(r, -46);
+        ctx.lineTo(r, 46);
+        ctx.moveTo(-46, r);
+        ctx.lineTo(46, r);
       }
       ctx.stroke();
 

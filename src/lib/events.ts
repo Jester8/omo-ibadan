@@ -49,6 +49,21 @@ const HOURS: Record<string, [number, number]> = {
   cathedral: [6, 21],
   grace: [6, 22],
   methodist: [6, 20],
+  "ui-library": [8, 22],
+  "ui-science": [8, 18],
+  "ui-arts": [9, 19],
+  "ui-law": [8, 18],
+  "ui-trenchard": [9, 21],
+  adeoyo: [0, 24],
+  "sango-market": [6, 19],
+  "iwo-road": [5, 23],
+  "mokola-mall": [9, 22],
+  poly: [8, 18],
+  palace: [9, 17],
+  eleyele: [6, 19],
+  "challenge-eatery": [8, 23],
+  "akobo-chapel": [6, 21],
+  "central-bank": [8, 16],
 };
 
 export const isOpen = (placeId: string, hour: number) => {

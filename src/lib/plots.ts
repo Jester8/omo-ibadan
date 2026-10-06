@@ -32,6 +32,20 @@ const ZONES: { district: string; price: number; centers: [number, number][] }[] 
   { district: "Oluyole Estate", price: 220000, centers: [[-7, 13], [-3, 13], [-7, 17], [-3, 17]] },
   { district: "Oluyole", price: 150000, centers: [[3, 17], [7, 17]] },
   { district: "Iyaganku GRA", price: 200000, centers: [[13, 17], [17, 17]] },
+  // the wider city
+  { district: "Samonda", price: 90000, centers: [[-17, -36], [-13, -36], [-17, -32], [-13, -32]] },
+  { district: "Ojoo", price: 70000, centers: [[-7, -36], [-3, -36], [-7, -32], [-3, -32]] },
+  { district: "Akobo Estate", price: 55000, centers: [[3, -36], [7, -36], [3, -32], [7, -32]] },
+  { district: "Oje", price: 50000, centers: [[13, -36], [17, -36]] },
+  { district: "Sango", price: 65000, centers: [[-37, -16], [-33, -16], [-37, -12], [-33, -12]] },
+  { district: "Beere", price: 75000, centers: [[-27, 4], [-23, 4], [-27, 8], [-23, 8]] },
+  { district: "Apata", price: 60000, centers: [[-37, 24], [-33, 24], [-37, 28], [-33, 28]] },
+  { district: "Odo-Ona", price: 48000, centers: [[-17, 34], [-13, 34], [-17, 38], [-13, 38]] },
+  { district: "Moniya", price: 40000, centers: [[3, 34], [7, 34], [3, 38], [7, 38]] },
+  { district: "Iyaganku Heights", price: 230000, centers: [[13, 26], [17, 26]] },
+  { district: "Iwo Road", price: 52000, centers: [[23, -16], [27, -16], [23, -12], [27, -12]] },
+  { district: "Adamasingba East", price: 140000, centers: [[23, 4], [27, 4], [23, 8], [27, 8]] },
+  { district: "Sapati", price: 58000, centers: [[33, 4], [37, 4]] },
 ];
 
 export const PLOTS: Plot[] = ZONES.flatMap((z) =>
@@ -63,6 +77,11 @@ export const NPC_HOMES: Record<string, { ownerName: string; tier: number }> = {
   "iyaganku-gra-1": { ownerName: "Engr. Bello", tier: 3 },
   "agbowo-1": { ownerName: "Mama Bisi", tier: 1 },
   "mokola-1": { ownerName: "Mr Seun", tier: 1 },
+  "samonda-1": { ownerName: "Prof. Adewale", tier: 3 },
+  "ojoo-1": { ownerName: "Mr Tunji", tier: 2 },
+  "odo-ona-1": { ownerName: "Mama Nkechi", tier: 1 },
+  "iyaganku-heights-1": { ownerName: "Chief Ogunleye", tier: 3 },
+  "sango-1": { ownerName: "Alhaja Sidikat", tier: 2 },
 };
 
 export const NPC_PLOTS: Record<string, PlotState> = Object.fromEntries(
