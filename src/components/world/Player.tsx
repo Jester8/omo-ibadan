@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { DECK_Y } from "@/lib/interiorRuntime";
 import { carById } from "@/lib/cars";
 import CarModel from "./CarModel";
 import Avatar from "@/components/avatar/Avatar";
@@ -76,6 +77,17 @@ export default function Player() {
     if (!s.profile || !group.current) return;
     const dt = Math.min(rawDt, 0.05);
     motion.current.eat = s.busy?.food ?? null;
+
+    // up on Bower's Tower: stand on the deck and look around
+    if (s.deck) {
+      me.path = [];
+      me.speed = 0;
+      motion.current.speed = 0;
+      motion.current.pose = null;
+      group.current.position.set(me.x, DECK_Y, me.z);
+      group.current.rotation.set(0, me.ry, 0);
+      return;
+    }
 
     // seated or sleeping on furniture: hold the pose until the action finishes
     if (me.use) {

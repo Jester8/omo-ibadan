@@ -41,7 +41,8 @@ export default function ViewControls() {
   // on phones the info panel covers the bottom of the screen: ride above it, as a row
   const roomOpen = !busy && !!interior && flip === `interior:${interior.kind}:${interior.id}`;
   const selOpen = !busy && !interior && !!selected && flip !== `${selected.type}:${selected.id}`;
-  const lift = roomOpen ? "max-sm:bottom-[47dvh] max-sm:flex-row" : selOpen ? "max-sm:bottom-[63dvh] max-sm:flex-row" : "max-sm:bottom-[4.5rem]";
+  const deck = useGame((s) => s.deck);
+  const lift = deck ? "max-sm:bottom-[43dvh] max-sm:flex-row" : roomOpen ? "max-sm:bottom-[47dvh] max-sm:flex-row" : selOpen ? "max-sm:bottom-[63dvh] max-sm:flex-row" : "max-sm:bottom-[4.5rem]";
 
   useEffect(() => {
     const keys = new Set<string>();

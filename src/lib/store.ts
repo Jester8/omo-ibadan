@@ -6,7 +6,7 @@ import { TIERS, plotById, RENT_CAP_MIN, naira, PLOTS, NPC_PLOTS } from "./plots"
 import type { InteriorRef } from "./interiors";
 import type { Rel } from "./romance";
 import { carById } from "./cars";
-import { eventFor } from "./events";
+import { eventFor, isOpen, opensAt } from "./events";
 import { gameMinutes } from "./time";
 import { decorById, MAX_PER_KIND, withDecor } from "./decor";
 import { layoutFor } from "./layouts";
@@ -114,6 +114,7 @@ type State = {
   clockOverride: number | null;
   timeMode: "auto" | "day" | "night";
   placesOnly: boolean;
+  deck: boolean;
   hideCard: boolean;
   hideIcons: boolean;
   panelFlip: string | null;
@@ -224,6 +225,7 @@ export const useGame = create<State>()(
       clockOverride: null,
       timeMode: "auto",
       placesOnly: false,
+      deck: false,
       hideCard: false,
       hideIcons: false,
       panelFlip: null,
@@ -280,6 +282,7 @@ export const useGame = create<State>()(
         if (a.minRep && s.rep < a.minRep) return `Needs ${a.minRep} reputation (${TITLES[titleIndex(a.minRep)].name}).`;
         if (a.cost && s.money < a.cost) return `You need ${naira(a.cost)}.`;
         if (a.gain?.energy && a.gain.energy < 0 && s.needs.energy + a.gain.energy < 0) return "Too tired. Eat or rest first.";
+        if (s.atPlace && !isOpen(s.atPlace, gameMinutes(Date.now(), s.clockOverride) / 60)) return `Closed for now. Opens at ${opensAt(s.atPlace)}.`;
         const policy = s.election?.governor?.policy;
         const price = (a.cost ?? 0) * (policy === "food" && (a.gain?.hunger ?? 0) > 0 ? 0.8 : 1);
         if (price && s.money < price) return `You need ${naira(price)}.`;

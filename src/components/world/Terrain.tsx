@@ -1,5 +1,6 @@
 "use client";
 
+import Skyline from "./Skyline";
 import { useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { RoundedBox } from "@react-three/drei";
@@ -301,6 +302,7 @@ export default function Terrain({ placesOnly = false }: { placesOnly?: boolean }
       {!placesOnly && <Trees />}
       {!placesOnly && <Lamps />}
       <Surroundings />
+      <Skyline />
       {!placesOnly && CARS.map((c, i) => <Vehicle key={i} car={c} />)}
     </>
   );

@@ -23,7 +23,7 @@ export type UseDef = {
   seatH?: number;
   needsPower?: boolean;
   action?: ActionDef;
-  special?: "generator";
+  special?: "generator" | "deck";
 };
 
 export type FurnDef = {
@@ -185,7 +185,7 @@ export const FURN: Record<FurnKind, FurnDef> = {
   goalpost: { w: 5.0, d: 0.2, h: 2.4, solid: false },
   ticketbooth: { w: 1.2, d: 1.2, h: 2.2, solid: true },
   tank: { w: 2.4, d: 0.9, h: 1.4, solid: true },
-  stairs: { w: 1.1, d: 3.2, h: 2.4, solid: true },
+  stairs: { w: 1.1, d: 3.2, h: 2.4, solid: true, use: { verb: "Climb to the viewing deck", special: "deck" } },
   wallart: { w: 0.9, d: 0.06, h: 0.7, solid: false },
   clock: { w: 0.4, d: 0.05, h: 0.4, solid: false },
   pitch: { w: 8, d: 5, h: 0.02, solid: false },

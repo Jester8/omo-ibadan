@@ -1,6 +1,7 @@
 "use client";
 
-import { eventFor } from "@/lib/events";
+import { climbTower } from "@/lib/interiorRuntime";
+import { closesAt, eventFor, isOpen, opensAt } from "@/lib/events";
 import NpcPanel from "./NpcPanel";
 import { AnimatePresence, motion } from "motion/react";
 import { DoorOpen, Footprints, X } from "lucide-react";
@@ -23,6 +24,7 @@ function PlaceBody({ id }: { id: string }) {
   const color = KIND_COLORS[place.kind];
   const { hour } = useClock();
   const ev = eventFor(id, hour);
+  const open = isOpen(id, hour);
 
   return (
     <>
@@ -79,6 +81,11 @@ function PlaceBody({ id }: { id: string }) {
         </div>
       )}
 
+      {!open && (
+        <div className="mt-3 rounded-2xl bg-stone-100 px-3.5 py-2.5 text-sm font-semibold text-stone-700 ring-1 ring-black/5">
+          🔒 Closed right now · opens {opensAt(id)}, closes {closesAt(id)}
+        </div>
+      )}
       {ev && (
         <div className="mt-3 flex items-start gap-2.5 rounded-2xl bg-rose-50 px-3.5 py-2.5 ring-1 ring-rose-100">
           <span className="text-lg">{ev.emoji}</span>
@@ -94,8 +101,9 @@ function PlaceBody({ id }: { id: string }) {
           <motion.li key={a.id} initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.06 + i * 0.05 }}>
             <ActionRow
               a={a}
-              enabled={at && !busy}
+              enabled={at && !busy && open}
               onRun={() => {
+                if (a.id === "climb") return climbTower();
                 const err = useGame.getState().runAction(a);
                 if (err) useGame.getState().toast(err, "bad");
               }}

@@ -7,6 +7,7 @@ import { useGame } from "./store";
 export function walkTo(x: number, z: number): boolean {
   const s = useGame.getState();
   if (!s.profile) return false;
+  if (s.deck) return false;
   if (s.busy) {
     s.toast("Finish what you're doing first.", "info");
     return false;

@@ -15,6 +15,8 @@ import { FURN, S } from "@/lib/furniture";
 import { interiorKey } from "@/lib/interiors";
 import { rt, walkToExit, walkToFurn } from "@/lib/interiorRuntime";
 import { TAG_Y } from "./Player";
+import { useClock } from "@/lib/hooks";
+import { isOpen } from "@/lib/events";
 
 function Anchored({
   id,
@@ -48,9 +50,11 @@ function Anchored({
 function PlaceLabels() {
   const selected = useGame((s) => s.selected);
   const atPlace = useGame((s) => s.atPlace);
+  const { hour } = useClock();
   return (
     <>
       {PLACES.map((p) => {
+        const open = isOpen(p.id, hour);
         const sel = selected?.type === "place" && selected.id === p.id;
         const here = atPlace === p.id;
         return (
@@ -70,6 +74,7 @@ function PlaceLabels() {
             >
               <span>{p.emoji}</span>
               {p.name}
+              {!open && <span className="rounded-full bg-stone-800/80 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">Closed</span>}
             </button>
           </Anchored>
         );

@@ -12,11 +12,12 @@ import { Npcs, RemotePlayers } from "./People";
 import { anchors } from "@/lib/overlay";
 import { cam, me } from "@/lib/playerState";
 import { useGame } from "@/lib/store";
+import { DECK_Y } from "@/lib/interiorRuntime";
 import { walkTo } from "@/lib/movement";
 import InteriorScene from "@/components/interior/InteriorScene";
 
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
-const limits = (): [number, number] => (useGame.getState().interior ? [4, 30] : [9, 44]);
+const limits = (): [number, number] => (useGame.getState().interior ? [4, 30] : useGame.getState().deck ? [6, 75] : [9, 44]);
 
 function CameraRig() {
   const { camera, gl, size } = useThree();
@@ -72,7 +73,10 @@ function CameraRig() {
       cam.az += dt * 0.05;
       target.current.lerp(new THREE.Vector3(0, 0, 0), k);
     } else {
-      target.current.lerp(new THREE.Vector3(me.use ? me.use.x : me.x, 0.5, me.use ? me.use.z : me.z), k);
+      const st = useGame.getState();
+      const f = st.deck ? cam.focus : null;
+      target.current.lerp(new THREE.Vector3(f ? f.x : me.use ? me.use.x : me.x, st.deck ? (f ? 1.5 : DECK_Y + 0.5) : 0.5, f ? f.z : me.use ? me.use.z : me.z), k);
+      if (cam.spin) cam.az += dt * 0.18;
     }
     const wantDist = hasProfile ? cam.dist : 40;
     dist.current += (wantDist - dist.current) * (1 - Math.exp(-3 * dt));

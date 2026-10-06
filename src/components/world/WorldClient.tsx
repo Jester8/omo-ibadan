@@ -7,6 +7,7 @@ import Hud from "@/components/ui/Hud";
 import SidePanel from "@/components/ui/PlacePanel";
 import ChatDock from "@/components/ui/ChatDock";
 import Sheets from "@/components/ui/Sheets";
+import DeckPanel from "@/components/ui/DeckPanel";
 import Minimap from "@/components/ui/Minimap";
 import ViewControls from "@/components/ui/ViewControls";
 import AudioBridge from "@/components/ui/AudioBridge";
@@ -22,7 +23,7 @@ import { net, roomOf } from "@/lib/net";
 import { voice } from "@/lib/voice";
 import { streetRoom } from "@/lib/voiceRoom";
 import TalkButton from "@/components/ui/TalkButton";
-import { enterInterior, homeRef, rt, startUse, walkToFurn } from "@/lib/interiorRuntime";
+import { enterInterior, goUpDeck, homeRef, rt, startUse, walkToFurn } from "@/lib/interiorRuntime";
 import { cam, me } from "@/lib/playerState";
 
 const CityScene = dynamic(() => import("./CityScene"), {
@@ -50,7 +51,7 @@ function Runtime() {
 
   useEffect(() => {
     const id = setInterval(() => useGame.getState().tick(1), 1000);
-    if (process.env.NODE_ENV !== "production") (window as unknown as { __omo: unknown }).__omo = { useGame, me, cam, startUse, walkToFurn, rt, NPCS };
+    if (process.env.NODE_ENV !== "production") (window as unknown as { __omo: unknown }).__omo = { useGame, me, cam, startUse, walkToFurn, rt, NPCS, goUpDeck };
     const hour = new URLSearchParams(location.search).get("hour");
     if (hour !== null && !Number.isNaN(Number(hour))) useGame.getState().patch({ clockOverride: Number(hour) });
     return () => clearInterval(id);
@@ -150,6 +151,7 @@ export default function WorldClient() {
           {!hideIcons && <ChatDock />}
           {!hideIcons && <TalkButton />}
           <Sheets />
+          <DeckPanel />
           <VoiceBar />
           {!hideIcons && <Minimap />}
           {!hideIcons && <ViewControls />}

@@ -306,6 +306,17 @@ function Lookout({ size: [w, h], color }: SP) {
     <>
       <Cyl r={w * 0.95} h={0.16} c="#d9d1c0" seg={20} />
       <Cyl p={[0, 0.16, 0]} r={w * 0.5} r2={w * 0.34} h={h * 0.8} c={color} seg={20} />
+      {/* viewing deck: a wide balcony ring with a railing, where visitors stand */}
+      <Cyl p={[0, 0.16 + h * 0.8 - 0.06, 0]} r={1.5} h={0.1} c="#cdb48f" seg={32} />
+      <Cyl p={[0, 0.16 + h * 0.8 - 0.3, 0]} r={1.05} r2={1.45} h={0.24} c="#b9855a" seg={32} />
+      <mesh position={[0, 0.16 + h * 0.8 + 0.52, 0]} rotation-x={Math.PI / 2}>
+        <torusGeometry args={[1.46, 0.025, 8, 48]} />
+        <meshStandardMaterial color="#7a5a40" roughness={0.6} />
+      </mesh>
+      {Array.from({ length: 16 }, (_, i) => {
+        const a = (i / 16) * Math.PI * 2;
+        return <Cyl key={i} p={[Math.cos(a) * 1.46, 0.16 + h * 0.8 + 0.04, Math.sin(a) * 1.46]} r={0.018} h={0.48} c="#7a5a40" seg={6} />;
+      })}
       <Cyl p={[0, 0.16 + h * 0.8, 0]} r={w * 0.62} h={0.34} c="#cdb48f" seg={20} />
       <Cyl p={[0, 0.16 + h * 0.8 + 0.34, 0]} r={w * 0.7} r2={0} h={0.5} c="#a85a3c" seg={20} />
       <Cyl p={[0, 0.16 + h * 0.8 + 0.84, 0]} r={0.015} h={0.4} c="#5a5a5a" seg={6} />

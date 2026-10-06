@@ -10,7 +10,7 @@ import { eventsAt } from "@/lib/events";
 import { walkToPlace } from "@/lib/movement";
 import { TITLES, titleIndex } from "@/lib/titles";
 import { QUESTS } from "@/lib/quests";
-import { enterInterior, exitInterior, homeRef } from "@/lib/interiorRuntime";
+import { enterInterior, exitInterior, homeRef, leaveDeck } from "@/lib/interiorRuntime";
 import { useSound } from "@/lib/soundStore";
 
 const NEEDS = [
@@ -34,6 +34,7 @@ export default function Hud() {
   const setSound = useSound((s) => s.set);
   const setSheet = useGame((s) => s.setSheet);
   const driving = useGame((s) => s.driving);
+  const deck = useGame((s) => s.deck);
   const hideCard = useGame((s) => s.hideCard);
   const hideIcons = useGame((s) => s.hideIcons);
   const patch = useGame((s) => s.patch);
@@ -148,7 +149,7 @@ export default function Hud() {
           <EyeOff className="size-5" />
         </button>
         <button
-          onClick={() => (inside ? exitInterior() : enterInterior(homeRef()))}
+          onClick={() => (deck ? leaveDeck() : inside ? exitInterior() : enterInterior(homeRef()))}
           className="grid size-11 place-items-center rounded-2xl bg-amber-500 text-white shadow-xl ring-1 ring-black/5 transition hover:bg-amber-600 active:scale-95"
           aria-label={inside ? "Leave the building" : "Go home"}
           title={inside ? "Leave" : "Go home"}

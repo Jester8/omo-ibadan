@@ -7,6 +7,9 @@ import { naira } from "./plots";
 import { useGame } from "./store";
 import { nepaOut } from "./time";
 import { audio } from "./audio";
+import { PLACES } from "./places";
+import { isOpen, opensAt } from "./events";
+import { gameMinutes } from "./time";
 import { withDecor } from "./decor";
 
 /** Everything about the interior the player is standing in (kept outside React). */
@@ -69,6 +72,14 @@ export function enterInterior(ref: InteriorRef): boolean {
   if (!s.profile || s.fade) return false;
   if (s.busy) {
     s.toast("Finish what you're doing first.", "info");
+    return false;
+  }
+  if (s.deck) {
+    s.toast("Climb down from the tower first.", "info");
+    return false;
+  }
+  if (ref.kind === "place" && !isOpen(ref.id, gameMinutes(Date.now(), s.clockOverride) / 60)) {
+    s.toast(`Closed for now. Opens at ${opensAt(ref.id)}.`, "info");
     return false;
   }
   if (sameRef(s.interior, ref)) return true;
@@ -165,6 +176,66 @@ export function walkToFurn(index: number): boolean {
 
 export const GENERATOR_FUEL = 800;
 
+/** Bower's Tower: the viewing deck sits at the top of the shaft. */
+export const DECK_Y = 3.72;
+const DECK_R = 1.05;
+const tower = () => PLACES.find((p) => p.id === "bowers")!;
+
+function arriveOnDeck() {
+  const t = tower();
+  me.x = t.pos[0];
+  me.z = t.pos[1] + DECK_R;
+  me.ry = 0;
+  me.path = [];
+  me.use = null;
+  me.pendingUse = null;
+  me.pendingExit = false;
+  me.goalPlace = null;
+  setActiveGrid(null);
+  rt.layout = null;
+  rt.grid = null;
+  rt.ref = null;
+  cam.dist = 30;
+  cam.el = 0.45;
+  cam.focus = null;
+  cam.spin = false;
+  useGame.setState({ interior: null, atPlace: null, deck: true, selected: null, driving: false });
+}
+
+export function goUpDeck() {
+  const s = useGame.getState();
+  if (s.fade || s.deck) return;
+  fadeThen(arriveOnDeck);
+}
+
+/** Pay the tower fee, spend a moment on the stairs, and arrive at the top. */
+export function climbTower() {
+  const s = useGame.getState();
+  const a = PLACES.find((p) => p.id === "bowers")!.actions[0];
+  const err = s.runAction(a);
+  if (err) {
+    s.toast(err, "bad");
+    return;
+  }
+  setTimeout(goUpDeck, a.secs * 1000 + 200);
+}
+
+export function leaveDeck() {
+  const s = useGame.getState();
+  if (s.fade || !s.deck) return;
+  fadeThen(() => {
+    const t = tower();
+    me.x = t.pos[0];
+    me.z = t.pos[1] + t.size[2] / 2 + 0.9;
+    me.ry = 0;
+    cam.dist = 14;
+    cam.el = 0.85;
+    cam.focus = null;
+    cam.spin = false;
+    useGame.setState({ deck: false });
+  });
+}
+
 /** Called when the player reaches the furniture they clicked. */
 export function startUse(index: number) {
   const it = rt.layout?.items[index];
@@ -174,6 +245,10 @@ export function startUse(index: number) {
   const s = useGame.getState();
   if (def.needsPower && !powerOn()) {
     s.toast("No light. Fuel the generator or wait for NEPA.", "bad");
+    return;
+  }
+  if (def.special === "deck") {
+    climbTower();
     return;
   }
   if (def.special === "generator") {

@@ -520,6 +520,17 @@ const PLACE_LAYOUTS: Record<string, Layout> = {
   }),
 };
 
+/* New churches and towers reuse the proven interiors of their older siblings under their own names. */
+const reuse = (src: string, id: string, name: string, palette: Partial<Layout> = {}) => {
+  PLACE_LAYOUTS[id] = { ...PLACE_LAYOUTS[src], ...palette, id, name };
+};
+reuse("cathedral", "aladura", "Aladura Prayer House", { accent: "#2b4a7a", wall: "#efe9d8" });
+reuse("cathedral", "grace", "Divine Grace Assembly", { accent: "#6a2a7a", wall: "#d6dbe6", floor: "carpet" });
+reuse("cathedral", "methodist", "Oke-Bola Methodist Church", { accent: "#3a5a3a" });
+reuse("cocoa-house", "secretariat", "State Secretariat Offices", { accent: "#47657f" });
+reuse("cocoa-house", "trustbank", "Trust Bank Banking Hall", { accent: "#1f5f8a", wall: "#e6edf2" });
+reuse("cocoa-house", "cathay", "Cathay Heights Lobby", { accent: "#2b7a8a", wall: "#eef2f4" });
+
 export function placeLayout(id: string): Layout | null {
   return PLACE_LAYOUTS[id] ?? null;
 }
