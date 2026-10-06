@@ -7,7 +7,7 @@ import { useClock } from "@/lib/hooks";
 import { eventsAt } from "@/lib/events";
 import { formatClock } from "@/lib/time";
 import { naira } from "@/lib/plots";
-import { PLACES, type ActionDef } from "@/lib/places";
+import type { ActionDef } from "@/lib/places";
 import { TITLES, titleIndex } from "@/lib/titles";
 import { pendingRent, useGame } from "@/lib/store";
 import JobsPanel from "./JobsPanel";
