@@ -75,11 +75,20 @@ export async function signOut() {
   location.reload();
 }
 
-export type IntroInfo = { available: boolean; title?: string; artist?: string; rightsHolder?: string };
+export type IntroInfo = { available: boolean; title?: string; artist?: string; rightsHolder?: string; url?: string };
+
+const STATIC_INTRO = { title: "Ibadan", artist: "Qdot ft. Olamide", rightsHolder: "Qdot, Olamide and their label/publisher", url: "/audio/intro.mp3" };
 export async function introInfo(): Promise<IntroInfo> {
+  // the song ships with the web app itself (public/audio), so it also works on static hosting such as Vercel
+  try {
+    const s = await fetch(STATIC_INTRO.url, { method: "HEAD", signal: AbortSignal.timeout(2500) });
+    if (s.ok && (s.headers.get("content-type") ?? "").startsWith("audio")) return { available: true, ...STATIC_INTRO };
+  } catch {
+    /* fall back to the server copy */
+  }
   try {
     const r = await fetch(`${apiBase()}/api/intro`, { signal: AbortSignal.timeout(2500) });
-    return r.ok ? ((await r.json()) as IntroInfo) : { available: false };
+    return r.ok ? { ...((await r.json()) as IntroInfo), url: introUrl() } : { available: false };
   } catch {
     return { available: false };
   }

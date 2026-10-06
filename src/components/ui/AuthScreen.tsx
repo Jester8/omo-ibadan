@@ -37,7 +37,7 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
 
   const enter = () => {
     if (info.available && !el.current) {
-      const a = new Audio(introUrl());
+      const a = new Audio(info.url ?? introUrl());
       a.loop = true;
       a.volume = 0.85;
       el.current = a;
