@@ -65,16 +65,30 @@ function rotateInRootFrame(bone: THREE.Object3D | null | undefined, root: THREE.
 
 type Rig = { root: THREE.Object3D; legs: { ar?: THREE.Object3D | null; lar?: THREE.Object3D | null }; wrist?: THREE.Object3D | null; food: THREE.Group };
 
+/** The arm bones as the animation last posed them, so eating never stacks offsets frame after frame. */
+const armSnap = new WeakMap<THREE.Object3D, THREE.Quaternion>();
+
 /** Raise the right arm to the mouth and show the food in hand. */
 function applyEat(built: Rig, eat: "bowl" | "cup" | "snack" | null, pose: string | null, t: number) {
   const food = built.food;
-  food.visible = !!eat && pose !== "lie";
-  if (!eat || pose === "lie") return;
-  const bite = (Math.sin(t * 4.2) + 1) / 2; // 0 = plate out, 1 = at the mouth
+  const arm = [built.legs.ar, built.legs.lar];
+  const eating = !!eat && pose !== "lie";
+  food.visible = eating;
+  if (!eating) {
+    // not eating: remember the current (animated) arm pose
+    for (const b of arm) if (b) armSnap.set(b, (armSnap.get(b) ?? new THREE.Quaternion()).copy(b.quaternion));
+    return;
+  }
+  // start every frame from the remembered pose, then add the offset once: nothing accumulates, nothing shakes
+  for (const b of arm) {
+    const q = b && armSnap.get(b);
+    if (b && q) b.quaternion.copy(q);
+  }
+  const bite = 0.5 - 0.5 * Math.cos(t * 2.1); // 0 = plate out, 1 = at the mouth, slow and smooth
   // upper arm forward and a little inward, forearm folding up towards the mouth
-  _eatUp.setFromAxisAngle(_ax, -0.5 - 0.12 * bite).premultiply(_eatIn.setFromAxisAngle(_az, 0.38));
+  _eatUp.setFromAxisAngle(_ax, -0.5 - 0.1 * bite).premultiply(_eatIn.setFromAxisAngle(_az, 0.38));
   rotateInRootFrame(built.legs.ar, built.root, _eatUp);
-  rotateInRootFrame(built.legs.lar, built.root, _eatFore.setFromAxisAngle(_ax, -0.95 - 0.7 * bite));
+  rotateInRootFrame(built.legs.lar, built.root, _eatFore.setFromAxisAngle(_ax, -0.95 - 0.65 * bite));
   if (!built.wrist) return;
   built.root.updateWorldMatrix(true, true);
   built.wrist.getWorldPosition(_wp);

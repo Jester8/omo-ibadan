@@ -3,6 +3,8 @@
 import { climbTower } from "@/lib/interiorRuntime";
 import { closesAt, eventFor, isOpen, opensAt } from "@/lib/events";
 import NpcPanel from "./NpcPanel";
+import GatePanel from "./GatePanel";
+import CabPanel from "./CabPanel";
 import { AnimatePresence, motion } from "motion/react";
 import { DoorOpen, Footprints, MapPin, X } from "lucide-react";
 import { PLACES, KIND_COLORS } from "@/lib/places";
@@ -180,7 +182,7 @@ export default function SidePanel() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 40, scale: 0.97 }}
           transition={{ type: "spring", stiffness: 260, damping: 26 }}
-          className={`absolute inset-x-3 bottom-3 z-20 ${min ? "max-sm:max-h-12 max-sm:overflow-hidden max-sm:py-2" : interior ? "max-h-[44dvh]" : "max-h-[62dvh]"} overflow-y-auto rounded-[1.6rem] bg-white/80 p-5 shadow-[0_12px_40px_-10px_rgba(0,0,0,0.35)] ring-1 ring-white/60 backdrop-blur-2xl sm:inset-x-auto sm:bottom-auto sm:right-5 sm:top-20 sm:max-h-[calc(100dvh-7rem)] sm:w-[24rem]`}
+          className={`absolute inset-x-3 bottom-[5.4rem] z-20 ${min ? "max-sm:max-h-12 max-sm:overflow-hidden max-sm:py-2" : interior ? "max-h-[44dvh]" : "max-h-[62dvh]"} overflow-y-auto rounded-[1.6rem] bg-white/80 p-5 shadow-[0_12px_40px_-10px_rgba(0,0,0,0.35)] ring-1 ring-white/60 backdrop-blur-2xl sm:inset-x-auto sm:bottom-auto sm:right-5 sm:top-20 sm:max-h-[calc(100dvh-7rem)] sm:w-[24rem]`}
         >
           <button
             onClick={setMin}
@@ -191,7 +193,7 @@ export default function SidePanel() {
             {min && !busy ? "Show panel" : ""}
           </button>
           <div className={min ? "max-sm:hidden" : ""}>
-            {interior ? <InteriorPanel /> : selected?.type === "place" ? <PlaceBody id={selected.id} /> : selected?.type === "npc" ? <NpcPanel id={selected.id} /> : selected ? <PlotPanelBody id={selected.id} /> : null}
+            {interior ? <InteriorPanel /> : selected?.type === "place" ? <PlaceBody id={selected.id} /> : selected?.type === "npc" ? <NpcPanel id={selected.id} /> : selected?.type === "gate" ? <GatePanel id={selected.id} /> : selected?.type === "cab" ? <CabPanel id={selected.id} /> : selected ? <PlotPanelBody id={selected.id} /> : null}
           </div>
         </motion.aside>
       )}

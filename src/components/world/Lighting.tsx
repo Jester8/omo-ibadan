@@ -31,6 +31,8 @@ function skyAt(h: number, out: THREE.Color) {
   return out.set(SKY[0][1]);
 }
 
+const SHADOW_RES: [number, number] = typeof window !== "undefined" && window.innerWidth < 640 ? [1024, 1024] : [2048, 2048];
+
 export default function Lighting() {
   const sun = useRef<THREE.DirectionalLight>(null);
   const amb = useRef<THREE.AmbientLight>(null);
@@ -77,7 +79,7 @@ export default function Lighting() {
         position={[10, 24, 12]}
         intensity={2}
         castShadow
-        shadow-mapSize={[2048, 2048]}
+        shadow-mapSize={SHADOW_RES}
         shadow-camera-left={-32}
         shadow-camera-right={32}
         shadow-camera-top={32}

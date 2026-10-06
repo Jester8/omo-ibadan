@@ -35,6 +35,10 @@ export type ActionDef = {
   minRep?: number;
   /** grants a temporary keke speed boost (ms) */
   boostMs?: number;
+  /** raw foodstuff portions added (+) or used (-) */
+  pantry?: number;
+  /** cooked meals added (+) or eaten (-) */
+  plates?: number;
 };
 
 export type Place = {
@@ -104,7 +108,7 @@ export const PLACES: Place[] = [
     style: "market",
     voice: true,
     actions: [
-      { id: "foodstuff", label: "Buy foodstuff", secs: 4, cost: 2500, gain: { hunger: 35 } },
+      { id: "foodstuff", label: "Buy foodstuff (4 meals)", secs: 4, cost: 2500, pantry: 4 },
       { id: "trade", label: "Run a trading stall", secs: 6, gain: { energy: -25 }, pay: 4000, rep: 1 },
     ],
   },
@@ -514,7 +518,7 @@ export const KIND_COLORS: Record<PlaceKind, string> = {
 const A = (id: string, label: string, secs: number, o: Partial<ActionDef> = {}): ActionDef => ({ id, label, secs, ...o });
 
 PLACES.push(
-  { id: "ui-library", name: "Kenneth Dike Library", emoji: "📚", kind: "learn", district: "UI Campus", blurb: "Ibadan's great reading room. Silence, please.", pos: [-25, -26], size: [3.2, 2.4, 2.6], color: "#b08a5a", style: "hall", voice: true,
+  { id: "ui-library", name: "Kenneth Dike Library", emoji: "📚", kind: "learn", district: "UI Campus", blurb: "Ibadan's great reading room. Silence, please.", pos: [-27, -27], size: [3.2, 2.4, 2.6], color: "#b08a5a", style: "hall", voice: true,
     actions: [A("read", "Study quietly", 6, { gain: { energy: -8, fun: 4 }, rep: 2 }), A("shelve", "Library assistant shift", 6, { gain: { energy: -18 }, pay: 3500, rep: 2 })] },
   { id: "ui-science", name: "Faculty of Science", emoji: "🔬", kind: "learn", district: "UI Campus", blurb: "Labs, lecture rooms and long practicals.", pos: [-35, -26], size: [3.6, 2.4, 2.8], color: "#6f8fb0", style: "campus", voice: true,
     actions: [A("lab", "Lab practical", 6, { gain: { energy: -18 }, rep: 3 }), A("teachlab", "Teach a lab class", 7, { gain: { energy: -25 }, pay: 4800, rep: 3 })] },
@@ -522,12 +526,12 @@ PLACES.push(
     actions: [A("drama", "Drama rehearsal", 6, { gain: { fun: 28, social: 15, energy: -8 }, rep: 2 }), A("lit", "Lecture on Yoruba literature", 6, { gain: { energy: -10, fun: 6 }, rep: 3 })] },
   { id: "ui-law", name: "Faculty of Law", emoji: "⚖️", kind: "learn", district: "UI Campus", blurb: "Moot court and very serious wigs.", pos: [-35, -36], size: [3.0, 2.6, 2.4], color: "#7a6a8a", style: "hall", voice: true,
     actions: [A("moot", "Moot court", 7, { gain: { energy: -20 }, rep: 4 }), A("clinic", "Legal aid clinic", 7, { gain: { energy: -18, social: 8 }, rep: 5 })] },
-  { id: "ui-trenchard", name: "Trenchard Hall", emoji: "🏛️", kind: "culture", district: "UI Campus", blurb: "The Great Hall: convocations, concerts and debates.", pos: [-25, -16], size: [3.2, 2.2, 2.6], color: "#c4a86a", style: "hall", voice: true,
+  { id: "ui-trenchard", name: "Trenchard Hall", emoji: "🏛️", kind: "culture", district: "UI Campus", blurb: "The Great Hall: convocations, concerts and debates.", pos: [-23, -23], size: [3.2, 2.2, 2.6], color: "#c4a86a", style: "hall", voice: true,
     actions: [A("convo", "Attend a convocation", 6, { gain: { fun: 15, social: 20 }, rep: 3 }), A("usher", "Usher at the Great Hall", 6, { gain: { energy: -15 }, pay: 3000, rep: 1 })] },
   { id: "adeoyo", name: "Adeoyo Teaching Hospital", emoji: "🏥", kind: "health", district: "Yemetu", blurb: "Wards, clinics and the busiest corridor in town.", pos: [25, -26], size: [4, 2.4, 2.8], color: "#7aa8b8", style: "hospital", voice: true,
     actions: [A("ward", "Rest in the ward", 8, { cost: 2000, gain: { energy: 40 } }), A("aide", "Nurse's aide shift", 7, { gain: { energy: -28 }, pay: 5000, rep: 3 }), A("blood", "Donate blood", 5, { gain: { energy: -8, social: 6 }, rep: 4 })] },
   { id: "sango-market", name: "Sango Market", emoji: "🧺", kind: "shop", district: "Sango", blurb: "Yams, cloth, pepper and every kind of bargain.", pos: [-35, -6], size: [4, 1.3, 3], color: "#d9a05a", style: "market", voice: true,
-    actions: [A("buy", "Buy foodstuff", 4, { cost: 2200, gain: { hunger: 32 } }), A("stall", "Run a stall", 6, { gain: { energy: -25 }, pay: 4200, rep: 1 })] },
+    actions: [A("buy", "Buy foodstuff (4 meals)", 4, { cost: 2200, pantry: 4 }), A("stall", "Run a stall", 6, { gain: { energy: -25 }, pay: 4200, rep: 1 })] },
   { id: "iwo-road", name: "Iwo Road Garage", emoji: "🚌", kind: "transport", district: "Iwo Road", blurb: "Interstate buses, touts and the loudest horns in Oyo.", pos: [35, -6], size: [4.2, 0.9, 3.2], color: "#8a8f98", style: "terminal", voice: true,
     actions: [A("tout", "Park attendant hustle", 6, { gain: { energy: -25 }, pay: 3500, rep: 1 }), A("pass", "Keke fast pass (5 min)", 2, { cost: 1500, boostMs: 5 * 60 * 1000 })] },
   { id: "mokola-mall", name: "Mokola Plaza", emoji: "🛍️", kind: "shop", district: "Mokola", blurb: "Boutiques, a cinema and a food court.", pos: [-35, 4.5], size: [4, 1.9, 2.8], color: "#b07ab0", style: "mall", voice: true,

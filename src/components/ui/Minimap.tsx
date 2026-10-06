@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { cam, me, remoteMotion } from "@/lib/playerState";
 import { KIND_COLORS, PLACES } from "@/lib/places";
 import { PLOTS } from "@/lib/plots";
-import { ROAD_LINES } from "@/lib/world";
+import { CAMPUS_PLACES, ROAD_LINES } from "@/lib/world";
 import { colorFor } from "@/lib/look";
 import { useGame } from "@/lib/store";
 import { walkTo } from "@/lib/movement";
@@ -74,6 +74,7 @@ function MinimapCanvas() {
         ctx.fillRect(p.pos[0] - 1.2, p.pos[1] - 1.2, 2.4, 2.4);
       }
       for (const p of PLACES) {
+        if (CAMPUS_PLACES.includes(p.id) && !st.campus) continue;
         ctx.fillStyle = KIND_COLORS[p.kind];
         ctx.beginPath();
         ctx.arc(p.pos[0], p.pos[1], 1.55, 0, Math.PI * 2);

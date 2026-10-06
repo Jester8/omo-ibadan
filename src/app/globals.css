@@ -36,6 +36,9 @@ body {
   }
 }
 
+html { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+button { touch-action: manipulation; }
+
 @keyframes load {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(200%); }

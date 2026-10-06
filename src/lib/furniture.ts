@@ -23,7 +23,7 @@ export type UseDef = {
   seatH?: number;
   needsPower?: boolean;
   action?: ActionDef;
-  special?: "generator" | "deck" | "computer";
+  special?: "generator" | "deck" | "computer" | "eat";
 };
 
 export type FurnDef = {
@@ -52,8 +52,8 @@ export const FURN: Record<FurnKind, FurnDef> = {
   pew: { w: 2.2, d: 0.55, h: 0.9, solid: true, use: sit(0.45, { id: "pew", label: "Sit and reflect", secs: 4, gain: { energy: 6, fun: 4, social: 3 } }) },
 
   coffeetable: { w: 1.0, d: 0.6, h: 0.42, solid: true },
-  diningtable: { w: 1.6, d: 0.9, h: 0.75, solid: true },
-  roundtable: { w: 1.0, d: 1.0, h: 0.75, solid: true },
+  diningtable: { w: 1.6, d: 0.9, h: 0.75, solid: true, use: { verb: "Eat a meal", special: "eat" } },
+  roundtable: { w: 1.0, d: 1.0, h: 0.75, solid: true, use: { verb: "Eat a meal", special: "eat" } },
   desk: { w: 1.3, d: 0.65, h: 0.75, solid: true },
   pcdesk: {
     w: 1.3, d: 0.65, h: 1.1, solid: true,
@@ -85,7 +85,7 @@ export const FURN: Record<FurnKind, FurnDef> = {
   },
   stove: {
     w: 0.65, d: 0.6, h: 0.9, solid: true,
-    use: { verb: "Cook", action: { id: "cook", label: "Cook a meal", secs: 5, cost: 800, gain: { hunger: 40, fun: 3 } } },
+    use: { verb: "Cook", action: { id: "cook", label: "Cook a meal", secs: 5, pantry: -1, plates: 1, gain: { energy: -4, fun: 3 } } },
   },
   sink: { w: 0.8, d: 0.6, h: 0.9, solid: true },
 
@@ -149,7 +149,7 @@ export const FURN: Record<FurnKind, FurnDef> = {
   umbrella: { w: 2.2, d: 2.2, h: 0, solid: false },
   mortar: {
     w: 0.6, d: 0.6, h: 0.7, solid: true,
-    use: { verb: "Pound yam", action: { id: "pound", label: "Pound yam", secs: 5, cost: 600, gain: { hunger: 35, energy: -6 } } },
+    use: { verb: "Pound yam", action: { id: "pound", label: "Pound yam", secs: 5, pantry: -1, plates: 1, gain: { energy: -8, fun: 2 } } },
   },
   calabash: { w: 0.5, d: 0.5, h: 0.3, solid: false },
   ibeji: { w: 0.4, d: 0.3, h: 0.55, solid: false },
@@ -157,7 +157,7 @@ export const FURN: Record<FurnKind, FurnDef> = {
   carvedstool: { w: 0.45, d: 0.45, h: 0.45, solid: true, use: sit(0.45) },
   gascooker: {
     w: 0.7, d: 0.55, h: 0.9, solid: true,
-    use: { verb: "Cook on gas", action: { id: "gascook", label: "Cook on the gas cooker", secs: 5, cost: 700, gain: { hunger: 40, fun: 3 } } },
+    use: { verb: "Cook on gas", action: { id: "gascook", label: "Cook on the gas cooker", secs: 5, cost: 200, pantry: -1, plates: 1, gain: { energy: -4, fun: 3 } } },
   },
   radio: {
     w: 0.4, d: 0.2, h: 0.3, solid: false,

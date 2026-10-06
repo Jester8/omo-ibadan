@@ -36,7 +36,7 @@ export default function DeckPanel() {
   };
 
   return (
-    <div className="absolute inset-x-3 bottom-3 z-20 max-h-[42dvh] overflow-y-auto rounded-[1.6rem] bg-white/80 p-4 shadow-[0_12px_40px_-10px_rgba(0,0,0,0.35)] ring-1 ring-white/60 backdrop-blur-2xl sm:inset-x-auto sm:bottom-auto sm:right-5 sm:top-20 sm:w-[22rem]">
+    <div className="absolute inset-x-3 bottom-[5.4rem] z-20 max-h-[42dvh] overflow-y-auto rounded-[1.6rem] bg-white/80 p-4 shadow-[0_12px_40px_-10px_rgba(0,0,0,0.35)] ring-1 ring-white/60 backdrop-blur-2xl sm:inset-x-auto sm:bottom-auto sm:right-5 sm:top-20 sm:w-[22rem]">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="flex items-center gap-1.5 text-base font-bold text-stone-900">

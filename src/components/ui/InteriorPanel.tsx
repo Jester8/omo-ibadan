@@ -19,6 +19,8 @@ export default function InteriorPanel() {
   const decor = useGame((s) => s.decor);
   const money = useGame((s) => s.money);
   const pid = useGame((s) => s.profile?.id);
+  const pantry = useGame((s) => s.pantry);
+  const plates = useGame((s) => s.plates);
   const { now } = useClock();
   const layout = interior ? rt.layout : null;
   if (!interior || !layout) return null;
@@ -94,6 +96,30 @@ export default function InteriorPanel() {
             </li>
           ))}
         </ul>
+      )}
+
+      {interior.kind === "home" && (
+        <div className="mt-3 rounded-2xl bg-amber-50 p-3.5 ring-1 ring-amber-100">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-bold text-amber-950">🍲 Kitchen</p>
+              <p className="text-xs text-amber-800/80">
+                Foodstuff <b>{pantry}</b> · Cooked meals <b>{plates}</b>
+              </p>
+            </div>
+            <button
+              disabled={!!busy || money < 2200}
+              onClick={() => {
+                const err = useGame.getState().runAction({ id: "groceries", label: "Order groceries", secs: 3, cost: 2200, pantry: 4 });
+                if (err) useGame.getState().toast(err, "bad");
+              }}
+              className="shrink-0 rounded-full bg-amber-600 px-3.5 py-2 text-xs font-bold text-white transition active:scale-95 disabled:opacity-40"
+            >
+              Groceries · {naira(2200)}
+            </button>
+          </div>
+          <p className="mt-2 text-xs text-amber-900/70">Buy foodstuff here or at a market, cook at the stove, then eat at the dining table.</p>
+        </div>
       )}
 
       {interior.kind === "home" && (interior.id === "flat" || plot?.ownerId === pid) && (

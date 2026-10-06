@@ -21,6 +21,19 @@ export function useClock() {
   return { minutes, hour: minutes / 60, day: daylight(minutes / 60), nepa: sec === 0 ? false : nepaOut(now), now };
 }
 
+/** The whole game hour, re-rendering only when it changes (about every 2.5 real minutes). */
+export function useHour(): number {
+  const override = useGame((s) => s.clockOverride);
+  return useSyncExternalStore(
+    (cb) => {
+      const id = setInterval(cb, 5000);
+      return () => clearInterval(id);
+    },
+    () => Math.floor(gameMinutes(Date.now(), override) / 60),
+    () => 12,
+  );
+}
+
 const noSub = () => () => {};
 /** false during SSR/hydration, true on the client afterwards. */
 export function useMounted(): boolean {

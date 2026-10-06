@@ -14,8 +14,9 @@ import { S } from "@/lib/furniture";
 import { interiorKey } from "@/lib/interiors";
 import { rt, walkToExit } from "@/lib/interiorRuntime";
 import { TAG_Y } from "./Player";
-import { useClock } from "@/lib/hooks";
+import { useHour } from "@/lib/hooks";
 import { isOpen } from "@/lib/events";
+import { CAMPUS_PLACES } from "@/lib/world";
 
 function Anchored({
   id,
@@ -49,10 +50,11 @@ function Anchored({
 function PlaceLabels() {
   const selected = useGame((s) => s.selected);
   const atPlace = useGame((s) => s.atPlace);
-  const { hour } = useClock();
+  const hour = useHour();
+  const campus = useGame((s) => s.campus);
   return (
     <>
-      {PLACES.map((p) => {
+      {PLACES.filter((p) => campus || !CAMPUS_PLACES.includes(p.id)).map((p) => {
         const open = isOpen(p.id, hour);
         const sel = selected?.type === "place" && selected.id === p.id;
         const here = atPlace === p.id;

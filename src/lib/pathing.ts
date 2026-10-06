@@ -1,4 +1,4 @@
-import { WORLD_HALF } from "./world";
+import { CAMPUS, ESTATES, WORLD_HALF, wallsFor } from "./world";
 import { PLACES, isSolid } from "./places";
 import { PLOTS } from "./plots";
 
@@ -183,13 +183,33 @@ function baseRects() {
   return PLACES.filter(isSolid).map((p) => ({ x: p.pos[0], z: p.pos[1], w: p.size[0], d: p.size[2] }));
 }
 
+const WALLS = [CAMPUS, ...ESTATES].flatMap((z) => wallsFor(z));
+let openEstates = new Set<string>();
+let lastBuilt: string[] = [];
+
+/** Estates whose boom gates are currently raised for the player. */
+export function setOpenEstates(ids: Iterable<string>) {
+  const next = new Set(ids);
+  if (next.size === openEstates.size && [...next].every((i) => openEstates.has(i))) return;
+  openEstates = next;
+  rebuildGrid(lastBuilt);
+}
+
 /** Rebuild the city walkability grid. `builtPlots` are plot ids that have a house on them. */
 export function rebuildGrid(builtPlots: Iterable<string>) {
+  lastBuilt = [...builtPlots];
+  builtPlots = lastBuilt;
   const grid = new Grid(-WORLD_HALF, -WORLD_HALF, WORLD_HALF * 2, WORLD_HALF * 2, 1);
   const built = new Set(builtPlots);
   const rects = baseRects();
   for (const p of PLOTS) if (built.has(p.id)) rects.push({ x: p.pos[0], z: p.pos[1], w: 1.9, d: 1.9 });
   for (const r of rects) grid.blockRect(r.x, r.z, r.w, r.d, MARGIN);
+  for (const w of WALLS) grid.blockRect(w.x, w.z, w.w, w.d, 0.1);
+  // closed boom gates are solid
+  for (const e of ESTATES) {
+    if (openEstates.has(e.id)) continue;
+    for (const g of e.gates) grid.blockRect(g.x, g.z, g.across === "z" ? 0.5 : 2.4, g.across === "z" ? 2.4 : 0.5, 0.05);
+  }
   const wasActive = active === world;
   world = grid;
   if (wasActive) active = world;

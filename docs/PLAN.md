@@ -64,5 +64,13 @@ Owners can buy decor (plants, lamps, rugs, adire wall hangings, calabash, carved
 - Sign-up with name, email and avatar (email is unique, not yet verified).
 - Searchable jobs board in the phone and on the computer; call friends from the Friends tab.
 
+## Round 7 (done)
+- UI campus is walled: the faculties, library and Trenchard Hall only appear once you come in through a gate.
+- Estates (Bodija Estate, Jericho GRA, Oluyole Estate, Iyaganku Heights) have walls, boom gates and 8 houses each. Residents walk in; visitors buy a 30-minute pass from the guard.
+- Cab parks (UI, Iwo Road, Dugbe): tap a parked micra, keke or okada, pick a destination, pay, ride.
+- Home kitchen: buy foodstuff (markets or groceries at home), cook at the stove, eat at the dining table.
+- Eating animation no longer shakes (the arm pose is restored each frame instead of stacking).
+- Performance: capped pixel ratio, smaller shadow map on phones, fewer label re-renders.
+
 ## Ideas next
 Billboards/ads revenue, furniture and interiors, jobs with skills, events (match day, festivals), pets, daily quests, sound and music, avatar visual polish after a hands-on review.

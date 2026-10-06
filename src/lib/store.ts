@@ -6,6 +6,8 @@ import { TIERS, plotById, RENT_CAP_MIN, naira, PLOTS, NPC_PLOTS } from "./plots"
 import type { InteriorRef } from "./interiors";
 import type { Rel } from "./romance";
 import { carById, type RideId } from "./cars";
+import { PASS_MS } from "./estates";
+import { ESTATE_BY_ID } from "./world";
 import { eventFor, isOpen, opensAt } from "./events";
 import { gameMinutes } from "./time";
 import { decorById, MAX_PER_KIND, withDecor } from "./decor";
@@ -30,7 +32,7 @@ export type ChatMsg = {
   fromId?: string;
   fromPid?: string;
 };
-export type Selection = { type: "place" | "plot" | "npc"; id: string } | null;
+export type Selection = { type: "place" | "plot" | "npc" | "gate" | "cab"; id: string } | null;
 export type Food = "bowl" | "cup" | "snack";
 export type Busy = { label: string; start: number; secs: number; food?: Food } | null;
 
@@ -115,6 +117,11 @@ type State = {
   timeMode: "auto" | "day" | "night";
   placesOnly: boolean;
   deck: boolean;
+  passes: Record<string, number>;
+  campus: boolean;
+  buyPass: (estateId: string) => string | null;
+  pantry: number;
+  plates: number;
   computer: boolean;
   ride: RideId | null;
   hideCard: boolean;
@@ -228,6 +235,19 @@ export const useGame = create<State>()(
       timeMode: "auto",
       placesOnly: false,
       deck: false,
+      passes: {},
+      campus: false,
+      buyPass: (estateId) => {
+        const s = get();
+        const e = ESTATE_BY_ID[estateId];
+        if (!e) return "No such estate.";
+        if (s.money < e.price) return `A pass costs ${naira(e.price)}.`;
+        const now = Date.now();
+        set({ money: s.money - e.price, passes: { ...s.passes, [e.id]: Math.max(now, s.passes[e.id] ?? 0) + PASS_MS } });
+        return null;
+      },
+      pantry: 0,
+      plates: 0,
       computer: false,
       ride: null,
       hideCard: false,
@@ -283,6 +303,8 @@ export const useGame = create<State>()(
       runAction: (a, opts) => {
         const s = get();
         if (s.busy) return "You're already busy.";
+        if (a.pantry && a.pantry < 0 && s.pantry < -a.pantry) return "No foodstuff left. Buy some at a market, or order groceries at home.";
+        if (a.plates && a.plates < 0 && s.plates < -a.plates) return "No cooked food. Cook a meal first.";
         if (a.minRep && s.rep < a.minRep) return `Needs ${a.minRep} reputation (${TITLES[titleIndex(a.minRep)].name}).`;
         if (a.cost && s.money < a.cost) return `You need ${naira(a.cost)}.`;
         if (a.gain?.energy && a.gain.energy < 0 && s.needs.energy + a.gain.energy < 0) return "Too tired. Eat or rest first.";
@@ -321,7 +343,11 @@ export const useGame = create<State>()(
             worked: cur.stats.worked + (a.pay ? 1 : 0),
             ate: cur.stats.ate + ((a.gain?.hunger ?? 0) >= 25 ? 1 : 0),
           };
-          set({ busy: null, needs, money, rep, stats });
+          const pantry = Math.max(0, cur.pantry + (a.pantry ?? 0));
+          const plates = Math.max(0, cur.plates + (a.plates ?? 0));
+          if (a.pantry && a.pantry > 0) parts.push(`+${a.pantry} foodstuff`);
+          if (a.plates && a.plates > 0) parts.push("meal ready");
+          set({ busy: null, needs, money, rep, stats, pantry, plates });
           get().toast(`${a.label}${parts.length ? ` · ${parts.join(" · ")}` : ""}`, "good");
           const afterTitle = titleIndex(rep);
           if (afterTitle > beforeTitle) get().toast(`New title: ${TITLES[afterTitle].name}!`, "good");
@@ -461,6 +487,9 @@ export const useGame = create<State>()(
         questsDone: s.questsDone,
         muted: s.muted,
         savedAt: s.savedAt,
+        pantry: s.pantry,
+        plates: s.plates,
+        passes: s.passes,
         decor: s.decor,
         romance: s.romance,
         cars: s.cars,

@@ -7,6 +7,8 @@ import Lighting from "./Lighting";
 import Terrain from "./Terrain";
 import Buildings from "./Buildings";
 import Gates from "./Gates";
+import Estates from "./Estates";
+import CabRanks from "./CabRanks";
 import PlotsLayer from "./PlotsLayer";
 import Player from "./Player";
 import { Npcs, RemotePlayers } from "./People";
@@ -132,6 +134,8 @@ function WorldContent() {
       <Terrain placesOnly={placesOnly} />
       <Buildings />
       <Gates />
+      <Estates />
+      <CabRanks />
       {!placesOnly && <PlotsLayer />}
       {!placesOnly && <Npcs />}
       {/* invisible ground: click anywhere to walk */}
@@ -157,7 +161,7 @@ export default function CityScene() {
   const placesOnly = useGame((s) => s.placesOnly);
   return (
     <Canvas
-      dpr={[1, 2]}
+      dpr={[1, 1.5]}
       shadows="percentage"
       camera={{ fov: 30, near: 0.5, far: 300, position: [24, 28, 24] }}
       gl={{ antialias: true }}

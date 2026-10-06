@@ -247,6 +247,16 @@ export function startUse(index: number) {
     s.toast("No light. Fuel the generator or wait for NEPA.", "bad");
     return;
   }
+  if (def.special === "eat") {
+    if (rt.ref?.kind !== "home") {
+      s.toast("Order at the counter to eat here.", "info");
+      return;
+    }
+    const err = s.runAction({ id: "eatmeal", label: "Eat a meal", secs: 5, plates: -1, gain: { hunger: 55, fun: 4 } });
+    if (err) s.toast(err, "bad");
+    else s.recordStat("used");
+    return;
+  }
   if (def.special === "computer") {
     useGame.setState({ computer: true });
     return;

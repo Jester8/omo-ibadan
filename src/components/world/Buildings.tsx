@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { PLACES, type Place } from "@/lib/places";
+import { CAMPUS_PLACES } from "@/lib/world";
 import { useGame } from "@/lib/store";
 import { facadeMaterials, lampMat, mat, signMat, windowMats } from "./materials";
 
@@ -580,9 +581,11 @@ function PlaceBuilding({ place }: { place: Place }) {
 }
 
 export default function Buildings() {
+  // the campus buildings only appear once you have come in through a gate
+  const campus = useGame((s) => s.campus);
   return (
     <>
-      {PLACES.map((p) => (
+      {PLACES.filter((p) => campus || !CAMPUS_PLACES.includes(p.id)).map((p) => (
         <PlaceBuilding key={p.id} place={p} />
       ))}
     </>

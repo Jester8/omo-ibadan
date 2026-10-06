@@ -9,13 +9,7 @@ const GATES: { x: number; z: number; across: "x" | "z"; title: string; sub: stri
   { x: 0, z: 43, across: "x", title: "IBADAN", sub: "South Gate · Come again", color: "#2f6f4f" },
   { x: -43, z: 0, across: "z", title: "IBADAN", sub: "West Gate · Eleyele Road", color: "#2f6f4f" },
   { x: 43, z: 0, across: "z", title: "IBADAN", sub: "East Gate · Iwo Road", color: "#2f6f4f" },
-  { x: -30, z: -22, across: "x", title: "University of Ibadan", sub: "Main Gate · UI Campus", color: "#7a1f2e" },
-  { x: 10, z: -22, across: "x", title: "Bodija Estate", sub: "Private estate", color: "#8a6a1a" },
-  { x: 20, z: -24, across: "x", title: "Jericho GRA", sub: "Government Reserved Area", color: "#1f5f8a" },
-  { x: -10, z: 22, across: "x", title: "Oluyole Estate", sub: "Residents only", color: "#8a6a1a" },
-  { x: 20, z: 22, across: "x", title: "Iyaganku GRA", sub: "Government Reserved Area", color: "#1f5f8a" },
   { x: 30, z: 0, across: "z", title: "Iwo Road", sub: "Garage · interstate buses", color: "#4a4f58" },
-  { x: -20, z: -30, across: "z", title: "Samonda", sub: "Ojoo · Akobo", color: "#4a6a2a" },
 ];
 
 function signTexture(title: string, sub: string, color: string) {
@@ -41,7 +35,9 @@ function signTexture(title: string, sub: string, color: string) {
   return t;
 }
 
-function Gate({ g }: { g: (typeof GATES)[number] }) {
+export type GateSpec = { x: number; z: number; across: "x" | "z"; title: string; sub: string; color: string };
+
+export function Gate({ g }: { g: GateSpec }) {
   const tex = useMemo(() => signTexture(g.title, g.sub, g.color), [g]);
   const W = 3.3;
   const H = 2.3;

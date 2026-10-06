@@ -28,6 +28,9 @@ import { streetRoom } from "@/lib/voiceRoom";
 import TalkButton from "@/components/ui/TalkButton";
 import { enterInterior, goUpDeck, homeRef, rt, startUse, walkToFurn } from "@/lib/interiorRuntime";
 import { cam, me } from "@/lib/playerState";
+import { setOpenEstates } from "@/lib/pathing";
+import { openEstateIds } from "@/lib/estates";
+import { inCampus } from "@/lib/world";
 
 const CityScene = dynamic(() => import("./CityScene"), {
   ssr: false,
@@ -118,6 +121,19 @@ function Runtime() {
     // walking indoors or into a venue leaves the street conversation
     if (room?.startsWith("street:") && (interior || atPlace)) voice.leave();
   }, [atPlace, interior]);
+
+  // boom gates follow who may enter; the campus buildings appear once you are through the gate
+  useEffect(() => {
+    const tick = () => {
+      const s = useGame.getState();
+      setOpenEstates(openEstateIds({ plots: s.plots, profileId: s.profile?.id, passes: s.passes }, Date.now()));
+      const inside = inCampus(me.x, me.z);
+      if (inside !== s.campus) useGame.setState({ campus: inside });
+    };
+    tick();
+    const id = setInterval(tick, 400);
+    return () => clearInterval(id);
+  }, []);
 
   // a street conversation follows you from block to block
   useEffect(() => {
