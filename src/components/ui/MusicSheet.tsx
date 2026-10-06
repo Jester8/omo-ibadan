@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Music2, Pause, Play, Trash2, Upload } from "lucide-react";
-import { play, useMusic } from "@/lib/music";
-import { listApproved, listMine, removeTrack, submitTrack, type MyTrack, type Track } from "@/lib/tracks";
+import { introInfo } from "@/lib/api";
+import { introTrackFrom, play, useMusic, type PlayableTrack } from "@/lib/music";
+import { listApproved, listMine, removeTrack, submitTrack, type MyTrack } from "@/lib/tracks";
 
 const STATUS: Record<MyTrack["status"], string> = { pending: "Waiting for review", approved: "Live in the city", rejected: "Not approved" };
 
@@ -27,12 +28,12 @@ export default function MusicSheet() {
 }
 
 function Listen() {
-  const [tracks, setTracks] = useState<Track[] | null>(null);
+  const [tracks, setTracks] = useState<PlayableTrack[] | null>(null);
   const current = useMusic((s) => s.current);
   const playing = useMusic((s) => s.playing);
   const error = useMusic((s) => s.error);
   useEffect(() => {
-    void listApproved().then(setTracks);
+    void Promise.all([listApproved(), introInfo()]).then(([list, intro]) => setTracks(intro.available ? [introTrackFrom(intro), ...list] : list));
   }, []);
 
   return (

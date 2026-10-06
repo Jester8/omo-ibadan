@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowRight, Mail, Music2, UserRound, Volume2, VolumeX } from "lucide-react";
-import { introInfo, introUrl, logIn, type IntroInfo } from "@/lib/api";
+import { ArrowRight, ChevronLeft, Mail, Music2, UserRound, Volume2, VolumeX } from "lucide-react";
+import { introInfo, logIn, type IntroInfo } from "@/lib/api";
+import { setIntroMuted, startIntro } from "@/lib/music";
 import type { Look } from "@/lib/look";
 
 type Step = "intro" | "choose" | "login";
@@ -17,38 +18,19 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
   const [name, setName] = useState("");
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
-  const el = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     void introInfo().then(setInfo);
-    return () => {
-      // fade the intro out rather than cutting it
-      const a = el.current;
-      if (!a) return;
-      const id = setInterval(() => {
-        a.volume = Math.max(0, a.volume - 0.1);
-        if (a.volume <= 0.01) {
-          a.pause();
-          clearInterval(id);
-        }
-      }, 80);
-    };
   }, []);
 
   const enter = () => {
-    if (info.available && !el.current) {
-      const a = new Audio(info.url ?? introUrl());
-      a.loop = true;
-      a.volume = 0.85;
-      el.current = a;
-      void a.play().catch(() => undefined);
-    }
+    if (info.available) startIntro(info);
     setStep("choose");
   };
 
   const toggleMute = () => {
     setMuted(!muted);
-    if (el.current) el.current.muted = !muted;
+    setIntroMuted(!muted);
   };
 
   const submitLogin = async (e: React.FormEvent) => {
@@ -134,8 +116,8 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
 
           {step === "login" && (
             <motion.form key="login" onSubmit={(e) => void submitLogin(e)} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-              <button type="button" onClick={() => setStep("choose")} className="mb-4 text-sm font-semibold text-white/70 hover:text-white">
-                ← Back
+              <button type="button" onClick={() => setStep("choose")} className="mb-5 inline-flex items-center gap-1 rounded-full bg-white/15 py-1.5 pl-2 pr-4 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/25 active:scale-95">
+                <ChevronLeft className="size-5" strokeWidth={2.4} /> Back
               </button>
               <h2 className="text-3xl font-extrabold tracking-tight">Log in</h2>
               <p className="mt-1 text-white/70">Use the email and name you signed up with.</p>

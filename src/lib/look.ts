@@ -60,8 +60,6 @@ export const HAIR_STYLES: { id: HairStyle; label: string }[] = [
   { id: "twists", label: "Twists" },
   { id: "bun", label: "Bun" },
   { id: "gele", label: "Gele" },
-  { id: "turban", label: "Turban" },
-  { id: "hijab", label: "Hijab" },
 ];
 
 export const TOP_STYLES: { id: TopStyle; label: string; frames: Frame[]; group: "Everyday" | "Nigerian" }[] = [
@@ -75,7 +73,6 @@ export const TOP_STYLES: { id: TopStyle; label: string; frames: Frame[]; group: 
   { id: "singlet", label: "Singlet & shorts", frames: ["m"], group: "Everyday" },
   { id: "senator", label: "Senator kaftan", frames: ["m"], group: "Nigerian" },
   { id: "buba", label: "Buba & sokoto", frames: ["m"], group: "Nigerian" },
-  { id: "babariga", label: "Babariga (Hausa gown)", frames: ["m", "f"], group: "Nigerian" },
   { id: "isiagu", label: "Isi agu", frames: ["m", "f"], group: "Nigerian" },
   { id: "agbada", label: "Agbada", frames: ["m", "f"], group: "Nigerian" },
   { id: "ankara", label: "Ankara iro & buba", frames: ["f"], group: "Nigerian" },
@@ -92,7 +89,6 @@ export const ACCESSORIES: { id: Accessory; label: string }[] = [
   { id: "sunglasses", label: "Sunglasses" },
   { id: "cap", label: "Cap" },
   { id: "fila", label: "Fila" },
-  { id: "hula", label: "Hausa cap" },
   { id: "igbocap", label: "Igbo red cap" },
 ];
 

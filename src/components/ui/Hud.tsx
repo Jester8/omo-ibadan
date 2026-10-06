@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { ChevronUp, EyeOff, Eye, Drumstick, Moon, PartyPopper, Sun, Target, UserRound, Users, Zap, ZapOff, Wifi, WifiOff } from "lucide-react";
+import { ChevronUp, EyeOff, Eye, HelpCircle, Drumstick, Moon, PartyPopper, Sun, Target, UserRound, Users, Zap, ZapOff, Wifi, WifiOff } from "lucide-react";
 import { useGame } from "@/lib/store";
 import { useClock } from "@/lib/hooks";
 import { formatClock } from "@/lib/time";
@@ -132,6 +132,11 @@ export default function Hud() {
         )}
       </motion.div>}
 
+      {!hideIcons && (
+        <button onClick={() => useGame.getState().setSheet(useGame.getState().sheet === "guide" ? null : "guide")} className={`${small} absolute right-14 top-3 z-10 sm:right-16 sm:top-5`} aria-label="How to play" title="How to play">
+          <HelpCircle className="size-4" />
+        </button>
+      )}
       {!hideIcons && (
         <button onClick={() => patch({ hideIcons: true })} className={`${small} absolute right-3 top-3 z-10 sm:right-5 sm:top-5`} aria-label="Hide menu" title="Hide menu">
           <EyeOff className="size-4" />

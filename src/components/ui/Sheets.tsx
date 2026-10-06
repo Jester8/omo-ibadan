@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { LogOut, Car, Music2, Check, CheckCircle2, Circle, Copy, Eye, Footprints, Heart, Landmark, Moon, PencilLine, PhoneCall, PhoneOff, Sun, SunMoon, Volume2, VolumeX, X } from "lucide-react";
+import { HelpCircle, LogOut, Car, Music2, Check, CheckCircle2, Circle, Copy, Eye, Footprints, Heart, Landmark, Moon, PencilLine, PhoneCall, PhoneOff, Sun, SunMoon, Volume2, VolumeX, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useGame, ownedBy } from "@/lib/store";
 import { net } from "@/lib/net";
@@ -21,6 +21,7 @@ import JobsPanel from "./JobsPanel";
 import { signOut } from "@/lib/api";
 import MusicSheet from "./MusicSheet";
 import FlightsSheet from "./FlightsSheet";
+import GuideSheet from "./GuideSheet";
 import { useSound } from "@/lib/soundStore";
 
 function Frame({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
@@ -254,6 +255,12 @@ function ViewSettings() {
             {soundMuted ? <VolumeX className="size-4 text-stone-500" /> : <Volume2 className="size-4 text-stone-500" />} Sound
           </span>
           <span className={`rounded-full px-2.5 py-0.5 text-xs ${soundMuted ? "bg-stone-200 text-stone-600" : "bg-emerald-600 text-white"}`}>{soundMuted ? "Off" : "On"}</span>
+        </button>
+        <button onClick={() => useGame.getState().setSheet("guide")} className={row}>
+          <span className="flex items-center gap-2.5">
+            <HelpCircle className="size-4 text-stone-500" /> How to play
+          </span>
+          <span className="text-stone-400">›</span>
         </button>
         <button onClick={() => useGame.getState().setSheet("music")} className={row}>
           <span className="flex items-center gap-2.5">
@@ -757,6 +764,11 @@ export default function Sheets() {
       {sheet === "quests" && (
         <Frame key="quests" title="Goals" onClose={() => setSheet(null)}>
           <QuestsSheet />
+        </Frame>
+      )}
+      {sheet === "guide" && (
+        <Frame key="guide" title="How to play" onClose={() => setSheet(null)}>
+          <GuideSheet />
         </Frame>
       )}
       {sheet === "flights" && (

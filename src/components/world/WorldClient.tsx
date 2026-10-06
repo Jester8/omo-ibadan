@@ -10,6 +10,7 @@ import Sheets from "@/components/ui/Sheets";
 import DeckPanel from "@/components/ui/DeckPanel";
 import BottomBar from "@/components/ui/BottomBar";
 import NowPlaying from "@/components/ui/NowPlaying";
+import GuideTour from "@/components/ui/GuideTour";
 import FlightScreen from "@/components/ui/FlightScreen";
 import ComputerScreen from "@/components/ui/ComputerScreen";
 import Minimap from "@/components/ui/Minimap";
@@ -25,7 +26,8 @@ import { QUESTS } from "@/lib/quests";
 import { naira } from "@/lib/plots";
 import { useMounted } from "@/lib/hooks";
 import { net, roomOf } from "@/lib/net";
-import { signUp } from "@/lib/api";
+import { introInfo, signUp } from "@/lib/api";
+import { introToGame, playIntroOnce } from "@/lib/music";
 import { voice } from "@/lib/voice";
 import { streetRoom } from "@/lib/voiceRoom";
 import TalkButton from "@/components/ui/TalkButton";
@@ -138,6 +140,20 @@ function Runtime() {
     return () => clearInterval(id);
   }, []);
 
+  // the intro chorus carries on into the city; returning players hear it once on their first tap
+  useEffect(() => {
+    if (!hasProfile) return;
+    introToGame();
+    let off = () => {};
+    void introInfo().then((info) => {
+      if (!info.available) return;
+      const start = () => void playIntroOnce(info);
+      window.addEventListener("pointerdown", start, { once: true });
+      off = () => window.removeEventListener("pointerdown", start);
+    });
+    return () => off();
+  }, [hasProfile]);
+
   // a street conversation follows you from block to block
   useEffect(() => {
     const id = setInterval(() => {
@@ -179,6 +195,7 @@ export default function WorldClient() {
           <DeckPanel />
           <ComputerScreen />
           <FlightScreen />
+          <GuideTour />
           {!hideIcons && <BottomBar />}
           {!hideIcons && <NowPlaying />}
           <VoiceBar />
