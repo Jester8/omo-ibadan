@@ -97,17 +97,17 @@ export function setIntroMuted(muted: boolean) {
   if (el) el.muted = muted;
 }
 
-/** The player is in the city: let the chorus finish its current pass (it fades out) and keep the credit showing. */
+/** The player is in the city: the chorus keeps repeating, with the credit showing, until they stop it. */
 export function introToGame() {
-  if (el && !el.paused) el.loop = false;
+  if (el && !el.paused) el.loop = true;
 }
 
-/** For players who come straight back into the city: play the chorus once, on their first tap. */
+/** For players who come straight back into the city: start the chorus on repeat at their first tap. */
 export async function playIntroOnce(info: { title?: string; artist?: string; rightsHolder?: string; url?: string }) {
   if (introPlayed || !info.url) return;
   introPlayed = true;
   const a = ensure();
-  a.loop = false;
+  a.loop = true;
   a.muted = false;
   a.src = info.url;
   a.volume = level();

@@ -2,13 +2,16 @@
 
 import Skyline from "./Skyline";
 import Roofscape from "./Roofscape";
+import TrafficLights from "./TrafficLights";
 import { BLOCKS, ROAD_LINES, WORLD_HALF } from "@/lib/world";
 import CarModel from "./CarModel";
 import Avatar from "@/components/avatar/Avatar";
 import { AVATAR_SCALE } from "./Player";
 import { seededLook } from "@/lib/look";
 import { audio } from "@/lib/audio";
-import { me, traffic } from "@/lib/playerState";
+import { me, remoteMotion, traffic } from "@/lib/playerState";
+import { junctionNear, lightAt } from "@/lib/traffic";
+import { NPCS } from "./People";
 import { useGame } from "@/lib/store";
 import { useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
@@ -228,22 +231,36 @@ const CARS: Car[] = [
 /** Traffic crawls through the streets at about half the old speed. */
 const TRAFFIC_PACE = 0.5;
 
+/** True when somebody on foot is standing where this vehicle is about to go. */
+function personAhead(px: number, pz: number, x: number, z: number): boolean {
+  const near = (qx: number, qz: number) => Math.hypot(qx - px, qz - pz) < 0.95 || Math.hypot(qx - x, qz - z) < 0.6;
+  const st = useGame.getState();
+  if (!st.interior && !st.deck && near(me.x, me.z)) return true;
+  for (const n of NPCS) if (near(n.st.x, n.st.z)) return true;
+  for (const r of remoteMotion.values()) if (near(r.x, r.z)) return true;
+  return false;
+}
+
 function Vehicle({ car, index }: { car: Car; index: number }) {
   const g = useRef<THREE.Group>(null);
   const rider = useRef({ speed: car.speed * TRAFFIC_PACE, pose: "sit" as const });
   const lane = 0.42;
-  useFrame((state) => {
+  // how far round its loop the vehicle has travelled, and how fast it is rolling right now (0 = stopped)
+  const prog = useRef(car.offset);
+  const roll = useRef(1);
+
+  const posAt = (p: number) => {
     const { hx, hz } = car;
     const w = (hx - lane) * 2;
     const h = (hz - lane) * 2;
     const per = 2 * (w + h);
-    let s = (state.clock.elapsedTime * car.speed * TRAFFIC_PACE + car.offset) % per;
+    let s = ((p % per) + per) % per;
     if (car.ccw) s = per - s;
+    const x0 = -(hx - lane);
+    const z0 = -(hz - lane);
     let x: number;
     let z: number;
     let ry: number;
-    const x0 = -(hx - lane);
-    const z0 = -(hz - lane);
     if (s < w) {
       x = x0 + s;
       z = z0;
@@ -262,21 +279,61 @@ function Vehicle({ car, index }: { car: Car; index: number }) {
       ry = Math.PI;
     }
     if (car.ccw) ry += Math.PI;
+    return { x, z, ry };
+  };
+
+  useFrame((_, rawDt) => {
+    const dt = Math.min(rawDt, 0.05);
+    const here = posAt(prog.current);
+    const ahead = posAt(prog.current + 1.25);
+    const { x, z, ry } = here;
+
+    // should it stop? someone on foot ahead, a vehicle just in front, or a red light at the junction
+    let stop = personAhead(ahead.x, ahead.z, x, z);
+    const fx = Math.sin(ry);
+    const fz = Math.cos(ry);
+    if (!stop) {
+      for (let k = 0; k < traffic.length; k++) {
+        const o = traffic[k];
+        if (!o || k === index) continue;
+        const dx = o.x - x;
+        const dz = o.z - z;
+        const d = Math.hypot(dx, dz);
+        if (d < 1.15 && d > 0.01 && (dx * fx + dz * fz) / d > 0.85) {
+          stop = true;
+          break;
+        }
+      }
+    }
+    if (!stop) {
+      const j = junctionNear(ahead.x, ahead.z, 0.95);
+      const inside = j && Math.abs(x - j.ix) < 0.95 && Math.abs(z - j.iz) < 0.95;
+      if (j && !inside) {
+        const axis = Math.abs(fx) > 0.5 ? "x" : "z";
+        if (lightAt(j.ix, j.iz, axis, Date.now() / 1000) !== "green") stop = true;
+      }
+    }
+
+    // brake firmly, pull away gently
+    roll.current += ((stop ? 0 : 1) - roll.current) * Math.min(1, dt * (stop ? 7 : 1.8));
+    prog.current += car.speed * TRAFFIC_PACE * roll.current * dt;
+
     if (g.current) {
       g.current.position.set(x, 0.08, z);
       g.current.rotation.y = ry;
     }
-    // share the position so the player can be hit, and so drivers can honk
+    // share the position (following distance, honks)
     const t = (traffic[index] ??= { x, z, ry, speed: car.speed, bike: !!car.bike, honkAt: 0 });
     t.x = x;
     t.z = z;
     t.ry = ry;
+    t.speed = car.speed * roll.current;
     const dx = me.x - x;
     const dz = me.z - z;
     const d = Math.hypot(dx, dz);
-    const ahead = d > 0.01 && (dx * Math.sin(ry) + dz * Math.cos(ry)) / d > 0.6; // the player is in front of the vehicle
+    const inFront = d > 0.01 && (dx * fx + dz * fz) / d > 0.6;
     const now = performance.now();
-    if (d < 3.4 && ahead && now - t.honkAt > 4500 && !useGame.getState().interior) {
+    if (d < 3.4 && inFront && now - t.honkAt > 4500 && !useGame.getState().interior) {
       t.honkAt = now;
       audio.horn(!!car.bike);
     }
@@ -284,7 +341,7 @@ function Vehicle({ car, index }: { car: Car; index: number }) {
   if (car.bike) {
     return (
       <group ref={g}>
-        <CarModel kind="okada" color={car.color} fixed={car.speed * TRAFFIC_PACE} />
+        <CarModel kind="okada" color={car.color} trafficIndex={index} />
         {/* the okada man, sitting on his bike */}
         <group position-y={-0.18}>
           <Avatar look={{ ...seededLook(`okada-${index}`), frame: "m", top: "tee", accessory: index % 2 ? "cap" : "none" }} motion={rider} scale={AVATAR_SCALE} />
@@ -330,6 +387,7 @@ export default function Terrain({ placesOnly = false }: { placesOnly?: boolean }
       <Lots />
       <Roads />
       {!placesOnly && <Roofscape />}
+      {!placesOnly && <TrafficLights />}
       {!placesOnly && <Trees />}
       {!placesOnly && <Lamps />}
       <Surroundings />

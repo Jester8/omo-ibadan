@@ -39,7 +39,7 @@ export const TOPICS: Topic[] = [
   { id: "wheels", emoji: "🛺", title: "Rides and cars", lines: [
     "Cab parks have parked cabs: tap one, search where you are going, pay the fare and ride.",
     "Buy your own car in Buy, then Cars. Tap Me, then Drive your car, to hop in. Press H to honk.",
-    "Watch out in the road: cars and okadas honk, and one that hits you will knock you down.",
+    "Traffic is polite: cars and okadas stop for people on foot and wait at red lights, and they may honk as they slow down.",
   ] },
   { id: "people", emoji: "💬", title: "People", lines: [
     "Tap Chat to talk to everyone nearby, and Talk to speak by voice with the people around you.",
