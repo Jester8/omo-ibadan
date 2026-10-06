@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { AnimatePresence, motion } from "motion/react";
 import Hud from "@/components/ui/Hud";
@@ -22,6 +22,7 @@ import { QUESTS } from "@/lib/quests";
 import { naira } from "@/lib/plots";
 import { useMounted } from "@/lib/hooks";
 import { net, roomOf } from "@/lib/net";
+import { signUp } from "@/lib/api";
 import { voice } from "@/lib/voice";
 import { streetRoom } from "@/lib/voiceRoom";
 import TalkButton from "@/components/ui/TalkButton";
@@ -141,6 +142,8 @@ export default function WorldClient() {
   const patch = useGame((s) => s.patch);
   const fade = useGame((s) => s.fade);
   const hideIcons = useGame((s) => s.hideIcons);
+  const [signupError, setSignupError] = useState("");
+  const [signingUp, setSigningUp] = useState(false);
 
   return (
     <div className="relative h-dvh w-full overflow-hidden bg-[#eef3ec]">
@@ -179,9 +182,18 @@ export default function WorldClient() {
             initialLook={profile?.look}
             isEdit={!!profile}
             onCancel={profile ? () => patch({ editingAvatar: false }) : undefined}
-            onDone={(name, look) => {
-              const id = profile?.id ?? crypto.randomUUID().replace(/-/g, "").slice(0, 20);
-              setProfile({ id, name, look });
+            askEmail={!profile}
+            error={signupError}
+            busy={signingUp}
+            onDone={async (name, look, email) => {
+              if (profile) return setProfile({ ...profile, name, look });
+              const id = crypto.randomUUID().replace(/-/g, "").slice(0, 20);
+              setSigningUp(true);
+              setSignupError("");
+              const r = await signUp(id, name, email);
+              setSigningUp(false);
+              if (r === "taken") return setSignupError("That email is already registered. Use a different one.");
+              setProfile({ id, name, look, email });
             }}
           />
         )}

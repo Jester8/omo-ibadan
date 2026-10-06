@@ -4,12 +4,13 @@ import { useEffect, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { DECK_Y } from "@/lib/interiorRuntime";
+import { audio } from "@/lib/audio";
 import { carById, rideById } from "@/lib/cars";
 import CarModel from "./CarModel";
 import Avatar from "@/components/avatar/Avatar";
 import { useGame } from "@/lib/store";
 import { PLACES, doorOf } from "@/lib/places";
-import { boost, cam, emotes, me } from "@/lib/playerState";
+import { boost, cam, emotes, me, traffic } from "@/lib/playerState";
 import { isBlockedAt } from "@/lib/pathing";
 import { net } from "@/lib/net";
 import { S } from "@/lib/furniture";
@@ -38,6 +39,8 @@ const angleDiff = (a: number, b: number) => {
   return d;
 };
 
+const FALL_MS = 2800;
+
 export default function Player() {
   const profile = useGame((s) => s.profile);
   const driving = useGame((s) => s.driving && !s.interior);
@@ -56,6 +59,10 @@ export default function Player() {
       return el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement;
     };
     const down = (e: KeyboardEvent) => {
+      if (!typing() && (e.key === "h" || e.key === "H")) {
+        const st = useGame.getState();
+        if (st.driving || st.ride) audio.horn(st.ride === "okada");
+      }
       if (!typing() && (e.key === "z" || e.key === "Z")) net.emote("wave");
       if (!typing() && (e.key === "x" || e.key === "X")) net.emote("dance");
       const k = KEY_MAP[e.key.toLowerCase()];
@@ -87,6 +94,32 @@ export default function Player() {
       motion.current.pose = null;
       group.current.position.set(me.x, DECK_Y, me.z);
       group.current.rotation.set(0, me.ry, 0);
+      return;
+    }
+
+    // knocked down by traffic: lie in the road, then get back up
+    const nowMs = Date.now();
+    if (!s.interior && !s.ride && !s.driving && nowMs > me.fallUntil) {
+      for (const t of traffic) {
+        if (t && Math.hypot(t.x - me.x, t.z - me.z) < (t.bike ? 0.42 : 0.52)) {
+          me.fallUntil = nowMs + FALL_MS;
+          me.path = [];
+          s.adjustNeeds({ energy: -8, fun: -6 });
+          s.toast(t.bike ? "Ouch! An okada knocked you down." : "Ouch! A car knocked you down.", "bad");
+          audio.bad();
+          break;
+        }
+      }
+    }
+    if (nowMs < me.fallUntil) {
+      const rem = me.fallUntil - nowMs;
+      const down = Math.max(0, Math.min(1, Math.min((FALL_MS - rem) / 180, rem / 600)));
+      me.path = [];
+      me.speed = 0;
+      motion.current.speed = 0;
+      motion.current.pose = null;
+      group.current.position.set(me.x, 0.14 * down, me.z);
+      group.current.rotation.set(-Math.PI / 2 * down, me.ry, 0, "YXZ");
       return;
     }
 

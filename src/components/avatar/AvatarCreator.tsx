@@ -68,18 +68,27 @@ export default function AvatarCreator({
   isEdit = false,
   onDone,
   onCancel,
+  askEmail = false,
+  error,
+  busy = false,
 }: {
   initialName?: string;
   initialLook?: Look;
   isEdit?: boolean;
-  onDone: (name: string, look: Look) => void;
+  onDone: (name: string, look: Look, email: string) => void;
   onCancel?: () => void;
+  /** first-time sign-up: also ask for an email address */
+  askEmail?: boolean;
+  error?: string;
+  busy?: boolean;
 }) {
+  const [email, setEmail] = useState("");
   const [name, setName] = useState(initialName);
   const [look, setLook] = useState<Look>(initialLook);
   const [walk, setWalk] = useState(false);
   const set = <K extends keyof Look>(k: K, v: Look[K]) => setLook((l) => ({ ...l, [k]: v }));
-  const valid = name.trim().length >= 2;
+  const emailOk = !askEmail || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
+  const valid = name.trim().length >= 2 && emailOk && !busy;
 
   return (
     <motion.div
@@ -138,6 +147,22 @@ export default function AvatarCreator({
               />
             </label>
 
+            {askEmail && (
+              <label className="block">
+                <span className="mb-2 block text-xs font-semibold uppercase tracking-wider text-stone-400">Email</span>
+                <input
+                  type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value.slice(0, 80))}
+                  placeholder="you@example.com"
+                  className="w-full rounded-2xl border-0 bg-stone-100 px-4 py-3 text-base font-medium text-stone-900 outline-none ring-2 ring-transparent transition placeholder:text-stone-400 focus:bg-white focus:ring-emerald-500"
+                />
+                {error && <span className="mt-1.5 block text-sm font-medium text-rose-600">{error}</span>}
+              </label>
+            )}
+
             <Swatches label="Skin" value={look.skin} options={SKIN_TONES} onPick={(c) => set("skin", c)} />
             <Chips
               label="Body type"
@@ -176,10 +201,10 @@ export default function AvatarCreator({
             )}
             <button
               disabled={!valid}
-              onClick={() => onDone(name.trim(), look)}
+              onClick={() => onDone(name.trim(), look, email.trim().toLowerCase())}
               className="rounded-full bg-emerald-700 px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-700/25 transition hover:bg-emerald-800 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {isEdit ? "Save look" : "Enter Ibadan"}
+              {isEdit ? "Save look" : busy ? "Creating…" : "Sign up & enter Ibadan"}
             </button>
           </div>
         </div>

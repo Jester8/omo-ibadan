@@ -38,6 +38,15 @@ export function touchPlayer(pid: string, name: string) {
   ).run(pid, name, now, now);
 }
 
+/** Registers an email for a player. Returns false if another player already owns that email. */
+export function signUp(pid: string, name: string, email: string): boolean {
+  const owner = db.prepare("SELECT pid FROM players WHERE email = ?").get(email) as { pid: string } | undefined;
+  if (owner && owner.pid !== pid) return false;
+  touchPlayer(pid, name);
+  db.prepare("UPDATE players SET email = ? WHERE pid = ?").run(email, pid);
+  return true;
+}
+
 export function getState(pid: string): { state: unknown; updatedAt: number } | null {
   const r = db.prepare("SELECT state_json, state_updated FROM players WHERE pid = ?").get(pid) as { state_json: string | null; state_updated: number | null } | undefined;
   if (!r?.state_json) return null;

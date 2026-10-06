@@ -32,6 +32,21 @@ export async function ensureToken(): Promise<string | null> {
 
 export const currentToken = () => cached;
 
+/** Create the account. "taken" means that email already belongs to someone; "offline" lets play continue locally. */
+export async function signUp(pid: string, name: string, email: string): Promise<"ok" | "taken" | "offline"> {
+  try {
+    const res = await fetch(`${apiBase()}/api/auth/signup`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ pid, name, email }), signal: AbortSignal.timeout(3500) });
+    if (res.status === 409) return "taken";
+    if (!res.ok) return "offline";
+    const out = (await res.json()) as { pid: string; token: string };
+    localStorage.setItem(KEY, JSON.stringify({ pid: out.pid, token: out.token }));
+    cached = out.token;
+    return "ok";
+  } catch {
+    return "offline";
+  }
+}
+
 const snapshot = () => {
   const s = useGame.getState();
   return { money: s.money, rep: s.rep, needs: s.needs, questsDone: s.questsDone, cars: s.cars, activeCar: s.activeCar, romance: s.romance, stats: s.stats };

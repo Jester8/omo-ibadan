@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { randomUUID } from "node:crypto";
 import { config } from "../config";
-import { getState, putState, touchPlayer } from "../db/repo";
+import { getState, putState, signUp, touchPlayer } from "../db/repo";
 import { issueToken, verifyToken } from "./auth";
 
 type Handler = (ctx: { req: IncomingMessage; body: unknown; pid: string | null; url: URL }) => { status?: number; json: unknown } | Promise<{ status?: number; json: unknown }>;
@@ -50,6 +50,17 @@ const routes: Record<string, Handler> = {
     const pid = typeof b.pid === "string" && /^[a-zA-Z0-9]{8,40}$/.test(b.pid) ? b.pid : randomUUID().replace(/-/g, "").slice(0, 20);
     const name = String(b.name ?? "Guest").replace(/[\u0000-\u001f<>]/g, "").slice(0, 16) || "Guest";
     touchPlayer(pid, name);
+    return { json: { pid, token: issueToken(pid) } };
+  },
+
+  /** Name + email sign-up. An email can only ever belong to one player. */
+  "POST /api/auth/signup": ({ body }) => {
+    const b = (body ?? {}) as { pid?: unknown; name?: unknown; email?: unknown };
+    const pid = typeof b.pid === "string" && /^[a-zA-Z0-9]{8,40}$/.test(b.pid) ? b.pid : null;
+    const email = String(b.email ?? "").trim().toLowerCase();
+    const name = String(b.name ?? "").replace(/[\u0000-\u001f<>]/g, "").trim().slice(0, 16);
+    if (!pid || name.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || email.length > 80) return { status: 400, json: { error: "invalid details" } };
+    if (!signUp(pid, name, email)) return { status: 409, json: { error: "email already registered" } };
     return { json: { pid, token: issueToken(pid) } };
   },
 

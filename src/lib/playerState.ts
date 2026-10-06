@@ -20,6 +20,8 @@ export const me = {
   /** leave the interior once we reach the exit mat */
   pendingExit: false,
   /** currently seated or lying on furniture (positions in world units) */
+  /** knocked down until this time (ms epoch) */
+  fallUntil: 0,
   use: null as null | { pose: "sit" | "lie"; x: number; z: number; ry: number; seatH: number; standX: number; standZ: number },
 };
 
@@ -40,6 +42,9 @@ export const cam = {
   /** slowly turn around the target */
   spin: false,
 };
+
+/** Live positions of the ambient traffic, written by the road scene and read for collisions and horns. */
+export const traffic: { x: number; z: number; ry: number; speed: number; bike: boolean; honkAt: number }[] = [];
 
 /** Keke boost expiry (ms epoch). */
 export const boost = { until: 0 };

@@ -352,6 +352,18 @@ class Engine {
       this.blip(165, t + 0.12, 0.22, "sawtooth", 0.12, b, 110);
     });
   }
+  /** Car horn (two-tone) and a lighter bike beep. */
+  horn(bike = false) {
+    this.sfx((t, b) => {
+      if (bike) {
+        this.blip(820, t, 0.12, "square", 0.1, b);
+        this.blip(820, t + 0.17, 0.12, "square", 0.1, b);
+        return;
+      }
+      this.blip(392, t, 0.4, "square", 0.11, b);
+      this.blip(494, t, 0.4, "square", 0.11, b);
+    });
+  }
   door() {
     this.sfx((t, b) => {
       this.burst(t, 0.12, 400, 1, 0.5, b);

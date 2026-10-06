@@ -1,6 +1,10 @@
 "use client";
 
 import Skyline from "./Skyline";
+import CarModel from "./CarModel";
+import { audio } from "@/lib/audio";
+import { me, traffic } from "@/lib/playerState";
+import { useGame } from "@/lib/store";
 import { useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { RoundedBox } from "@react-three/drei";
@@ -211,7 +215,7 @@ function Surroundings() {
 
 /* --------------------------------- traffic --------------------------------- */
 
-type Car = { hx: number; hz: number; speed: number; offset: number; color: string; danfo: boolean; ccw: boolean };
+type Car = { hx: number; hz: number; speed: number; offset: number; color: string; danfo: boolean; ccw: boolean; bike?: boolean };
 
 const CARS: Car[] = [
   { hx: 10, hz: 10, speed: 2.4, offset: 0, color: "#f2b632", danfo: true, ccw: false },
@@ -222,9 +226,12 @@ const CARS: Car[] = [
   { hx: 20, hz: 20, speed: 2.8, offset: 40, color: "#3aa57a", danfo: false, ccw: true },
   { hx: 0, hz: 10, speed: 2.0, offset: 5, color: "#f2b632", danfo: true, ccw: false },
   { hx: 10, hz: 0, speed: 2.2, offset: 12, color: "#8a5adf", danfo: false, ccw: false },
+  { hx: 10, hz: 10, speed: 3.4, offset: 60, color: "#2f9e6b", danfo: false, ccw: true, bike: true },
+  { hx: 20, hz: 20, speed: 3.6, offset: 20, color: "#e85d4a", danfo: false, ccw: false, bike: true },
+  { hx: 0, hz: 10, speed: 3.2, offset: 25, color: "#4a90e2", danfo: false, ccw: true, bike: true },
 ];
 
-function Vehicle({ car }: { car: Car }) {
+function Vehicle({ car, index }: { car: Car; index: number }) {
   const g = useRef<THREE.Group>(null);
   const lane = 0.42;
   useFrame((state) => {
@@ -261,7 +268,28 @@ function Vehicle({ car }: { car: Car }) {
       g.current.position.set(x, 0.08, z);
       g.current.rotation.y = ry;
     }
+    // share the position so the player can be hit, and so drivers can honk
+    const t = (traffic[index] ??= { x, z, ry, speed: car.speed, bike: !!car.bike, honkAt: 0 });
+    t.x = x;
+    t.z = z;
+    t.ry = ry;
+    const dx = me.x - x;
+    const dz = me.z - z;
+    const d = Math.hypot(dx, dz);
+    const ahead = d > 0.01 && (dx * Math.sin(ry) + dz * Math.cos(ry)) / d > 0.6; // the player is in front of the vehicle
+    const now = performance.now();
+    if (d < 3.4 && ahead && now - t.honkAt > 4500 && !useGame.getState().interior) {
+      t.honkAt = now;
+      audio.horn(!!car.bike);
+    }
   });
+  if (car.bike) {
+    return (
+      <group ref={g}>
+        <CarModel kind="okada" color={car.color} fixed={car.speed} />
+      </group>
+    );
+  }
   const len = car.danfo ? 0.95 : 0.8;
   return (
     <group ref={g}>
@@ -303,7 +331,7 @@ export default function Terrain({ placesOnly = false }: { placesOnly?: boolean }
       {!placesOnly && <Lamps />}
       <Surroundings />
       <Skyline />
-      {!placesOnly && CARS.map((c, i) => <Vehicle key={i} car={c} />)}
+      {!placesOnly && CARS.map((c, i) => <Vehicle key={i} car={c} index={i} />)}
     </>
   );
 }

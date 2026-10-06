@@ -13,7 +13,7 @@ export type RideId = "okada" | "keke" | "micra";
 export const RIDES: { id: RideId; name: string; emoji: string; speed: number; base: number; perMetre: number; color: string; blurb: string }[] = [
   { id: "okada", name: "Okada", emoji: "🏍️", speed: 7.5, base: 80, perMetre: 0.35, color: "#2f9e6b", blurb: "Cheapest. Weaves through traffic." },
   { id: "keke", name: "Keke", emoji: "🛺", speed: 8.5, base: 120, perMetre: 0.5, color: "#f2b632", blurb: "The everyday ride." },
-  { id: "micra", name: "Micra", emoji: "🚕", speed: 11, base: 250, perMetre: 0.9, color: "#f59e0b", blurb: "Private, air-conditioned (nearly)." },
+  { id: "micra", name: "Micra", emoji: "🚕", speed: 11, base: 250, perMetre: 0.9, color: "#722f37", blurb: "Wine-red and private. Air-conditioned (nearly)." },
 ];
 export const rideById = (id: string | null | undefined) => RIDES.find((r) => r.id === id);
 export const rideFare = (id: RideId, metres: number) => {
