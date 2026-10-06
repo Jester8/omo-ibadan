@@ -10,6 +10,7 @@ import { naira } from "@/lib/plots";
 import { PLACES, type ActionDef } from "@/lib/places";
 import { TITLES, titleIndex } from "@/lib/titles";
 import { pendingRent, useGame } from "@/lib/store";
+import JobsPanel from "./JobsPanel";
 
 type App = "browser" | "mail" | "work" | "food";
 
@@ -165,27 +166,7 @@ export default function ComputerScreen() {
                               ))}
                             </ul>
                             <h4 className="mb-2 mt-5 text-sm font-bold">Jobs board</h4>
-                            <ul className="space-y-1.5">
-                              {PLACES.filter((p) => p.actions.some((a) => a.pay)).map((p) => {
-                                const best = Math.max(...p.actions.map((a) => a.pay ?? 0));
-                                return (
-                                  <li key={p.id} className="flex items-center justify-between gap-2 rounded-xl bg-white px-3 py-2 text-sm ring-1 ring-stone-200">
-                                    <span>
-                                      {p.emoji} {p.name} <span className="text-stone-400">· up to {naira(best)}</span>
-                                    </span>
-                                    <button
-                                      onClick={() => {
-                                        useGame.getState().select({ type: "place", id: p.id });
-                                        close();
-                                      }}
-                                      className="rounded-full bg-stone-900 px-2.5 py-1 text-[11px] font-semibold text-white"
-                                    >
-                                      Directions
-                                    </button>
-                                  </li>
-                                );
-                              })}
-                            </ul>
+                            <JobsPanel onPick={close} />
                           </>
                         )}
 
