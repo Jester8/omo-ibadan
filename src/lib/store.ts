@@ -47,7 +47,7 @@ export type CallState = {
   peerName: string;
   room: string | null;
 };
-export type Sheet = "phone" | "profile" | "quests" | "election" | "garage" | null;
+export type Sheet = "phone" | "profile" | "quests" | "election" | "garage" | "buy" | "friends" | null;
 
 const START_MONEY = 25000;
 const START_NEEDS: Needs = { hunger: 80, energy: 90, fun: 65, social: 55 };

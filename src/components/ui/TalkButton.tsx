@@ -13,7 +13,7 @@ export default function TalkButton() {
   if (net !== "online") return null;
 
   return (
-    <div className="absolute bottom-3 left-[5.6rem] z-10 flex items-center gap-1.5 sm:bottom-5 sm:left-[6.4rem]">
+    <div className="absolute bottom-[5.4rem] left-[5.6rem] z-10 flex items-center gap-1.5 sm:bottom-24 sm:left-[6.4rem]">
       <button
         onClick={() => (live ? voice.leave() : void voice.join(roomHere().room))}
         className={`flex h-11 items-center gap-2 rounded-2xl px-3.5 text-sm font-semibold shadow-xl ring-1 ring-black/5 backdrop-blur-xl transition active:scale-95 ${live ? "bg-emerald-600 text-white" : "bg-white/85 text-stone-700 hover:bg-white"}`}

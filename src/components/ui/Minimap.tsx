@@ -123,7 +123,7 @@ function MinimapCanvas() {
   };
 
   return (
-    <div className="absolute bottom-3 right-3 z-10 rounded-full bg-white/80 p-1 shadow-xl ring-1 ring-black/5 backdrop-blur-xl max-sm:bottom-[4.5rem] sm:bottom-14 sm:right-5">
+    <div className="absolute bottom-[5.4rem] right-3 z-10 rounded-full bg-white/80 p-1 shadow-xl ring-1 ring-black/5 backdrop-blur-xl sm:bottom-24 sm:right-5">
       <canvas ref={ref} onClick={onClick} style={{ width: SIZE, height: SIZE }} className="cursor-pointer rounded-full" aria-label="Minimap, click to walk" />
     </div>
   );

@@ -1,11 +1,13 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { Check, CheckCircle2, Circle, Copy, Footprints, PencilLine, PhoneCall, PhoneOff, X } from "lucide-react";
+import { Car, Check, CheckCircle2, Circle, Copy, Eye, Footprints, Heart, Landmark, Moon, PencilLine, PhoneCall, PhoneOff, Sun, SunMoon, Volume2, VolumeX, X } from "lucide-react";
 import { useState } from "react";
 import { useGame, ownedBy } from "@/lib/store";
 import { net } from "@/lib/net";
-import { TIERS, naira, plotById } from "@/lib/plots";
+import { PLOTS, TIERS, naira, plotById } from "@/lib/plots";
+import { me } from "@/lib/playerState";
+import { GIRLS, NEW_REL, STATUS_LABEL } from "@/lib/romance";
 import { TITLES, titleProgress } from "@/lib/titles";
 import { QUESTS } from "@/lib/quests";
 import { walkTo } from "@/lib/movement";
@@ -23,7 +25,7 @@ function Frame({ title, onClose, children }: { title: string; onClose: () => voi
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 40 }}
       transition={{ type: "spring", stiffness: 280, damping: 28 }}
-      className="absolute inset-x-3 bottom-3 top-20 z-30 flex flex-col overflow-hidden rounded-[1.6rem] bg-white/85 shadow-[0_12px_40px_-10px_rgba(0,0,0,0.35)] ring-1 ring-white/60 backdrop-blur-2xl sm:inset-x-auto sm:right-5 sm:w-[24rem]"
+      className="absolute inset-x-3 bottom-[5.4rem] top-20 z-30 flex flex-col overflow-hidden rounded-[1.6rem] bg-white/85 shadow-[0_12px_40px_-10px_rgba(0,0,0,0.35)] ring-1 ring-white/60 backdrop-blur-2xl sm:inset-x-auto sm:right-5 sm:w-[24rem]"
     >
       <div className="flex items-center justify-between border-b border-stone-100 px-5 py-3.5">
         <h2 className="text-base font-bold text-stone-900">{title}</h2>
@@ -188,6 +190,183 @@ function SoundSliders() {
   );
 }
 
+function ViewSettings() {
+  const timeMode = useGame((s) => s.timeMode);
+  const placesOnly = useGame((s) => s.placesOnly);
+  const hasCar = useGame((s) => s.cars.length > 0);
+  const driving = useGame((s) => s.driving);
+  const soundMuted = useSound((s) => s.muted);
+  const setSound = useSound((s) => s.set);
+  const patch = useGame((s) => s.patch);
+  const seg = (on: boolean) => `flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-semibold transition active:scale-95 ${on ? "bg-emerald-600 text-white" : "bg-stone-100 text-stone-700"}`;
+  const row = "flex w-full items-center justify-between rounded-2xl bg-stone-50 px-4 py-3 text-sm font-semibold text-stone-800 ring-1 ring-black/5 transition active:scale-[0.98]";
+
+  return (
+    <>
+      <p className="mb-2 mt-5 text-xs font-semibold uppercase tracking-wider text-stone-400">Time of day</p>
+      <div className="flex gap-2">
+        {([
+          ["auto", "Auto", SunMoon, null],
+          ["day", "Day", Sun, 12],
+          ["night", "Night", Moon, 22],
+        ] as const).map(([id, label, Icon, hour]) => (
+          <button key={id} onClick={() => patch({ timeMode: id, clockOverride: hour })} className={seg(timeMode === id)}>
+            <Icon className="size-3.5" /> {label}
+          </button>
+        ))}
+      </div>
+
+      <p className="mb-2 mt-5 text-xs font-semibold uppercase tracking-wider text-stone-400">Quick settings</p>
+      <div className="space-y-2">
+        <button onClick={() => patch({ placesOnly: !placesOnly })} className={row}>
+          <span className="flex items-center gap-2.5">
+            <Eye className="size-4 text-stone-500" /> Show only locations
+          </span>
+          <span className={`rounded-full px-2.5 py-0.5 text-xs ${placesOnly ? "bg-emerald-600 text-white" : "bg-stone-200 text-stone-600"}`}>{placesOnly ? "On" : "Off"}</span>
+        </button>
+        <button onClick={() => setSound({ muted: !soundMuted })} className={row}>
+          <span className="flex items-center gap-2.5">
+            {soundMuted ? <VolumeX className="size-4 text-stone-500" /> : <Volume2 className="size-4 text-stone-500" />} Sound
+          </span>
+          <span className={`rounded-full px-2.5 py-0.5 text-xs ${soundMuted ? "bg-stone-200 text-stone-600" : "bg-emerald-600 text-white"}`}>{soundMuted ? "Off" : "On"}</span>
+        </button>
+        <button onClick={() => useGame.getState().setSheet("election")} className={row}>
+          <span className="flex items-center gap-2.5">
+            <Landmark className="size-4 text-stone-500" /> Governor election
+          </span>
+          <span className="text-stone-400">›</span>
+        </button>
+        {hasCar && (
+          <button
+            onClick={() => {
+              const err = useGame.getState().toggleDrive();
+              if (err) useGame.getState().toast(err, "bad");
+              else useGame.getState().setSheet(null);
+            }}
+            className={row}
+          >
+            <span className="flex items-center gap-2.5">
+              <Car className="size-4 text-stone-500" /> {driving ? "Park your car" : "Drive your car"}
+            </span>
+            <span className="text-stone-400">›</span>
+          </button>
+        )}
+      </div>
+    </>
+  );
+}
+
+function BuySheet() {
+  const [tab, setTab] = useState<"land" | "cars">("land");
+  const plots = useGame((s) => s.plots);
+  const money = useGame((s) => s.money);
+  const forSale = PLOTS.filter((p) => !plots[p.id])
+    .map((p) => ({ p, d: Math.hypot(p.pos[0] - me.x, p.pos[1] - me.z) }))
+    .sort((a, b) => a.d - b.d)
+    .slice(0, 12);
+  const seg = (on: boolean) => `flex-1 rounded-xl py-2 text-sm font-semibold transition active:scale-95 ${on ? "bg-stone-900 text-white" : "bg-stone-100 text-stone-700"}`;
+
+  return (
+    <>
+      <div className="mb-4 flex gap-2">
+        <button onClick={() => setTab("land")} className={seg(tab === "land")}>
+          Land
+        </button>
+        <button onClick={() => setTab("cars")} className={seg(tab === "cars")}>
+          Cars
+        </button>
+      </div>
+      {tab === "cars" ? (
+        <GarageSheet />
+      ) : (
+        <>
+          <p className="mb-3 text-xs text-stone-500">Plots for sale nearest to you. Tap one to see it on the map and buy.</p>
+          <ul className="space-y-2">
+            {forSale.map(({ p, d }) => (
+              <li key={p.id} className="flex items-center justify-between gap-3 rounded-2xl bg-stone-50 px-4 py-3 ring-1 ring-black/5">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-stone-900">{p.district}</p>
+                  <p className="text-xs text-stone-500">{Math.round(d * 25)} m away</p>
+                </div>
+                <button
+                  onClick={() => {
+                    useGame.getState().patch({ selected: { type: "plot", id: p.id }, sheet: null });
+                    walkTo(p.pos[0], p.pos[1] + 2.3);
+                  }}
+                  className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold text-white transition active:scale-95 ${money >= p.price ? "bg-emerald-600" : "bg-stone-400"}`}
+                >
+                  {naira(p.price)}
+                </button>
+              </li>
+            ))}
+            {forSale.length === 0 && <li className="rounded-2xl bg-stone-50 p-4 text-sm text-stone-600">Every plot is taken. Check back later.</li>}
+          </ul>
+        </>
+      )}
+    </>
+  );
+}
+
+function FriendsSheet() {
+  const romance = useGame((s) => s.romance);
+  const online = useGame((s) => s.online);
+  const [copied, setCopied] = useState(false);
+  const known = GIRLS.filter((g) => (romance[g.id] ?? NEW_REL).affection > 0 || (romance[g.id]?.status ?? "stranger") !== "stranger");
+
+  return (
+    <>
+      <button onClick={() => useGame.getState().setSheet("phone")} className="flex w-full items-center justify-between rounded-2xl bg-emerald-50 px-4 py-3 text-left ring-1 ring-emerald-100 transition active:scale-[0.98]">
+        <span>
+          <span className="block text-sm font-bold text-emerald-900">{online > 1 ? `${online - 1} player${online > 2 ? "s" : ""} online` : "No one else online"}</span>
+          <span className="text-xs text-emerald-800/70">Open the phone to call them</span>
+        </span>
+        <PhoneCall className="size-5 text-emerald-700" />
+      </button>
+
+      <p className="mb-2 mt-5 text-xs font-semibold uppercase tracking-wider text-stone-400">People you&apos;ve met</p>
+      {known.length === 0 ? (
+        <p className="rounded-2xl bg-stone-50 p-4 text-sm text-stone-600 ring-1 ring-black/5">Tap someone in the city to say hello. The people you get to know show up here.</p>
+      ) : (
+        <ul className="space-y-2">
+          {known.map((g) => {
+            const r = romance[g.id] ?? NEW_REL;
+            return (
+              <li key={g.id} className="flex items-center justify-between gap-3 rounded-2xl bg-stone-50 px-4 py-3 ring-1 ring-black/5">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-stone-900">{g.name}</p>
+                  <p className="flex items-center gap-1 text-xs text-rose-600">
+                    <Heart className="size-3 fill-rose-500" /> {STATUS_LABEL[r.status]} · {Math.round(r.affection)}
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    useGame.getState().patch({ selected: { type: "npc", id: g.id }, sheet: null });
+                  }}
+                  className="shrink-0 rounded-full bg-stone-900 px-3.5 py-1.5 text-xs font-semibold text-white transition active:scale-95"
+                >
+                  Meet
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      <button
+        onClick={() => {
+          navigator.clipboard?.writeText(location.origin + "/play").then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1800);
+          });
+        }}
+        className="mt-5 inline-flex items-center gap-2 rounded-full bg-stone-900 px-4 py-2 text-xs font-semibold text-white transition active:scale-95"
+      >
+        {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />} {copied ? "Link copied" : "Invite friends"}
+      </button>
+    </>
+  );
+}
+
 function ProfileSheet() {
   const profile = useGame((s) => s.profile)!;
   const rep = useGame((s) => s.rep);
@@ -279,6 +458,8 @@ function ProfileSheet() {
           </button>
         </div>
       )}
+
+      <ViewSettings />
 
       <SoundSliders />
 
@@ -486,6 +667,16 @@ export default function Sheets() {
       {sheet === "quests" && (
         <Frame key="quests" title="Goals" onClose={() => setSheet(null)}>
           <QuestsSheet />
+        </Frame>
+      )}
+      {sheet === "buy" && (
+        <Frame key="buy" title="Buy" onClose={() => setSheet(null)}>
+          <BuySheet />
+        </Frame>
+      )}
+      {sheet === "friends" && (
+        <Frame key="friends" title="Friends" onClose={() => setSheet(null)}>
+          <FriendsSheet />
         </Frame>
       )}
       {sheet === "garage" && (

@@ -32,7 +32,7 @@ export default function ChatDock() {
   };
 
   return (
-    <div className="absolute bottom-3 left-3 z-10 sm:bottom-5 sm:left-5">
+    <div className="absolute bottom-[5.4rem] left-3 z-10 sm:bottom-24 sm:left-5">
       <AnimatePresence mode="wait" initial={false}>
         {open ? (
           <motion.div

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { ChevronUp, EyeOff, Eye, CarFront, Landmark, Drumstick, DoorOpen, House, ListChecks, Moon, Phone, PartyPopper, Sun, Target, UserRound, Users, Zap, ZapOff, Wifi, WifiOff, Volume2, VolumeX } from "lucide-react";
+import { ChevronUp, EyeOff, Eye, Drumstick, Moon, PartyPopper, Sun, Target, UserRound, Users, Zap, ZapOff, Wifi, WifiOff } from "lucide-react";
 import { useGame } from "@/lib/store";
 import { useClock } from "@/lib/hooks";
 import { formatClock } from "@/lib/time";
@@ -10,8 +10,6 @@ import { eventsAt } from "@/lib/events";
 import { walkToPlace } from "@/lib/movement";
 import { TITLES, titleIndex } from "@/lib/titles";
 import { QUESTS } from "@/lib/quests";
-import { enterInterior, exitInterior, homeRef, leaveDeck } from "@/lib/interiorRuntime";
-import { useSound } from "@/lib/soundStore";
 
 const NEEDS = [
   { key: "hunger", label: "Hunger", icon: Drumstick, color: "bg-orange-500" },
@@ -27,14 +25,9 @@ export default function Hud() {
   const profile = useGame((s) => s.profile);
   const net = useGame((s) => s.net);
   const online = useGame((s) => s.online);
-  const call = useGame((s) => s.call.phase);
   const questsDone = useGame((s) => s.questsDone);
   const inside = useGame((s) => !!s.interior);
-  const muted = useSound((s) => s.muted);
-  const setSound = useSound((s) => s.set);
   const setSheet = useGame((s) => s.setSheet);
-  const driving = useGame((s) => s.driving);
-  const deck = useGame((s) => s.deck);
   const hideCard = useGame((s) => s.hideCard);
   const hideIcons = useGame((s) => s.hideIcons);
   const patch = useGame((s) => s.patch);
@@ -114,7 +107,7 @@ export default function Hud() {
         </div>
 
         {!inside &&
-          live.map((e) => (
+          live.slice(0, 1).map((e) => (
             <button
               key={e.id}
               onClick={() => {
@@ -128,7 +121,7 @@ export default function Hud() {
             </button>
           ))}
 
-        {nextQuest && (
+        {nextQuest && (inside || live.length === 0) && (
           <button
             onClick={() => setSheet("quests")}
             className="mt-2 flex w-full items-center gap-1.5 rounded-xl bg-amber-500/10 px-2.5 py-1 text-left text-[11px] font-semibold text-amber-800 transition hover:bg-amber-500/20"
@@ -139,77 +132,11 @@ export default function Hud() {
         )}
       </motion.div>}
 
-      {!hideIcons && <motion.div
-        initial={{ opacity: 0, y: -16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3, type: "spring", stiffness: 200, damping: 22 }}
-        className="absolute right-3 top-3 z-10 flex flex-col gap-2 sm:right-5 sm:top-5 sm:flex-row"
-      >
-        <button onClick={() => patch({ hideIcons: true })} className="grid size-11 place-items-center rounded-2xl bg-white/85 text-stone-500 shadow-xl ring-1 ring-black/5 backdrop-blur-xl transition hover:bg-white active:scale-95" aria-label="Hide icons" title="Hide icons">
-          <EyeOff className="size-5" />
+      {!hideIcons && (
+        <button onClick={() => patch({ hideIcons: true })} className={`${small} absolute right-3 top-3 z-10 sm:right-5 sm:top-5`} aria-label="Hide menu" title="Hide menu">
+          <EyeOff className="size-4" />
         </button>
-        <button
-          onClick={() => (deck ? leaveDeck() : inside ? exitInterior() : enterInterior(homeRef()))}
-          className="grid size-11 place-items-center rounded-2xl bg-amber-500 text-white shadow-xl ring-1 ring-black/5 transition hover:bg-amber-600 active:scale-95"
-          aria-label={inside ? "Leave the building" : "Go home"}
-          title={inside ? "Leave" : "Go home"}
-        >
-          {inside ? <DoorOpen className="size-5" /> : <House className="size-5" />}
-        </button>
-        <button
-          onClick={() => setSound({ muted: !muted })}
-          className="grid size-11 place-items-center rounded-2xl bg-white/85 text-stone-700 shadow-xl ring-1 ring-black/5 backdrop-blur-xl transition hover:bg-white active:scale-95"
-          aria-label={muted ? "Unmute" : "Mute"}
-        >
-          {muted ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}
-        </button>
-        <button
-          onClick={() => setSheet("phone")}
-          className="relative grid size-11 place-items-center rounded-2xl bg-white/85 text-stone-700 shadow-xl ring-1 ring-black/5 backdrop-blur-xl transition hover:bg-white active:scale-95"
-          aria-label="Phone"
-        >
-          <Phone className="size-5" />
-          {call !== "idle" && <span className="absolute right-1.5 top-1.5 size-2.5 animate-pulse rounded-full bg-emerald-500" />}
-        </button>
-        <button
-          onClick={() => {
-            const s = useGame.getState();
-            if (s.cars.length && !s.sheet) {
-              const err = s.toggleDrive();
-              if (err) s.toast(err, "bad");
-            } else setSheet("garage");
-          }}
-          onContextMenu={(e) => {
-            e.preventDefault();
-            setSheet("garage");
-          }}
-          className={`relative grid size-11 place-items-center rounded-2xl shadow-xl ring-1 ring-black/5 backdrop-blur-xl transition active:scale-95 ${driving ? "bg-sky-600 text-white" : "bg-white/85 text-stone-700 hover:bg-white"}`}
-          aria-label="Car: drive or park (long-press for dealer)"
-        >
-          <CarFront className="size-5" />
-        </button>
-        <button
-          onClick={() => setSheet("election")}
-          className="relative grid size-11 place-items-center rounded-2xl bg-white/85 text-stone-700 shadow-xl ring-1 ring-black/5 backdrop-blur-xl transition hover:bg-white active:scale-95"
-          aria-label="Governor election"
-        >
-          <Landmark className="size-5" />
-        </button>
-        <button
-          onClick={() => setSheet("quests")}
-          className="relative grid size-11 place-items-center rounded-2xl bg-white/85 text-stone-700 shadow-xl ring-1 ring-black/5 backdrop-blur-xl transition hover:bg-white active:scale-95"
-          aria-label="Goals"
-        >
-          <ListChecks className="size-5" />
-        </button>
-        <button
-          onClick={() => setSheet("profile")}
-          className="grid size-11 place-items-center rounded-2xl bg-white/85 text-stone-700 shadow-xl ring-1 ring-black/5 backdrop-blur-xl transition hover:bg-white active:scale-95"
-          aria-label="Profile"
-        >
-          <UserRound className="size-5" />
-        </button>
-      </motion.div>}
+      )}
     </>
   );
 }

@@ -8,6 +8,7 @@ import SidePanel from "@/components/ui/PlacePanel";
 import ChatDock from "@/components/ui/ChatDock";
 import Sheets from "@/components/ui/Sheets";
 import DeckPanel from "@/components/ui/DeckPanel";
+import BottomBar from "@/components/ui/BottomBar";
 import ComputerScreen from "@/components/ui/ComputerScreen";
 import Minimap from "@/components/ui/Minimap";
 import ViewControls from "@/components/ui/ViewControls";
@@ -154,6 +155,7 @@ export default function WorldClient() {
           <Sheets />
           <DeckPanel />
           <ComputerScreen />
+          {!hideIcons && <BottomBar />}
           <VoiceBar />
           {!hideIcons && <Minimap />}
           {!hideIcons && <ViewControls />}
