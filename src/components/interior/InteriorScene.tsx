@@ -326,7 +326,7 @@ function ExitMat({ layout }: { layout: Layout }) {
 const CHATTER = ["How far?", "E kaaro!", "Abeg, make yourself comfortable.", "Wetin dey happen?"];
 
 function ResidentActor({ r, layout }: { r: Resident; layout: Layout }) {
-  const look = useMemo(() => (r.woman ? womanLook(r.seed ?? r.name) : seededLook(r.seed ?? r.name)), [r.seed, r.name]);
+  const look = useMemo(() => (r.woman ? womanLook(r.seed ?? r.name) : seededLook(r.seed ?? r.name)), [r.seed, r.name, r.woman]);
   const motion = useRef({ speed: 0, pose: r.pose ?? null });
   const next = useRef(0);
   const ry = r.ry ?? Math.atan2(-r.x, -r.z);

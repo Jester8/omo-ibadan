@@ -72,7 +72,7 @@ export async function signOut() {
     /* ignore */
   }
   cached = null;
-  location.href = "/play";
+  location.reload();
 }
 
 export type IntroInfo = { available: boolean; title?: string; artist?: string; rightsHolder?: string };

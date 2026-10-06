@@ -72,5 +72,16 @@ Owners can buy decor (plants, lamps, rugs, adire wall hangings, calabash, carved
 - Eating animation no longer shakes (the arm pose is restored each frame instead of stacking).
 - Performance: capped pixel ratio, smaller shadow map on phones, fewer label re-renders.
 
+## Round 8 (done)
+- Sign-in flow: intro screen with the intro song, Sign up (name, email, avatar), Log in (email + name), Sign out (saves, clears the device).
+- Intro song is served from a git-ignored private folder and only in production when INTRO_LICENSED=1 (needs the artists' written permission).
+- Artist music platform: upload with a rights declaration, admin review, credited playback, owner takedown (Me > Music and sounds; /admin/tracks).
+- Rust-brown roofscape across the city and brown roofs on houses.
+- Traffic crawls at half speed; okadas carry riders.
+- Ibadan Airport: book a ticket, board, fly, fly home.
+- Nightlife: five late-night venues with dancing, drinks and spraying money; opening hours past midnight.
+- Bodija Market is now very large with a crowd of market women inside and outside; Dugbe and Sango too.
+- Life guide PDF: docs/Omo-Ibadan-Life-Guide.pdf.
+
 ## Ideas next
 Billboards/ads revenue, furniture and interiors, jobs with skills, events (match day, festivals), pets, daily quests, sound and music, avatar visual polish after a hands-on review.
