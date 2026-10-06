@@ -5,32 +5,25 @@
  *
  * NOTE: money/needs are still client-side (trusted). Move them server-side before a public launch.
  */
+import { createServer } from "node:http";
 import { WebSocketServer, WebSocket } from "ws";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { randomUUID } from "node:crypto";
-import { join } from "node:path";
-import { appendFileSync } from "node:fs";
+import { config } from "./config";
+import { migrate } from "./db";
+import { addReport, importLegacyPlots, loadPlots, recordElection, savePlot, touchPlayer } from "./db/repo";
+import { handleHttp } from "./http/router";
+import { verifyToken } from "./http/auth";
 import { cleanChat } from "../src/lib/moderation";
 import type { C2S, Election, PeerInfo, PlotState, Policy, S2C } from "../src/lib/protocol";
 
-const PORT = Number(process.env.PORT ?? 8787);
-const PLOTS_FILE = join(__dirname, "plots.json");
-const REPORTS_FILE = join(__dirname, "reports.log");
+migrate();
+importLegacyPlots(__dirname);
 
 type Client = { ws: WebSocket; info: PeerInfo; moved: boolean; speed: number; voiceRoom: string | null; lastChat: number };
 
 const clients = new Map<string, Client>();
 const voiceRooms = new Map<string, Set<string>>();
-const plots: Record<string, PlotState> = existsSync(PLOTS_FILE) ? JSON.parse(readFileSync(PLOTS_FILE, "utf8")) : {};
-let saveTimer: ReturnType<typeof setTimeout> | null = null;
-
-const savePlots = () => {
-  if (saveTimer) return;
-  saveTimer = setTimeout(() => {
-    saveTimer = null;
-    writeFileSync(PLOTS_FILE, JSON.stringify(plots));
-  }, 800);
-};
+const plots: Record<string, PlotState> = loadPlots();
 
 const tx = (ws: WebSocket, m: S2C) => ws.readyState === WebSocket.OPEN && ws.send(JSON.stringify(m));
 const broadcast = (m: S2C, except?: string) => {
@@ -79,6 +72,7 @@ setInterval(() => {
   const e = snapshot();
   const win = [...e.candidates].sort((a, b) => b.votes - a.votes)[0];
   if (win && win.votes > 0) governor = { pid: win.pid, name: win.name, slogan: win.slogan, policy: "none" };
+  recordElection(term, win && win.votes > 0 ? win : null);
   term++;
   endsAt = Date.now() + TERM_MS;
   candidates.clear();
@@ -86,7 +80,8 @@ setInterval(() => {
   pushElection();
 }, 3000);
 
-const wss = new WebSocketServer({ port: PORT });
+const httpServer = createServer((req, res) => void handleHttp(req, res));
+const wss = new WebSocketServer({ server: httpServer });
 
 wss.on("connection", (ws) => {
   const id = randomUUID().slice(0, 8);
@@ -101,6 +96,12 @@ wss.on("connection", (ws) => {
     }
 
     if (m.t === "hello") {
+      // with REQUIRE_AUTH on, only players holding a genuine token get in, and only as themselves
+      const tokenPid = verifyToken(m.token);
+      if (config.requireAuth && (!tokenPid || tokenPid !== m.pid)) {
+        ws.close(4401, "unauthorised");
+        return;
+      }
       const info: PeerInfo = {
         id,
         pid: clean(m.pid, 40),
@@ -111,6 +112,7 @@ wss.on("connection", (ws) => {
         z: client?.info.z ?? 8.2,
         ry: 0,
       };
+      touchPlayer(info.pid, info.name);
       if (!client) {
         client = { ws, info, moved: false, speed: 0, voiceRoom: null, lastChat: 0 };
         clients.set(id, client);
@@ -164,7 +166,7 @@ wss.on("connection", (ws) => {
           decor: Array.isArray(m.plot.decor) ? m.plot.decor.filter((d) => typeof d === "string" && /^[a-z0-9]{1,20}$/.test(d)).slice(0, 21) : existing?.decor,
         };
         plots[m.plotId] = plot;
-        savePlots();
+        savePlot(m.plotId, plot);
         broadcast({ t: "plot", plotId: m.plotId, plot });
         break;
       }
@@ -206,8 +208,7 @@ wss.on("connection", (ws) => {
       }
       case "report": {
         const target = clients.get(m.id);
-        const line = `${new Date().toISOString()} reporter=${c.info.pid}(${c.info.name}) target=${target ? `${target.info.pid}(${target.info.name})` : m.id} reason=${clean(m.reason, 120)}\n`;
-        appendFileSync(REPORTS_FILE, line);
+        addReport(`${c.info.pid}(${c.info.name})`, target ? `${target.info.pid}(${target.info.name})` : clean(m.id, 40), clean(m.reason, 120));
         break;
       }
       case "car": {
@@ -270,4 +271,4 @@ setInterval(() => {
   if (m.length) broadcast({ t: "moves", m });
 }, 100);
 
-console.log(`Omo Ibadan server listening on ws://localhost:${PORT}`);
+httpServer.listen(config.port, () => console.log(`Omo Ibadan server listening on http/ws://localhost:${config.port}`));

@@ -33,7 +33,7 @@ export type PeerInfo = {
 };
 
 export type C2S =
-  | { t: "hello"; pid: string; name: string; look: Look }
+  | { t: "hello"; pid: string; name: string; look: Look; token?: string }
   | { t: "move"; x: number; z: number; ry: number; s: number }
   | { t: "room"; room: string }
   | { t: "chat"; text: string }

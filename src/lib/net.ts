@@ -2,6 +2,7 @@ import type { C2S, PeerInfo, S2C } from "./protocol";
 import { hooks, useGame } from "./store";
 import { emotes, remoteMotion } from "./playerState";
 import { audio } from "./audio";
+import { currentToken, ensureToken, pullState, pushState } from "./api";
 import type { Policy } from "./protocol";
 import { voice } from "./voice";
 import { cleanChat } from "./moderation";
@@ -144,11 +145,26 @@ function endCallLocal() {
   useGame.setState({ call: { phase: "idle", peerId: null, peerName: "", room: null } });
 }
 
+let connecting = false;
+
 function connect() {
   const { profile } = useGame.getState();
-  if (!profile || ws) return;
+  if (!profile || ws || connecting) return;
   want = true;
+  connecting = true;
   useGame.setState({ net: "connecting" });
+  // fetch the guest token first so the server can verify who we are
+  void ensureToken().finally(() => {
+    connecting = false;
+    if (want && !ws) openSocket();
+  });
+}
+
+let autosave: ReturnType<typeof setInterval> | null = null;
+
+function openSocket() {
+  const { profile } = useGame.getState();
+  if (!profile) return;
   try {
     ws = new WebSocket(wsUrl());
   } catch {
@@ -157,8 +173,11 @@ function connect() {
   }
   ws.onopen = () => {
     retry = 0;
-    send({ t: "hello", pid: profile.id, name: profile.name, look: profile.look });
+    send({ t: "hello", pid: profile.id, name: profile.name, look: profile.look, token: currentToken() ?? undefined });
     sendCar();
+    void pullState().then(() => pushState());
+    if (autosave) clearInterval(autosave);
+    autosave = setInterval(() => void pushState(), 30_000);
   };
   ws.onmessage = (e) => {
     try {
@@ -170,6 +189,7 @@ function connect() {
   ws.onerror = () => ws?.close();
   ws.onclose = () => {
     ws = null;
+    if (autosave) clearInterval(autosave);
     remoteMotion.clear();
     if (useGame.getState().call.phase !== "idle") endCallLocal();
     else voice.leave();
@@ -204,7 +224,7 @@ export const net = {
   /** Re-announce name/look after the avatar is edited. */
   hello() {
     const { profile } = useGame.getState();
-    if (profile) send({ t: "hello", pid: profile.id, name: profile.name, look: profile.look });
+    if (profile) send({ t: "hello", pid: profile.id, name: profile.name, look: profile.look, token: currentToken() ?? undefined });
   },
   move(x: number, z: number, ry: number, s: number) {
     send({ t: "move", x, z, ry, s });

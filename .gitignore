@@ -13,3 +13,7 @@ server/reports.log
 .vercel
 next-env.d.ts
 server/plots.json
+server/data/
+server/reports.log
+.env
+.env.local

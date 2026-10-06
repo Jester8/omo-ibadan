@@ -1,0 +1,12 @@
+# Backend image: docker build -f Dockerfile.server -t omo-ibadan-server .
+FROM node:24-slim
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY tsconfig.json ./
+COPY src/lib ./src/lib
+COPY server ./server
+ENV NODE_ENV=production PORT=8787 DB_PATH=/data/omo.sqlite
+VOLUME /data
+EXPOSE 8787
+CMD ["npx", "tsx", "server/index.ts"]

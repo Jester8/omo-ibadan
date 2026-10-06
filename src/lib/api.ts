@@ -1,0 +1,68 @@
+import { useGame } from "./store";
+
+/** HTTP API lives beside the websocket on the same port unless NEXT_PUBLIC_API_URL says otherwise. */
+export const apiBase = () =>
+  process.env.NEXT_PUBLIC_API_URL ||
+  (process.env.NEXT_PUBLIC_WS_URL ? process.env.NEXT_PUBLIC_WS_URL.replace(/^ws/, "http") : `${location.protocol}//${location.hostname}:8787`);
+
+const KEY = "omo-ibadan-token";
+let cached: string | null = null;
+
+/** Guest token for the current player, fetched once and kept in localStorage. */
+export async function ensureToken(): Promise<string | null> {
+  const profile = useGame.getState().profile;
+  if (!profile) return null;
+  try {
+    const saved = JSON.parse(localStorage.getItem(KEY) ?? "null") as { pid: string; token: string } | null;
+    if (saved?.pid === profile.id) return (cached = saved.token);
+  } catch {
+    /* fall through and ask the server */
+  }
+  try {
+    const res = await fetch(`${apiBase()}/api/auth/guest`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ pid: profile.id, name: profile.name }), signal: AbortSignal.timeout(2500) });
+    if (!res.ok) return null;
+    const { pid, token } = (await res.json()) as { pid: string; token: string };
+    if (pid !== profile.id) return null;
+    localStorage.setItem(KEY, JSON.stringify({ pid, token }));
+    return (cached = token);
+  } catch {
+    return null;
+  }
+}
+
+export const currentToken = () => cached;
+
+const snapshot = () => {
+  const s = useGame.getState();
+  return { money: s.money, rep: s.rep, needs: s.needs, questsDone: s.questsDone, cars: s.cars, activeCar: s.activeCar, romance: s.romance, stats: s.stats };
+};
+
+/** Upload the player's progress. Quietly does nothing when the server is unreachable. */
+export async function pushState() {
+  const token = cached ?? (await ensureToken());
+  const profile = useGame.getState().profile;
+  if (!token || !profile) return;
+  try {
+    await fetch(`${apiBase()}/api/state`, { method: "PUT", headers: { "content-type": "application/json", authorization: `Bearer ${token}` }, body: JSON.stringify({ name: profile.name, state: snapshot() }), signal: AbortSignal.timeout(4000) });
+  } catch {
+    /* offline: the next autosave will try again */
+  }
+}
+
+/** On a new device (or after clearing data) bring the cloud save down. */
+export async function pullState() {
+  const token = cached ?? (await ensureToken());
+  if (!token) return;
+  try {
+    const res = await fetch(`${apiBase()}/api/state`, { headers: { authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(4000) });
+    if (!res.ok) return;
+    const { state, updatedAt } = (await res.json()) as { state: ReturnType<typeof snapshot> | null; updatedAt: number };
+    const s = useGame.getState();
+    // only when the cloud copy is clearly newer than what this device last saved
+    if (!state || updatedAt <= s.savedAt + 60_000) return;
+    useGame.setState({ money: state.money, rep: state.rep, needs: state.needs, questsDone: state.questsDone, cars: state.cars, activeCar: state.activeCar, romance: { ...s.romance, ...state.romance }, stats: { ...s.stats, ...state.stats } });
+    s.toast("Progress restored from the cloud.", "info");
+  } catch {
+    /* ignore */
+  }
+}

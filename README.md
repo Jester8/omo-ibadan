@@ -44,3 +44,6 @@ recoloured and extended in code with Nigerian outfits (senator kaftan, buba, bab
 gele, turban, hijab, fila, Hausa and Igbo caps and many hairstyles. See `public/models/avatars/CREDITS.txt`.
 
 See `docs/PLAN.md` for status and what is next.
+
+## Backend
+See [server/README.md](server/README.md): HTTP + WebSocket on port 8787, SQLite storage, guest tokens and cloud saves. Needs Node 22.13+ and `npm install` after pulling.
