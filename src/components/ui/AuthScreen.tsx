@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight, ChevronLeft, Mail, Music2, UserRound, Volume2, VolumeX } from "lucide-react";
@@ -74,7 +75,7 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
         <AnimatePresence mode="wait">
           {step === "intro" && (
             <motion.div key="intro" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="text-center">
-              <div className="mx-auto grid size-20 place-items-center rounded-[1.6rem] bg-amber-500 text-4xl font-black text-white shadow-2xl shadow-amber-500/30">O</div>
+              <Image src="/logo.png" alt="Omo Ibadan" width={112} height={112} priority className="mx-auto size-28 drop-shadow-[0_10px_30px_rgba(224,162,31,0.35)]" />
               <h1 className="mt-6 text-5xl font-black tracking-tight">Omo Ibadan</h1>
               <p className="mt-3 text-lg text-white/80">Live the life. Rust roofs, amala and good vibes.</p>
               <button onClick={enter} className="mt-10 inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-base font-bold text-stone-900 shadow-xl transition active:scale-95">

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
 import Hud from "@/components/ui/Hud";
 import SidePanel from "@/components/ui/PlacePanel";
@@ -42,7 +43,7 @@ const CityScene = dynamic(() => import("./CityScene"), {
   loading: () => (
     <div className="grid h-full place-items-center bg-gradient-to-b from-[#eef6ee] to-[#dfeadf]">
       <div className="flex flex-col items-center gap-4">
-        <div className="grid size-16 place-items-center rounded-3xl bg-emerald-600 text-2xl font-black text-white shadow-xl shadow-emerald-600/30">O</div>
+        <Image src="/logo.png" alt="" width={80} height={80} priority className="size-20 drop-shadow-xl" />
         <p className="text-lg font-bold tracking-tight text-stone-900">Omo Ibadan</p>
         <div className="h-1.5 w-40 overflow-hidden rounded-full bg-emerald-900/10">
           <div className="h-full w-1/2 animate-[load_1.1s_ease-in-out_infinite] rounded-full bg-emerald-600" />

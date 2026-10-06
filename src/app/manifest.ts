@@ -1,0 +1,19 @@
+import type { MetadataRoute } from "next";
+
+/** Lets the game be installed to a phone's home screen. */
+export default function manifest(): MetadataRoute.Manifest {
+  return {
+    name: "Omo Ibadan",
+    short_name: "Omo Ibadan",
+    description: "Live the life. A real-life simulation of Ibadan, the city of rust roofs.",
+    start_url: "/play",
+    display: "standalone",
+    background_color: "#FBF5E4",
+    theme_color: "#1E1B3A",
+    icons: [
+      { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+      { src: "/icons/maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+    ],
+  };
+}
