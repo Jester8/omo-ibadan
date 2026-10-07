@@ -21,7 +21,7 @@ export function useClock() {
   return { minutes, hour: minutes / 60, day: daylight(minutes / 60), nepa: sec === 0 ? false : nepaOut(now), now };
 }
 
-/** The whole game hour, re-rendering only when it changes (about every 2.5 real minutes). */
+/** The whole game hour, re-rendering only when it changes (once a real hour). */
 export function useHour(): number {
   const override = useGame((s) => s.clockOverride);
   return useSyncExternalStore(

@@ -1,14 +1,15 @@
 /**
- * Shared world clock. One game day = one real hour, derived from wall-clock time,
- * so every player sees the same hour without a server.
+ * Shared world clock: the real time in Ibadan (WAT, UTC+1, no daylight saving),
+ * so every player sees the same hour without a server and day/night matches outside.
  */
-export const DAY_REAL_MS = 60 * 60 * 1000;
+export const DAY_REAL_MS = 24 * 60 * 60 * 1000;
+const WAT_OFFSET_MS = 60 * 60 * 1000;
 export const NEPA_SLOT_MS = 3 * 60 * 1000;
 
 /** Game minutes since midnight (0..1440). `override` is a fixed hour for testing (?hour=). */
 export function gameMinutes(now: number, override: number | null = null): number {
   if (override !== null) return override * 60;
-  return ((now % DAY_REAL_MS) / DAY_REAL_MS) * 1440;
+  return (((now + WAT_OFFSET_MS) % DAY_REAL_MS) / DAY_REAL_MS) * 1440;
 }
 
 export function formatClock(minutes: number): string {
