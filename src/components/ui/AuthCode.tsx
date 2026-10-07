@@ -17,7 +17,7 @@ export default function AuthCode({
 }: {
   email: string;
   purpose: "login" | "signup";
-  signup?: { name: string; look: Look; username?: string };
+  signup?: { name: string; look: Look; username?: string; password?: string };
   devCode?: string;
   cooldown?: number;
   onVerified: (p: Verified) => void;

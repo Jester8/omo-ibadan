@@ -74,7 +74,7 @@ export default function AvatarCreator({
   initialName?: string;
   initialLook?: Look;
   isEdit?: boolean;
-  onDone: (name: string, look: Look, email: string, username: string) => void;
+  onDone: (name: string, look: Look, email: string, username: string, password: string) => void;
   onCancel?: () => void;
   /** first-time sign-up: also ask for an email address */
   askEmail?: boolean;
@@ -83,13 +83,16 @@ export default function AvatarCreator({
 }) {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPw, setShowPw] = useState(false);
   const [name, setName] = useState(initialName);
   const [look, setLook] = useState<Look>(initialLook);
   const [walk, setWalk] = useState(false);
   const set = <K extends keyof Look>(k: K, v: Look[K]) => setLook((l) => ({ ...l, [k]: v }));
   const emailOk = !askEmail || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
   const userOk = !askEmail || /^[a-z0-9_]{3,16}$/i.test(username);
-  const valid = name.trim().length >= 2 && emailOk && userOk && !busy;
+  const pwOk = !askEmail || (password.length >= 6 && password.length <= 72);
+  const valid = name.trim().length >= 2 && emailOk && userOk && pwOk && !busy;
 
   return (
     <motion.div
@@ -182,6 +185,26 @@ export default function AvatarCreator({
               </label>
             )}
 
+            {askEmail && (
+              <label className="block">
+                <span className="mb-2 block text-xs font-semibold uppercase tracking-wider text-stone-400">Password</span>
+                <div className="flex items-center rounded-2xl bg-stone-100 pr-2 ring-2 ring-transparent transition focus-within:bg-white focus-within:ring-emerald-500">
+                  <input
+                    type={showPw ? "text" : "password"}
+                    autoComplete="new-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value.slice(0, 72))}
+                    placeholder="At least 6 characters"
+                    className="min-w-0 flex-1 bg-transparent px-4 py-3 text-base font-medium text-stone-900 outline-none placeholder:text-stone-400"
+                  />
+                  <button type="button" onClick={() => setShowPw((v) => !v)} className="rounded-full px-3 py-1.5 text-xs font-semibold text-stone-500 hover:bg-stone-200">
+                    {showPw ? "Hide" : "Show"}
+                  </button>
+                </div>
+                <span className="mt-1.5 block text-xs text-stone-400">You stay logged in on this device until you log out.</span>
+              </label>
+            )}
+
             <Swatches label="Skin" value={look.skin} options={SKIN_TONES} onPick={(c) => set("skin", c)} />
             <Chips
               label="Body type"
@@ -220,7 +243,7 @@ export default function AvatarCreator({
             )}
             <button
               disabled={!valid}
-              onClick={() => onDone(name.trim(), look, email.trim().toLowerCase(), username)}
+              onClick={() => onDone(name.trim(), look, email.trim().toLowerCase(), username, password)}
               className="rounded-full bg-emerald-700 px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-700/25 transition hover:bg-emerald-800 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {isEdit ? "Save look" : busy ? "Creating…" : "Sign up & enter Ibadan"}

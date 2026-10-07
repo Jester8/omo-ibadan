@@ -166,7 +166,7 @@ export default function WorldClient() {
   const fade = useGame((s) => s.fade);
   const hideIcons = useGame((s) => s.hideIcons);
   const [creating, setCreating] = useState(false);
-  const [pending, setPending] = useState<{ name: string; look: Look; email: string; username: string; devCode?: string; cooldown: number } | null>(null);
+  const [pending, setPending] = useState<{ name: string; look: Look; email: string; username: string; password: string; devCode?: string; cooldown: number } | null>(null);
   const [signupError, setSignupError] = useState("");
   const [signingUp, setSigningUp] = useState(false);
 
@@ -222,7 +222,7 @@ export default function WorldClient() {
             key="code"
             email={pending.email}
             purpose="signup"
-            signup={{ name: pending.name, look: pending.look, username: pending.username }}
+            signup={{ name: pending.name, look: pending.look, username: pending.username, password: pending.password }}
             devCode={pending.devCode}
             cooldown={pending.cooldown}
             onBack={() => setPending(null)}
@@ -243,7 +243,7 @@ export default function WorldClient() {
             askEmail={!profile}
             error={signupError}
             busy={signingUp}
-            onDone={async (name, look, email, username) => {
+            onDone={async (name, look, email, username, password) => {
               if (profile) return setProfile({ ...profile, name, look });
               setSigningUp(true);
               setSignupError("");
@@ -258,7 +258,7 @@ export default function WorldClient() {
               const r = await requestCode(email, "signup", username);
               if (r.ok && r.skip) {
                 // no emailed codes for now: just save the details and go in
-                const v = await verifyCode(email, "", { name, look, username });
+                const v = await verifyCode(email, "", { name, look, username, password });
                 setSigningUp(false);
                 if (!v.ok) return setSignupError(v.error);
                 if (v.profile.isNew) useGame.setState({ money: SIGNUP_MONEY });
@@ -266,7 +266,7 @@ export default function WorldClient() {
               }
               setSigningUp(false);
               if (!r.ok) return setSignupError(r.error);
-              setPending({ name, look, email, username, devCode: r.devCode, cooldown: r.cooldown });
+              setPending({ name, look, email, username, password, devCode: r.devCode, cooldown: r.cooldown });
             }}
           />
         )}

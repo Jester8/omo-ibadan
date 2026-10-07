@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowRight, ChevronLeft, Mail, Music2, Volume2, VolumeX } from "lucide-react";
+import { ArrowRight, ChevronLeft, Lock, Mail, Music2, Volume2, VolumeX } from "lucide-react";
 import { DEMO_AUTH, demoLogIn, requestCode, verifyCode, type Verified } from "@/lib/api";
 import AuthCode from "./AuthCode";
 import InstallApp from "./InstallApp";
@@ -17,6 +17,7 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
   const [step, setStep] = useState<Step>("intro");
   const muted = useSound((s) => s.muted);
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   // the Mapo Hall picture: shown once it has loaded, otherwise the painted skyline stays
   const [film, setFilm] = useState<"loading" | "on" | "off">("loading");
   const [devCode, setDevCode] = useState<string | undefined>();
@@ -43,8 +44,8 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
     }
     const r = await requestCode(email.trim().toLowerCase(), "login");
     if (r.ok && r.skip) {
-      // the server is not asking for emailed codes right now: the email alone logs in
-      const v = await verifyCode(email.trim().toLowerCase(), "");
+      // no emailed code: the password is what proves it is you
+      const v = await verifyCode(email.trim().toLowerCase(), "", { password });
       setBusy(false);
       if (v.ok) onLoggedIn(v.profile);
       else setErr(v.error);
@@ -150,9 +151,13 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
                   <input type="text" autoComplete="username" autoCapitalize="none" autoCorrect="off" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email or username" className={`${field} pl-11`} />
                 </div>
               </div>
+              <div className="relative mt-3">
+                <Lock className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
+                <input type="password" autoComplete="current-password" required={!DEMO_AUTH} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" className={`${field} pl-11`} />
+              </div>
               {err && <p className="mt-3 rounded-xl bg-rose-500/25 px-3.5 py-2.5 text-sm font-medium text-rose-100">{err}</p>}
-              <button disabled={busy || !email} className="mt-5 w-full rounded-2xl bg-amber-500 py-4 text-base font-extrabold text-stone-900 shadow-xl transition active:scale-[0.98] disabled:opacity-50">
-                {busy ? "Please wait…" : DEMO_AUTH ? "Log in" : "Email me a code"}
+              <button disabled={busy || !email || (!DEMO_AUTH && !password)} className="mt-5 w-full rounded-2xl bg-amber-500 py-4 text-base font-extrabold text-stone-900 shadow-xl transition active:scale-[0.98] disabled:opacity-50">
+                {busy ? "Please wait…" : "Log in"}
               </button>
               <p className="mt-4 text-center text-xs text-white/50">New here?{" "}
                 <button type="button" onClick={onSignup} className="font-semibold text-amber-300 underline">

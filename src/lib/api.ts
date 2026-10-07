@@ -96,7 +96,7 @@ export async function requestCode(email: string, purpose: "login" | "signup", us
 export type Verified = { id: string; name: string; username?: string; look: Look | null; email: string; isNew: boolean };
 
 /** Step 2: check the code. An existing email logs in; a new one creates the account from the name and avatar. */
-export async function verifyCode(email: string, code: string, extra?: { name: string; look: Look; username?: string }): Promise<{ ok: true; profile: Verified } | { ok: false; error: string }> {
+export async function verifyCode(email: string, code: string, extra?: { name?: string; look?: Look; username?: string; password?: string }): Promise<{ ok: true; profile: Verified } | { ok: false; error: string }> {
   try {
     const res = await fetch(`${apiBase()}/api/auth/verify`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, code, ...extra }), signal: AbortSignal.timeout(8000) });
     const j = (await res.json().catch(() => ({}))) as { pid?: string; name?: string; username?: string; email?: string; look?: Look | null; token?: string; isNew?: boolean; error?: string };
