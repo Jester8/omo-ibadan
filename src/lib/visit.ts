@@ -1,6 +1,5 @@
-import { PLOTS, PLOT_SIZE } from "./plots";
+import { PLOTS } from "./plots";
 import { useGame } from "./store";
-import { walkTo } from "./movement";
 
 /** The house a player lives in: their best built home (businesses don't count). */
 export function homeOf(pid: string | undefined) {
@@ -26,9 +25,9 @@ export function visitHome(pid: string, name: string) {
     s.toast("Step outside first, then you can visit.", "info");
     return;
   }
+  // open the house card, where you choose how to get there: walk, drive yourself or take a ride
   s.patch({ sheet: null, selected: { type: "plot", id: h.id } });
-  walkTo(h.x, h.z + PLOT_SIZE / 2 + 0.6);
-  s.toast(`Walking to ${name}'s home…`, "info");
+  s.toast(`Choose how to get to ${name}'s home.`, "info");
 }
 
 /** Walk to any home or business and open its card (a house card offers "Knock", a business card offers "Step inside"). */
@@ -41,5 +40,4 @@ export function goToPlot(plotId: string) {
     return;
   }
   s.patch({ sheet: null, selected: { type: "plot", id: plotId } });
-  walkTo(p.pos[0], p.pos[1] + PLOT_SIZE / 2 + 0.6);
 }

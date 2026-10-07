@@ -94,6 +94,45 @@ export function driveToPlace(id: string, carId: string): boolean {
   return walkToPlace(id);
 }
 
+/** What a hired ride to this spot would cost right now, or null if there is no route. */
+export function quoteRideTo(x: number, z: number, ride: RideId): { fare: number; metres: number } | null {
+  const path = findPath(me.x, me.z, x, z);
+  if (!path) return null;
+  const metres = pathMetres(me, path);
+  const free = ride === "keke" && useGame.getState().election?.governor?.policy === "transport";
+  return { fare: free ? 0 : rideFare(ride, metres), metres };
+}
+
+/** Pay a driver to take you to a spot (a friend's door, a shop). */
+export function rideTo(x: number, z: number, ride: RideId): boolean {
+  const s = useGame.getState();
+  const q = quoteRideTo(x, z, ride);
+  if (!q) return false;
+  if (s.money < q.fare) {
+    s.toast(`A ${rideById(ride)!.name} there costs ₦${q.fare}.`, "bad");
+    return false;
+  }
+  if (!walkTo(x, z)) return false;
+  me.ride = true;
+  useGame.setState({ money: s.money - q.fare, ride, driving: false });
+  s.toast(q.fare ? `${rideById(ride)!.name} on the way! -₦${q.fare}` : "Free keke, courtesy of the Governor!", "info");
+  audio.coin();
+  return true;
+}
+
+/** Take the wheel of one of your own cars and drive to a spot. */
+export function driveTo(x: number, z: number, carId: string): boolean {
+  const s = useGame.getState();
+  if (!(s.driving && s.activeCar === carId)) {
+    const err = s.toggleDrive(carId);
+    if (err) {
+      s.toast(err, "bad");
+      return false;
+    }
+  }
+  return walkTo(x, z);
+}
+
 export function stopWalking() {
   me.path = [];
   me.goalPlace = null;

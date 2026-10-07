@@ -1,6 +1,6 @@
 "use client";
 
-import { DoorOpen, Footprints, Hammer, KeyRound, Landmark, X } from "lucide-react";
+import { DoorOpen, Hammer, KeyRound, Landmark, X } from "lucide-react";
 import { enterInterior } from "@/lib/interiorRuntime";
 import { HOME_ACTIONS, PLOT_SIZE, TIERS, naira, plotById } from "@/lib/plots";
 import { pendingRent, useGame } from "@/lib/store";
@@ -11,6 +11,7 @@ import { nepaOut } from "@/lib/time";
 import { useSecond } from "@/lib/hooks";
 import { ActionRow, VoiceRoomCard } from "./parts";
 import { net } from "@/lib/net";
+import TravelOptions from "./Travel";
 import { BUSINESSES, bizById } from "@/lib/business";
 
 export default function PlotPanelBody({ id }: { id: string }) {
@@ -26,6 +27,7 @@ export default function PlotPanelBody({ id }: { id: string }) {
   const biz = bizById(state?.biz);
   // a business is not a house: no bungalow upgrades, no going inside
   const tier = biz ? 0 : (state?.tier ?? 0);
+  const door = { x: plot.pos[0], z: plot.pos[1] + PLOT_SIZE / 2 + 0.6 };
   const next = biz ? undefined : TIERS[tier + 1];
   const rent = state && mine ? pendingRent(state, sec * 1000) : 0;
   const act = (fn: () => string | null) => {
@@ -141,7 +143,7 @@ export default function PlotPanelBody({ id }: { id: string }) {
               </div>
             </div>
           )}
-          {bizButton}
+          {near && bizButton}
 
           {tier >= 1 && (
             <div className="mt-3 rounded-2xl bg-white p-3 ring-1 ring-black/5">
@@ -183,17 +185,10 @@ export default function PlotPanelBody({ id }: { id: string }) {
             </div>
           )}
 
-          {enterButton}
+          {near && enterButton}
           {tier >= 1 && (
             <>
-              {!near && (
-                <button
-                  onClick={() => walkTo(plot.pos[0], plot.pos[1] + PLOT_SIZE / 2 + 0.6)}
-                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-white py-3 text-sm font-semibold text-stone-700 ring-1 ring-black/10 transition hover:bg-stone-50 active:scale-[0.98]"
-                >
-                  <Footprints className="size-4" /> Walk home to use it
-                </button>
-              )}
+              {!near && <TravelOptions x={door.x} z={door.z} label="Choose how to get there" />}
               <ul className="mt-3 space-y-2">
                 {HOME_ACTIONS.map((a) => (
                   <li key={a.id}>
@@ -221,15 +216,12 @@ export default function PlotPanelBody({ id }: { id: string }) {
             <KeyRound className="size-4" /> Owned by {state.ownerName}
           </p>
           <p className="mt-1">{biz ? `${biz.emoji} ${biz.name}: open to customers. Step inside to look around, say hello and buy something.` : "Knock and wait for them to let you in, or ask to be invited to a house party."}</p>
-          {bizButton}
-          {enterButton}
-          {tier >= 1 && (
-            <button
-              onClick={() => walkTo(plot.pos[0], plot.pos[1] + PLOT_SIZE / 2 + 0.6)}
-              className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-stone-900 py-2.5 text-sm font-semibold text-white transition hover:bg-stone-700 active:scale-[0.98]"
-            >
-              <Footprints className="size-4" /> Visit
-            </button>
+          {(tier >= 1 || biz) && !near && <TravelOptions x={door.x} z={door.z} label="Choose how to get there" />}
+          {(tier >= 1 || biz) && near && (
+            <>
+              {bizButton}
+              {enterButton}
+            </>
           )}
           {tier >= 1 && near && (
             <div className="mt-3">
