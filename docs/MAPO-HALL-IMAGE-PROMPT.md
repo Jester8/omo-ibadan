@@ -1,22 +1,23 @@
 # Mapo Hall home background: image prompt
 
-Use with any image generator (Midjourney, DALL·E, Imagen, Flux, Firefly). If it accepts a reference image,
+Use with any image generator (Midjourney, DALL·E, Imagen, Flux, Firefly). Cartoon / animated style to match the game. If it accepts a reference image,
 attach a real photo of Mapo Hall so the building is accurate.
 
 ## Prompt
 
-Wide cinematic photograph of Mapo Hall in Ibadan, Nigeria, at golden hour. The stately cream-white colonial-era
-hall with its columned portico and tower stands on Mapo hill among palm trees and a green lawn, and below it an
-endless sea of rust-brown corrugated-iron roofs rolls to the hazy horizon, the famous Ibadan skyline. Warm low
-sun, long soft shadows, glowing roofs, a few birds in the sky, tiny yellow danfo buses on the roads far below, wisps
-of cooking smoke, dramatic soft clouds. Aerial view from slightly above and in front, the hall in the left third so
-there is calm open sky and rooftops on the right for text. Photoreal, rich warm colour grade, shallow atmospheric
-haze, 16:9, ultra detailed.
+Stylised animated-film illustration of Mapo Hall in Ibadan, Nigeria, at golden hour, in the look of a modern 3D
+animated movie or a Studio Ghibli background painting. The stately cream-white colonial-era hall with its columned
+portico and tower stands on Mapo hill among round, chunky palm trees and a bright green lawn, and below it a
+sea of charming rust-brown corrugated-iron rooftops rolls to a soft hazy horizon. Warm peach and orange sky with
+fluffy storybook clouds, glowing sunlight, tiny yellow danfo buses and little okada riders on the roads far below,
+a few birds, cooking smoke curls, cheerful colours, clean shapes, soft gradients, gentle rim light. Wide view from
+slightly above and in front, the hall in the left third so there is open sky and rooftops on the right for text.
+Playful, warm and inviting, 16:9, highly detailed, no text.
 
 ## Negative prompt
 
-text, captions, logos, watermarks, close-up faces, crowds, distorted buildings, extra towers, snow, cartoon style,
-oversaturated, night-only darkness.
+text, captions, logos, watermarks, photo-realistic, close-up faces, crowds, distorted buildings, extra towers, snow,
+blurry, night-only darkness.
 
 ## Variants
 

@@ -52,3 +52,11 @@ button { touch-action: manipulation; }
   0% { transform: translateX(-100%); }
   100% { transform: translateX(200%); }
 }
+
+/* the home picture drifts very slowly, so the still image feels alive */
+@keyframes home-drift {
+  from { transform: scale(1.04) translate3d(-1%, 0, 0); }
+  to { transform: scale(1.12) translate3d(1%, -1%, 0); }
+}
+.home-drift { animation: home-drift 28s ease-in-out infinite alternate; }
+@media (prefers-reduced-motion: reduce) { .home-drift { animation: none; } }
