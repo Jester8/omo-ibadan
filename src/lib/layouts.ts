@@ -600,25 +600,84 @@ export function placeLayout(id: string): Layout | null {
 
 export const ALL_PLACE_LAYOUT_IDS = Object.keys(PLACE_LAYOUTS);
 
-/** The inside of a player's business: a counter at the back, stock on the shelves, and room for customers. */
+/** The inside of a player's business: it looks like what it is, a gym with gym equipment, a salon with chairs and mirrors... */
 export function bizLayout(bizId: string, ownerName?: string): Layout {
   const b = bizById(bizId);
   const name = `${ownerName ? `${ownerName}'s ` : ""}${b?.name ?? "Shop"}`;
   const base = { name, w: 10, d: 8, wall: "#f4efe6", trim: "#3a3f48", accent: b?.color ?? "#16a34a", light: "bright" as const, exitX: 0, walls: [] as Wall[] };
-  const fans = [I("ceilingfan", -2.5, 0), I("ceilingfan", 2.5, 0), I("plant", -4.5, 3.4), I("plant", 4.5, 3.4)];
+  const fans = [I("ceilingfan", -2.5, 0), I("ceilingfan", 2.5, 0), I("plant", -4.6, 3.4), I("plant", 4.6, 3.4)];
   switch (bizId) {
-    case "salon":
-      return lay({ ...base, id: "biz", floor: "tile", items: [I("counter", 0, -3.4, 0, { w: 2.6 }), ...row("armchair", -3.4, -1.4, 3, 2.2, R), ...row("chair", -3, 2.2, 4, 2, 0), I("sink", -4.2, -3.5, 0), I("sidetable", 3.6, -3.5), I("tv", 4.9, 0, -H), ...fans] });
-    case "cafe":
-      return lay({ ...base, id: "biz", floor: "wood", items: [I("bar", 0, -2.8, 0, { w: 4.4 }), ...row("barstool", -1.8, -1.8, 4, 1.2, 0), I("fridge", -4.2, -3.5, 0), I("stove", 3.8, -3.5, 0), ...[[-3.4, 1.4], [0, 0.3], [3.4, 1.4]].flatMap(([x, z]) => [I("roundtable", x, z), ...around("chair", x, z, 0.8, 3, 0.5)]), I("tv", 4.9, 0, -H), ...fans] });
-    case "pharmacy":
-      return lay({ ...base, id: "biz", floor: "tile", light: "cool", items: [I("counter", 0, -3.4, 0, { w: 3.4 }), ...row("displaycase", -3.8, -1.2, 3, 2.2, 0), ...row("rack", -4.4, -3.6, 2, 1.0, 0), I("fridge", 4.2, -3.6, 0), ...row("bench", -3.4, 2.6, 2, 6.8, 0), I("waterdispenser", 4.5, 2.4), ...fans] });
     case "gym":
-      return lay({ ...base, id: "biz", floor: "concrete", light: "cool", w: 12, d: 9, items: [I("counter", -4, -4, 0, { w: 2.2 }), ...row("bench", -3.5, -0.8, 3, 2.4, 0), ...row("rack", -4.5, -3.6, 1, 1, 0), ...row("crates", 1.2, -3.8, 3, 1.2, 0), I("rug", 2, 1.4, 0), I("tv", 5.9, 0.4, -H), I("standingfan", 4.8, 3.4), I("standingfan", -4.8, 3.4), I("cooler", 5.4, -3.6), ...fans.slice(0, 2)] });
+      return lay({
+        ...base, id: "biz", floor: "concrete", light: "cool", wall: "#e7eaee", trim: "#1f2937", w: 12, d: 9,
+        items: [
+          // mirrors along the back wall, treadmills facing them
+          I("gymmirror", -3, -4.42, 0), I("gymmirror", 3, -4.42, 0),
+          ...row("treadmill", -4.6, -2.6, 3, 1.5, 0),
+          I("dumbbells", 3.4, -3.9, 0), I("dumbbells", 5.2, -3.9, 0),
+          I("weightbench", 3.8, -1.2, 0), I("weightbench", 3.8, 1.0, 0),
+          I("punchingbag", -5.2, 0.6, 0),
+          ...row("exercisebike", -3.4, 1.3, 3, 1.0, R),
+          I("yogamat", 0.4, 0.9, 0, { c: "#7c3aed" }), I("yogamat", 1.3, 0.9, 0, { c: "#0ea5e9" }),
+          I("counter", -4.7, 3.7, 0, { w: 2.0 }), I("waterdispenser", -3.2, 3.9), I("cooler", 5.2, 3.6),
+          I("tv", 5.95, -0.2, -H), I("standingfan", 5.0, 1.0), I("standingfan", -5.2, 2.4),
+          I("ceilingfan", -2.5, 0), I("ceilingfan", 2.5, 0),
+        ],
+      });
+    case "salon":
+      return lay({
+        ...base, id: "biz", floor: "tile", wall: "#f3ecf7", trim: "#4c1d95",
+        items: [
+          ...row("mirrorstation", -3.3, -3.55, 3, 2.3, 0),
+          ...row("salonchair", -3.3, -2.5, 3, 2.3, R),
+          ...col("dryer", 4.3, -2.6, 2, 1.2, 0),
+          I("sink", 4.3, -0.2, -H), I("armchair", 3.4, 0.4, H),
+          I("counter", -3.2, 3.0, 0, { w: 2.2 }), I("loveseat", 3.4, 3.1, R), I("coffeetable", 2.0, 3.0),
+          I("tv", 4.95, 1.6, -H), I("plant", -4.6, -3.5), ...fans.slice(0, 2),
+        ],
+      });
+    case "cafe":
+      return lay({
+        ...base, id: "biz", floor: "wood", wall: "#f1e4d3", trim: "#5a3a24",
+        items: [
+          I("menuboard", 0, -3.95, 0, { y: 1.15 }), I("espresso", -2.7, -3.4, 0), I("fridge", -4.3, -3.5, 0),
+          I("bar", 0.9, -2.5, 0, { w: 4.0 }), ...row("barstool", -0.6, -1.6, 4, 1.1, 0),
+          I("displaycase", 3.9, -3.4, 0), I("stove", 4.6, -3.4, 0),
+          ...[[-3.4, 1.2], [0, 0.4], [3.4, 1.2]].flatMap(([x, z]) => [I("roundtable", x, z), ...around("chair", x, z, 0.8, 3, 0.5)]),
+          I("tv", 4.95, 0.2, -H), I("coffeetable", -4.2, 2.4), I("armchair", -4.4, 3.1, 0.6), ...fans.slice(0, 2),
+        ],
+      });
+    case "pharmacy":
+      return lay({
+        ...base, id: "biz", floor: "tile", light: "cool", wall: "#eef6f1", trim: "#166534",
+        items: [
+          ...row("medshelf", -3.4, -3.6, 3, 1.75, 0),
+          I("counter", 0, -1.4, 0, { w: 3.6 }), I("scale", 3.6, 2.4), I("scale", 4.2, 2.4),
+          ...row("displaycase", -3.4, 0.4, 2, 2.0, 0), I("fridge", 4.4, -3.6, 0),
+          ...row("bench", -3, 2.7, 2, 6.0, 0), I("waterdispenser", 4.6, 0.6), I("wallart", 0, -3.97, 0, { y: 2.0, w: 1.2, d: 0.7, c: "#16a34a" }),
+          ...fans.slice(0, 2),
+        ],
+      });
     case "mart":
-      return lay({ ...base, id: "biz", floor: "tile", w: 12, d: 9, items: [I("counter", -4.2, 3, 0, { w: 1.6 }), I("counter", -2.2, 3, 0, { w: 1.6 }), ...row("rack", -4, -3, 5, 2, 0), ...row("rack", -4, -0.6, 5, 2, 0), ...row("provisions", -4.4, -4, 3, 3, 0), I("cooler", 5.4, -4), I("fridge", 5.4, -2.4, -H), I("cooler", 5.4, 0.2, -H), ...fans.slice(0, 2)] });
+      return lay({
+        ...base, id: "biz", floor: "tile", w: 12, d: 9, wall: "#fbf6e9", trim: "#92400e",
+        items: [
+          ...row("freezer", -4.2, -4.0, 4, 1.7, 0),
+          ...row("rack", -4, -2.3, 5, 2, 0), ...row("rack", -4, 0.1, 5, 2, 0),
+          I("provisions", 5.2, -2.4, -H), I("provisions", 5.2, 0.4, -H), I("cooler", 5.3, 2.4, -H),
+          I("counter", -4.2, 3.2, 0, { w: 1.6 }), I("counter", -2.2, 3.2, 0, { w: 1.6 }),
+          ...row("trolley", 1.6, 3.4, 3, 0.8, 0), ...fans.slice(0, 2),
+        ],
+      });
     default:
-      return lay({ ...base, id: "biz", floor: "redoxide", items: [I("counter", 0, -3.2, 0, { w: 3 }), I("provisions", -3.8, -3.6, 0), I("provisions", 3.8, -3.6, 0), ...row("rack", -4.2, -0.6, 3, 1.1, 0), ...row("crates", 1.2, -0.6, 3, 1.1, 0), I("cooler", 4.5, 1.8), I("fridge", -4.5, 1.8, H), I("radio", -0.6, -3.3), ...fans] });
+      return lay({
+        ...base, id: "biz", floor: "redoxide",
+        items: [
+          I("counter", 0, -3.2, 0, { w: 3 }), I("radio", -0.6, -3.3), I("provisions", -3.8, -3.6, 0), I("provisions", 3.8, -3.6, 0),
+          ...row("rack", -4.2, -0.6, 3, 1.1, 0), ...row("crates", 1.2, -0.6, 3, 1.1, 0),
+          I("freezer", 3.7, 1.9, 0), I("cooler", -4.5, 1.8), ...fans,
+        ],
+      });
   }
 }
 

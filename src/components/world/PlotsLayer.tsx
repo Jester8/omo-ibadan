@@ -128,6 +128,54 @@ function geos() {
     ]),
     bizaccent: merge([box(1.9, 0.22, 1.42, "#ffffff", [0, B + 1.03, -0.1]), box(1.5, 0.06, 0.5, "#ffffff", [0.1, B + 0.74, 0.7], { rx: -0.35 }), box(0.46, 0.2, 0.04, "#ffffff", [1.15, B + 0.72, 0.95])]),
     bizglow: merge([box(0.75, 0.4, 0.03, "#fff4d6", [0.35, B + 0.38, 0.56])]),
+    // what each kind of business adds outside, so you can tell what it is from the street
+    bz_gym: merge([
+      part(new THREE.CylinderGeometry(0.03, 0.03, 1.1, 8), "#9ca3af", [0, B + 1.3, 0.42], { rz: Math.PI / 2 }),
+      ...[-1, 1].flatMap((s) => [
+        part(new THREE.CylinderGeometry(0.17, 0.17, 0.06, 14), "#1f2937", [s * 0.5, B + 1.3, 0.42], { rz: Math.PI / 2 }),
+        part(new THREE.CylinderGeometry(0.12, 0.12, 0.06, 14), "#374151", [s * 0.58, B + 1.3, 0.42], { rz: Math.PI / 2 }),
+        post(0.02, 0.32, "#6b7280", [s * 0.3, B + 1.1, 0.42]),
+      ]),
+      box(0.5, 0.05, 0.22, "#dc2626", [1.05, B + 0.02, 0.95]),
+    ]),
+    bz_salon: merge([
+      ...Array.from({ length: 6 }, (_, i) => part(new THREE.CylinderGeometry(0.06, 0.06, 0.1, 10), i % 2 ? "#dc2626" : "#ffffff", [1.15, B + 0.07 + i * 0.1, 0.92])),
+      part(new THREE.IcosahedronGeometry(0.075, 0), "#2563eb", [1.15, B + 0.72, 0.92]),
+      part(new THREE.CylinderGeometry(0.1, 0.1, 0.04, 10), "#2a2f3a", [1.15, B + 0.02, 0.92]),
+      part(new THREE.CylinderGeometry(0.07, 0.07, 0.34, 10), "#f9a8d4", [-1.05, B + 0.2, 0.95]),
+    ]),
+    bz_cafe: merge([
+      part(new THREE.CylinderGeometry(0.2, 0.14, 0.24, 14), "#92400e", [0, B + 1.3, 0.45]),
+      part(new THREE.CylinderGeometry(0.27, 0.27, 0.03, 14), "#f4f1e6", [0, B + 1.17, 0.45]),
+      part(new THREE.TorusGeometry(0.09, 0.025, 6, 10), "#92400e", [0.24, B + 1.3, 0.45]),
+      ...[-0.06, 0.02, 0.1].map((x, i) => part(new THREE.IcosahedronGeometry(0.04, 0), "#e5e7eb", [x, B + 1.5 + i * 0.07, 0.45])),
+      part(new THREE.CylinderGeometry(0.22, 0.22, 0.03, 12), "#f4f1e6", [1.0, B + 0.3, 0.95]),
+      post(0.025, 0.3, "#6b7380", [1.0, B + 0.15, 0.95]),
+      part(new THREE.CylinderGeometry(0.1, 0.1, 0.22, 8), "#b45309", [0.78, B + 0.11, 1.1]),
+      part(new THREE.CylinderGeometry(0.1, 0.1, 0.22, 8), "#b45309", [1.22, B + 0.11, 1.1]),
+    ]),
+    bz_pharmacy: merge([
+      box(0.46, 0.15, 0.07, "#16a34a", [0, B + 1.3, 0.45]),
+      box(0.15, 0.46, 0.07, "#16a34a", [0, B + 1.15, 0.45]),
+      box(0.7, 0.05, 0.22, "#d1d5db", [1.0, B + 0.2, 0.98]),
+      box(0.04, 0.2, 0.04, "#6b7280", [0.72, B, 0.98]),
+      box(0.04, 0.2, 0.04, "#6b7280", [1.28, B, 0.98]),
+    ]),
+    bz_mart: merge([
+      box(1.6, 0.18, 0.05, "#f59e0b", [0, B + 1.18, 0.62]),
+      ...[-0.9, -0.55].flatMap((x) => [
+        box(0.28, 0.18, 0.2, "#cbd5e1", [x, B + 0.26, 0.98]),
+        box(0.28, 0.04, 0.04, "#ef4444", [x, B + 0.46, 1.08]),
+        post(0.03, 0.12, "#111827", [x - 0.1, B + 0.06, 0.98]),
+        post(0.03, 0.12, "#111827", [x + 0.1, B + 0.06, 0.98]),
+      ]),
+    ]),
+    bz_shop: merge([
+      ...[-1.0, -0.6].flatMap((x) => [
+        box(0.34, 0.15, 0.26, "#a16207", [x, B, 0.98]),
+        ...[0, 1, 2].map((k) => part(new THREE.IcosahedronGeometry(0.06, 0), k % 2 ? "#ef4444" : "#f97316", [x - 0.09 + k * 0.09, B + 0.2, 0.98])),
+      ]),
+    ]),
     // land that is bought but not built on: corner stakes and a flag
     claimed: merge([
       ...([[-1.35, -1.35], [1.35, -1.35], [-1.35, 1.35], [1.35, 1.35]] as [number, number][]).map(([x, z]) => box(0.07, 0.28, 0.07, "#ffffff", [x, 0.2, z])),
@@ -178,6 +226,7 @@ export default function PlotsLayer() {
   const lists = useMemo(() => {
     const by: Record<string, Item[]> = { t1: [], t2: [], t3: [], claimed: [], sale: [], biz: [] };
     const pads: Item[] = [];
+    const byBiz: Record<string, Item[]> = {};
     const white = new THREE.Color("#ffffff");
     const sand = new THREE.Color("#f5f2e6");
     for (const p of PLOTS) {
@@ -185,9 +234,10 @@ export default function PlotsLayer() {
       const accent = st ? new THREE.Color(colorFor(st.ownerId)) : undefined;
       const kind = kindOf(st);
       by[kind].push({ x: p.pos[0], z: p.pos[1], color: kind === "biz" ? new THREE.Color(bizById(st?.biz)?.color ?? "#16a34a") : accent });
+      if (kind === "biz" && st?.biz) (byBiz[st.biz] ??= []).push({ x: p.pos[0], z: p.pos[1] });
       pads.push({ x: p.pos[0], z: p.pos[1], color: accent ? accent.clone().lerp(white, 0.75) : sand });
     }
-    return { by, pads };
+    return { by, pads, byBiz };
   }, [plots]);
 
   const rings = PLOTS.filter((p) => (selected?.type === "plot" && selected.id === p.id) || plots[p.id]?.ownerId === me);
@@ -206,6 +256,9 @@ export default function PlotsLayer() {
       <Inst geometry={g.biz} material={bodyMat} items={lists.by.biz} shadow />
       <Inst geometry={g.bizaccent} material={tintMat} items={lists.by.biz} tint />
       <Inst geometry={g.bizglow} material={lampMat} items={lists.by.biz} />
+      {["gym", "salon", "cafe", "pharmacy", "mart", "shop"].map((id) => (
+        <Inst key={id} geometry={g[`bz_${id}`]} material={bodyMat} items={lists.byBiz[id] ?? []} shadow />
+      ))}
       <Inst geometry={g.claimed} material={tintMat} tint items={lists.by.claimed} />
       <Inst geometry={g.sale} material={bodyMat} items={lists.by.sale} />
       <PlotHits />

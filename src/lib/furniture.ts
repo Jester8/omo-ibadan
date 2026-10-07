@@ -12,6 +12,8 @@ export type FurnKind =
   | "podium" | "blackboard" | "studentdesk" | "altar" | "pulpit" | "mimbar" | "prayermat"
   | "displaycase" | "arcade" | "clawmachine" | "fountain" | "stage" | "drum" | "rack" | "crates" | "sacks" | "umbrella"
   | "mortar" | "calabash" | "ibeji" | "mannequin" | "carvedstool" | "gascooker" | "radio" | "sewingmachine" | "meterbox" | "calendar" | "provisions" | "cooler" | "watertank" | "agbadastand"
+  | "treadmill" | "dumbbells" | "weightbench" | "punchingbag" | "exercisebike" | "yogamat" | "gymmirror"
+  | "salonchair" | "dryer" | "mirrorstation" | "espresso" | "menuboard" | "medshelf" | "scale" | "trolley" | "freezer"
   | "curtain" | "flag" | "trophycase" | "goalpost" | "ticketbooth" | "tank" | "stairs" | "wallart" | "clock" | "pitch" | "liftdoor";
 
 export type Pose = "sit" | "lie";
@@ -114,6 +116,25 @@ export const FURN: Record<FurnKind, FurnDef> = {
     use: { verb: "Take a bath", action: { id: "bath", label: "Take a bath", secs: 7, gain: { hygiene: 100, energy: 6, fun: 5 } } },
   },
   basin: { w: 0.5, d: 0.4, h: 0.9, solid: true, use: { verb: "Wash up", action: { id: "wash", label: "Wash your hands and face", secs: 2, gain: { hygiene: 15 } } } },
+
+  // the gym: all of it can be used
+  treadmill: { w: 0.8, d: 1.7, h: 1.4, solid: true, use: { verb: "Run on the treadmill", needsPower: true, action: { id: "treadmill", label: "Run on the treadmill", secs: 6, gain: { energy: -14, fun: 10, hygiene: -8, hunger: -4 } } } },
+  dumbbells: { w: 1.6, d: 0.5, h: 1.0, solid: true, use: { verb: "Lift dumbbells", action: { id: "dumbbells", label: "Lift dumbbells", secs: 5, gain: { energy: -12, fun: 8, hygiene: -6, hunger: -3 } } } },
+  weightbench: { w: 1.8, d: 1.0, h: 1.3, solid: true, use: { verb: "Bench press", action: { id: "benchpress", label: "Bench press", secs: 6, gain: { energy: -15, fun: 9, hygiene: -9, hunger: -4 } } } },
+  punchingbag: { w: 0.7, d: 0.7, h: 2.0, solid: true, use: { verb: "Hit the bag", action: { id: "punchbag", label: "Hit the punching bag", secs: 5, gain: { energy: -11, fun: 12, hygiene: -7, hunger: -3 } } } },
+  exercisebike: { w: 0.55, d: 1.0, h: 1.2, solid: true, use: { verb: "Ride the bike", needsPower: true, action: { id: "spin", label: "Ride the exercise bike", secs: 6, gain: { energy: -11, fun: 8, hygiene: -6, hunger: -3 } } } },
+  yogamat: { w: 0.7, d: 1.8, h: 0.02, solid: false, use: { verb: "Stretch", action: { id: "stretch", label: "Stretch and breathe", secs: 5, gain: { energy: 6, fun: 8 } } } },
+  gymmirror: { w: 3.0, d: 0.06, h: 2.0, solid: false },
+  // the salon, cafe, pharmacy and shops
+  salonchair: { w: 0.8, d: 0.8, h: 1.2, solid: true },
+  dryer: { w: 0.6, d: 0.6, h: 1.7, solid: true },
+  mirrorstation: { w: 1.2, d: 0.4, h: 1.7, solid: true },
+  espresso: { w: 0.9, d: 0.6, h: 1.45, solid: true },
+  menuboard: { w: 1.5, d: 0.08, h: 1.1, solid: false },
+  medshelf: { w: 1.6, d: 0.4, h: 1.9, solid: true },
+  scale: { w: 0.4, d: 0.4, h: 0.1, solid: false },
+  trolley: { w: 0.6, d: 0.9, h: 1.0, solid: true },
+  freezer: { w: 1.4, d: 0.7, h: 0.9, solid: true },
 
   podium: { w: 0.6, d: 0.5, h: 1.1, solid: true },
   blackboard: { w: 3.0, d: 0.1, h: 1.3, solid: false },
