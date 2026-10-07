@@ -13,6 +13,7 @@ import { cleanChat } from "./moderation";
 import { interiorKey, type InteriorRef } from "./interiors";
 import { usePhotos } from "./photos";
 import { levelOf } from "./bonds";
+import { collectPending, takeCredit } from "./bank";
 import { enterInterior } from "./interiorRuntime";
 
 /** The owner said yes: step in. */
@@ -177,6 +178,9 @@ function handle(m: S2C) {
       audio.pop();
       break;
     }
+    case "credit":
+      void takeCredit(m);
+      break;
     case "doing":
       useGame.setState((st) => ({ doing: { ...st.doing, [m.id]: m.label } }));
       break;
@@ -341,6 +345,7 @@ function openSocket() {
     sendCar();
     void pullState().then(() => pushState());
     void loadSocial();
+    void collectPending();
     if (autosave) clearInterval(autosave);
     autosave = setInterval(() => void pushState(), 30_000);
   };

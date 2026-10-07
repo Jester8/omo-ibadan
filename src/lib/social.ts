@@ -2,7 +2,7 @@ import { apiBase, ensureToken } from "./api";
 import type { Look } from "./look";
 import { useGame } from "./store";
 
-export type Person = { pid: string; name: string; look: Look | null; online?: boolean; level?: string };
+export type Person = { pid: string; name: string; username?: string | null; look: Look | null; online?: boolean; level?: string };
 export type Thread = Person & { unread: number; last: { text: string; at: number; mine: boolean } };
 export type DmMsg = { id: number; from: string; to: string; text: string; at: number };
 
