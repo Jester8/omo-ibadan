@@ -1,5 +1,5 @@
 import type { C2S, PeerInfo, S2C } from "./protocol";
-import { hooks, useGame } from "./store";
+import { FULL_AT, hooks, useGame } from "./store";
 import { emotes, me, remoteMotion, remoteSits } from "./playerState";
 import { PLOTS, PLOT_SIZE, plotById } from "./plots";
 import { ESTATES } from "./world";
@@ -486,7 +486,11 @@ export const net = {
     send({ t: "serve", to, dish });
   },
   /** Eat what a host served you, or say no thanks. */
-  answerServe(from: string, dish: string, accept: boolean) {
+  answerServe(from: string, dish: string, wantsIt: boolean) {
+    // already full: politely decline, so the host keeps their meal
+    const full = useGame.getState().needs.hunger >= FULL_AT;
+    if (wantsIt && full) useGame.getState().toast("You are full. You have eaten enough for now.", "info");
+    const accept = wantsIt && !full;
     send({ t: "serveReply", to: from, dish, accept });
     useGame.setState((st) => ({ serves: st.serves.filter((v) => !(v.from === from && v.dish === dish)) }));
     if (accept) {

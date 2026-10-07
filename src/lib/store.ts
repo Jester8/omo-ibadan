@@ -55,6 +55,8 @@ export type CallState = {
 export type Sheet = "phone" | "profile" | "quests" | "election" | "garage" | "buy" | "friends" | "music" | "flights" | "guide" | null;
 
 const START_MONEY = 25000;
+/** at or above this hunger level you are full and cannot eat another meal */
+export const FULL_AT = 80;
 /** a brand-new account starts with this much (₦) */
 export const SIGNUP_MONEY = 2_000_000;
 const START_NEEDS: Needs = { hunger: 80, energy: 90, fun: 65, social: 55 };
@@ -385,6 +387,8 @@ export const useGame = create<State>()(
       runAction: (a, opts) => {
         const s = get();
         if (s.busy) return "You're already busy.";
+        // a meal or two is enough: no eating more until you are hungry again
+        if ((a.gain?.hunger ?? 0) >= 15 && s.needs.hunger >= FULL_AT) return "You are full. You have eaten enough for now. Come back when you are hungry again.";
         if (a.pantry && a.pantry < 0 && s.pantry < -a.pantry) return "No foodstuff left. Buy some at a market, or order groceries at home.";
         if (a.plates && a.plates < 0 && s.plates < -a.plates) return "No cooked food. Cook a meal first.";
         if (a.minRep && s.rep < a.minRep) return `Needs ${a.minRep} reputation (${TITLES[titleIndex(a.minRep)].name}).`;
