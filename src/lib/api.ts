@@ -174,6 +174,7 @@ export function forgetDevice() {
   try {
     localStorage.removeItem(KEY);
     localStorage.removeItem(STORE_KEY);
+    localStorage.removeItem(SYNCED);
   } catch {
     /* ignore */
   }
@@ -192,6 +193,7 @@ export async function signOut() {
       if (acc) putDemo({ ...acc, saved: localStorage.getItem(STORE_KEY) ?? undefined });
     }
     localStorage.removeItem(KEY);
+    localStorage.removeItem(SYNCED);
     useGame.persist.clearStorage();
   } catch {
     /* ignore */
@@ -206,11 +208,30 @@ const snapshot = () => {
 };
 
 /** Upload the player's progress. Quietly does nothing when the server is unreachable. */
+/** Which account this device's saved progress belongs to. Without it we cannot tell your progress from a fresh start. */
+const SYNCED = "omo-ibadan-synced";
+const syncedFor = () => {
+  try {
+    return localStorage.getItem(SYNCED);
+  } catch {
+    return null;
+  }
+};
+const markSynced = (pid: string) => {
+  try {
+    localStorage.setItem(SYNCED, pid);
+  } catch {
+    /* ignore */
+  }
+};
+
 export async function pushState() {
   if (DEMO_AUTH) return;
   const token = cached ?? (await ensureToken());
   const profile = useGame.getState().profile;
   if (!token || !profile) return;
+  // never save a fresh-looking game over a real one: this device must have been loaded from this account first
+  if (syncedFor() !== profile.id) return;
   try {
     await fetch(`${apiBase()}/api/state`, { method: "PUT", headers: { "content-type": "application/json", authorization: `Bearer ${token}` }, body: JSON.stringify({ name: profile.name, look: profile.look, state: snapshot() }), signal: AbortSignal.timeout(4000) });
   } catch {
@@ -222,16 +243,25 @@ export async function pushState() {
 export async function pullState() {
   if (DEMO_AUTH) return;
   const token = cached ?? (await ensureToken());
-  if (!token) return;
+  const pid = useGame.getState().profile?.id;
+  if (!token || !pid) return;
   try {
-    const res = await fetch(`${apiBase()}/api/state`, { headers: { authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(4000) });
+    const res = await fetch(`${apiBase()}/api/state`, { headers: { authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(6000) });
     if (!res.ok) return;
     const { state, updatedAt } = (await res.json()) as { state: ReturnType<typeof snapshot> | null; updatedAt: number };
     const s = useGame.getState();
-    // only when the cloud copy is clearly newer than what this device last saved
-    if (!state || updatedAt <= s.savedAt + 60_000) return;
+    // first time this device sees this account: its progress comes from the cloud, whatever the clock says.
+    // after that, only when the cloud copy is clearly newer than what this device last saved.
+    const firstTime = syncedFor() !== pid;
+    if (!state) {
+      markSynced(pid); // a brand new account: this device's start is the real start
+      return;
+    }
+    if (!firstTime && updatedAt <= s.savedAt + 60_000) return;
+    markSynced(pid);
     useGame.setState({ money: state.money, rep: state.rep, needs: state.needs, questsDone: state.questsDone, cars: state.cars, activeCar: state.activeCar, romance: { ...s.romance, ...state.romance }, stats: { ...s.stats, ...state.stats } });
-    s.toast("Progress restored from the cloud.", "info");
+    if (firstTime) s.toast("Welcome back! Your progress is restored.", "good");
+    else s.toast("Progress restored from the cloud.", "info");
   } catch {
     /* ignore */
   }
