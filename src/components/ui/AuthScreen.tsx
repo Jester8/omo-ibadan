@@ -17,7 +17,7 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
   const [step, setStep] = useState<Step>("intro");
   const muted = useSound((s) => s.muted);
   const [email, setEmail] = useState("");
-  // the Mapo Hall film: shown once it is really playing, otherwise the painted skyline stays
+  // the Mapo Hall picture: shown once it has loaded, otherwise the painted skyline stays
   const [film, setFilm] = useState<"loading" | "on" | "off">("loading");
   const [devCode, setDevCode] = useState<string | undefined>();
   const [err, setErr] = useState("");
@@ -64,17 +64,14 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
   return (
     <div className="absolute inset-0 z-50 overflow-hidden bg-gradient-to-b from-[#1b1a2e] via-[#3a2a3a] to-[#7a3b22] text-white">
       {film !== "off" && (
-        <video
-          className={`absolute inset-0 size-full object-cover transition-opacity duration-1000 ${film === "on" ? "opacity-100" : "opacity-0"}`}
-          src="/video/mapo-hall.mp4"
-          poster="/video/mapo-hall.jpg"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src="/home/mapo-hall.jpg"
+          alt=""
           aria-hidden
-          onPlaying={() => setFilm("on")}
+          draggable={false}
+          className={`absolute inset-0 size-full object-cover transition-opacity duration-1000 ${film === "on" ? "opacity-100" : "opacity-0"}`}
+          onLoad={() => setFilm("on")}
           onError={() => setFilm("off")}
         />
       )}
