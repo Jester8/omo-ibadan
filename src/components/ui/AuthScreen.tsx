@@ -7,10 +7,14 @@ import { ArrowRight, ChevronLeft, Lock, Mail, Music2, Volume2, VolumeX } from "l
 import { DEMO_AUTH, demoLogIn, requestCode, verifyCode, type Verified } from "@/lib/api";
 import AuthCode from "./AuthCode";
 import InstallApp from "./InstallApp";
+import LandingBackdrop from "./LandingBackdrop";
 import { audio } from "@/lib/audio";
 import { useSound } from "@/lib/soundStore";
 
 type Step = "intro" | "choose" | "login" | "code";
+
+/** The painted skyline and gold glow are now inside the landing video; true shows them on the landing screen again to compare. */
+const LANDING_LEGACY_DECOR = false;
 
 /** First screen: the city's own live sound, then Sign up (name, email, avatar) or Log in (email and name). */
 export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => void; onLoggedIn: (p: Verified) => void }) {
@@ -23,6 +27,8 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
   const [devCode, setDevCode] = useState<string | undefined>();
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
+  // the title block stays up in the sky until the landing content has finished fading out
+  const [skyStack, setSkyStack] = useState(true);
 
   const enter = () => {
     audio.start(); // the groove begins from the top on this first tap
@@ -60,6 +66,9 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
 
   const field = "w-full rounded-2xl border-0 bg-white/90 px-4 py-3.5 text-base font-medium text-stone-900 outline-none ring-2 ring-transparent transition placeholder:text-stone-400 focus:ring-amber-400";
 
+  const landing = step === "intro";
+  const legacy = !landing || LANDING_LEGACY_DECOR;
+
   if (step === "code") return <AuthCode email={email.trim().toLowerCase()} purpose="login" devCode={devCode} onVerified={onLoggedIn} onBack={() => setStep("login")} />;
 
   return (
@@ -71,14 +80,14 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
           alt=""
           aria-hidden
           draggable={false}
-          className={`home-drift absolute inset-0 size-full object-cover object-[22%_50%] transition-opacity sm:object-center duration-1000 ${film === "on" ? "opacity-100" : "opacity-0"}`}
+          className={`home-drift absolute inset-0 size-full object-cover object-[22%_50%] transition-opacity sm:object-center duration-1000 ${film === "on" ? "opacity-100" : "opacity-0"} ${legacy ? "" : "invisible"}`}
           onLoad={() => setFilm("on")}
           onError={() => setFilm("off")}
         />
       )}
       {film === "on" && <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/25 to-black/65" />}
       {/* the brown-roofed skyline of Ibadan (the painted fallback) */}
-      <svg aria-hidden className={`absolute inset-x-0 bottom-0 h-[46%] w-full transition-opacity duration-1000 ${film === "on" ? "opacity-0" : "opacity-100"}`} viewBox="0 0 400 200" preserveAspectRatio="xMidYMax slice">
+      <svg aria-hidden className={`absolute inset-x-0 bottom-0 h-[46%] w-full transition-opacity duration-1000 ${film === "on" ? "opacity-0" : "opacity-100"} ${legacy ? "" : "hidden"}`} viewBox="0 0 400 200" preserveAspectRatio="xMidYMax slice">
         {Array.from({ length: 22 }, (_, i) => {
           const x = i * 19 - 6;
           const h = 34 + ((i * 37) % 46);
@@ -92,7 +101,16 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
         })}
         <rect x="0" y="186" width="400" height="14" fill="#1a141c" />
       </svg>
-      <div className="pointer-events-none absolute -top-24 left-1/2 size-80 -translate-x-1/2 rounded-full bg-amber-400/25 blur-3xl" />
+      <div className={`pointer-events-none absolute -top-24 left-1/2 size-80 -translate-x-1/2 rounded-full bg-amber-400/25 blur-3xl ${legacy ? "" : "hidden"}`} />
+
+      {/* the Mapo Hall film plays only on the landing screen, and fades away (and stops) once you enter */}
+      <AnimatePresence>
+        {landing && (
+          <motion.div key="landing-film" className="absolute inset-0" initial={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.8 } }}>
+            <LandingBackdrop />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {step !== "intro" && (
         <button onClick={toggleMute} aria-label={muted ? "Unmute sound" : "Mute sound"} className="absolute right-4 top-[calc(env(safe-area-inset-top)+1rem)] z-10 grid size-10 place-items-center rounded-full bg-white/15 backdrop-blur transition hover:bg-white/25">
@@ -100,17 +118,17 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
         </button>
       )}
 
-      <div className="relative z-10 mx-auto flex h-full max-w-md flex-col justify-center px-6">
-        <AnimatePresence mode="wait">
+      <div className={`relative z-10 mx-auto flex h-full max-w-md flex-col px-6 ${landing || skyStack ? "landing-stack justify-start" : "justify-center"}`}>
+        <AnimatePresence mode="wait" onExitComplete={() => setSkyStack(false)}>
           {step === "intro" && (
             <motion.div key="intro" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="text-center">
-              <Image src="/logo.png" alt="Omo'badan" width={112} height={112} priority className="mx-auto size-28 drop-shadow-[0_10px_30px_rgba(224,162,31,0.35)]" />
-              <h1 className="mt-6 text-5xl font-black tracking-tight">Omo&apos;badan</h1>
-              <p className="mt-3 text-lg text-white/80">Live the life. Brown roofs, amala and good vibes.</p>
-              <button onClick={enter} className="mt-10 inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-base font-bold text-stone-900 shadow-xl transition active:scale-95">
+              <Image src="/logo.png" alt="Omo'badan" width={112} height={112} priority className="landing-logo mx-auto size-28 drop-shadow-[0_10px_30px_rgba(224,162,31,0.35)]" />
+              <h1 className="landing-title mt-6 text-5xl font-black tracking-tight [text-shadow:0_2px_18px_rgba(26,24,40,0.55)]">Omo&apos;badan</h1>
+              <p className="landing-tagline mt-3 text-lg text-white/85 [text-shadow:0_1px_12px_rgba(26,24,40,0.6)]">Live the life. Brown roofs, amala and good vibes.</p>
+              <button onClick={enter} className="landing-cta mt-10 inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-base font-bold text-stone-900 shadow-xl transition active:scale-95">
                 Tap to enter <ArrowRight className="size-5" />
               </button>
-              <p className="mt-6 flex items-center justify-center gap-1.5 text-xs text-white/60">
+              <p className="landing-hint mt-6 flex items-center justify-center gap-1.5 text-xs text-white/70">
                 <Music2 className="size-3.5" /> Sound on
               </p>
             </motion.div>

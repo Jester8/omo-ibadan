@@ -60,3 +60,21 @@ button { touch-action: manipulation; }
 }
 .home-drift { animation: home-drift 28s ease-in-out infinite alternate; }
 @media (prefers-reduced-motion: reduce) { .home-drift { animation: none; } }
+
+/* landing screen: the title block sits in the sky, clear of Mapo Hall in the video below */
+.landing-stack { padding-top: max(calc(env(safe-area-inset-top) + 1.25rem), 7vh); }
+.landing-stack .landing-logo { width: 7rem; height: 7rem; }
+@media (max-height: 950px), (min-aspect-ratio: 2/1) {
+  .landing-stack .landing-logo { width: 5rem; height: 5rem; }
+  .landing-stack .landing-title { margin-top: 1rem; }
+  .landing-stack .landing-cta { margin-top: 1.75rem; }
+  .landing-stack .landing-hint { margin-top: 1rem; }
+}
+@media (max-height: 520px) {
+  .landing-stack { padding-top: max(calc(env(safe-area-inset-top) + 0.75rem), 4vh); }
+  .landing-stack .landing-logo { display: none; }
+  .landing-stack .landing-title { margin-top: 0; font-size: 2.25rem; }
+  .landing-stack .landing-tagline { margin-top: 0.375rem; font-size: 1rem; }
+  .landing-stack .landing-cta { margin-top: 1rem; padding-top: 0.75rem; padding-bottom: 0.75rem; }
+  .landing-stack .landing-hint { margin-top: 0.625rem; }
+}
