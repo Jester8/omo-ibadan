@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Mic } from "lucide-react";
 import type { Vector3 } from "three";
 import { anchors } from "@/lib/overlay";
@@ -52,6 +52,8 @@ function PlaceLabels() {
   const atPlace = useGame((s) => s.atPlace);
   const hour = useHour();
   const campus = useGame((s) => s.campus);
+  // on a phone, place names are smaller and only the ones near you show, so the screen stays readable
+  const [phone] = useState(() => typeof window !== "undefined" && window.innerWidth < 640);
   return (
     <>
       {PLACES.filter((p) => campus || !CAMPUS_PLACES.includes(p.id)).map((p) => {
@@ -59,10 +61,10 @@ function PlaceLabels() {
         const sel = selected?.type === "place" && selected.id === p.id;
         const here = atPlace === p.id;
         return (
-          <Anchored key={p.id} id={`place:${p.id}`} get={(o) => o.set(p.pos[0], p.size[1] + 0.9, p.pos[1])} maxCam={46}>
+          <Anchored key={p.id} id={`place:${p.id}`} get={(o) => o.set(p.pos[0], p.size[1] + 0.9, p.pos[1])} maxCam={phone ? 38 : 46} maxDist={phone ? 26 : undefined}>
             <button
               onClick={() => useGame.getState().select({ type: "place", id: p.id })}
-              className={`${sel || here ? "" : "max-sm:hidden"} pointer-events-auto flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] font-semibold shadow-lg ring-1 backdrop-blur transition-all duration-300 hover:scale-105 ${
+              className={`pointer-events-auto flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] font-semibold max-sm:gap-1 max-sm:px-2 max-sm:py-1 max-sm:text-[10.5px] shadow-lg ring-1 backdrop-blur transition-all duration-300 hover:scale-105 ${
                 sel
                   ? "scale-110 bg-amber-500 text-white ring-amber-600"
                   : here
