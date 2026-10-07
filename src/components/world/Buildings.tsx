@@ -163,16 +163,66 @@ function Campus({ size: [w, h, d], color }: SP) {
   );
 }
 
+/** A white ambulance with a red stripe and a flashing light bar. +z is forward. */
+function Ambulance({ p, ry = 0 }: { p: V3; ry?: number }) {
+  const bar = useRef<THREE.MeshStandardMaterial>(null);
+  useFrame(({ clock }) => {
+    if (bar.current) bar.current.emissiveIntensity = Math.sin(clock.elapsedTime * 7) > 0 ? 1.4 : 0.15;
+  });
+  return (
+    <group position={p} rotation-y={ry}>
+      <Box p={[0, 0.12, 0]} s={[0.46, 0.34, 1.0]} c="#f7f7f7" />
+      <Box p={[0, 0.12, 0.62]} s={[0.46, 0.22, 0.3]} c="#f7f7f7" />
+      <Box p={[0, 0.3, 0.7]} s={[0.4, 0.12, 0.12]} c="#8fb6d6" />
+      <Box p={[0, 0.2, 0]} s={[0.475, 0.06, 1.02]} c="#d63a3a" />
+      <Box p={[0.236, 0.28, -0.1]} s={[0.01, 0.16, 0.05]} c="#d63a3a" />
+      <Box p={[0.236, 0.28, -0.1]} s={[0.01, 0.05, 0.16]} c="#d63a3a" />
+      <mesh position={[0, 0.5, 0.45]}>
+        <boxGeometry args={[0.3, 0.05, 0.08]} />
+        <meshStandardMaterial ref={bar} color="#3b6fd6" emissive="#3b6fd6" emissiveIntensity={0.4} />
+      </mesh>
+      {[-0.26, 0.26].flatMap((x) => [-0.32, 0.5].map((z) => <Cyl key={`${x}${z}`} p={[x, 0, z]} r={0.09} h={0.06} c="#1b1e24" seg={10} />))}
+    </group>
+  );
+}
+
 function Hospital({ size: [w, h, d], color }: SP) {
+  const front = d / 2;
   return (
     <>
       <Box s={[w + 0.4, 0.1, d + 0.4]} c="#dfe5e8" />
       <Facade p={[0, 0.1, 0]} w={w} h={h} d={d} tint="#eef3f6" />
       <Facade p={[w * 0.3, 0.1 + h, 0]} w={w * 0.4} h={h * 0.5} d={d * 0.7} tint="#eef3f6" />
       <Box p={[0, h + 0.1, 0]} s={[w + 0.1, 0.08, d + 0.1]} c={color} />
-      <Box p={[-w * 0.2, h * 0.55, d / 2 + 0.03]} s={[0.12, 0.56, 0.04]} c="#e04848" />
-      <Box p={[-w * 0.2 - 0.22, h * 0.55 + 0.22, d / 2 + 0.03]} s={[0.56, 0.12, 0.04]} c="#e04848" />
-      <Box p={[w * 0.2, 0.1, d / 2 + 0.1]} s={[0.9, 0.5, 0.5]} c="#f7f7f7" />
+      {/* big red cross on the front and on the roof */}
+      <Box p={[-w * 0.2, h * 0.55, front + 0.03]} s={[0.12, 0.56, 0.04]} c="#e04848" />
+      <Box p={[-w * 0.2 - 0.22, h * 0.55 + 0.22, front + 0.03]} s={[0.56, 0.12, 0.04]} c="#e04848" />
+      <Box p={[-w * 0.3, h + 0.18, 0]} s={[0.1, 0.5, 0.1]} c="#e04848" />
+      <Box p={[-w * 0.3 - 0.2, h + 0.18 + 0.2, 0]} s={[0.5, 0.1, 0.1]} c="#e04848" />
+      {/* helipad on the upper block */}
+      <Cyl p={[w * 0.3, h * 1.5 + 0.18, 0]} r={Math.min(w, d) * 0.16} h={0.03} c="#4a5361" seg={24} />
+      <Box p={[w * 0.3 - 0.07, h * 1.5 + 0.21, -0.02]} s={[0.04, 0.01, 0.2]} c="#ffffff" />
+      <Box p={[w * 0.3 + 0.07, h * 1.5 + 0.21, -0.02]} s={[0.04, 0.01, 0.2]} c="#ffffff" />
+      <Box p={[w * 0.3, h * 1.5 + 0.21, -0.02]} s={[0.18, 0.01, 0.04]} c="#ffffff" />
+      {/* main entrance with a canopy on pillars */}
+      <Box p={[w * 0.2, 0.1, front + 0.1]} s={[0.9, 0.5, 0.5]} c="#f7f7f7" />
+      <Box p={[w * 0.2, 0.74, front + 0.55]} s={[1.3, 0.06, 0.9]} c={color} />
+      {[-0.55, 0.55].map((x) => (
+        <Column key={x} p={[w * 0.2 + x, 0.1, front + 0.95]} h={0.64} r={0.04} />
+      ))}
+      <Glow p={[w * 0.2, 0.85, front + 0.55]} s={[1.0, 0.1, 0.04]} c="#e04848" />
+      {/* emergency bay: its own ramp, an EMERGENCY sign and an ambulance waiting */}
+      <Box p={[-w * 0.36, 0.1, front + 0.55]} s={[1.5, 0.02, 1.0]} c="#c9d2d8" />
+      <Box p={[-w * 0.36, 0.1, front + 0.55]} s={[1.5, 0.005, 0.05]} c="#e04848" />
+      <Glow p={[-w * 0.36, 0.7, front + 0.05]} s={[0.9, 0.18, 0.04]} c="#e04848" />
+      <Ambulance p={[-w * 0.36, 0.12, front + 0.6]} />
+      {/* a small car park to the side, with bays */}
+      <Box p={[w / 2 + 1.0, 0.0, 0]} s={[1.6, 0.03, d * 0.9]} c="#5c6370" />
+      {[-0.3, 0, 0.3].map((k) => (
+        <Box key={k} p={[w / 2 + 1.0, 0.03, k * d]} s={[1.5, 0.005, 0.04]} c="#f4f1e6" />
+      ))}
+      <Box p={[w / 2 + 1.0, 0.03, -d * 0.15]} s={[0.5, 0.2, 0.9]} c="#4a90e2" />
+      <Box p={[w / 2 + 1.0, 0.03, d * 0.18]} s={[0.5, 0.2, 0.9]} c="#e8e3d6" />
     </>
   );
 }
@@ -595,6 +645,52 @@ const STYLES: Record<Place["style"], (p: SP) => React.ReactNode> = {
 
 /* ------------------------------- wrapper -------------------------------- */
 
+/** Street furniture that makes every public place feel lived in: lamps at the front, a bench, and for food places, umbrella tables. */
+function Extras({ place }: { place: Place }) {
+  const [w, , d] = place.size;
+  const front = d / 2 + 0.55;
+  const food = place.style === "eatery" || place.style === "market";
+  return (
+    <>
+      {[-1, 1].map((k) => (
+        <group key={k} position={[k * (w / 2 + 0.2), 0, front]}>
+          <mesh position={[0, 0.45, 0]} material={mat("#444b55")}>
+            <cylinderGeometry args={[0.025, 0.035, 0.9, 6]} />
+          </mesh>
+          <mesh position={[0, 0.93, 0]} material={lampMat}>
+            <sphereGeometry args={[0.08, 8, 6]} />
+          </mesh>
+        </group>
+      ))}
+      <group position={[-w * 0.28, 0, front + 0.05]}>
+        <mesh position={[0, 0.17, 0]} material={mat("#8a5a34")}>
+          <boxGeometry args={[0.7, 0.05, 0.22]} />
+        </mesh>
+        <mesh position={[0, 0.07, 0]} material={mat("#444b55")}>
+          <boxGeometry args={[0.6, 0.14, 0.16]} />
+        </mesh>
+      </group>
+      {food &&
+        [-0.3, 0.3].map((k) => (
+          <group key={k} position={[w * k, 0, front + 0.55]}>
+            <mesh position={[0, 0.2, 0]} material={mat("#f4f1e6")}>
+              <cylinderGeometry args={[0.2, 0.2, 0.04, 12]} />
+            </mesh>
+            <mesh position={[0, 0.1, 0]} material={mat("#6b7380")}>
+              <cylinderGeometry args={[0.025, 0.025, 0.2, 6]} />
+            </mesh>
+            <mesh position={[0, 0.62, 0]} material={mat(k < 0 ? "#d63a3a" : "#f2b632")}>
+              <coneGeometry args={[0.42, 0.18, 10]} />
+            </mesh>
+            <mesh position={[0, 0.38, 0]} material={mat("#6b7380")}>
+              <cylinderGeometry args={[0.015, 0.015, 0.5, 6]} />
+            </mesh>
+          </group>
+        ))}
+    </>
+  );
+}
+
 function PlaceBuilding({ place }: { place: Place }) {
   const selected = useGame((s) => s.selected);
   const atPlace = useGame((s) => s.atPlace);
@@ -631,6 +727,7 @@ function PlaceBuilding({ place }: { place: Place }) {
         }}
       >
         <Style size={place.size} color={place.color} />
+        <Extras place={place} />
       </group>
       {(isSel || atPlace === place.id) && (
         <mesh position={[0, 0.05, 0]} rotation-x={-Math.PI / 2}>

@@ -1,8 +1,15 @@
 "use client";
 
-import { RIDES } from "@/lib/cars";
+import { useRef, useState } from "react";
+import { useFrame } from "@react-three/fiber";
+import * as THREE from "three";
+import { RIDES, type CarKind } from "@/lib/cars";
 import { useGame } from "@/lib/store";
 import { walkTo } from "@/lib/movement";
+import { audio } from "@/lib/audio";
+import { me } from "@/lib/playerState";
+import { seededLook } from "@/lib/look";
+import Avatar from "@/components/avatar/Avatar";
 import CarModel from "./CarModel";
 
 export const RANKS: { id: string; name: string; pos: [number, number] }[] = [
@@ -13,6 +20,106 @@ export const RANKS: { id: string; name: string; pos: [number, number] }[] = [
 
 // two bays of each kind, parked nose-to-the-road
 const BAYS = RIDES.flatMap((r, i) => [0, 1].map((k) => ({ ride: r, x: (i * 2 + k - 2.5) * 1.05, z: 0 })));
+
+/**
+ * One cab that is loading up at the end of the rank: passengers wait, climb in, the driver hoots and pulls away down
+ * the street; a few moments later another cab rolls in and a new group walks up. A loop of about 44 seconds.
+ */
+const PERIOD = 44;
+const PAX = 3;
+const ease = (t: number) => t * t * (3 - 2 * t);
+
+const cycleTime = (offset: number) => (((Date.now() / 1000 + offset) % PERIOD) + PERIOD) % PERIOD;
+
+/** One of the people waiting for the cab: queues, walks to the door and climbs in, and a fresh face arrives for the next cab. */
+function Passenger({ i, seed, offset }: { i: number; seed: string; offset: number }) {
+  const g = useRef<THREE.Group>(null);
+  const motion = useRef({ speed: 0 });
+  const [look] = useState(() => seededLook(seed));
+  useFrame(() => {
+    const t = cycleTime(offset);
+    const wait = { x: -1.2 - i * 0.55, z: 0.2 + (i % 2) * 0.25 };
+    let x = wait.x;
+    let z = wait.z;
+    let show = true;
+    let walk = 0;
+    let face = -Math.PI / 2;
+    if (t >= 8 && t < 12) {
+      const k = Math.min(1, Math.max(0, (t - 8 - i * 0.7) / 2.2));
+      x = wait.x + (-0.3 - wait.x) * k;
+      z = wait.z + (0 - wait.z) * k;
+      walk = k > 0 && k < 1 ? 1.4 : 0;
+      show = k < 1;
+      face = Math.PI / 2;
+    } else if (t >= 12 && t < 30) {
+      show = false;
+    } else if (t >= 30 && t < 36) {
+      const k = Math.min(1, Math.max(0, (t - 30 - i * 0.6) / 3));
+      x = wait.x - (1 - k) * 4;
+      walk = k < 1 ? 1.4 : 0;
+      face = Math.PI / 2;
+    }
+    if (!g.current) return;
+    g.current.visible = show;
+    g.current.position.set(x, 0, z);
+    g.current.rotation.y = face;
+    motion.current.speed = walk;
+  });
+  return (
+    <group ref={g}>
+      <Avatar look={look} motion={motion} scale={0.9} />
+    </group>
+  );
+}
+
+function LoadingCab({ kind, color, offset }: { kind: CarKind; color: string; offset: number }) {
+  const cab = useRef<THREE.Group>(null);
+  const [rolling, setRolling] = useState(0);
+  const last = useRef({ rolling: 0, honked: -1 });
+
+  useFrame(() => {
+    const t = cycleTime(offset);
+    let z = 0;
+    let moving = 0;
+    if (t >= 14 && t < 24) {
+      z = ease((t - 14) / 10) * 22; // pulls away
+      moving = 2.2;
+    } else if (t >= 24 && t < 32) {
+      z = 40; // somewhere else in the city
+    } else if (t >= 32 && t < 40) {
+      z = -22 + ease((t - 32) / 8) * 22; // rolls back in
+      moving = t < 38 ? 2.2 : 0.6;
+    }
+    const c = cab.current;
+    if (c) {
+      c.position.z = z;
+      c.visible = Math.abs(z) < 30;
+    }
+    if (moving !== last.current.rolling) {
+      last.current.rolling = moving;
+      setRolling(moving);
+    }
+    // the driver hoots once as it leaves, if you are anywhere near
+    const cycle = Math.floor((Date.now() / 1000 + offset) / PERIOD);
+    if (c && t >= 12.5 && t < 13.5 && last.current.honked !== cycle) {
+      last.current.honked = cycle;
+      const w = new THREE.Vector3();
+      c.getWorldPosition(w);
+      if (Math.hypot(w.x - me.x, w.z - me.z) < 18) audio.horn();
+    }
+  });
+
+  return (
+    <group>
+      <group ref={cab}>
+        <CarModel kind={kind} color={color} fixed={rolling} />
+      </group>
+      {Array.from({ length: PAX }, (_, i) => (
+        <Passenger key={i} i={i} offset={offset} seed={`pax-${kind}-${offset}-${i}`} />
+      ))}
+    </group>
+  );
+}
 
 /** A cab park: tap a parked cab to climb in and say where you are going. */
 export default function CabRanks() {
@@ -30,6 +137,10 @@ export default function CabRanks() {
               <meshBasicMaterial color="#f4f1e6" />
             </mesh>
           ))}
+          {/* a cab loading up at the end of the rank */}
+          <group position={[4.6, 0.05, 0]}>
+            <LoadingCab kind={rank.id === "iwo" ? "keke" : "micra"} color={rank.id === "iwo" ? "#f2b632" : "#722f37"} offset={RANKS.indexOf(rank) * 15} />
+          </group>
           {/* sign */}
           <group position={[-3.4, 0, 1.4]}>
             <mesh position={[0, 0.7, 0]}>
