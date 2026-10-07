@@ -6,13 +6,8 @@ import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
 import Hud from "@/components/ui/Hud";
 import SidePanel from "@/components/ui/PlacePanel";
-import Sheets from "@/components/ui/Sheets";
-import DeckPanel from "@/components/ui/DeckPanel";
 import BottomBar from "@/components/ui/BottomBar";
 import NowPlaying from "@/components/ui/NowPlaying";
-import GuideTour from "@/components/ui/GuideTour";
-import FlightScreen from "@/components/ui/FlightScreen";
-import ComputerScreen from "@/components/ui/ComputerScreen";
 import Minimap from "@/components/ui/Minimap";
 import ViewControls from "@/components/ui/ViewControls";
 import AudioBridge from "@/components/ui/AudioBridge";
@@ -38,6 +33,13 @@ import { cam, me } from "@/lib/playerState";
 import { setOpenEstates } from "@/lib/pathing";
 import { openEstateIds } from "@/lib/estates";
 import { inCampus } from "@/lib/world";
+
+// big panels that are rarely open load on demand, so the game itself starts sooner
+const Sheets = dynamic(() => import("@/components/ui/Sheets"), { ssr: false });
+const DeckPanel = dynamic(() => import("@/components/ui/DeckPanel"), { ssr: false });
+const GuideTour = dynamic(() => import("@/components/ui/GuideTour"), { ssr: false });
+const FlightScreen = dynamic(() => import("@/components/ui/FlightScreen"), { ssr: false });
+const ComputerScreen = dynamic(() => import("@/components/ui/ComputerScreen"), { ssr: false });
 
 const CityScene = dynamic(() => import("./CityScene"), {
   ssr: false,
