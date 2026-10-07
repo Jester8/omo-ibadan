@@ -109,8 +109,9 @@ export function enterInterior(ref: InteriorRef): boolean {
     me.pendingExit = false;
     // phones are tall and narrow: pull back so the whole room fits above the bottom panel
     const aspect = typeof window !== "undefined" ? Math.min(1.7, window.innerWidth / Math.max(1, window.innerHeight)) : 1.6;
-    const fit = (Math.max(layout.w, layout.d) * S) / (0.536 * aspect) * 0.8;
-    cam.dist = Math.min(28, Math.max(8, fit));
+    // the room fills the screen
+    const fit = (Math.max(layout.w, layout.d) * S) / (0.536 * aspect) * 0.6;
+    cam.dist = Math.min(28, Math.max(6, fit));
     useGame.setState({ driving: false, interior: ref, selected: null, atPlace: ref.kind === "place" ? ref.id : null });
     useGame.getState().recordStat("entered");
   });

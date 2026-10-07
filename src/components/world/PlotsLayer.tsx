@@ -52,6 +52,25 @@ const post = (r: number, h: number, hex: string, p: V3) => part(new THREE.Cylind
 const merge = (parts: THREE.BufferGeometry[]) => mergeGeometries(parts, false)!;
 
 const B = 0.06; // top of the plot pad
+
+/** A roofed veranda across the front door: floor, two pillars and a roof. */
+const veranda = (x: number, z: number, w = 1.3): THREE.BufferGeometry[] => [
+  box(w, 0.03, 0.5, "#e6dfd0", [x, B + 0.015, z]),
+  box(0.06, 0.55, 0.06, "#fbf9f4", [x - w / 2 + 0.05, B + 0.3, z + 0.2]),
+  box(0.06, 0.55, 0.06, "#fbf9f4", [x + w / 2 - 0.05, B + 0.3, z + 0.2]),
+  box(w + 0.1, 0.05, 0.58, "#a0512f", [x, B + 0.6, z]),
+];
+
+/** A paved car park with bay lines and a parked car. */
+const carPark = (x: number, z: number, body: string, rot = 0): THREE.BufferGeometry[] => [
+  box(0.95, 0.025, 0.75, "#7a808a", [x, B + 0.012, z]),
+  box(0.03, 0.004, 0.6, "#f4f1e6", [x - 0.42, B + 0.027, z]),
+  box(0.03, 0.004, 0.6, "#f4f1e6", [x + 0.42, B + 0.027, z]),
+  box(0.34, 0.12, 0.6, body, [x, B + 0.1, z], { ry: rot }),
+  box(0.3, 0.1, 0.32, "#dfe9f2", [x, B + 0.2, z - 0.03], { ry: rot }),
+  box(0.04, 0.04, 0.04, "#1b1e24", [x - 0.16, B + 0.05, z + 0.2]),
+  box(0.04, 0.04, 0.04, "#1b1e24", [x + 0.16, B + 0.05, z + 0.2]),
+];
 const fence = (c = "#f3efe6", s = 2.9): THREE.BufferGeometry[] => [
   box(s, 0.18, 0.05, c, [0, B + 0.09, -s / 2]),
   box(s, 0.18, 0.05, c, [0, B + 0.09, s / 2]),
@@ -69,6 +88,8 @@ function geos() {
       box(1.5, 0.6, 1.2, "#f4ead7", [0, B + 0.3, 0]),
       roof(1.0, 0.56, [0, B + 0.6 + 0.28, 0], [1.25, 1, 1]),
       box(0.3, 0.42, 0.03, "#7a5a40", [0, B + 0.24, 0.61]),
+      ...veranda(-0.15, 0.88, 1.2),
+      ...carPark(1.0, 1.1, "#e8e3d6"),
     ]),
     t1glow: merge([box(0.26, 0.22, 0.03, "#fff4d6", [0.45, B + 0.34, 0.61])]),
     // duplex
@@ -79,6 +100,8 @@ function geos() {
       box(1.2, 0.05, 0.4, "#e9e3d4", [0, B + 0.7, 0.62]),
       box(0.55, 0.5, 0.9, "#d8d2c4", [0.95, B + 0.25, 0.4]),
       box(0.4, 0.4, 0.02, "#2a2f3a", [1.1, B + 0.3, 0.8]),
+      ...veranda(0.05, 0.95, 1.1),
+      ...carPark(-1.0, 1.15, "#4a90e2"),
     ]),
     t2accent: merge([box(1.8, 0.09, 1.4, "#ffffff", [0, B + 1.25 + 0.04, -0.1])]),
     t2glow: merge([box(0.3, 0.3, 0.03, "#fff4d6", [-0.4, B + 0.8, 0.56]), box(0.3, 0.3, 0.03, "#fff4d6", [0.3, B + 0.8, 0.56])]),
@@ -91,7 +114,7 @@ function geos() {
       ...[-0.45, -0.15, 0.15].map((x) => post(0.04, 0.8, "#fbf9f4", [x, B + 0.4, 0.4])),
       box(0.95, 0.06, 0.4, "#fbf9f4", [-0.3, B + 0.83, 0.4]),
       box(0.9, 0.012, 0.5, "#59c2e6", [-0.75, B + 0.01, 1.0]),
-      part(new THREE.IcosahedronGeometry(0.28, 0), "#4f9a4d", [1.05, B + 0.55, 1.0]),
+      ...carPark(1.1, 1.15, "#1f2937"),
     ]),
     t3accent: merge([box(2.1, 0.09, 1.45, "#ffffff", [-0.2, B + 1.5 + 0.04, -0.35])]),
     t3glow: merge([box(0.32, 0.34, 0.03, "#fff4d6", [-0.9, B + 1.0, 0.33]), box(0.32, 0.34, 0.03, "#fff4d6", [-0.2, B + 1.0, 0.33]), box(0.32, 0.34, 0.03, "#fff4d6", [0.5, B + 1.0, 0.33])]),

@@ -198,8 +198,13 @@ export default function SidePanel() {
   const key = shown ? `${shown.type}:${shown.id}` : "";
   const hidden = useGame((s) => s.panelHidden);
   // a new room or a new selection brings the panel back
+  // and in your own home the panel stays out of the way, so the room fills the screen
   useEffect(() => {
-    useGame.setState({ panelHidden: false });
+    const st = useGame.getState();
+    const it = st.interior;
+    const plot = it && it.kind === "home" ? st.plots[it.id] : undefined;
+    const atHome = !!it && it.kind === "home" && (it.id === "flat" || (!!plot && plot.ownerId === st.profile?.id && !plot.biz));
+    useGame.setState({ panelHidden: atHome });
   }, [key]);
   // outside, a tapped place or house is a small card with its own close button
   const card = !interior;
