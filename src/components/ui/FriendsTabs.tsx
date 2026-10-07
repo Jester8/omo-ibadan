@@ -33,13 +33,17 @@ export function callPlayer(pid: string, name: string) {
 
 function Thread_({ pid }: { pid: string }) {
   const friend = useGame((s) => s.friends.find((f) => f.pid === pid) ?? s.threads.find((t) => t.pid === pid));
-  const msgs = useGame((s) => s.dms[pid]) ?? [];
+  const loaded = useGame((s) => s.dms[pid]);
+  const msgs = loaded ?? [];
+  const [showProfile, setShowProfile] = useState(false);
+  const home = homeOf(pid);
+  const peerOnline = useGame((s) => Object.values(s.remotes).find((r) => r.pid === pid));
   const me = useGame((s) => s.profile?.id);
   const [text, setText] = useState("");
   const end = useRef<HTMLDivElement>(null);
   useEffect(() => {
     end.current?.scrollIntoView({ block: "end" });
-  }, [msgs.length]);
+  }, [msgs.length, loaded]);
   const name = friend?.name ?? "Friend";
   const send = (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,17 +58,40 @@ function Thread_({ pid }: { pid: string }) {
         <button onClick={closeThread} aria-label="Back" className="grid size-9 place-items-center rounded-full bg-stone-100 text-stone-700 transition active:scale-90">
           <ChevronLeft className="size-5" strokeWidth={2.4} />
         </button>
-        <Avatar name={name} online={friend?.online} />
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-bold text-stone-900">{name}</p>
-          <p className="text-[11px] text-stone-400">{friend?.online ? "Online" : "Offline"}</p>
-        </div>
+        <button onClick={() => setShowProfile((v) => !v)} aria-label={`${name}'s profile`} className="flex min-w-0 flex-1 items-center gap-2 text-left">
+          <Avatar name={name} online={friend?.online} />
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-sm font-bold text-stone-900">{name}</span>
+            <span className="block text-[11px] text-stone-500">{friend?.online ? "Online" : "Offline"} · tap for profile</span>
+          </span>
+        </button>
         <button onClick={() => callPlayer(pid, name)} aria-label={`Call ${name}`} className="grid size-9 place-items-center rounded-full bg-emerald-600 text-white transition active:scale-90">
           <PhoneCall className="size-4" />
         </button>
       </div>
+      {showProfile && (
+        <div className="mb-3 rounded-2xl bg-white p-3 ring-1 ring-black/10">
+          <div className="flex items-center gap-3">
+            <Avatar name={name} online={friend?.online} />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-bold text-black">{name}</p>
+              <p className="text-xs text-stone-500">{friend?.online ? (peerOnline ? `Online · ${peerOnline.room === "streets" ? "out and about" : peerOnline.room.replace(/-/g, " ")}` : "Online") : "Offline right now"}</p>
+              <p className="text-xs text-stone-500">{home ? "Has a home you can visit" : "No home built yet"}</p>
+            </div>
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <button disabled={!home} onClick={() => visitHome(pid, name)} className="flex items-center justify-center gap-1.5 rounded-xl bg-amber-500 py-2.5 text-xs font-bold text-white transition active:scale-95 disabled:opacity-40">
+              <House className="size-4" /> Visit home
+            </button>
+            <button onClick={() => callPlayer(pid, name)} className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 py-2.5 text-xs font-bold text-white transition active:scale-95">
+              <PhoneCall className="size-4" /> Call
+            </button>
+          </div>
+        </div>
+      )}
       <div className="min-h-40 flex-1 space-y-1.5 overflow-y-auto rounded-2xl bg-stone-50 p-3 ring-1 ring-black/5">
-        {msgs.length === 0 && <p className="pt-6 text-center text-xs text-stone-400">No messages yet. Say hello 👋</p>}
+        {loaded === undefined && <p className="pt-6 text-center text-xs text-stone-400">Loading…</p>}
+        {loaded !== undefined && msgs.length === 0 && <p className="pt-6 text-center text-xs text-stone-400">No messages yet. Say hello 👋</p>}
         {msgs.map((m) => (
           <div key={m.id} className={`flex ${m.from === me ? "justify-end" : "justify-start"}`}>
             <p className={`max-w-[80%] rounded-2xl px-3.5 py-2 text-[13px] leading-snug ${m.from === me ? "rounded-br-sm bg-emerald-600 text-white" : "rounded-bl-sm bg-white text-black ring-1 ring-black/5"}`}>{m.text}</p>
@@ -287,6 +314,11 @@ export default function FriendsTabs() {
   const unread = useGame((s) => s.threads.reduce((n, t) => n + t.unread, 0));
   const reqs = useGame((s) => s.requestsIn.length);
   const open = useGame((s) => s.openChat);
+  // a message to open from anywhere (a friend row, a profile card) always lands on the chat itself
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (open) setTab("chats");
+  }, [open]);
   const tabs: [Tab, string, number][] = [
     ["chats", "Chats", unread],
     ["friends", "Friends", reqs],

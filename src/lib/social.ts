@@ -31,7 +31,13 @@ export async function openThread(pid: string) {
   useGame.setState({ openChat: pid });
   const r = await call<{ messages: DmMsg[] }>("GET", `/api/dm/${pid}`);
   if (r.data) {
-    useGame.setState((s) => ({ dms: { ...s.dms, [pid]: r.data!.messages }, threads: s.threads.map((t) => (t.pid === pid ? { ...t, unread: 0 } : t)) }));
+    // keep anything still on its way to the server, so a refresh never makes a sent message vanish
+    useGame.setState((s) => ({
+      dms: { ...s.dms, [pid]: [...r.data!.messages, ...(s.dms[pid] ?? []).filter((m) => m.id < 0 && !r.data!.messages.some((x) => x.from === m.from && x.text === m.text))] },
+      threads: s.threads.map((t) => (t.pid === pid ? { ...t, unread: 0 } : t)),
+    }));
+  } else {
+    useGame.setState((s) => (s.dms[pid] ? s : { dms: { ...s.dms, [pid]: [] } }));
   }
 }
 

@@ -95,8 +95,14 @@ function handle(m: S2C) {
       const other = m.from === me ? m.to : m.from;
       const msg = { id: m.id, from: m.from, to: m.to, text: m.text, at: m.at };
       const reading = s.openChat === other && s.sheet === "friends";
+      useGame.setState((st) => {
+        // my own message coming back from the server replaces the copy I showed instantly
+        const list = st.dms[other] ?? [];
+        const pending = m.from === me ? list.findIndex((x) => x.id < 0 && x.text === m.text) : -1;
+        const nextList = pending >= 0 ? list.map((x, i) => (i === pending ? msg : x)) : [...list, msg];
+        return { dms: { ...st.dms, [other]: nextList } };
+      });
       useGame.setState((st) => ({
-        dms: { ...st.dms, [other]: [...(st.dms[other] ?? []), msg] },
         threads: st.threads.some((t) => t.pid === other)
           ? st.threads.map((t) => (t.pid === other ? { ...t, last: { text: m.text, at: m.at, mine: m.from === me }, unread: m.from === me || reading ? t.unread : t.unread + 1 } : t))
           : st.threads,
@@ -112,6 +118,8 @@ function handle(m: S2C) {
       break;
     }
     case "dmError":
+      // take back the messages that were shown but never delivered
+      useGame.setState((st) => ({ dms: Object.fromEntries(Object.entries(st.dms).map(([k, v]) => [k, v.filter((x) => x.id >= 0)])) }));
       s.toast(m.error, "bad");
       break;
     case "friendEvent":
@@ -300,8 +308,22 @@ export const net = {
     ws?.close();
     ws = null;
   },
+  /** Send a message: it shows in the chat at once, and the server's copy replaces it a moment later. */
   dm(to: string, text: string) {
-    send({ t: "dm", to, text });
+    const s = useGame.getState();
+    const me = s.profile?.id;
+    const clean = text.trim().slice(0, 400);
+    if (!me || !clean) return;
+    if (s.net !== "online") {
+      s.toast("You are offline. Your message was not sent.", "bad");
+      return;
+    }
+    const at = Date.now();
+    useGame.setState((st) => ({
+      dms: { ...st.dms, [to]: [...(st.dms[to] ?? []), { id: -at, from: me, to, text: clean, at }] },
+      threads: st.threads.map((t) => (t.pid === to ? { ...t, last: { text: clean, at, mine: true } } : t)),
+    }));
+    send({ t: "dm", to, text: clean });
   },
   /** Tell the room you sat down (or stood up, with null). */
   sit(u: { pose: "sit" | "lie"; x: number; z: number; ry: number; seatH: number } | null) {
