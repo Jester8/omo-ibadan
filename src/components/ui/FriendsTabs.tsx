@@ -3,8 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Check, ChevronLeft, Copy, House, MessageCircle, PhoneCall, Send, UserMinus, UserPlus } from "lucide-react";
 import { homeOf, visitHome } from "@/lib/visit";
+import { LEVELS, levelOf, levelRank } from "@/lib/bonds";
 import { net } from "@/lib/net";
-import { blockPlayer, closeThread, friendRequest, friendRespond, loadSocial, openThread, removeFriend, unblockPlayer, type Person, type Thread } from "@/lib/social";
+import { blockPlayer, closeThread, friendRequest, friendRespond, loadSocial, openThread, removeFriend, setBond, unblockPlayer, type Person, type Thread } from "@/lib/social";
 import { useGame } from "@/lib/store";
 
 const initial = (n: string) => n.slice(0, 1).toUpperCase();
@@ -62,7 +63,7 @@ function Thread_({ pid }: { pid: string }) {
           <Avatar name={name} online={friend?.online} />
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm font-bold text-stone-900">{name}</span>
-            <span className="block text-[11px] text-stone-500">{friend?.online ? "Online" : "Offline"} · tap for profile</span>
+            <span className="block text-[11px] text-stone-500">{levelOf(friend?.level).emoji} {levelOf(friend?.level).label} · {friend?.online ? "Online" : "Offline"}</span>
           </span>
         </button>
         <button onClick={() => callPlayer(pid, name)} aria-label={`Call ${name}`} className="grid size-9 place-items-center rounded-full bg-emerald-600 text-white transition active:scale-90">
@@ -79,6 +80,29 @@ function Thread_({ pid }: { pid: string }) {
               <p className="text-xs text-stone-500">{home ? "Has a home you can visit" : "No home built yet"}</p>
             </div>
           </div>
+          <p className="mt-3 text-[11px] font-bold uppercase tracking-wide text-stone-400">Your bond</p>
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
+            {LEVELS.map((l) => {
+              const here = (friend?.level ?? "friend") === l.id;
+              return (
+                <button
+                  key={l.id}
+                  disabled={here}
+                  onClick={async () => {
+                    const up = levelRank(l.id) > levelRank(friend?.level);
+                    if (!up && !confirm(`Move ${name} back to ${l.label.toLowerCase()}?`)) return;
+                    const r = await setBond(pid, l.id);
+                    useGame.getState().toast(r.message, r.ok ? "info" : "bad");
+                  }}
+                  className={`flex items-center gap-1 rounded-full px-2.5 py-1.5 text-[11px] font-bold transition active:scale-95 ${here ? "bg-stone-900 text-white" : "bg-stone-100 text-stone-800"}`}
+                  title={l.blurb}
+                >
+                  <span>{l.emoji}</span> {l.label}
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-1.5 text-[11px] text-stone-500">Going closer asks {name} first. Moving back down happens right away.</p>
           <div className="mt-3 grid grid-cols-2 gap-2">
             <button disabled={!home} onClick={() => visitHome(pid, name)} className="flex items-center justify-center gap-1.5 rounded-xl bg-amber-500 py-2.5 text-xs font-bold text-white transition active:scale-95 disabled:opacity-40">
               <House className="size-4" /> Visit home
@@ -166,7 +190,14 @@ function PersonRow({ p, children }: { p: Person; children: React.ReactNode }) {
   return (
     <li className="flex items-center gap-3 rounded-2xl bg-stone-50 px-4 py-3 ring-1 ring-black/5">
       <Avatar name={p.name} online={p.online} />
-      <span className="min-w-0 flex-1 truncate text-sm font-semibold text-stone-900">{p.name}</span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-sm font-semibold text-stone-900">{p.name}</span>
+        {p.level && p.level !== "friend" && (
+          <span className="block truncate text-[11px] font-semibold text-rose-600">
+            {levelOf(p.level).emoji} {levelOf(p.level).label}
+          </span>
+        )}
+      </span>
       <span className="flex shrink-0 items-center gap-1.5">{children}</span>
     </li>
   );

@@ -160,6 +160,8 @@ type State = {
   knocks: { from: string; name: string; plotId: string }[];
   /** a brand new account is still waiting to be given its starter home (not saved) */
   starterPending: boolean;
+  /** friends asking to get closer, waiting for your answer */
+  relAsks: { from: string; name: string; level: string }[];
 
   setProfile: (p: Profile) => void;
   select: (s: Selection) => void;
@@ -317,6 +319,7 @@ export const useGame = create<State>()(
       incoming: null,
       knocks: [],
       starterPending: false,
+      relAsks: [],
 
       setProfile: (profile) => set({ profile, editingAvatar: false }),
       select: (selected) => set({ selected }),

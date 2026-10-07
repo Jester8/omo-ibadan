@@ -12,6 +12,7 @@ import { voice } from "./voice";
 import { cleanChat } from "./moderation";
 import { interiorKey, type InteriorRef } from "./interiors";
 import { usePhotos } from "./photos";
+import { levelOf } from "./bonds";
 import { enterInterior } from "./interiorRuntime";
 
 /** The owner said yes: step in. */
@@ -171,6 +172,19 @@ function handle(m: S2C) {
       audio.pop();
       break;
     }
+    case "relAsk":
+      if (!s.relAsks.some((a) => a.from === m.from && a.level === m.level)) useGame.setState({ relAsks: [...s.relAsks, { from: m.from, name: m.name, level: m.level }] });
+      audio.pop();
+      break;
+    case "relChanged": {
+      const l = levelOf(m.level);
+      void loadSocial();
+      s.toast(m.by === "accepted" ? `${m.name} said yes: you are now ${l.label} ${l.emoji}` : `${m.name} made you ${l.label} ${l.emoji}`, "good");
+      break;
+    }
+    case "relDeclined":
+      s.toast(`${m.name} is not ready for that yet.`, "info");
+      break;
     case "starterHome": {
       // your starter home is ready: land at its door
       const p = plotById(m.plotId);

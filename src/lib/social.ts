@@ -2,7 +2,7 @@ import { apiBase, ensureToken } from "./api";
 import type { Look } from "./look";
 import { useGame } from "./store";
 
-export type Person = { pid: string; name: string; look: Look | null; online?: boolean };
+export type Person = { pid: string; name: string; look: Look | null; online?: boolean; level?: string };
 export type Thread = Person & { unread: number; last: { text: string; at: number; mine: boolean } };
 export type DmMsg = { id: number; from: string; to: string; text: string; at: number };
 
@@ -48,6 +48,20 @@ export async function friendRequest(pid: string): Promise<string> {
   if (!r.ok) return r.data?.error ?? "Could not send the request.";
   await loadSocial();
   return r.data?.status === "friends" ? "You are now friends." : "Friend request sent.";
+}
+
+/** Change how close you are to a friend. Up asks them first; down happens at once. Returns a message for the player. */
+export async function setBond(pid: string, level: string): Promise<{ ok: boolean; message: string }> {
+  const r = await call<{ status?: string; error?: string }>("POST", "/api/friends/level", { pid, level });
+  if (!r.ok) return { ok: false, message: r.data?.error ?? "Could not change that." };
+  await loadSocial();
+  return { ok: true, message: r.data?.status === "asked" ? "Asked. Waiting for them to answer." : "Done." };
+}
+
+export async function answerBond(pid: string, accept: boolean) {
+  await call("POST", "/api/friends/level/respond", { pid, accept });
+  useGame.setState((s) => ({ relAsks: s.relAsks.filter((a) => a.from !== pid) }));
+  await loadSocial();
 }
 
 export async function friendRespond(pid: string, accept: boolean) {
