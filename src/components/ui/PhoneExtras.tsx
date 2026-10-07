@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { House, MapPin, Search, Store, UserPlus } from "lucide-react";
 import { PLACES } from "@/lib/places";
-import { PLOTS, plotById } from "@/lib/plots";
+import { PLOTS, naira, plotById } from "@/lib/plots";
 import { useGame } from "@/lib/store";
 import { bizById } from "@/lib/business";
 import { levelOf } from "@/lib/bonds";
@@ -34,10 +34,37 @@ export function VisitsApp() {
   const homes = friends.map((f) => ({ f, h: homeOf(f.pid) })).filter((x) => x.h);
   const shops = PLOTS.filter((p) => plots[p.id]?.biz);
   const mine = PLOTS.filter((p) => plots[p.id]?.ownerId === me);
+  const works = PLOTS.filter((p) => plots[p.id]?.staff?.some((s) => s.pid === me));
   return (
     <>
       <h3 className="text-xl font-extrabold tracking-tight">Visits</h3>
       <p className="text-xs text-stone-500">Go and see friends at home, or drop in on a business.</p>
+
+      {works.length > 0 && (
+        <>
+          <p className="mb-1.5 mt-4 text-[11px] font-bold uppercase tracking-wide text-stone-400">Where you work</p>
+          <ul className="space-y-1.5">
+            {works.map((p) => {
+              const st = plots[p.id];
+              const b = bizById(st.biz)!;
+              return (
+                <li key={p.id} className={row}>
+                  <span className="grid size-8 shrink-0 place-items-center rounded-lg text-base" style={{ background: `${b.color}22` }}>
+                    {b.emoji}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[13px] font-semibold text-black">{st.ownerName}&apos;s {b.name.toLowerCase()}</span>
+                    <span className="block truncate text-[11px] text-stone-500">{naira(st.wage ?? 2500)} a shift · {p.district}</span>
+                  </span>
+                  <button className={go} onClick={() => goToPlot(p.id)}>
+                    Go
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )}
 
       <p className="mb-1.5 mt-4 text-[11px] font-bold uppercase tracking-wide text-stone-400">Friends&apos; homes</p>
       {homes.length === 0 ? (

@@ -11,6 +11,8 @@ import { naira, plotById } from "@/lib/plots";
 import { ActionRow, VoiceRoomCard } from "./parts";
 import HereNow from "./HereNow";
 import HomeLife from "./HomeLife";
+import BusinessCenter from "./BusinessCenter";
+import { payBusiness, workShift } from "@/lib/bank";
 import FoodArt from "./FoodArt";
 import { HOME_MENU } from "@/lib/menu";
 import ShopPanel from "./ShopPanel";
@@ -52,6 +54,7 @@ export default function InteriorPanel() {
     mart: { id: "bigshop", label: "Do a big shop (+3 provisions)", secs: 4, cost: 3500, pantry: 3 },
   };
   const bizAction = biz ? BIZ_ACTIONS[biz.id] : undefined;
+  const isStaff = !!biz && !mineBiz && !!plot?.staff?.some((s) => s.pid === pid);
   // hosting: serve the people who are with you. A home uses up a cooked meal; a cafe, shop or gym serves from stock.
   const mineHome = interior.kind === "home" && !biz && !!plot && plot.ownerId === pid;
   const guests = Object.values(remotes).filter((r) => r.room === interiorKey(interior));
@@ -214,28 +217,37 @@ export default function InteriorPanel() {
         </div>
       )}
 
-      {biz && (
+      {mineBiz && <BusinessCenter plotId={interior.id} />}
+
+      {biz && !mineBiz && (
         <ul className="mt-4 space-y-2">
           {bizAction && (
             <li>
               <ActionRow
-                a={bizAction}
+                a={{ ...bizAction, cost: plot?.price ?? biz.price }}
                 enabled={!busy}
-                onRun={() => {
-                  const err = useGame.getState().runAction(bizAction);
+                onRun={async () => {
+                  // you pay the owner's price at the counter, and they are paid live
+                  const price = plot?.price ?? biz.price;
+                  if (useGame.getState().money < price) return useGame.getState().toast(`That costs ${naira(price)}.`, "bad");
+                  const pay = await payBusiness(interior.id);
+                  if (!pay.ok) return useGame.getState().toast(pay.message, "bad");
+                  const err = useGame.getState().runAction({ ...bizAction, cost: 0 });
                   if (err) useGame.getState().toast(err, "bad");
                 }}
               />
             </li>
           )}
-          {mineBiz && (
+          {isStaff && (
             <li>
               <ActionRow
-                a={{ id: "serve", label: "Serve customers", secs: 6, gain: { energy: -18 }, pay: 2500, rep: 1 }}
+                a={{ id: "shiftwork", label: `Work a shift for ${plot?.ownerName}: ${naira(plot?.wage ?? 2500)}`, secs: 6, gain: { energy: -18 }, rep: 1 }}
                 enabled={!busy}
                 onRun={() => {
-                  const err = useGame.getState().runAction({ id: "serve", label: "Serve customers", secs: 6, gain: { energy: -18 }, pay: 2500, rep: 1 });
-                  if (err) useGame.getState().toast(err, "bad");
+                  const err = useGame.getState().runAction({ id: "shiftwork", label: "Work a shift", secs: 6, gain: { energy: -18 }, rep: 1 });
+                  if (err) return useGame.getState().toast(err, "bad");
+                  // when the shift is over, the owner pays the wage
+                  setTimeout(() => void workShift(interior.id).then((r) => !r.ok && useGame.getState().toast(r.message, "bad")), 6400);
                 }}
               />
             </li>

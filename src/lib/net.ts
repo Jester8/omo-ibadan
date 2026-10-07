@@ -13,7 +13,7 @@ import { cleanChat } from "./moderation";
 import { interiorKey, type InteriorRef } from "./interiors";
 import { usePhotos } from "./photos";
 import { levelOf } from "./bonds";
-import { collectPending, takeCredit } from "./bank";
+import { collectDebits, collectPending, takeCredit, takeDebit } from "./bank";
 import { enterInterior } from "./interiorRuntime";
 
 /** The owner said yes: step in. */
@@ -180,6 +180,21 @@ function handle(m: S2C) {
     }
     case "credit":
       void takeCredit(m);
+      break;
+    case "debit":
+      void takeDebit(m);
+      break;
+    case "sale":
+      // someone just paid at my business: shown the moment it happens
+      useGame.setState((st) => ({ sales: [{ id: `${Date.now()}${Math.random()}`, plotId: m.plotId, name: m.from, item: m.item, amount: m.amount, at: Date.now() }, ...st.sales].slice(0, 40) }));
+      s.toast(`${m.from} paid ₦${m.amount.toLocaleString("en-NG")} for ${m.item}`, "good");
+      audio.coin();
+      break;
+    case "hired":
+      s.toast(`${m.owner} hired you at the ${m.business.toLowerCase()}: ₦${m.wage.toLocaleString("en-NG")} a shift`, "good");
+      break;
+    case "fired":
+      s.toast(`${m.owner} no longer needs you at the ${m.business.toLowerCase()}.`, "info");
       break;
     case "pong": {
       const rtt = Date.now() - m.at;
@@ -372,6 +387,7 @@ function openSocket() {
     void pullState().then(() => pushState());
     void loadSocial();
     void collectPending();
+    void collectDebits();
     // watch the link: a slow or missing answer means a weak network, and the player is told
     lastPong = Date.now();
     if (pingTimer) clearInterval(pingTimer);

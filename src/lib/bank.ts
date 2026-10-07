@@ -40,11 +40,50 @@ export async function takeCredit(c: { id: number; from: string; amount: number; 
   const r = await call<{ ok: boolean; amount: number }>("POST", "/api/bank/claim", { id: c.id });
   if (!r.data?.ok) return;
   useGame.setState((st) => ({ money: st.money + r.data!.amount }));
-  useGame.getState().toast(`${c.from} sent you ₦${r.data.amount.toLocaleString("en-NG")}${c.note ? `: ${c.note}` : ""}`, "good");
+  // a sale has its own live notice for the owner
+  if (!c.note.startsWith("Sale:")) useGame.getState().toast(`${c.from} sent you ₦${r.data.amount.toLocaleString("en-NG")}${c.note ? `: ${c.note}` : ""}`, "good");
 }
 
 /** Money sent while you were away. */
 export async function collectPending() {
   const r = await call<{ credits: { id: number; from: string; amount: number; note: string }[] }>("GET", "/api/bank/pending");
   for (const c of r.data?.credits ?? []) await takeCredit(c);
+}
+
+/* ------------------------------------ business ------------------------------------ */
+
+/** Pay a business at the price its owner set. The owner is paid live; your balance drops once the bank accepts. */
+export async function payBusiness(plotId: string): Promise<{ ok: boolean; message: string; amount?: number }> {
+  const r = await call<{ ok?: boolean; error?: string; amount?: number; item?: string }>("POST", "/api/biz/pay", { plotId });
+  if (!r.ok || !r.data?.ok || !r.data.amount) return { ok: false, message: r.data?.error ?? "The payment did not go through." };
+  const amount = r.data.amount;
+  if (useGame.getState().money < amount) return { ok: false, message: "You do not have enough for that." };
+  useGame.setState((st) => ({ money: st.money - amount }));
+  return { ok: true, message: `Paid ₦${amount.toLocaleString("en-NG")}`, amount };
+}
+
+/** Finish a shift: the owner pays your wage straight away. */
+export async function workShift(plotId: string): Promise<{ ok: boolean; message: string }> {
+  const r = await call<{ ok?: boolean; error?: string; wage?: number }>("POST", "/api/biz/shift", { plotId });
+  return r.data?.ok ? { ok: true, message: `Shift done. Wage: ₦${r.data.wage?.toLocaleString("en-NG")}` } : { ok: false, message: r.data?.error ?? "The shift was not counted." };
+}
+
+/** Recent sales for a business you own (the live ones arrive as they happen). */
+export async function salesHistory(plotId: string) {
+  const r = await call<{ sales: { id: number; from: string; amount: number; item: string; at: number }[] }>("GET", `/api/biz/sales?plotId=${encodeURIComponent(plotId)}`);
+  return r.data?.sales ?? [];
+}
+
+/** Take a wage out of your balance: you are the employer. The bank does it only once per shift. */
+export async function takeDebit(d: { id: number; to: string; amount: number; note: string }) {
+  const r = await call<{ ok: boolean; amount: number }>("POST", "/api/bank/debited", { id: d.id });
+  if (!r.data?.ok) return;
+  useGame.setState((st) => ({ money: Math.max(0, st.money - r.data!.amount) }));
+  useGame.getState().toast(`You paid ${d.to} ₦${r.data.amount.toLocaleString("en-NG")}: ${d.note}`, "info");
+}
+
+/** Wages owed from shifts worked while you were away. */
+export async function collectDebits() {
+  const r = await call<{ debits: { id: number; to: string; amount: number; note: string }[] }>("GET", "/api/bank/debits");
+  for (const d of r.data?.debits ?? []) await takeDebit(d);
 }
