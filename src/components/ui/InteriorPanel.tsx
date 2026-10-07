@@ -14,6 +14,7 @@ import { DECOR, MAX_PER_KIND } from "@/lib/decor";
 import { bizById } from "@/lib/business";
 import type { ActionDef } from "@/lib/places";
 import { interiorKey } from "@/lib/interiors";
+import { net } from "@/lib/net";
 import { refreshInterior } from "@/lib/interiorRuntime";
 
 export default function InteriorPanel() {
@@ -46,6 +47,12 @@ export default function InteriorPanel() {
     mart: { id: "bigshop", label: "Do a big shop (+3 provisions)", secs: 4, cost: 3500, pantry: 3 },
   };
   const bizAction = biz ? BIZ_ACTIONS[biz.id] : undefined;
+  // hosting: serve the people who are with you. A home uses up a cooked meal; a cafe, shop or gym serves from stock.
+  const mineHome = interior.kind === "home" && !biz && !!plot && plot.ownerId === pid;
+  const guests = Object.values(remotes).filter((r) => r.room === interiorKey(interior));
+  const SERVE_BIZ: Record<string, string> = { cafe: "coffee and a pastry", shop: "snacks and a cold drink", gym: "a cold drink" };
+  const HOME_DISHES = ["jollof rice and chicken", "pounded yam and egusi", "amala and ewedu", "fried rice and plantain"];
+  const canServe = (mineHome && plates > 0) || (mineBiz && !!biz && !!SERVE_BIZ[biz.id]);
   // visiting someone at home: they are the host, and you can join in with what they are doing
   const visiting = interior.kind === "home" && !biz && !!plot && plot.ownerId !== pid;
   const host = visiting ? Object.values(remotes).find((r) => r.pid === plot?.ownerId && r.room === interiorKey(interior)) : undefined;
@@ -137,6 +144,31 @@ export default function InteriorPanel() {
             </li>
           ))}
         </ul>
+      )}
+
+      {(mineHome || (mineBiz && biz && SERVE_BIZ[biz.id])) && guests.length > 0 && (
+        <div className="mt-3 rounded-2xl bg-amber-50 p-3 ring-1 ring-amber-100">
+          <p className="text-sm font-bold text-amber-950">Serve your guests</p>
+          <p className="mt-0.5 text-xs text-amber-900/80">{mineHome ? (plates > 0 ? `You have ${plates} cooked meal${plates > 1 ? "s" : ""}. Each plate you serve uses one.` : "No cooked food. Cook a meal first, then serve it.") : "Serve a guest from your stock."}</p>
+          <ul className="mt-2 space-y-1.5">
+            {guests.map((g) => (
+              <li key={g.id} className="flex items-center gap-2.5 rounded-xl bg-white px-3 py-2 ring-1 ring-black/5">
+                <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-black">{g.name}</span>
+                <button
+                  disabled={!canServe}
+                  onClick={() => {
+                    const dish = mineBiz && biz ? SERVE_BIZ[biz.id] : HOME_DISHES[Math.floor(Math.random() * HOME_DISHES.length)];
+                    net.serve(g.id, dish, mineHome);
+                    useGame.getState().toast(`Served ${g.name}: ${dish}`, "info");
+                  }}
+                  className="shrink-0 rounded-full bg-amber-500 px-3 py-1.5 text-[11px] font-bold text-white transition active:scale-95 disabled:opacity-40"
+                >
+                  Serve
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
 
       {visiting && (

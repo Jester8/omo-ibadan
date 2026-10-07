@@ -7,6 +7,7 @@ import { useGame } from "@/lib/store";
 import { PLACES } from "@/lib/places";
 import { net, roomOf } from "@/lib/net";
 import { rt } from "@/lib/interiorRuntime";
+import { useSecond } from "@/lib/hooks";
 
 /** The chat card. Comms owns the round buttons and decides when this is open. */
 export default function ChatDock({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -20,6 +21,12 @@ export default function ChatDock({ open, onClose }: { open: boolean; onClose: ()
   const label = interior ? rt.layout?.name : atPlace ? PLACES.find((p) => p.id === atPlace)?.name : "The streets";
   const msgs = chat.filter((m) => m.room === room && !(m.fromPid && muted.includes(m.fromPid))).slice(-40);
   const end = useRef<HTMLDivElement>(null);
+  const typingMap = useGame((s) => s.typing);
+  const remotesMap = useGame((s) => s.remotes);
+  const sec = useSecond();
+  const typers = Object.entries(typingMap)
+    .filter(([k, v]) => k.startsWith("room:") && sec * 1000 - v.at < 4000 && remotesMap[k.slice(5)]?.room === room)
+    .map(([, v]) => v.name);
 
   useEffect(() => {
     end.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -100,10 +107,14 @@ export default function ChatDock({ open, onClose }: { open: boolean; onClose: ()
               })}
               <div ref={end} />
             </div>
+            {typers.length > 0 && <p className="px-4 pb-1 text-[11px] font-semibold text-stone-500">{typers.slice(0, 2).join(" and ")} {typers.length > 1 ? "are" : "is"} typing...</p>}
             <form onSubmit={submit} className="flex gap-2 border-t border-stone-100 p-2.5">
               <input
                 value={text}
-                onChange={(e) => setText(e.target.value)}
+                onChange={(e) => {
+                  setText(e.target.value);
+                  net.typing();
+                }}
                 maxLength={200}
                 placeholder="Say something…"
                 className="min-w-0 flex-1 rounded-full bg-stone-100 px-4 py-2 text-sm text-black outline-none ring-2 ring-transparent transition focus:bg-white focus:ring-emerald-500"

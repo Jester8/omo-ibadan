@@ -180,6 +180,25 @@ function handle(m: S2C) {
     case "doing":
       useGame.setState((st) => ({ doing: { ...st.doing, [m.id]: m.label } }));
       break;
+    case "typing":
+      useGame.setState((st) => ({ typing: { ...st.typing, [`${m.dm ? "dm" : "room"}:${m.from}`]: { name: m.name, at: Date.now() } } }));
+      break;
+    case "served":
+      if (!s.serves.some((v) => v.from === m.from && v.dish === m.dish)) useGame.setState({ serves: [...s.serves, { from: m.from, name: m.name, dish: m.dish }] });
+      audio.pop();
+      break;
+    case "serveResult":
+      if (m.accept) {
+        // they ate: it comes out of a home's cooked meals, and you earn a little standing
+        if (pendingServe.get(`${m.from}|${m.dish}`)) useGame.setState((st) => ({ plates: Math.max(0, st.plates - 1) }));
+        useGame.getState().adjustNeeds({ social: 8, fun: 4 });
+        useGame.setState((st) => ({ rep: st.rep + 1 }));
+        s.toast(`${m.name} enjoyed the ${m.dish}. +1 rep`, "good");
+      } else {
+        s.toast(`${m.name} said no thanks.`, "info");
+      }
+      pendingServe.delete(`${m.from}|${m.dish}`);
+      break;
     case "relAsk":
       if (!s.relAsks.some((a) => a.from === m.from && a.level === m.level)) useGame.setState({ relAsks: [...s.relAsks, { from: m.from, name: m.name, level: m.level }] });
       audio.pop();
@@ -374,6 +393,10 @@ useGame.subscribe((s) => {
   if (s.net === "online") send({ t: "doing", label });
 });
 
+/** food I have served, waiting to hear if it was eaten: "guest|dish" -> comes from my cooked meals */
+const pendingServe = new Map<string, boolean>();
+let lastTypingSent = 0;
+
 export const net = {
   connect,
   disconnect() {
@@ -412,6 +435,27 @@ export const net = {
   knockReply(to: string, plotId: string, allow: boolean) {
     send({ t: "knockReply", to, plotId, allow });
     useGame.setState((st) => ({ knocks: st.knocks.filter((k) => !(k.from === to && k.plotId === plotId)) }));
+  },
+  /** Let a friend (or the room) see that you are typing. Sent at most every two seconds. */
+  typing(to?: string) {
+    const now = Date.now();
+    if (now - lastTypingSent < 2000 || useGame.getState().net !== "online") return;
+    lastTypingSent = now;
+    send({ t: "typing", to });
+  },
+  /** Serve a guest in the room. They choose whether to eat; a meal from a home's kitchen is used up when they do. */
+  serve(to: string, dish: string, usesMeal: boolean) {
+    pendingServe.set(`${to}|${dish}`, usesMeal);
+    send({ t: "serve", to, dish });
+  },
+  /** Eat what a host served you, or say no thanks. */
+  answerServe(from: string, dish: string, accept: boolean) {
+    send({ t: "serveReply", to: from, dish, accept });
+    useGame.setState((st) => ({ serves: st.serves.filter((v) => !(v.from === from && v.dish === dish)) }));
+    if (accept) {
+      const err = useGame.getState().runAction({ id: "served", label: `Eat ${dish}`, secs: 5, gain: { hunger: 50, fun: 6, social: 10 } });
+      if (err) useGame.getState().toast(err, "bad");
+    }
   },
   /** Tell the room you sat down (or stood up, with null). */
   sit(u: { pose: "sit" | "lie"; x: number; z: number; ry: number; seatH: number } | null) {

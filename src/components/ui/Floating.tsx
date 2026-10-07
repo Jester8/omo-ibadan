@@ -104,6 +104,38 @@ export function IncomingCall() {
   );
 }
 
+/** A host has served you food: eat it or say no thanks. */
+export function Serves() {
+  const serves = useGame((s) => s.serves);
+  const v = serves[0];
+  return (
+    <AnimatePresence>
+      {v && (
+        <motion.div
+          key={`${v.from}${v.dish}`}
+          initial={{ opacity: 0, y: -30, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -30 }}
+          transition={{ type: "spring", stiffness: 300, damping: 24 }}
+          className="absolute left-1/2 top-[calc(env(safe-area-inset-top)+4.6rem)] z-50 flex w-[min(24rem,calc(100vw-1.5rem))] -translate-x-1/2 items-center gap-3 rounded-3xl bg-white p-3 pr-3.5 text-black shadow-2xl ring-1 ring-black/10 sm:top-24"
+        >
+          <span className="grid size-12 shrink-0 place-items-center rounded-full bg-amber-100 text-2xl">🍽️</span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-bold">{v.name} served you</p>
+            <p className="truncate text-xs text-stone-500">{v.dish}</p>
+          </div>
+          <button onClick={() => net.answerServe(v.from, v.dish, false)} className="rounded-full bg-stone-100 px-3 py-2 text-xs font-bold text-stone-700 transition active:scale-95">
+            No thanks
+          </button>
+          <button onClick={() => net.answerServe(v.from, v.dish, true)} className="rounded-full bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white transition active:scale-95">
+            Eat
+          </button>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 /** A friend wants to get closer: say yes or not yet. */
 export function RelAsks() {
   const asks = useGame((s) => s.relAsks);

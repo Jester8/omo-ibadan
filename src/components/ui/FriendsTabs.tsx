@@ -8,6 +8,8 @@ import AvatarPreview from "@/components/avatar/AvatarPreview";
 import { net } from "@/lib/net";
 import { blockPlayer, closeThread, friendRequest, friendRespond, loadSocial, openThread, removeFriend, setBond, unblockPlayer, type Person, type Thread } from "@/lib/social";
 import { useGame } from "@/lib/store";
+import { useSecond } from "@/lib/hooks";
+import { motion } from "motion/react";
 
 const initial = (n: string) => n.slice(0, 1).toUpperCase();
 const ago = (t: number) => {
@@ -39,13 +41,16 @@ function Thread_({ pid }: { pid: string }) {
   const msgs = loaded ?? [];
   const [showProfile, setShowProfile] = useState(false);
   const home = homeOf(pid);
+  const typingNow = useGame((s) => s.typing[`dm:${pid}`]);
+  const sec = useSecond();
+  const isTyping = !!typingNow && sec * 1000 - typingNow.at < 4000;
   const peerOnline = useGame((s) => Object.values(s.remotes).find((r) => r.pid === pid));
   const me = useGame((s) => s.profile?.id);
   const [text, setText] = useState("");
   const end = useRef<HTMLDivElement>(null);
   useEffect(() => {
     end.current?.scrollIntoView({ block: "end" });
-  }, [msgs.length, loaded]);
+  }, [msgs.length, loaded, isTyping]);
   const name = friend?.name ?? "Friend";
   const send = (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,10 +132,25 @@ function Thread_({ pid }: { pid: string }) {
             <p className={`max-w-[80%] rounded-2xl px-3.5 py-2 text-[13px] leading-snug ${m.from === me ? "rounded-br-sm bg-emerald-600 text-white" : "rounded-bl-sm bg-white text-black ring-1 ring-black/5"}`}>{m.text}</p>
           </div>
         ))}
+        {isTyping && (
+          <div className="flex justify-start">
+            <p className="flex items-center gap-1.5 rounded-2xl rounded-bl-sm bg-white px-3.5 py-2 text-[12px] font-semibold text-stone-500 ring-1 ring-black/5">
+              {name} is typing
+              <span className="flex gap-0.5">
+                {[0, 1, 2].map((i) => (
+                  <motion.span key={i} className="size-1 rounded-full bg-stone-400" animate={{ y: [0, -3, 0] }} transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.15 }} />
+                ))}
+              </span>
+            </p>
+          </div>
+        )}
         <div ref={end} />
       </div>
       <form onSubmit={send} className="mt-2 flex gap-2">
-        <input value={text} onChange={(e) => setText(e.target.value.slice(0, 400))} placeholder="Message" className="min-w-0 flex-1 rounded-full bg-stone-100 px-4 py-2.5 text-sm outline-none ring-2 ring-transparent focus:bg-white focus:ring-emerald-500" />
+        <input value={text} onChange={(e) => {
+            setText(e.target.value.slice(0, 400));
+            net.typing(pid);
+          }} placeholder="Message" className="min-w-0 flex-1 rounded-full bg-stone-100 px-4 py-2.5 text-sm outline-none ring-2 ring-transparent focus:bg-white focus:ring-emerald-500" />
         <button disabled={!text.trim()} aria-label="Send" className="grid size-11 shrink-0 place-items-center rounded-full bg-emerald-600 text-white transition active:scale-90 disabled:opacity-40">
           <Send className="size-4" />
         </button>

@@ -167,6 +167,10 @@ type State = {
   relAsks: { from: string; name: string; level: string }[];
   /** what other people in the room are doing right now (cooking, eating...), by connection id */
   doing: Record<string, string | null>;
+  /** who is typing right now: "dm:<pid>" for a chat with a friend, "room:<id>" for the room chat */
+  typing: Record<string, { name: string; at: number }>;
+  /** food a host has served you, waiting for you to eat or say no thanks */
+  serves: { from: string; name: string; dish: string }[];
 
   setProfile: (p: Profile) => void;
   select: (s: Selection) => void;
@@ -334,6 +338,8 @@ export const useGame = create<State>()(
       starterPending: false,
       relAsks: [],
       doing: {},
+      typing: {},
+      serves: [],
 
       setProfile: (profile) => set({ profile, editingAvatar: false }),
       select: (selected) => set({ selected }),
