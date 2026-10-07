@@ -10,8 +10,8 @@ import { DoorOpen, Footprints, MapPin, X } from "lucide-react";
 import { PLACES, KIND_COLORS } from "@/lib/places";
 import { useGame } from "@/lib/store";
 import { useClock } from "@/lib/hooks";
-import { quoteRide, rideToPlace, walkToPlace } from "@/lib/movement";
-import { RIDES, type RideId } from "@/lib/cars";
+import { driveToPlace, quoteRide, rideToPlace, walkToPlace } from "@/lib/movement";
+import { RIDES, carById, type RideId } from "@/lib/cars";
 import { me } from "@/lib/playerState";
 import { useMemo } from "react";
 import { naira } from "@/lib/plots";
@@ -31,6 +31,7 @@ function PlaceBody({ id }: { id: string }) {
   const ev = eventFor(id, hour);
   const open = isOpen(id, hour);
   const money = useGame((s) => s.money);
+  const myCars = useGame((s) => s.cars);
   const px = Math.round(me.x);
   const pz = Math.round(me.z);
   const quotes = useMemo(() => {
@@ -80,6 +81,21 @@ function PlaceBody({ id }: { id: string }) {
           >
             <Footprints className="size-4" /> Walk here · free
           </button>
+          {myCars.length > 0 && (
+            <>
+              <p className="mb-1.5 mt-3 text-xs font-bold uppercase tracking-wide text-stone-400">Drive yourself · free</p>
+              <div className="grid grid-cols-2 gap-2">
+                {myCars.map((cid) => {
+                  const c = carById(cid);
+                  return c ? (
+                    <button key={cid} onClick={() => driveToPlace(id, cid)} className="rounded-2xl bg-emerald-50 px-2 py-2.5 text-center text-xs font-bold text-emerald-900 ring-1 ring-emerald-200 transition hover:bg-emerald-100 active:scale-[0.97]">
+                      🚗 {c.name}
+                    </button>
+                  ) : null;
+                })}
+              </div>
+            </>
+          )}
           <p className="mb-1.5 mt-3 text-xs font-bold uppercase tracking-wide text-stone-400">Or pay for a ride</p>
           <div className="grid grid-cols-3 gap-2">
             {RIDES.map((r) => {

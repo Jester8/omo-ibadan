@@ -97,12 +97,12 @@ function makeTrees() {
   };
   const out: { x: number; z: number; s: number }[] = [];
   for (const b of BLOCKS) {
-    for (let k = 0; k < 40 && out.length < 1700; k++) {
+    for (let k = 0; k < 7 && out.length < 380; k++) {
       const x = b.c[0] + (rnd() - 0.5) * 8.2;
       const z = b.c[1] + (rnd() - 0.5) * 8.2;
       if (rects.some((r) => Math.abs(x - r.x) < r.hw && Math.abs(z - r.z) < r.hd)) continue;
       if (inLake(x, z)) continue;
-      if (out.filter((t) => Math.hypot(t.x - x, t.z - z) < 1.6).length) continue;
+      if (out.filter((t) => Math.hypot(t.x - x, t.z - z) < 3.2).length) continue;
       out.push({ x, z, s: 0.7 + rnd() * 0.7 });
     }
   }

@@ -80,6 +80,20 @@ export function rideToPlace(id: string, ride: RideId): boolean {
   return true;
 }
 
+/** Drive one of your own cars there: you take the wheel and follow the route at the car's speed. */
+export function driveToPlace(id: string, carId: string): boolean {
+  const s = useGame.getState();
+  if (s.atPlace === id) return true;
+  if (!(s.driving && s.activeCar === carId)) {
+    const err = s.toggleDrive(carId);
+    if (err) {
+      s.toast(err, "bad");
+      return false;
+    }
+  }
+  return walkToPlace(id);
+}
+
 export function stopWalking() {
   me.path = [];
   me.goalPlace = null;
