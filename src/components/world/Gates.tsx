@@ -5,10 +5,10 @@ import * as THREE from "three";
 
 /** Archways across the main roads: city entrances and district gates. `across` is the road direction the arch spans. */
 const GATES: { x: number; z: number; across: "x" | "z"; title: string; sub: string; color: string }[] = [
-  { x: 0, z: -43, across: "x", title: "IBADAN", sub: "North Gate · Welcome", color: "#2f6f4f" },
-  { x: 0, z: 43, across: "x", title: "IBADAN", sub: "South Gate · Come again", color: "#2f6f4f" },
-  { x: -43, z: 0, across: "z", title: "IBADAN", sub: "West Gate · Eleyele Road", color: "#2f6f4f" },
-  { x: 43, z: 0, across: "z", title: "IBADAN", sub: "East Gate · Iwo Road", color: "#2f6f4f" },
+  { x: 0, z: -73, across: "x", title: "IBADAN", sub: "North Gate · Welcome", color: "#2f6f4f" },
+  { x: 0, z: 73, across: "x", title: "IBADAN", sub: "South Gate · Come again", color: "#2f6f4f" },
+  { x: -73, z: 0, across: "z", title: "IBADAN", sub: "West Gate · Eleyele Road", color: "#2f6f4f" },
+  { x: 73, z: 0, across: "z", title: "IBADAN", sub: "East Gate · Iwo Road", color: "#2f6f4f" },
   { x: 30, z: 0, across: "z", title: "Iwo Road", sub: "Garage · interstate buses", color: "#4a4f58" },
 ];
 

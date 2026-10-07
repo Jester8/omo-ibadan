@@ -1,4 +1,4 @@
-import { CAMPUS, ESTATES, WORLD_HALF, wallsFor } from "./world";
+import { CAMPUS, ESTATES, ESTATE_SOLIDS, WORLD_HALF, wallsFor } from "./world";
 import { PLACES, isSolid } from "./places";
 import { PLOTS } from "./plots";
 
@@ -180,7 +180,7 @@ let world = new Grid(-WORLD_HALF, -WORLD_HALF, WORLD_HALF * 2, WORLD_HALF * 2, 1
 let active: Grid = world;
 
 function baseRects() {
-  return PLACES.filter(isSolid).map((p) => ({ x: p.pos[0], z: p.pos[1], w: p.size[0], d: p.size[2] }));
+  return [...PLACES.filter(isSolid).map((p) => ({ x: p.pos[0], z: p.pos[1], w: p.size[0], d: p.size[2] })), ...ESTATE_SOLIDS];
 }
 
 const WALLS = [CAMPUS, ...ESTATES].flatMap((z) => wallsFor(z));

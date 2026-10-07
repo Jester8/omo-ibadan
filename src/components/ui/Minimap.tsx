@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { cam, me, remoteMotion } from "@/lib/playerState";
 import { KIND_COLORS, PLACES } from "@/lib/places";
 import { PLOTS } from "@/lib/plots";
-import { CAMPUS_PLACES, ROAD_LINES } from "@/lib/world";
+import { CAMPUS_PLACES, ROAD_LINES, WORLD_HALF } from "@/lib/world";
 import { colorFor } from "@/lib/look";
 import { useGame } from "@/lib/store";
 import { walkTo } from "@/lib/movement";
@@ -61,10 +61,10 @@ function MinimapCanvas() {
       ctx.lineWidth = 1.6;
       ctx.beginPath();
       for (const r of ROADS) {
-        ctx.moveTo(r, -46);
-        ctx.lineTo(r, 46);
-        ctx.moveTo(-46, r);
-        ctx.lineTo(46, r);
+        ctx.moveTo(r, -WORLD_HALF);
+        ctx.lineTo(r, WORLD_HALF);
+        ctx.moveTo(-WORLD_HALF, r);
+        ctx.lineTo(WORLD_HALF, r);
       }
       ctx.stroke();
 

@@ -3,7 +3,7 @@
 import Skyline from "./Skyline";
 import Roofscape from "./Roofscape";
 import TrafficLights from "./TrafficLights";
-import { BLOCKS, ROAD_LINES, WORLD_HALF } from "@/lib/world";
+import { BLOCKS, ESTATES, ROAD_LINES, WORLD_HALF, inLake } from "@/lib/world";
 import CarModel from "./CarModel";
 import Avatar from "@/components/avatar/Avatar";
 import { AVATAR_SCALE } from "./Player";
@@ -87,6 +87,8 @@ function makeTrees() {
   const rects = [
     ...PLACES.map((p) => ({ x: p.pos[0], z: p.pos[1], hw: p.size[0] / 2 + 0.9, hd: p.size[2] / 2 + 1.5 })),
     ...PLOTS.map((p) => ({ x: p.pos[0], z: p.pos[1], hw: PLOT_SIZE / 2 + 0.4, hd: PLOT_SIZE / 2 + 0.4 })),
+    // the estates plant their own parks and clubhouses
+    ...ESTATES.flatMap((e) => [e.park, e.club].map((c) => ({ x: c[0], z: c[1], hw: 4.3, hd: 4.3 }))),
   ];
   let seed = 42;
   const rnd = () => {
@@ -95,10 +97,11 @@ function makeTrees() {
   };
   const out: { x: number; z: number; s: number }[] = [];
   for (const b of BLOCKS) {
-    for (let k = 0; k < 40 && out.length < 620; k++) {
+    for (let k = 0; k < 40 && out.length < 1700; k++) {
       const x = b.c[0] + (rnd() - 0.5) * 8.2;
       const z = b.c[1] + (rnd() - 0.5) * 8.2;
       if (rects.some((r) => Math.abs(x - r.x) < r.hw && Math.abs(z - r.z) < r.hd)) continue;
+      if (inLake(x, z)) continue;
       if (out.filter((t) => Math.hypot(t.x - x, t.z - z) < 1.6).length) continue;
       out.push({ x, z, s: 0.7 + rnd() * 0.7 });
     }
@@ -181,10 +184,10 @@ function Lamps() {
 function Surroundings() {
   const hills = useMemo(() => {
     const out: { x: number; z: number; r: number; h: number; c: string }[] = [];
-    for (let i = 0; i < 30; i++) {
-      const a = (i / 30) * Math.PI * 2;
-      const rad = 62 + ((i * 7) % 5) * 2.4;
-      out.push({ x: Math.cos(a) * rad, z: Math.sin(a) * rad, r: 6 + ((i * 3) % 4) * 1.4, h: 2.2 + ((i * 5) % 3) * 0.9, c: ["#b8d6a4", "#a9cd98", "#c3dcae"][i % 3] });
+    for (let i = 0; i < 44; i++) {
+      const a = (i / 44) * Math.PI * 2;
+      const rad = 94 + ((i * 7) % 5) * 2.4;
+      out.push({ x: Math.cos(a) * rad, z: Math.sin(a) * rad, r: 8 + ((i * 3) % 4) * 1.8, h: 2.6 + ((i * 5) % 3) * 1.1, c: ["#b8d6a4", "#a9cd98", "#c3dcae"][i % 3] });
     }
     return out;
   }, []);
@@ -381,7 +384,7 @@ export default function Terrain({ placesOnly = false }: { placesOnly?: boolean }
   return (
     <>
       <mesh rotation-x={-Math.PI / 2} receiveShadow raycast={noRaycast}>
-        <planeGeometry args={[220, 220]} />
+        <planeGeometry args={[320, 320]} />
         <meshStandardMaterial color="#cfe3c2" roughness={1} />
       </mesh>
       <Lots />

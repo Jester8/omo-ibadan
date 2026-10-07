@@ -4,7 +4,7 @@ import { useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { PLACES } from "@/lib/places";
 import { PLOTS, PLOT_SIZE } from "@/lib/plots";
-import { BLOCKS, CAMPUS, ESTATES, inRect } from "@/lib/world";
+import { BLOCKS, CAMPUS, ESTATES, inLake, inRect } from "@/lib/world";
 import { RANKS } from "./CabRanks";
 
 /** Ibadan's famous sea of rust-brown corrugated roofs: small gabled houses filling the free lots. */
@@ -33,7 +33,7 @@ function build(): House[] {
         const z = b.c[1] + j * 1.75 + (rnd() - 0.5) * 0.35;
         if (taken.some((t) => Math.abs(x - t.x) < t.hw && Math.abs(z - t.z) < t.hd)) continue;
         // estates and the campus keep their own, more formal look
-        if (inRect(CAMPUS.rect, x, z, 0.5) || ESTATES.some((e) => inRect(e.rect, x, z, 0.5))) continue;
+        if (inRect(CAMPUS.rect, x, z, 0.5) || ESTATES.some((e) => inRect(e.rect, x, z, 0.5)) || inLake(x, z)) continue;
         out.push({ x, z, w: 0.95 + rnd() * 0.5, d: 0.8 + rnd() * 0.4, h: 0.34 + rnd() * 0.18, ry: rnd() < 0.5 ? 0 : Math.PI / 2, roof: RUST[Math.floor(rnd() * RUST.length)], wall: WALLS[Math.floor(rnd() * WALLS.length)] });
       }
     }

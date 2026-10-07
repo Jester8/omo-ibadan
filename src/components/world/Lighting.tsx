@@ -45,7 +45,7 @@ export default function Lighting() {
     skyAt(h, _a);
     scene.background = scene.background instanceof THREE.Color ? scene.background.copy(_a) : _a.clone();
     if (scene.fog instanceof THREE.Fog) scene.fog.color.copy(_a);
-    else scene.fog = new THREE.Fog(_a.clone(), 55, 130);
+    else scene.fog = new THREE.Fog(_a.clone(), 70, 180);
 
     const ang = ((h - 6) / 12) * Math.PI;
     if (sun.current) {

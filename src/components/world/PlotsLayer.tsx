@@ -12,7 +12,7 @@ import { facadeMaterials, lampMat, mat, windowMats } from "./materials";
 
 type V3 = [number, number, number];
 
-function Wall({ tint, w, h, d, p }: { tint: string; w: number; h: number; d: number; p: V3 }) {
+export function Wall({ tint, w, h, d, p }: { tint: string; w: number; h: number; d: number; p: V3 }) {
   const mats = useMemo(() => facadeMaterials(w, h, d, tint), [w, h, d, tint]);
   useEffect(() => {
     const glow = mats.filter((m): m is THREE.MeshStandardMaterial => !!(m as THREE.MeshStandardMaterial).emissiveMap);
