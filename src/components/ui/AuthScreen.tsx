@@ -13,7 +13,7 @@ import { useSound } from "@/lib/soundStore";
 
 type Step = "intro" | "choose" | "login" | "code";
 
-/** The painted skyline and gold glow are now inside the landing video; true shows them on the landing screen again to compare. */
+/** The Mapo Hall film replaced the painted photo, skyline and gold glow behind these screens; true brings the old background back to compare. */
 const LANDING_LEGACY_DECOR = false;
 
 /** First screen: the city's own live sound, then Sign up (name, email, avatar) or Log in (email and name). */
@@ -27,8 +27,6 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
   const [devCode, setDevCode] = useState<string | undefined>();
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
-  // the title block stays up in the sky until the landing content has finished fading out
-  const [skyStack, setSkyStack] = useState(true);
 
   const enter = () => {
     audio.start(); // the groove begins from the top on this first tap
@@ -66,26 +64,25 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
 
   const field = "w-full rounded-2xl border-0 bg-white/90 px-4 py-3.5 text-base font-medium text-stone-900 outline-none ring-2 ring-transparent transition placeholder:text-stone-400 focus:ring-amber-400";
 
-  const landing = step === "intro";
-  const legacy = !landing || LANDING_LEGACY_DECOR;
+  const legacy = LANDING_LEGACY_DECOR;
 
   if (step === "code") return <AuthCode email={email.trim().toLowerCase()} purpose="login" devCode={devCode} onVerified={onLoggedIn} onBack={() => setStep("login")} />;
 
   return (
     <div className="absolute inset-0 z-50 overflow-hidden bg-gradient-to-b from-[#1b1a2e] via-[#3a2a3a] to-[#7a3b22] text-white">
-      {film !== "off" && (
+      {legacy && film !== "off" && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src="/home/mapo-hall.jpg"
           alt=""
           aria-hidden
           draggable={false}
-          className={`home-drift absolute inset-0 size-full object-cover object-[22%_50%] transition-opacity sm:object-center duration-1000 ${film === "on" ? "opacity-100" : "opacity-0"} ${legacy ? "" : "invisible"}`}
+          className={`home-drift absolute inset-0 size-full object-cover object-[22%_50%] transition-opacity sm:object-center duration-1000 ${film === "on" ? "opacity-100" : "opacity-0"}`}
           onLoad={() => setFilm("on")}
           onError={() => setFilm("off")}
         />
       )}
-      {film === "on" && <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/25 to-black/65" />}
+      {legacy && film === "on" && <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/25 to-black/65" />}
       {/* the brown-roofed skyline of Ibadan (the painted fallback) */}
       <svg aria-hidden className={`absolute inset-x-0 bottom-0 h-[46%] w-full transition-opacity duration-1000 ${film === "on" ? "opacity-0" : "opacity-100"} ${legacy ? "" : "hidden"}`} viewBox="0 0 400 200" preserveAspectRatio="xMidYMax slice">
         {Array.from({ length: 22 }, (_, i) => {
@@ -103,14 +100,8 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
       </svg>
       <div className={`pointer-events-none absolute -top-24 left-1/2 size-80 -translate-x-1/2 rounded-full bg-amber-400/25 blur-3xl ${legacy ? "" : "hidden"}`} />
 
-      {/* the Mapo Hall film plays only on the landing screen, and fades away (and stops) once you enter */}
-      <AnimatePresence>
-        {landing && (
-          <motion.div key="landing-film" className="absolute inset-0" initial={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.8 } }}>
-            <LandingBackdrop />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* the Mapo Hall film plays behind the landing, Welcome and Log in screens, and stops once you leave them */}
+      {!legacy && <LandingBackdrop />}
 
       {step !== "intro" && (
         <button onClick={toggleMute} aria-label={muted ? "Unmute sound" : "Mute sound"} className="absolute right-4 top-[calc(env(safe-area-inset-top)+1rem)] z-10 grid size-10 place-items-center rounded-full bg-white/15 backdrop-blur transition hover:bg-white/25">
@@ -118,8 +109,9 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
         </button>
       )}
 
-      <div className={`relative z-10 mx-auto flex h-full max-w-md flex-col px-6 ${landing || skyStack ? "landing-stack justify-start" : "justify-center"}`}>
-        <AnimatePresence mode="wait" onExitComplete={() => setSkyStack(false)}>
+      {/* every step sits up in the sky, clear of the hall */}
+      <div className="landing-stack relative z-10 mx-auto flex h-full max-w-md flex-col justify-start overflow-y-auto px-6 pb-[max(env(safe-area-inset-bottom),1.5rem)]">
+        <AnimatePresence mode="wait">
           {step === "intro" && (
             <motion.div key="intro" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="text-center">
               <Image src="/logo.png" alt="Omo'badan" width={112} height={112} priority className="landing-logo mx-auto size-28 drop-shadow-[0_10px_30px_rgba(224,162,31,0.35)]" />
