@@ -1,4 +1,4 @@
-/* Omo Ibadan service worker: lets the game install to a home screen and open fast. Never touches the API or voice. */
+/* Omo'badan service worker: lets the game install to a home screen and open fast. Never touches the API or voice. */
 const VERSION = "omo-v1";
 const SHELL = ["/offline.html", "/logo.png", "/icons/icon-192.png", "/icons/icon-512.png"];
 

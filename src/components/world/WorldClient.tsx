@@ -44,7 +44,7 @@ const CityScene = dynamic(() => import("./CityScene"), {
     <div className="grid h-full place-items-center bg-gradient-to-b from-[#eef6ee] to-[#dfeadf]">
       <div className="flex flex-col items-center gap-4">
         <Image src="/logo.png" alt="" width={80} height={80} priority className="size-20 drop-shadow-xl" />
-        <p className="text-lg font-bold tracking-tight text-stone-900">Omo Ibadan</p>
+        <p className="text-lg font-bold tracking-tight text-stone-900">Omo&apos;badan</p>
         <div className="h-1.5 w-40 overflow-hidden rounded-full bg-emerald-900/10">
           <div className="h-full w-1/2 animate-[load_1.1s_ease-in-out_infinite] rounded-full bg-emerald-600" />
         </div>

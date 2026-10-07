@@ -421,7 +421,7 @@ function ProfileSheet() {
 
       <button
         onClick={() => {
-          if (confirm("Sign out of Omo Ibadan? Your progress is saved to your account.")) void signOut();
+          if (confirm("Sign out of Omo'badan? Your progress is saved to your account.")) void signOut();
         }}
         className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-rose-50 py-3 text-sm font-semibold text-rose-700 ring-1 ring-rose-100 transition active:scale-[0.98]"
       >

@@ -88,8 +88,8 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
         <AnimatePresence mode="wait">
           {step === "intro" && (
             <motion.div key="intro" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="text-center">
-              <Image src="/logo.png" alt="Omo Ibadan" width={112} height={112} priority className="mx-auto size-28 drop-shadow-[0_10px_30px_rgba(224,162,31,0.35)]" />
-              <h1 className="mt-6 text-5xl font-black tracking-tight">Omo Ibadan</h1>
+              <Image src="/logo.png" alt="Omo'badan" width={112} height={112} priority className="mx-auto size-28 drop-shadow-[0_10px_30px_rgba(224,162,31,0.35)]" />
+              <h1 className="mt-6 text-5xl font-black tracking-tight">Omo&apos;badan</h1>
               <p className="mt-3 text-lg text-white/80">Live the life. Rust roofs, amala and good vibes.</p>
               <button onClick={enter} className="mt-10 inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-base font-bold text-stone-900 shadow-xl transition active:scale-95">
                 Tap to enter <ArrowRight className="size-5" />

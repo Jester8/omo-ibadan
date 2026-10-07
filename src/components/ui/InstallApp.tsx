@@ -40,7 +40,7 @@ export default function InstallApp({ className = "" }: { className?: string }) {
         }}
         className="flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 py-3 text-sm font-semibold text-white shadow transition active:scale-[0.98]"
       >
-        <Download className="size-4" /> Add Omo Ibadan to your home screen
+        <Download className="size-4" /> Add Omo&apos;badan to your home screen
       </button>
       {help && (
         <p className="mt-2 flex items-start gap-2 rounded-2xl bg-stone-50 p-3 text-xs text-stone-600 ring-1 ring-black/5">

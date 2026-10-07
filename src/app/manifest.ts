@@ -3,8 +3,8 @@ import type { MetadataRoute } from "next";
 /** Lets the game be installed to a phone's home screen. */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Omo Ibadan",
-    short_name: "Omo Ibadan",
+    name: "Omo'badan",
+    short_name: "Omo'badan",
     description: "Live the life. A real-life simulation of Ibadan, the city of rust roofs.",
     id: "/play",
     start_url: "/play",

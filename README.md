@@ -1,4 +1,4 @@
-# Omo Ibadan
+# Omo'badan
 
 A real-life simulation of Ibadan in the browser. Walk the city, work, eat, buy land and build a home,
 and talk to real people with live voice.

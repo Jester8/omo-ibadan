@@ -6,7 +6,7 @@ import { SHORTCUTS, TOPICS } from "@/lib/guide";
 export default function GuideSheet() {
   return (
     <>
-      <p className="mb-4 rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-950 ring-1 ring-amber-100">New to Omo Ibadan? Start with Moving around and The bottom bar. Come back here any time you are lost.</p>
+      <p className="mb-4 rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-950 ring-1 ring-amber-100">New to Omo&apos;badan? Start with Moving around and The bottom bar. Come back here any time you are lost.</p>
       <ul className="space-y-3">
         {TOPICS.map((t) => (
           <li key={t.id} className="rounded-2xl bg-stone-50 p-4 ring-1 ring-black/5">

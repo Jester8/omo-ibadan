@@ -14,13 +14,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Omo Ibadan — live your life in Ibadan",
+  title: "Omo'badan — live your life in Ibadan",
   description: "A real-life simulation of Ibadan with live voice chat. Play free in your browser.",
-  applicationName: "Omo Ibadan",
-  appleWebApp: { capable: true, title: "Omo Ibadan", statusBarStyle: "black-translucent" },
+  applicationName: "Omo'badan",
+  appleWebApp: { capable: true, title: "Omo'badan", statusBarStyle: "black-translucent" },
   formatDetection: { telephone: false },
-  openGraph: { title: "Omo Ibadan", description: "Live the life. A real-life simulation of Ibadan, the city of rust roofs.", siteName: "Omo Ibadan", type: "website" },
-  twitter: { card: "summary_large_image", title: "Omo Ibadan", description: "Live the life. A real-life simulation of Ibadan, the city of rust roofs." },
+  openGraph: { title: "Omo'badan", description: "Live the life. A real-life simulation of Ibadan, the city of rust roofs.", siteName: "Omo'badan", type: "website" },
+  twitter: { card: "summary_large_image", title: "Omo'badan", description: "Live the life. A real-life simulation of Ibadan, the city of rust roofs." },
 };
 
 export const viewport: Viewport = { themeColor: "#1E1B3A", viewportFit: "cover", width: "device-width", initialScale: 1, maximumScale: 1, userScalable: false };

@@ -227,7 +227,7 @@ function FriendsPanel() {
         }}
         className="mt-5 inline-flex items-center gap-2 rounded-full bg-stone-900 px-4 py-2 text-xs font-semibold text-white transition active:scale-95"
       >
-        {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />} {copied ? "Link copied" : "Invite friends to Omo Ibadan"}
+        {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />} {copied ? "Link copied" : "Invite friends to Omo'badan"}
       </button>
     </>
   );

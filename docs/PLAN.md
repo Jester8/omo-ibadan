@@ -1,4 +1,4 @@
-# Omo Ibadan: status and plan
+# Omo'badan: status and plan
 
 ## Built
 - **Foundation:** landing page, 3D city (20 places, 16 districts), day/night cycle, NEPA outages, traffic

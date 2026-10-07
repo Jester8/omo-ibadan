@@ -119,7 +119,7 @@ function Share() {
         <label className="flex items-start gap-2.5 text-xs leading-relaxed text-stone-700">
           <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} className="mt-0.5 size-4 shrink-0 accent-emerald-600" />
           <span>
-            I own the copyright in this recording and composition (or have the owner&apos;s written permission), and I allow Omo Ibadan to stream it in the game. I keep all my rights and can remove it at any time.
+            I own the copyright in this recording and composition (or have the owner&apos;s written permission), and I allow Omo&apos;badan to stream it in the game. I keep all my rights and can remove it at any time.
           </span>
         </label>
         <button disabled={!ready} onClick={() => void submit()} className="w-full rounded-2xl bg-emerald-600 py-3 text-sm font-semibold text-white transition active:scale-[0.98] disabled:opacity-40">
@@ -145,7 +145,7 @@ function Share() {
                 </div>
                 <button
                   onClick={() => {
-                    if (confirm(`Remove “${t.title}” from Omo Ibadan?`)) void removeTrack(t.id).then(refresh);
+                    if (confirm(`Remove “${t.title}” from Omo'badan?`)) void removeTrack(t.id).then(refresh);
                   }}
                   aria-label="Remove track"
                   className="grid size-9 shrink-0 place-items-center rounded-full bg-white text-stone-500 ring-1 ring-black/10 transition hover:text-rose-600 active:scale-90"

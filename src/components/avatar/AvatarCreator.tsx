@@ -114,7 +114,7 @@ export default function AvatarCreator({
             </button>
           )}
           <div className={`absolute top-4 rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-black/5 backdrop-blur ${onCancel ? "left-16" : "left-4"}`}>
-            Omo Ibadan
+            Omo&apos;badan
           </div>
           <div className="absolute right-3 top-3 flex flex-col items-end gap-2 sm:bottom-4 sm:left-1/2 sm:right-auto sm:top-auto sm:-translate-x-1/2 sm:flex-row">
             <button
@@ -132,7 +132,7 @@ export default function AvatarCreator({
           <div className="space-y-5 overflow-y-auto p-5 sm:p-7">
             <div>
               <h2 className="text-2xl font-bold tracking-tight text-stone-900">
-                {isEdit ? "Change your look" : "Make your Omo Ibadan"}
+                {isEdit ? "Change your look" : "Make your Omo'badan"}
               </h2>
               <p className="mt-1 text-sm text-stone-500">This is how people will see you around the city.</p>
             </div>

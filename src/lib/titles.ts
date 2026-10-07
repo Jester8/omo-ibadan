@@ -4,7 +4,7 @@
  * real Ibadan line of succession with a local before using these in marketing.
  */
 export const TITLES = [
-  { name: "Omo Ibadan", rep: 0, blurb: "Newcomer finding your feet" },
+  { name: "Omo'badan", rep: 0, blurb: "Newcomer finding your feet" },
   { name: "Mogaji", rep: 25, blurb: "Head of your own compound" },
   { name: "Jagun", rep: 70, blurb: "Trusted in the community" },
   { name: "Osi", rep: 140, blurb: "A voice at the table" },
