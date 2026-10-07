@@ -102,6 +102,38 @@ export function IncomingCall() {
   );
 }
 
+/** Someone is at your door: let them in or not. */
+export function Knocks() {
+  const knocks = useGame((s) => s.knocks);
+  const k = knocks[0];
+  return (
+    <AnimatePresence>
+      {k && (
+        <motion.div
+          key={`${k.from}${k.plotId}`}
+          initial={{ opacity: 0, y: -30, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -30 }}
+          transition={{ type: "spring", stiffness: 300, damping: 24 }}
+          className="absolute left-1/2 top-[calc(env(safe-area-inset-top)+4.6rem)] z-50 flex w-[min(24rem,calc(100vw-1.5rem))] -translate-x-1/2 items-center gap-3 rounded-3xl bg-white p-3 pr-3.5 text-black shadow-2xl ring-1 ring-black/10 sm:top-24"
+        >
+          <span className="grid size-12 place-items-center rounded-full bg-amber-500 text-lg font-bold text-white">{k.name.slice(0, 1).toUpperCase()}</span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-bold">{k.name}</p>
+            <p className="text-xs text-stone-500">is at your door{knocks.length > 1 ? ` (+${knocks.length - 1} more)` : ""}</p>
+          </div>
+          <button onClick={() => net.knockReply(k.from, k.plotId, false)} className="rounded-full bg-stone-100 px-3.5 py-2 text-xs font-bold text-stone-700 transition active:scale-95">
+            Not now
+          </button>
+          <button onClick={() => net.knockReply(k.from, k.plotId, true)} className="rounded-full bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white transition active:scale-95">
+            Let in
+          </button>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 export function Toasts() {
   const toasts = useGame((s) => s.toasts);
   const inCall = useGame((s) => !!s.voice.room);

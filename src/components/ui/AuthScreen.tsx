@@ -19,6 +19,9 @@ const LANDING_LEGACY_DECOR = false;
 /** First screen: the city's own live sound, then Sign up (name, email, avatar) or Log in (email and name). */
 export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => void; onLoggedIn: (p: Verified) => void }) {
   const [step, setStep] = useState<Step>("intro");
+  const landing = step === "intro";
+  // the title block stays up in the sky until the landing content has finished fading out
+  const [skyStack, setSkyStack] = useState(true);
   const muted = useSound((s) => s.muted);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -109,11 +112,11 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
         </button>
       )}
 
-      {/* every step sits up in the sky, clear of the hall */}
-      <div className="landing-stack relative z-10 mx-auto flex h-full max-w-md flex-col justify-start overflow-y-auto px-6 pb-[max(env(safe-area-inset-bottom),1.5rem)]">
-        <AnimatePresence mode="wait">
+      {/* the landing title sits up in the sky, clear of the hall; Welcome, Log in and the code step sit in the middle of the screen */}
+      <div className={`relative z-10 mx-auto flex h-full max-w-md flex-col overflow-y-auto px-6 pb-[max(env(safe-area-inset-bottom),1.5rem)] ${landing || skyStack ? "landing-stack justify-start" : "justify-center pt-[max(env(safe-area-inset-top),1rem)]"}`}>
+        <AnimatePresence mode="wait" onExitComplete={() => setSkyStack(false)}>
           {step === "intro" && (
-            <motion.div key="intro" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="text-center">
+            <motion.div key="intro" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.9, ease: "easeOut" }} className="text-center">
               <Image src="/logo.png" alt="Omo'badan" width={112} height={112} priority className="landing-logo mx-auto size-28 drop-shadow-[0_10px_30px_rgba(224,162,31,0.35)]" />
               <h1 className="landing-title mt-6 text-5xl font-black tracking-tight [text-shadow:0_2px_18px_rgba(26,24,40,0.55)]">Omo&apos;badan</h1>
               <p className="landing-tagline mt-3 text-lg text-white/85 [text-shadow:0_1px_12px_rgba(26,24,40,0.6)]">Live the life. Brown roofs, amala and good vibes.</p>
@@ -127,7 +130,7 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
           )}
 
           {step === "choose" && (
-            <motion.div key="choose" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+            <motion.div key="choose" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.9, ease: "easeOut" }} className="my-auto">
               <h2 className="text-3xl font-extrabold tracking-tight">Welcome</h2>
               <p className="mt-1 text-white/70">Create your Ibadan life, or pick up where you left off.</p>
               <button onClick={onSignup} className="mt-8 flex w-full items-center justify-between rounded-2xl bg-amber-500 px-5 py-4 text-left text-stone-900 shadow-xl transition active:scale-[0.98]">
@@ -149,7 +152,7 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
           )}
 
           {step === "login" && (
-            <motion.form key="login" onSubmit={(e) => void submitLogin(e)} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+            <motion.form key="login" onSubmit={(e) => void submitLogin(e)} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.9, ease: "easeOut" }} className="my-auto">
               <button type="button" onClick={() => setStep("choose")} className="mb-5 inline-flex items-center gap-1 rounded-full bg-white/15 py-1.5 pl-2 pr-4 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/25 active:scale-95">
                 <ChevronLeft className="size-5" strokeWidth={2.4} /> Back
               </button>

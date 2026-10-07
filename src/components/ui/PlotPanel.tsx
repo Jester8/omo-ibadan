@@ -10,6 +10,7 @@ import { walkTo } from "@/lib/movement";
 import { nepaOut } from "@/lib/time";
 import { useSecond } from "@/lib/hooks";
 import { ActionRow, VoiceRoomCard } from "./parts";
+import { net } from "@/lib/net";
 import { BUSINESSES, bizById } from "@/lib/business";
 
 export default function PlotPanelBody({ id }: { id: string }) {
@@ -34,7 +35,9 @@ export default function PlotPanelBody({ id }: { id: string }) {
 
   const enterHome = () => {
     if (!near) return walkTo(plot.pos[0], plot.pos[1] + PLOT_SIZE / 2 + 0.6);
-    enterInterior({ kind: "home", id });
+    // your own door opens; anyone else knocks and waits for the owner (or their door setting) to decide
+    if (mine) enterInterior({ kind: "home", id });
+    else net.knock(id);
   };
   const enterButton =
     tier >= 1 ? (
@@ -42,7 +45,7 @@ export default function PlotPanelBody({ id }: { id: string }) {
         onClick={enterHome}
         className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 py-3 text-sm font-semibold text-white shadow-lg shadow-amber-500/20 transition hover:bg-amber-600 active:scale-[0.98]"
       >
-        <DoorOpen className="size-4" /> {near ? (mine ? "Go inside your home" : `Knock and go in`) : "Walk to the door"}
+        <DoorOpen className="size-4" /> {near ? (mine ? "Go inside your home" : "Knock to be let in") : "Walk to the door"}
       </button>
     ) : null;
 
@@ -109,6 +112,24 @@ export default function PlotPanelBody({ id }: { id: string }) {
               </span>
               <span className="text-sm font-bold tabular-nums">{naira(next.cost)}</span>
             </button>
+          )}
+
+          {tier >= 1 && (
+            <div className="mt-3 rounded-2xl bg-white p-3 ring-1 ring-black/5">
+              <p className="text-[11px] font-bold uppercase tracking-wide text-stone-400">Who can visit</p>
+              <div className="mt-2 grid grid-cols-3 gap-1.5">
+                {([["ask", "Ask me"], ["friends", "Friends in"], ["closed", "Closed"]] as const).map(([mode, label]) => (
+                  <button
+                    key={mode}
+                    onClick={() => useGame.getState().setVisit(id, mode)}
+                    className={`rounded-xl py-2 text-xs font-bold transition active:scale-95 ${(state?.visit ?? "ask") === mode ? "bg-stone-900 text-white" : "bg-stone-100 text-stone-700"}`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-2 text-[11px] text-stone-500">{(state?.visit ?? "ask") === "ask" ? "You get a knock and choose each time." : state?.visit === "friends" ? "Your friends can walk straight in." : "Nobody can come in."}</p>
+            </div>
           )}
 
           {tier === 0 && !biz && (

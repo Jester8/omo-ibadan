@@ -114,6 +114,7 @@ type State = {
   decorRev: number;
   buyDecor: (homeId: string, decorId: string, tier: number) => string | null;
   buildBusiness: (id: string, bizId: string) => string | null;
+  setVisit: (id: string, mode: "ask" | "friends" | "closed") => void;
   myVote: string | null;
   selected: Selection;
   atPlace: string | null;
@@ -155,6 +156,8 @@ type State = {
   call: CallState;
   voice: { room: string | null; muted: boolean; peers: string[]; speaking: Record<string, boolean> };
   incoming: { from: string; name: string } | null;
+  /** someone at your door, waiting for you to let them in */
+  knocks: { from: string; name: string; plotId: string }[];
 
   setProfile: (p: Profile) => void;
   select: (s: Selection) => void;
@@ -310,6 +313,7 @@ export const useGame = create<State>()(
       call: { phase: "idle", peerId: null, peerName: "", room: null },
       voice: { room: null, muted: false, peers: [], speaking: {} },
       incoming: null,
+      knocks: [],
 
       setProfile: (profile) => set({ profile, editingAvatar: false }),
       select: (selected) => set({ selected }),
@@ -434,6 +438,15 @@ export const useGame = create<State>()(
         hooks.plotSet?.(id, state);
         get().toast(`You bought land in ${plot.district}! +10 rep`, "good");
         return null;
+      },
+
+      setVisit: (id, mode) => {
+        const s = get();
+        const cur = s.plots[id];
+        if (!cur || cur.ownerId !== s.profile?.id) return;
+        const state: PlotState = { ...cur, visit: mode };
+        set({ plots: { ...s.plots, [id]: state } });
+        hooks.plotSet?.(id, state);
       },
 
       buildBusiness: (id, bizId) => {

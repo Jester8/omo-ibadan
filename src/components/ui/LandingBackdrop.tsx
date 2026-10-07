@@ -78,6 +78,7 @@ export default function LandingBackdrop() {
     v.muted = true;
     v.defaultMuted = true;
     v.setAttribute("muted", "");
+    v.playbackRate = 0.75; // a calmer pace
     const tryPlay = () =>
       v.play().then(
         () => live && setRefused((r) => (r === orient ? null : r)),

@@ -10,6 +10,12 @@ import { voice } from "./voice";
 import { cleanChat } from "./moderation";
 import { interiorKey, type InteriorRef } from "./interiors";
 import { usePhotos } from "./photos";
+import { enterInterior } from "./interiorRuntime";
+
+/** The owner said yes: step in. */
+function enterHomeAfterKnock(plotId: string) {
+  enterInterior({ kind: "home", id: plotId });
+}
 
 let ws: WebSocket | null = null;
 let want = false;
@@ -151,6 +157,18 @@ function handle(m: S2C) {
       audio.pop();
       break;
     }
+    case "knock":
+      // someone is at my door
+      if (!s.knocks.some((k) => k.from === m.from && k.plotId === m.plotId)) useGame.setState({ knocks: [...s.knocks, { from: m.from, name: m.name, plotId: m.plotId }] });
+      audio.pop();
+      break;
+    case "knockResult":
+      if (m.allow) {
+        enterHomeAfterKnock(m.plotId);
+      } else {
+        s.toast(m.reason ?? "They cannot have visitors right now.", "bad");
+      }
+      break;
     case "sit":
       if (m.u) remoteSits.set(m.id, m.u);
       else remoteSits.delete(m.id);
@@ -324,6 +342,20 @@ export const net = {
       threads: st.threads.map((t) => (t.pid === to ? { ...t, last: { text: clean, at, mine: true } } : t)),
     }));
     send({ t: "dm", to, text: clean });
+  },
+  /** Ask to be let into someone's home. The answer comes back as knockResult. */
+  knock(plotId: string) {
+    if (useGame.getState().net !== "online") {
+      useGame.getState().toast("You are offline, so you cannot ask to come in.", "bad");
+      return;
+    }
+    send({ t: "knock", plotId });
+    useGame.getState().toast("Knock, knock… waiting for them to open.", "info");
+  },
+  /** The owner's answer to someone at the door. */
+  knockReply(to: string, plotId: string, allow: boolean) {
+    send({ t: "knockReply", to, plotId, allow });
+    useGame.setState((st) => ({ knocks: st.knocks.filter((k) => !(k.from === to && k.plotId === plotId)) }));
   },
   /** Tell the room you sat down (or stood up, with null). */
   sit(u: { pose: "sit" | "lie"; x: number; z: number; ry: number; seatH: number } | null) {
