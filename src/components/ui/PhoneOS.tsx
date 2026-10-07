@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { BatteryFull, Briefcase, ChevronLeft, HeartHandshake, HelpCircle, ListChecks, MapPin, MessageCircle, Music2, Newspaper, Phone, Plane, Search, ShoppingBag, Signal, Wifi } from "lucide-react";
+import { BatteryFull, Briefcase, ChevronLeft, DoorOpen, HeartHandshake, HelpCircle, ListChecks, MapPin, MessageCircle, Music2, Newspaper, Phone, Plane, Search, ShoppingBag, Signal, Store, Wifi } from "lucide-react";
 import { eventsAt } from "@/lib/events";
 import { useClock } from "@/lib/hooks";
 import { NEWS } from "@/lib/news";
@@ -17,8 +17,9 @@ import FlightsSheet from "./FlightsSheet";
 import JobsPanel from "./JobsPanel";
 import MusicSheet from "./MusicSheet";
 import { ChatsPanel } from "./FriendsTabs";
+import { MarketApp, SearchApp, VisitsApp } from "./PhoneExtras";
 
-export type AppId = "jobs" | "news" | "calls" | "messages" | "maps" | "goals" | "buy" | "flights" | "music" | "family" | "guide";
+export type AppId = "jobs" | "news" | "calls" | "messages" | "maps" | "goals" | "buy" | "flights" | "music" | "family" | "guide" | "market" | "visits" | "search";
 
 const APPS: { id: AppId; label: string; icon: typeof Phone; tint: string }[] = [
   { id: "jobs", label: "Jobs", icon: Briefcase, tint: "from-emerald-400 to-teal-600" },
@@ -32,6 +33,9 @@ const APPS: { id: AppId; label: string; icon: typeof Phone; tint: string }[] = [
   { id: "music", label: "Music", icon: Music2, tint: "from-pink-400 to-rose-600" },
   { id: "family", label: "Family", icon: HeartHandshake, tint: "from-orange-400 to-red-500" },
   { id: "guide", label: "Guide", icon: HelpCircle, tint: "from-stone-400 to-stone-600" },
+  { id: "market", label: "Market", icon: Store, tint: "from-lime-400 to-green-600" },
+  { id: "visits", label: "Visits", icon: DoorOpen, tint: "from-yellow-400 to-amber-600" },
+  { id: "search", label: "Search", icon: Search, tint: "from-slate-400 to-slate-600" },
 ];
 const DOCK: AppId[] = ["calls", "messages", "jobs", "maps"];
 
@@ -218,6 +222,12 @@ export default function PhoneOS({ initial = null, render }: { initial?: AppId | 
         return <FamilyApp />;
       case "guide":
         return <GuideSheet />;
+      case "market":
+        return <MarketApp />;
+      case "visits":
+        return <VisitsApp />;
+      case "search":
+        return <SearchApp />;
       default:
         return null;
     }
@@ -227,11 +237,11 @@ export default function PhoneOS({ initial = null, render }: { initial?: AppId | 
     const a = APPS.find((x) => x.id === id)!;
     const badge = (id === "messages" && unread > 0 ? unread : 0) || (id === "calls" && call !== "idle" ? 1 : 0);
     return (
-      <button onClick={() => setApp(id)} className="group relative flex flex-col items-center gap-1" aria-label={a.label}>
-        <span className={`grid ${big ? "size-14" : "size-12"} place-items-center rounded-2xl bg-gradient-to-br ${a.tint} text-white shadow-lg ring-1 ring-white/20 transition group-hover:scale-105 group-active:scale-90`}>
-          <a.icon className={big ? "size-7" : "size-6"} />
+      <button onClick={() => setApp(id)} className="group relative flex flex-col items-center gap-1.5" aria-label={a.label}>
+        <span className={`grid ${big ? "size-11" : "size-10"} place-items-center rounded-xl bg-gradient-to-br ${a.tint} text-white shadow-md ring-1 ring-white/20 transition group-hover:scale-105 group-active:scale-90`}>
+          <a.icon className={big ? "size-5" : "size-[1.15rem]"} />
         </span>
-        {!big && <span className="text-[10.5px] font-medium text-white/90">{a.label}</span>}
+        {!big && <span className="text-[10px] font-medium leading-none text-white/90">{a.label}</span>}
         {badge > 0 && <span className="absolute -right-0.5 -top-1 grid min-w-4 place-items-center rounded-full bg-rose-500 px-1 text-[9px] font-bold leading-4 text-white ring-2 ring-stone-900">{badge}</span>}
       </button>
     );
@@ -258,12 +268,12 @@ export default function PhoneOS({ initial = null, render }: { initial?: AppId | 
               <p className="mt-0.5 text-center text-xs text-white/70">
                 Ibadan · {day > 0.5 ? "☀️ 29°C, sunny" : "🌙 24°C, clear"}
               </p>
-              <div className="mt-5 grid grid-cols-4 gap-x-2 gap-y-4">
+              <div className="mt-4 grid grid-cols-4 gap-x-3 gap-y-5 px-1">
                 {APPS.filter((a) => !DOCK.includes(a.id)).map((a) => (
                   <Icon key={a.id} id={a.id} />
                 ))}
               </div>
-              <div className="mt-auto flex items-center justify-around rounded-[1.6rem] bg-white/15 px-3 py-3 backdrop-blur">
+              <div className="mt-auto flex items-center justify-around rounded-[1.5rem] bg-white/15 px-3 py-2.5 backdrop-blur">
                 {DOCK.map((id) => (
                   <Icon key={id} id={id} big />
                 ))}

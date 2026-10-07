@@ -84,6 +84,12 @@ export async function unblockPlayer(pid: string) {
   await loadSocial();
 }
 
+/** Find players by username (starts with) or name (contains). */
+export async function searchPeople(q: string): Promise<(Person & { username: string | null })[]> {
+  const r = await call<{ players: (Person & { username: string | null })[] }>("GET", `/api/players/search?q=${encodeURIComponent(q)}`);
+  return r.data?.players ?? [];
+}
+
 export type Profile = Person & { friendship: "none" | "friends" | "sent" | "received"; blocked: boolean };
 export async function playerProfile(pid: string): Promise<Profile | null> {
   const r = await call<Profile>("GET", `/api/players/${pid}`);

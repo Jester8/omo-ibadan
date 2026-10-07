@@ -30,3 +30,16 @@ export function visitHome(pid: string, name: string) {
   walkTo(h.x, h.z + PLOT_SIZE / 2 + 0.6);
   s.toast(`Walking to ${name}'s home…`, "info");
 }
+
+/** Walk to any home or business and open its card (a house card offers "Knock", a business card offers "Step inside"). */
+export function goToPlot(plotId: string) {
+  const s = useGame.getState();
+  const p = PLOTS.find((x) => x.id === plotId);
+  if (!p) return;
+  if (s.interior) {
+    s.toast("Step outside first.", "info");
+    return;
+  }
+  s.patch({ sheet: null, selected: { type: "plot", id: plotId } });
+  walkTo(p.pos[0], p.pos[1] + PLOT_SIZE / 2 + 0.6);
+}
