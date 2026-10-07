@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Map as MapIcon, X } from "lucide-react";
 import { cam, me, remoteMotion } from "@/lib/playerState";
 import { KIND_COLORS, PLACES } from "@/lib/places";
 import { PLOTS } from "@/lib/plots";
@@ -9,8 +10,16 @@ import { colorFor } from "@/lib/look";
 import { useGame } from "@/lib/store";
 import { walkTo } from "@/lib/movement";
 
-const SIZE = 148;
-const SCALE = 2.6; // pixels per world unit
+const SHOWN = "omo-ibadan-map";
+const readShown = () => {
+  try {
+    const v = localStorage.getItem(SHOWN);
+    if (v !== null) return v === "1";
+  } catch {
+    /* private mode */
+  }
+  return window.innerWidth >= 640; // phones start with the map tucked away
+};
 const ROADS = ROAD_LINES;
 
 /** Rotation that puts the camera's forward direction at the top of the minimap. */
@@ -18,12 +27,43 @@ const rotation = () => -Math.PI / 2 - Math.atan2(-Math.cos(cam.az), -Math.sin(ca
 
 export default function Minimap() {
   const inside = useGame((s) => !!s.interior);
+  const [shown, setShown] = useState(true);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setShown(readShown());
+  }, []);
+  const set = (v: boolean) => {
+    setShown(v);
+    try {
+      localStorage.setItem(SHOWN, v ? "1" : "0");
+    } catch {
+      /* private mode */
+    }
+  };
   if (inside) return null;
-  return <MinimapCanvas />;
+  return (
+    <div className="absolute bottom-[5.4rem] right-3 z-10 sm:bottom-24 sm:right-5">
+      {shown ? (
+        <div className="relative">
+          <MinimapCanvas />
+          <button onClick={() => set(false)} aria-label="Hide map" className="absolute -left-1 -top-1 grid size-8 place-items-center rounded-full bg-white text-stone-600 shadow-lg ring-1 ring-black/10 transition active:scale-90">
+            <X className="size-4" />
+          </button>
+        </div>
+      ) : (
+        <button onClick={() => set(true)} aria-label="Show map" className="grid size-12 place-items-center rounded-full bg-white/90 text-stone-700 shadow-xl ring-1 ring-black/5 backdrop-blur-xl transition active:scale-90 sm:size-14">
+          <MapIcon className="size-5 sm:size-6" />
+        </button>
+      )}
+    </div>
+  );
 }
 
 function MinimapCanvas() {
   const ref = useRef<HTMLCanvasElement>(null);
+  // a smaller map on phones
+  const [SIZE] = useState(() => (typeof window !== "undefined" && window.innerWidth < 640 ? 116 : 148));
+  const SCALE = SIZE / 57; // pixels per world unit
 
   useEffect(() => {
     const canvas = ref.current;
@@ -111,7 +151,7 @@ function MinimapCanvas() {
     };
     raf = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(raf);
-  }, []);
+  }, [SIZE, SCALE]);
 
   const onClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -125,7 +165,7 @@ function MinimapCanvas() {
   };
 
   return (
-    <div className="absolute bottom-[5.4rem] right-3 z-10 rounded-full bg-white/80 p-1 shadow-xl ring-1 ring-black/5 backdrop-blur-xl sm:bottom-24 sm:right-5">
+    <div className="rounded-full bg-white/80 p-1 shadow-xl ring-1 ring-black/5 backdrop-blur-xl">
       <canvas ref={ref} onClick={onClick} style={{ width: SIZE, height: SIZE }} className="cursor-pointer rounded-full" aria-label="Minimap, click to walk" />
     </div>
   );

@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight, ChevronLeft, Mail, Music2, Volume2, VolumeX } from "lucide-react";
 import { DEMO_AUTH, demoLogIn, requestCode, verifyCode, type Verified } from "@/lib/api";
 import AuthCode from "./AuthCode";
+import InstallApp from "./InstallApp";
 import { audio } from "@/lib/audio";
 import { useSound } from "@/lib/soundStore";
 
@@ -117,6 +118,7 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
                 </span>
                 <ArrowRight className="size-5" />
               </button>
+              <InstallApp className="mt-6" />
             </motion.div>
           )}
 

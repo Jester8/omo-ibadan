@@ -171,29 +171,37 @@ export default function SidePanel() {
   const shown = interior ? { type: "interior", id: `${interior.kind}:${interior.id}` } : selected;
   const key = shown ? `${shown.type}:${shown.id}` : "";
   const busy = useGame((s) => !!s.busy || !!s.ride);
-  // folded on phones while you are doing something, so you can watch your character
-  const min = busy || (interior ? flip !== key : flip === key);
+  // inside a room the panel folds away on phones so you can see the room (it holds the way out)
+  const min = !!interior && (busy || flip !== key);
   const setMin = () => setFlip(flip === key ? null : key);
+  // outside, on a phone, a tapped place or house is a small card at the top left with a close button that really closes it
+  const card = !interior;
   return (
     <AnimatePresence mode="wait">
       {shown && (
         <motion.aside
           key={`${shown.type}:${shown.id}`}
-          initial={{ opacity: 0, y: 40, scale: 0.97 }}
+          initial={{ opacity: 0, y: card ? -12 : 40, scale: 0.97 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 40, scale: 0.97 }}
+          exit={{ opacity: 0, y: card ? -12 : 40, scale: 0.97 }}
           transition={{ type: "spring", stiffness: 260, damping: 26 }}
-          className={`absolute inset-x-3 bottom-[5.4rem] z-20 ${min ? "max-sm:max-h-12 max-sm:overflow-hidden max-sm:py-2" : interior ? "max-h-[44dvh]" : "max-h-[62dvh]"} overflow-y-auto rounded-[1.6rem] bg-white/80 p-5 shadow-[0_12px_40px_-10px_rgba(0,0,0,0.35)] ring-1 ring-white/60 backdrop-blur-2xl sm:inset-x-auto sm:bottom-auto sm:right-5 sm:top-20 sm:max-h-[calc(100dvh-7rem)] sm:w-[24rem]`}
+          className={`absolute z-20 overflow-y-auto rounded-[1.6rem] bg-white/85 p-4 shadow-[0_12px_40px_-10px_rgba(0,0,0,0.35)] ring-1 ring-white/60 backdrop-blur-2xl sm:inset-x-auto sm:bottom-auto sm:right-5 sm:top-20 sm:max-h-[calc(100dvh-7rem)] sm:w-[24rem] sm:p-5 ${
+            card
+              ? "left-3 top-[9.4rem] max-h-[calc(100dvh-16rem)] w-[min(17rem,66vw)] sm:left-auto"
+              : `inset-x-3 bottom-[5.4rem] ${min ? "max-sm:max-h-12 max-sm:overflow-hidden max-sm:py-2" : "max-h-[44dvh]"}`
+          }`}
         >
-          <button
-            onClick={setMin}
-            aria-label={min ? "Show panel" : "Hide panel"}
-            className="mx-auto -mt-2 mb-2 flex w-full items-center justify-center gap-1 text-[11px] font-semibold text-stone-400 sm:hidden"
-          >
-            <span className="h-1 w-10 rounded-full bg-stone-300" />
-            {min && !busy ? "Show panel" : ""}
-          </button>
-          <div className={min ? "max-sm:hidden" : ""}>
+          {card ? (
+            <button onClick={() => useGame.getState().select(null)} aria-label="Close" className="absolute right-2.5 top-2.5 z-10 grid size-8 place-items-center rounded-full bg-stone-100 text-stone-500 transition hover:bg-stone-200 active:scale-90">
+              <X className="size-4" />
+            </button>
+          ) : (
+            <button onClick={setMin} aria-label={min ? "Show panel" : "Hide panel"} className="mx-auto -mt-2 mb-2 flex w-full items-center justify-center gap-1 text-[11px] font-semibold text-stone-400 sm:hidden">
+              <span className="h-1 w-10 rounded-full bg-stone-300" />
+              {min && !busy ? "Show panel" : ""}
+            </button>
+          )}
+          <div className={`${min ? "max-sm:hidden" : ""} ${card ? "pr-7 sm:pr-8" : ""}`}>
             {interior ? <InteriorPanel /> : selected?.type === "place" ? <PlaceBody id={selected.id} /> : selected?.type === "player" ? <PlayerPanel id={selected.id} /> : selected?.type === "gate" ? <GatePanel id={selected.id} /> : selected?.type === "cab" ? <CabPanel id={selected.id} /> : selected ? <PlotPanelBody id={selected.id} /> : null}
           </div>
         </motion.aside>

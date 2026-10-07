@@ -1,14 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
-import { RoundedBox } from "@react-three/drei";
+import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import { PLOTS, PLOT_SIZE, type Plot } from "@/lib/plots";
+import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
+import { PLOTS, PLOT_SIZE } from "@/lib/plots";
 import type { PlotState } from "@/lib/protocol";
 import { useGame } from "@/lib/store";
 import { colorFor } from "@/lib/look";
-import { facadeMaterials, lampMat, mat, windowMats } from "./materials";
+import { facadeMaterials, lampMat, windowMats } from "./materials";
 
 type V3 = [number, number, number];
 
@@ -26,187 +25,188 @@ export function Wall({ tint, w, h, d, p }: { tint: string; w: number; h: number;
   );
 }
 
-function Fence({ s = 2.9, c = "#f3efe6" }: { s?: number; c?: string }) {
-  const h = 0.18;
-  return (
-    <>
-      {[
-        [0, -s / 2, s, 0.05],
-        [0, s / 2, s, 0.05],
-        [-s / 2, 0, 0.05, s],
-        [s / 2, 0, 0.05, s],
-      ].map(([x, z, w, d], i) => (
-        <mesh key={i} position={[x, h / 2 + 0.06, z]} material={mat(c)} castShadow>
-          <boxGeometry args={[w, h, d]} />
-        </mesh>
-      ))}
-    </>
-  );
-}
+/* ------------------------------------------------------------------------------------------------
+ * Houses are drawn as a handful of instanced meshes (one draw call per kind of part) instead of a few
+ * dozen separate meshes each, so 200+ plots cost almost nothing to render.
+ * ------------------------------------------------------------------------------------------------ */
 
 const RUST_ROOF = "#a0512f";
 
-function House({ tier, accent }: { tier: number; accent: string }) {
-  if (tier === 1)
-    return (
-      <>
-        <Fence />
-        <mesh position={[0, 0.06 + 0.3, 0]} material={mat("#f4ead7")} castShadow>
-          <boxGeometry args={[1.5, 0.6, 1.2]} />
-        </mesh>
-        <mesh position={[0, 0.06 + 0.6 + 0.28, 0]} rotation-y={Math.PI / 4} scale={[1.25, 1, 1]} material={mat(RUST_ROOF, 0.7)} castShadow>
-          <coneGeometry args={[1.0, 0.56, 4]} />
-        </mesh>
-        <mesh position={[0, 0.06 + 0.24, 0.61]} material={mat("#7a5a40")}>
-          <boxGeometry args={[0.3, 0.42, 0.03]} />
-        </mesh>
-        <mesh position={[0.45, 0.06 + 0.34, 0.61]} material={mat("#8fb6d6")}>
-          <boxGeometry args={[0.26, 0.22, 0.03]} />
-        </mesh>
-      </>
-    );
-  if (tier === 2)
-    return (
-      <>
-        <Fence />
-        <Wall tint="#f2ecdf" w={1.7} h={1.25} d={1.3} p={[0, 0.06, -0.1]} />
-        <mesh position={[0, 0.06 + 1.25 + 0.04, -0.1]} material={mat(accent)} castShadow>
-          <boxGeometry args={[1.8, 0.09, 1.4]} />
-        </mesh>
-        <mesh position={[0, 0.06 + 1.25 + 0.3, -0.1]} rotation-y={Math.PI / 4} scale={[1.3, 1, 1]} material={mat(RUST_ROOF, 0.7)} castShadow>
-          <coneGeometry args={[0.95, 0.5, 4]} />
-        </mesh>
-        <mesh position={[0, 0.06 + 0.7, 0.62]} material={mat("#e9e3d4")} castShadow>
-          <boxGeometry args={[1.2, 0.05, 0.4]} />
-        </mesh>
-        <mesh position={[0.95, 0.06 + 0.25, 0.4]} material={mat("#d8d2c4")} castShadow>
-          <boxGeometry args={[0.55, 0.5, 0.9]} />
-        </mesh>
-        <mesh position={[1.1, 0.06 + 0.3, 0.8]} material={mat("#2a2f3a")}>
-          <boxGeometry args={[0.4, 0.4, 0.02]} />
-        </mesh>
-      </>
-    );
-  if (tier >= 3)
-    return (
-      <>
-        <Fence c="#e8e3d6" />
-        <Wall tint="#eef0f3" w={2.0} h={1.5} d={1.35} p={[-0.2, 0.06, -0.35]} />
-        <Wall tint="#eef0f3" w={1.1} h={0.85} d={1.0} p={[0.8, 0.06, 0.15]} />
-        <mesh position={[-0.2, 0.06 + 1.5 + 0.04, -0.35]} material={mat(accent)} castShadow>
-          <boxGeometry args={[2.1, 0.09, 1.45]} />
-        </mesh>
-        <mesh position={[-0.2, 0.06 + 1.5 + 0.34, -0.35]} rotation-y={Math.PI / 4} scale={[1.5, 1, 1.05]} material={mat(RUST_ROOF, 0.7)} castShadow>
-          <coneGeometry args={[1.0, 0.58, 4]} />
-        </mesh>
-        {[-0.45, -0.15, 0.15].map((x) => (
-          <mesh key={x} position={[x, 0.06 + 0.4, 0.4]} material={mat("#fbf9f4")} castShadow>
-            <cylinderGeometry args={[0.04, 0.04, 0.8, 10]} />
-          </mesh>
-        ))}
-        <mesh position={[-0.3, 0.06 + 0.83, 0.4]} material={mat("#fbf9f4")} castShadow>
-          <boxGeometry args={[0.95, 0.06, 0.4]} />
-        </mesh>
-        <mesh position={[-0.75, 0.075, 1.0]} rotation-x={-Math.PI / 2}>
-          <planeGeometry args={[0.9, 0.5]} />
-          <meshStandardMaterial color="#59c2e6" roughness={0.15} />
-        </mesh>
-        <mesh position={[1.05, 0.06 + 0.55, 1.0]} material={mat("#4f9a4d")} castShadow>
-          <icosahedronGeometry args={[0.28, 0]} />
-        </mesh>
-      </>
-    );
-  return null;
+type Opts = { rx?: number; ry?: number; rz?: number; s?: V3 };
+
+/** A shape moved into place with its colour baked in, ready to be merged with the rest of the house. */
+function part(g: THREE.BufferGeometry, hex: string, p: V3, o: Opts = {}) {
+  const m = new THREE.Matrix4().compose(new THREE.Vector3(...p), new THREE.Quaternion().setFromEuler(new THREE.Euler(o.rx ?? 0, o.ry ?? 0, o.rz ?? 0)), new THREE.Vector3(...(o.s ?? [1, 1, 1])));
+  // every part non-indexed, so shapes of different kinds merge cleanly
+  const geo = (g.index ? g.toNonIndexed() : g.clone()).applyMatrix4(m);
+  const c = new THREE.Color(hex);
+  const n = geo.attributes.position.count;
+  const col = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) col.set([c.r, c.g, c.b], i * 3);
+  geo.setAttribute("color", new THREE.BufferAttribute(col, 3));
+  return geo;
+}
+const box = (w: number, h: number, d: number, hex: string, p: V3, o?: Opts) => part(new THREE.BoxGeometry(w, h, d), hex, p, o);
+const roof = (r: number, h: number, p: V3, s: V3) => part(new THREE.ConeGeometry(r, h, 4), RUST_ROOF, p, { ry: Math.PI / 4, s });
+const post = (r: number, h: number, hex: string, p: V3) => part(new THREE.CylinderGeometry(r, r, h, 8), hex, p);
+const merge = (parts: THREE.BufferGeometry[]) => mergeGeometries(parts, false)!;
+
+const B = 0.06; // top of the plot pad
+const fence = (c = "#f3efe6", s = 2.9): THREE.BufferGeometry[] => [
+  box(s, 0.18, 0.05, c, [0, B + 0.09, -s / 2]),
+  box(s, 0.18, 0.05, c, [0, B + 0.09, s / 2]),
+  box(0.05, 0.18, s, c, [-s / 2, B + 0.09, 0]),
+  box(0.05, 0.18, s, c, [s / 2, B + 0.09, 0]),
+];
+
+let GEOS: Record<string, THREE.BufferGeometry> | null = null;
+function geos() {
+  if (GEOS) return GEOS;
+  GEOS = {
+    // bungalow
+    t1: merge([
+      ...fence(),
+      box(1.5, 0.6, 1.2, "#f4ead7", [0, B + 0.3, 0]),
+      roof(1.0, 0.56, [0, B + 0.6 + 0.28, 0], [1.25, 1, 1]),
+      box(0.3, 0.42, 0.03, "#7a5a40", [0, B + 0.24, 0.61]),
+    ]),
+    t1glow: merge([box(0.26, 0.22, 0.03, "#fff4d6", [0.45, B + 0.34, 0.61])]),
+    // duplex
+    t2: merge([
+      ...fence(),
+      box(1.7, 1.25, 1.3, "#f2ecdf", [0, B + 0.625, -0.1]),
+      roof(0.95, 0.5, [0, B + 1.25 + 0.3, -0.1], [1.3, 1, 1]),
+      box(1.2, 0.05, 0.4, "#e9e3d4", [0, B + 0.7, 0.62]),
+      box(0.55, 0.5, 0.9, "#d8d2c4", [0.95, B + 0.25, 0.4]),
+      box(0.4, 0.4, 0.02, "#2a2f3a", [1.1, B + 0.3, 0.8]),
+    ]),
+    t2accent: merge([box(1.8, 0.09, 1.4, "#ffffff", [0, B + 1.25 + 0.04, -0.1])]),
+    t2glow: merge([box(0.3, 0.3, 0.03, "#fff4d6", [-0.4, B + 0.8, 0.56]), box(0.3, 0.3, 0.03, "#fff4d6", [0.3, B + 0.8, 0.56])]),
+    // mansion
+    t3: merge([
+      ...fence("#e8e3d6"),
+      box(2.0, 1.5, 1.35, "#eef0f3", [-0.2, B + 0.75, -0.35]),
+      box(1.1, 0.85, 1.0, "#eef0f3", [0.8, B + 0.425, 0.15]),
+      roof(1.0, 0.58, [-0.2, B + 1.5 + 0.34, -0.35], [1.5, 1, 1.05]),
+      ...[-0.45, -0.15, 0.15].map((x) => post(0.04, 0.8, "#fbf9f4", [x, B + 0.4, 0.4])),
+      box(0.95, 0.06, 0.4, "#fbf9f4", [-0.3, B + 0.83, 0.4]),
+      box(0.9, 0.012, 0.5, "#59c2e6", [-0.75, B + 0.01, 1.0]),
+      part(new THREE.IcosahedronGeometry(0.28, 0), "#4f9a4d", [1.05, B + 0.55, 1.0]),
+    ]),
+    t3accent: merge([box(2.1, 0.09, 1.45, "#ffffff", [-0.2, B + 1.5 + 0.04, -0.35])]),
+    t3glow: merge([box(0.32, 0.34, 0.03, "#fff4d6", [-0.9, B + 1.0, 0.33]), box(0.32, 0.34, 0.03, "#fff4d6", [-0.2, B + 1.0, 0.33]), box(0.32, 0.34, 0.03, "#fff4d6", [0.5, B + 1.0, 0.33])]),
+    // land that is bought but not built on: corner stakes and a flag
+    claimed: merge([
+      ...([[-1.35, -1.35], [1.35, -1.35], [-1.35, 1.35], [1.35, 1.35]] as [number, number][]).map(([x, z]) => box(0.07, 0.28, 0.07, "#ffffff", [x, 0.2, z])),
+      post(0.015, 0.9, "#ffffff", [0, 0.5, 0]),
+      box(0.38, 0.22, 0.02, "#ffffff", [0.2, 0.82, 0]),
+    ]),
+    // for sale
+    sale: merge([post(0.02, 0.6, "#7a6a54", [0.9, 0.3, 1.0]), box(0.5, 0.26, 0.03, "#10b981", [0.9, 0.62, 1.0])]),
+    pad: new THREE.BoxGeometry(PLOT_SIZE - 0.2, 0.06, PLOT_SIZE - 0.2).translate(0, 0.03, 0),
+    hit: new THREE.BoxGeometry(PLOT_SIZE - 0.3, 1.8, PLOT_SIZE - 0.3).translate(0, 0.9, 0),
+  };
+  return GEOS;
 }
 
-function PlotMesh({ plot }: { plot: Plot }) {
-  const state: PlotState | undefined = useGame((s) => s.plots[plot.id]);
+const bodyMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85, metalness: 0.02 });
+const tintMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.7, metalness: 0.02 });
+const padMat = new THREE.MeshStandardMaterial({ color: "#ffffff", roughness: 0.95 });
+const hitMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
+const _m = new THREE.Matrix4();
+
+type Item = { x: number; z: number; color?: THREE.Color };
+
+/** One draw call for every plot of a kind. */
+function Inst({ geometry, material, items, shadow = false, tint = false }: { geometry: THREE.BufferGeometry; material: THREE.Material; items: Item[]; shadow?: boolean; tint?: boolean }) {
+  const ref = useRef<THREE.InstancedMesh>(null);
+  useLayoutEffect(() => {
+    const m = ref.current;
+    if (!m) return;
+    items.forEach((it, i) => {
+      m.setMatrixAt(i, _m.makeTranslation(it.x, 0, it.z));
+      if (tint && it.color) m.setColorAt(i, it.color);
+    });
+    m.count = items.length;
+    m.instanceMatrix.needsUpdate = true;
+    if (m.instanceColor) m.instanceColor.needsUpdate = true;
+  }, [items, tint]);
+  return <instancedMesh ref={ref} args={[geometry, material, PLOTS.length]} frustumCulled={false} castShadow={shadow} receiveShadow />;
+}
+
+const kindOf = (st?: PlotState) => (!st ? "sale" : st.tier >= 3 ? "t3" : st.tier === 2 ? "t2" : st.tier === 1 ? "t1" : "claimed");
+
+export default function PlotsLayer() {
+  const plots = useGame((s) => s.plots);
   const selected = useGame((s) => s.selected);
   const me = useGame((s) => s.profile?.id);
-  const hovered = useRef(false);
-  const lift = useRef<THREE.Group>(null);
-  const isSel = selected?.type === "plot" && selected.id === plot.id;
-  const mine = state && state.ownerId === me;
-  const accent = state ? colorFor(state.ownerId) : "#10b981";
+  const g = geos();
 
-  useFrame((_, dt) => {
-    if (!lift.current) return;
-    lift.current.position.y = THREE.MathUtils.damp(lift.current.position.y, hovered.current ? 0.1 : 0, 10, dt);
-  });
+  const lists = useMemo(() => {
+    const by: Record<string, Item[]> = { t1: [], t2: [], t3: [], claimed: [], sale: [] };
+    const pads: Item[] = [];
+    const white = new THREE.Color("#ffffff");
+    const sand = new THREE.Color("#f5f2e6");
+    for (const p of PLOTS) {
+      const st = plots[p.id];
+      const accent = st ? new THREE.Color(colorFor(st.ownerId)) : undefined;
+      by[kindOf(st)].push({ x: p.pos[0], z: p.pos[1], color: accent });
+      pads.push({ x: p.pos[0], z: p.pos[1], color: accent ? accent.clone().lerp(white, 0.75) : sand });
+    }
+    return { by, pads };
+  }, [plots]);
+
+  const rings = PLOTS.filter((p) => (selected?.type === "plot" && selected.id === p.id) || plots[p.id]?.ownerId === me);
 
   return (
-    <group position={[plot.pos[0], 0, plot.pos[1]]}>
-      <group
-        ref={lift}
-        onPointerOver={(e) => {
-          e.stopPropagation();
-          hovered.current = true;
-          document.body.style.cursor = "pointer";
-        }}
-        onPointerOut={() => {
-          hovered.current = false;
-          document.body.style.cursor = "auto";
-        }}
-        onClick={(e) => {
-          if (e.delta > 6) return;
-          e.stopPropagation();
-          useGame.getState().select({ type: "plot", id: plot.id });
-        }}
-      >
-        <RoundedBox args={[PLOT_SIZE - 0.2, 0.06, PLOT_SIZE - 0.2]} radius={0.04} smoothness={3} position={[0, 0.03, 0]} receiveShadow>
-          <meshStandardMaterial color={state ? new THREE.Color(accent).lerp(new THREE.Color("#ffffff"), 0.75) : "#f5f2e6"} roughness={0.95} />
-        </RoundedBox>
-        {state && state.tier >= 1 && <House tier={state.tier} accent={accent} />}
-        {state && state.tier === 0 && (
-          <>
-            {[
-              [-1.35, -1.35],
-              [1.35, -1.35],
-              [-1.35, 1.35],
-              [1.35, 1.35],
-            ].map(([x, z], i) => (
-              <mesh key={i} position={[x, 0.2, z]} material={mat(accent)} castShadow>
-                <boxGeometry args={[0.07, 0.28, 0.07]} />
-              </mesh>
-            ))}
-            <mesh position={[0, 0.5, 0]} material={mat("#7a6a54")} castShadow>
-              <cylinderGeometry args={[0.015, 0.015, 0.9, 6]} />
-            </mesh>
-            <mesh position={[0.2, 0.82, 0]} material={mat(accent)} castShadow>
-              <boxGeometry args={[0.38, 0.22, 0.02]} />
-            </mesh>
-          </>
-        )}
-        {!state && (
-          <group position={[0.9, 0, 1.0]}>
-            <mesh position={[0, 0.3, 0]} material={mat("#7a6a54")}>
-              <cylinderGeometry args={[0.02, 0.02, 0.6, 6]} />
-            </mesh>
-            <mesh position={[0, 0.62, 0]} material={mat("#10b981")} castShadow>
-              <boxGeometry args={[0.5, 0.26, 0.03]} />
-            </mesh>
-            <mesh position={[0, 0.62, 0.02]} material={lampMat}>
-              <boxGeometry args={[0.38, 0.1, 0.01]} />
-            </mesh>
-          </group>
-        )}
-      </group>
-      {(isSel || mine) && (
-        <mesh position={[0, 0.07, 0]} rotation-x={-Math.PI / 2}>
-          <ringGeometry args={[PLOT_SIZE * 0.6, PLOT_SIZE * 0.6 + 0.07, 4, 1, Math.PI / 4]} />
-          <meshBasicMaterial color={isSel ? "#f59e0b" : "#10b981"} transparent opacity={0.9} />
-        </mesh>
-      )}
-    </group>
+    <>
+      <Inst geometry={g.pad} material={padMat} tint items={lists.pads} />
+      <Inst geometry={g.t1} material={bodyMat} items={lists.by.t1} shadow />
+      <Inst geometry={g.t1glow} material={lampMat} items={lists.by.t1} />
+      <Inst geometry={g.t2} material={bodyMat} items={lists.by.t2} shadow />
+      <Inst geometry={g.t2accent} material={tintMat} tint items={lists.by.t2} />
+      <Inst geometry={g.t2glow} material={lampMat} items={lists.by.t2} />
+      <Inst geometry={g.t3} material={bodyMat} items={lists.by.t3} shadow />
+      <Inst geometry={g.t3accent} material={tintMat} tint items={lists.by.t3} />
+      <Inst geometry={g.t3glow} material={lampMat} items={lists.by.t3} />
+      <Inst geometry={g.claimed} material={tintMat} tint items={lists.by.claimed} />
+      <Inst geometry={g.sale} material={bodyMat} items={lists.by.sale} />
+      <PlotHits />
+      {rings.map((p) => {
+        const isSel = selected?.type === "plot" && selected.id === p.id;
+        return (
+          <mesh key={p.id} position={[p.pos[0], 0.07, p.pos[1]]} rotation-x={-Math.PI / 2}>
+            <ringGeometry args={[PLOT_SIZE * 0.6, PLOT_SIZE * 0.6 + 0.07, 4, 1, Math.PI / 4]} />
+            <meshBasicMaterial color={isSel ? "#f59e0b" : "#10b981"} transparent opacity={0.9} />
+          </mesh>
+        );
+      })}
+    </>
   );
 }
 
-export default function PlotsLayer() {
+/** Invisible tap targets, all in one mesh: tap any plot to open it. */
+function PlotHits() {
+  const ref = useRef<THREE.InstancedMesh>(null);
+  const g = geos();
+  useLayoutEffect(() => {
+    const m = ref.current;
+    if (!m) return;
+    PLOTS.forEach((p, i) => m.setMatrixAt(i, _m.makeTranslation(p.pos[0], 0, p.pos[1])));
+    m.instanceMatrix.needsUpdate = true;
+  }, []);
   return (
-    <>
-      {PLOTS.map((p) => (
-        <PlotMesh key={p.id} plot={p} />
-      ))}
-    </>
+    <instancedMesh
+      ref={ref}
+      args={[g.hit, hitMat, PLOTS.length]}
+      frustumCulled={false}
+      onClick={(e) => {
+        if (e.delta > 6 || e.instanceId === undefined) return;
+        e.stopPropagation();
+        useGame.getState().select({ type: "plot", id: PLOTS[e.instanceId].id });
+      }}
+      onPointerOver={() => (document.body.style.cursor = "pointer")}
+      onPointerOut={() => (document.body.style.cursor = "auto")}
+    />
   );
 }
