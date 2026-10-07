@@ -387,6 +387,11 @@ function openSocket() {
   ws.onerror = () => ws?.close();
   ws.onclose = (ev) => {
     ws = null;
+    if (ev.code === 4000) {
+      // the game was opened somewhere else: this window steps aside instead of fighting for the connection
+      want = false;
+      useGame.getState().toast("You opened Omo'badan somewhere else, so this window was disconnected.", "info");
+    }
     if (ev.code === 4401) {
       want = false;
       useGame.getState().toast("Your session has ended. Please log in again.", "bad");
