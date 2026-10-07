@@ -41,12 +41,12 @@ export default function Hud() {
   return (
     <>
       {hideCard && (
-        <button onClick={() => patch({ hideCard: false })} className={`${small} absolute left-3 top-3 z-10 sm:left-5 sm:top-5`} aria-label="Show profile card" title="Show profile card">
+        <button onClick={() => patch({ hideCard: false })} className={`${small} absolute left-3 top-[calc(env(safe-area-inset-top)+0.9rem)] z-10 sm:left-5 sm:top-5`} aria-label="Show profile card" title="Show profile card">
           <UserRound className="size-4" />
         </button>
       )}
       {hideIcons && (
-        <button onClick={() => patch({ hideIcons: false })} className={`${small} absolute right-3 top-3 z-10 sm:right-5 sm:top-5`} aria-label="Show icons" title="Show icons">
+        <button onClick={() => patch({ hideIcons: false })} className={`${small} absolute right-3 top-[calc(env(safe-area-inset-top)+0.9rem)] z-10 sm:right-5 sm:top-5`} aria-label="Show icons" title="Show icons">
           <Eye className="size-4" />
         </button>
       )}
@@ -54,7 +54,7 @@ export default function Hud() {
         initial={{ opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, type: "spring", stiffness: 200, damping: 22 }}
-        className="absolute left-3 top-3 z-10 w-[min(21rem,calc(100vw-5.5rem))] sm:w-[21rem] rounded-[1.6rem] bg-white/75 p-3 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.25)] ring-1 ring-white/60 backdrop-blur-2xl sm:left-5 sm:top-5"
+        className="absolute left-3 top-[calc(env(safe-area-inset-top)+0.9rem)] z-10 w-[min(21rem,calc(100vw-5.5rem))] sm:w-[21rem] rounded-[1.6rem] bg-white/75 p-3 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.25)] ring-1 ring-white/60 backdrop-blur-2xl sm:left-5 sm:top-5"
       >
         <button onClick={() => patch({ hideCard: true })} className="absolute -bottom-2.5 left-1/2 grid h-5 w-10 -translate-x-1/2 place-items-center rounded-full bg-white/90 text-stone-400 shadow ring-1 ring-black/5 hover:text-stone-700" aria-label="Hide card" title="Hide card">
           <ChevronUp className="size-3.5" />
@@ -134,12 +134,12 @@ export default function Hud() {
       </motion.div>}
 
       {!hideIcons && (
-        <button onClick={() => useGame.getState().setSheet(useGame.getState().sheet === "guide" ? null : "guide")} className={`${small} absolute right-14 top-3 z-10 sm:right-16 sm:top-5`} aria-label="How to play" title="How to play">
+        <button onClick={() => useGame.getState().setSheet(useGame.getState().sheet === "guide" ? null : "guide")} className={`${small} absolute right-14 top-[calc(env(safe-area-inset-top)+0.9rem)] z-10 sm:right-16 sm:top-5`} aria-label="How to play" title="How to play">
           <HelpCircle className="size-4" />
         </button>
       )}
       {!hideIcons && (
-        <button onClick={() => patch({ hideIcons: true })} className={`${small} absolute right-3 top-3 z-10 sm:right-5 sm:top-5`} aria-label="Hide menu" title="Hide menu">
+        <button onClick={() => patch({ hideIcons: true })} className={`${small} absolute right-3 top-[calc(env(safe-area-inset-top)+0.9rem)] z-10 sm:right-5 sm:top-5`} aria-label="Hide menu" title="Hide menu">
           <EyeOff className="size-4" />
         </button>
       )}

@@ -58,7 +58,7 @@ export function IncomingCall() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -30 }}
           transition={{ type: "spring", stiffness: 300, damping: 24 }}
-          className="absolute left-1/2 top-4 z-50 flex w-[min(24rem,calc(100vw-1.5rem))] -translate-x-1/2 items-center gap-3 rounded-3xl bg-stone-900 p-3 pr-3.5 text-white shadow-2xl"
+          className="absolute left-1/2 top-[calc(env(safe-area-inset-top)+1rem)] z-50 flex w-[min(24rem,calc(100vw-1.5rem))] -translate-x-1/2 items-center gap-3 rounded-3xl bg-stone-900 p-3 pr-3.5 text-white shadow-2xl"
         >
           <motion.span animate={{ scale: [1, 1.1, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="grid size-12 place-items-center rounded-full bg-emerald-500 text-lg font-bold">
             {inc.name.slice(0, 1).toUpperCase()}
@@ -82,7 +82,7 @@ export function IncomingCall() {
 export function Toasts() {
   const toasts = useGame((s) => s.toasts);
   return (
-    <div className="pointer-events-none absolute left-1/2 top-4 z-40 flex -translate-x-1/2 flex-col items-center gap-2 max-sm:top-auto max-sm:bottom-24">
+    <div className="pointer-events-none absolute left-1/2 top-[calc(env(safe-area-inset-top)+1rem)] z-40 flex -translate-x-1/2 flex-col items-center gap-2 max-sm:top-auto max-sm:bottom-24">
       <AnimatePresence>
         {toasts.map((t) => (
           <motion.div

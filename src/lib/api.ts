@@ -147,6 +147,40 @@ export async function getVoiceTicket(room: string, id: string): Promise<{ url: s
   }
 }
 
+/**
+ * Is this device's login still good? False only when the server says so: the account is gone (a wiped database) or the
+ * token is rejected, or there is no login saved at all. Offline, it says yes so you can keep playing.
+ */
+export async function sessionValid(): Promise<boolean> {
+  const profile = useGame.getState().profile;
+  if (!profile || DEMO_AUTH) return true;
+  let saved: { pid: string; token: string } | null = null;
+  try {
+    saved = JSON.parse(localStorage.getItem(KEY) ?? "null");
+  } catch {
+    /* treated as no login */
+  }
+  if (!saved || saved.pid !== profile.id) return false;
+  try {
+    const r = await fetch(`${apiBase()}/api/state`, { headers: { authorization: `Bearer ${saved.token}` }, signal: AbortSignal.timeout(7000) });
+    return r.status !== 401;
+  } catch {
+    return true;
+  }
+}
+
+/** Forget everything saved on this device and go back to the sign-in screen. */
+export function forgetDevice() {
+  try {
+    localStorage.removeItem(KEY);
+    localStorage.removeItem(STORE_KEY);
+  } catch {
+    /* ignore */
+  }
+  cached = null;
+  location.reload();
+}
+
 /** Save progress, forget this device, and return to the sign-in screen. */
 export async function signOut() {
   await pushState();

@@ -95,7 +95,7 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
       <div className="pointer-events-none absolute -top-24 left-1/2 size-80 -translate-x-1/2 rounded-full bg-amber-400/25 blur-3xl" />
 
       {step !== "intro" && (
-        <button onClick={toggleMute} aria-label={muted ? "Unmute sound" : "Mute sound"} className="absolute right-4 top-4 z-10 grid size-10 place-items-center rounded-full bg-white/15 backdrop-blur transition hover:bg-white/25">
+        <button onClick={toggleMute} aria-label={muted ? "Unmute sound" : "Mute sound"} className="absolute right-4 top-[calc(env(safe-area-inset-top)+1rem)] z-10 grid size-10 place-items-center rounded-full bg-white/15 backdrop-blur transition hover:bg-white/25">
           {muted ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}
         </button>
       )}

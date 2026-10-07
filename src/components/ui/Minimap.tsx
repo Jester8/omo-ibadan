@@ -42,7 +42,7 @@ export default function Minimap() {
   };
   if (inside) return null;
   return (
-    <div className="absolute bottom-[5.4rem] right-3 z-10 sm:bottom-24 sm:right-5">
+    <div className="absolute bottom-[calc(5.4rem+env(safe-area-inset-bottom))] right-3 z-10 sm:bottom-24 sm:right-5">
       {shown ? (
         <div className="relative">
           <MinimapCanvas />

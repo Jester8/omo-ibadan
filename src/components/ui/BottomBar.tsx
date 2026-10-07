@@ -36,7 +36,7 @@ export default function BottomBar() {
   ];
 
   return (
-    <nav aria-label="Main menu" className="absolute inset-x-3 bottom-3 z-[15] mx-auto flex max-w-sm items-stretch rounded-[1.7rem] bg-white/85 px-1.5 py-1.5 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.3)] ring-1 ring-white/60 backdrop-blur-2xl sm:bottom-5">
+    <nav aria-label="Main menu" className="absolute inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] z-[15] mx-auto flex max-w-sm items-stretch rounded-[1.7rem] bg-white/85 px-1.5 py-1.5 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.3)] ring-1 ring-white/60 backdrop-blur-2xl sm:bottom-5">
       {items.map((it) => (
         <button key={it.id} onClick={it.onClick} aria-label={it.label} aria-current={it.active ? "page" : undefined} className="relative flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-2xl px-1 py-2 transition active:scale-90">
           {it.active && <motion.span layoutId="nav-pill" transition={{ type: "spring", stiffness: 420, damping: 34 }} className="absolute inset-0 rounded-2xl bg-emerald-600 shadow-lg shadow-emerald-600/30" />}

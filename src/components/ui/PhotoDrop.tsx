@@ -15,7 +15,7 @@ export default function PhotoDrop() {
 
   return (
     <>
-      <div className="pointer-events-none absolute inset-x-3 top-3 z-30 flex flex-col items-center gap-2 sm:top-5">
+      <div className="pointer-events-none absolute inset-x-3 top-[calc(env(safe-area-inset-top)+0.9rem)] z-30 flex flex-col items-center gap-2 sm:top-5">
         <AnimatePresence>
           {!viewing &&
             inbox.map((p) => (
@@ -59,7 +59,7 @@ function Viewer({ name, data }: { name: string; data: string }) {
       initial={{ opacity: 0, y: -24 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -24 }}
-      className="absolute inset-x-3 top-3 z-40 mx-auto w-auto max-w-xl overflow-hidden rounded-3xl bg-stone-950 shadow-2xl ring-1 ring-white/10 sm:top-5 sm:w-[34rem]"
+      className="absolute inset-x-3 top-[calc(env(safe-area-inset-top)+0.9rem)] z-40 mx-auto w-auto max-w-xl overflow-hidden rounded-3xl bg-stone-950 shadow-2xl ring-1 ring-white/10 sm:top-5 sm:w-[34rem]"
     >
       <div className="flex items-center justify-between px-4 py-2.5 text-white">
         <p className="truncate text-sm font-bold">{name} · view once</p>

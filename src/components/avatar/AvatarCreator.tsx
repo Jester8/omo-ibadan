@@ -112,14 +112,14 @@ export default function AvatarCreator({
         <div className="relative h-72 bg-gradient-to-b from-emerald-50 via-stone-50 to-amber-50 sm:h-auto sm:min-h-[34rem]">
           <AvatarPreview look={look} walk={walk} className="absolute inset-0" />
           {onCancel && (
-            <button onClick={onCancel} aria-label="Back" className="absolute left-3 top-3 grid size-10 place-items-center rounded-full bg-white/90 text-stone-800 shadow-md ring-1 ring-black/5 backdrop-blur transition hover:bg-white active:scale-90">
+            <button onClick={onCancel} aria-label="Back" className="absolute left-3 top-[calc(env(safe-area-inset-top)+0.9rem)] grid size-10 place-items-center rounded-full bg-white/90 text-stone-800 shadow-md ring-1 ring-black/5 backdrop-blur transition hover:bg-white active:scale-90">
               <ChevronLeft className="size-6" strokeWidth={2.4} />
             </button>
           )}
-          <div className={`absolute top-4 rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-black/5 backdrop-blur ${onCancel ? "left-16" : "left-4"}`}>
+          <div className={`absolute top-[calc(env(safe-area-inset-top)+1.1rem)] rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-black/5 backdrop-blur ${onCancel ? "left-16" : "left-4"}`}>
             Omo&apos;badan
           </div>
-          <div className="absolute right-3 top-3 flex flex-col items-end gap-2 sm:bottom-4 sm:left-1/2 sm:right-auto sm:top-auto sm:-translate-x-1/2 sm:flex-row">
+          <div className="absolute right-3 top-[calc(env(safe-area-inset-top)+0.9rem)] flex flex-col items-end gap-2 sm:bottom-4 sm:left-1/2 sm:right-auto sm:top-auto sm:-translate-x-1/2 sm:flex-row">
             <button
               onClick={() => setWalk((w) => !w)}
               className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-medium shadow ring-1 ring-black/5 transition active:scale-95 ${

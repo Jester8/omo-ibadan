@@ -33,7 +33,7 @@ export default function Comms() {
   };
 
   return (
-    <div className="absolute bottom-[5.4rem] left-3 z-10 flex flex-col items-start gap-2.5 sm:bottom-24 sm:left-5">
+    <div className="absolute bottom-[calc(5.4rem+env(safe-area-inset-bottom))] left-3 z-10 flex flex-col items-start gap-2.5 sm:bottom-24 sm:left-5">
       <ChatDock open={open} onClose={() => setOpen(false)} />
       <button onClick={() => setOpen((o) => !o)} aria-label={open ? "Hide chat" : "Open chat"} aria-pressed={open} className={`${round} ${open ? "bg-stone-900 text-white" : "bg-white/90 text-stone-700 hover:bg-white"}`}>
         <MessageCircle className="size-5 sm:size-6" />

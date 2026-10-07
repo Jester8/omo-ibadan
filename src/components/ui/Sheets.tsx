@@ -28,7 +28,7 @@ function Frame({ title, onClose, children }: { title: string; onClose: () => voi
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 40 }}
       transition={{ type: "spring", stiffness: 280, damping: 28 }}
-      className="absolute inset-x-3 bottom-[5.2rem] z-30 flex max-h-[56dvh] flex-col overflow-hidden rounded-[1.4rem] sm:bottom-[5.4rem] sm:top-20 sm:max-h-none sm:rounded-[1.6rem] bg-white/85 shadow-[0_12px_40px_-10px_rgba(0,0,0,0.35)] ring-1 ring-white/60 backdrop-blur-2xl sm:inset-x-auto sm:right-5 sm:w-[24rem]"
+      className="absolute inset-x-3 bottom-[calc(5.2rem+env(safe-area-inset-bottom))] z-30 flex max-h-[56dvh] flex-col overflow-hidden rounded-[1.4rem] sm:bottom-[calc(5.4rem+env(safe-area-inset-bottom))] sm:top-20 sm:max-h-none sm:rounded-[1.6rem] bg-white/85 shadow-[0_12px_40px_-10px_rgba(0,0,0,0.35)] ring-1 ring-white/60 backdrop-blur-2xl sm:inset-x-auto sm:right-5 sm:w-[24rem]"
     >
       <div className="flex items-center justify-between border-b border-stone-100 px-5 py-3.5">
         <h2 className="text-base font-bold text-stone-900">{title}</h2>

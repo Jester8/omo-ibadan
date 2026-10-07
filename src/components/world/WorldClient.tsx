@@ -21,7 +21,7 @@ import { QUESTS } from "@/lib/quests";
 import { naira } from "@/lib/plots";
 import { useMounted } from "@/lib/hooks";
 import { net, roomOf } from "@/lib/net";
-import { DEMO_AUTH, demoSignUp, requestCode, verifyCode, type Verified } from "@/lib/api";
+import { DEMO_AUTH, demoSignUp, forgetDevice, requestCode, sessionValid, verifyCode, type Verified } from "@/lib/api";
 import AuthCode from "@/components/ui/AuthCode";
 import type { Look } from "@/lib/look";
 import { voice } from "@/lib/voice";
@@ -143,6 +143,18 @@ function Runtime() {
     const id = setInterval(tick, 400);
     return () => clearInterval(id);
   }, []);
+
+  // a saved login is only good if the server still knows the account: after a wiped database, start at the sign-in screen
+  useEffect(() => {
+    if (!hasProfile || DEMO_AUTH) return;
+    let live = true;
+    void sessionValid().then((ok) => {
+      if (live && !ok) forgetDevice();
+    });
+    return () => {
+      live = false;
+    };
+  }, [hasProfile]);
 
   // a street conversation follows you from block to block
   useEffect(() => {
