@@ -54,6 +54,8 @@ export type CallState = {
 export type Sheet = "phone" | "profile" | "quests" | "election" | "garage" | "buy" | "friends" | "music" | "flights" | "guide" | null;
 
 const START_MONEY = 25000;
+/** a brand-new account starts with this much (₦) */
+export const SIGNUP_MONEY = 2_000_000;
 const START_NEEDS: Needs = { hunger: 80, energy: 90, fun: 65, social: 55 };
 const clamp = (n: number) => Math.max(0, Math.min(100, n));
 

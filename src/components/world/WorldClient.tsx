@@ -22,7 +22,7 @@ import AvatarCreator from "@/components/avatar/AvatarCreator";
 import AuthScreen from "@/components/ui/AuthScreen";
 import Overlay from "./Overlay";
 import { NPCS } from "./People";
-import { ownedBy, pendingRent, useGame } from "@/lib/store";
+import { ownedBy, pendingRent, SIGNUP_MONEY, useGame } from "@/lib/store";
 import { QUESTS } from "@/lib/quests";
 import { naira } from "@/lib/plots";
 import { useMounted } from "@/lib/hooks";
@@ -242,6 +242,7 @@ export default function WorldClient() {
             cooldown={pending.cooldown}
             onBack={() => setPending(null)}
             onVerified={(p) => {
+              if (p.isNew) useGame.setState({ money: SIGNUP_MONEY });
               setProfile({ id: p.id, name: p.name, look: p.look ?? pending.look, email: p.email });
               setPending(null);
             }}
@@ -266,6 +267,7 @@ export default function WorldClient() {
                 const d = demoSignUp(name, email, look);
                 setSigningUp(false);
                 if (!d.ok) return setSignupError(d.error);
+                useGame.setState({ money: SIGNUP_MONEY });
                 return setProfile({ id: d.profile.id, name, look, email: d.profile.email });
               }
               const r = await requestCode(email, "signup");
@@ -274,6 +276,7 @@ export default function WorldClient() {
                 const v = await verifyCode(email, "", { name, look });
                 setSigningUp(false);
                 if (!v.ok) return setSignupError(v.error);
+                if (v.profile.isNew) useGame.setState({ money: SIGNUP_MONEY });
                 return setProfile({ id: v.profile.id, name: v.profile.name, look: v.profile.look ?? look, email: v.profile.email });
               }
               setSigningUp(false);
