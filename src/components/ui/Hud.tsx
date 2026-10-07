@@ -41,8 +41,14 @@ export default function Hud() {
   return (
     <>
       {hideCard && (
-        <button onClick={() => patch({ hideCard: false })} className={`${small} absolute left-3 top-[calc(env(safe-area-inset-top)+0.9rem)] z-10 sm:left-5 sm:top-5`} aria-label="Show profile card" title="Show profile card">
-          <UserRound className="size-4" />
+        <button
+          onClick={() => patch({ hideCard: false })}
+          className="absolute left-3 top-[calc(env(safe-area-inset-top)+0.9rem)] z-10 flex h-9 items-center gap-2 rounded-full bg-white/90 pl-2.5 pr-3.5 text-stone-900 shadow-lg ring-1 ring-black/5 backdrop-blur-xl transition active:scale-95 sm:left-5 sm:top-5"
+          aria-label="Show profile card"
+          title="Show profile card"
+        >
+          <UserRound className="size-4 text-stone-600" />
+          <span className="text-sm font-extrabold tabular-nums">{naira(money)}</span>
         </button>
       )}
       {hideIcons && (
