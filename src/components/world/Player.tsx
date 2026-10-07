@@ -49,6 +49,7 @@ export default function Player() {
   const marker = useRef<THREE.Mesh>(null);
   const motion = useRef<{ speed: number; pose: "sit" | "lie" | null; emote: "wave" | "dance" | null; eat: "bowl" | "cup" | "snack" | null }>({ speed: 0, pose: null, emote: null, eat: null });
   const keys = useRef(new Set<string>());
+  const rest = useRef(0);
   const sent = useRef({ t: 0, x: 0, z: 0, s: 0 });
 
   useEffect(() => {
@@ -104,6 +105,14 @@ export default function Player() {
         me.speed = 0;
         motion.current.speed = 0;
         motion.current.pose = me.use.pose;
+        // sitting with no action running: you slowly rest, for as long as you stay
+        if (me.use.free) {
+          rest.current += dt;
+          if (rest.current > 6) {
+            rest.current = 0;
+            useGame.getState().adjustNeeds({ energy: 2, fun: 1, social: Object.keys(s.remotes).length > 0 ? 1 : 0 });
+          }
+        }
         const u = me.use;
         if (u.pose === "sit") {
           group.current.position.set(u.x, (u.seatH + 0.04 - 0.865) * S, u.z);

@@ -59,19 +59,19 @@ function PlaceBody({ id }: { id: string }) {
   return (
     <>
       <PlacePhoto id={id} />
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="grid size-12 place-items-center rounded-2xl text-2xl" style={{ background: `${color}22` }}>
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <div className="grid size-11 shrink-0 place-items-center rounded-2xl text-2xl" style={{ background: `${color}22` }}>
             {place.emoji}
           </div>
-          <div>
-            <h2 className="text-lg font-semibold leading-tight text-stone-900">{place.name}</h2>
+          <div className="min-w-0">
+            <h2 className="truncate text-base font-semibold leading-tight text-stone-900 sm:text-lg">{place.name}</h2>
             <p className="text-xs font-semibold capitalize" style={{ color }}>
               {place.kind} · {place.district}
             </p>
           </div>
         </div>
-        <button onClick={() => select(null)} aria-label="Close" className="rounded-full p-1.5 text-stone-400 transition hover:bg-stone-100 hover:text-stone-700">
+        <button onClick={() => select(null)} aria-label="Close" className="shrink-0 rounded-full p-1.5 text-stone-400 transition hover:bg-stone-100 hover:text-stone-700">
           <X className="size-5" />
         </button>
       </div>
@@ -110,7 +110,7 @@ function PlaceBody({ id }: { id: string }) {
             </>
           )}
           <p className="mb-1.5 mt-3 text-xs font-bold uppercase tracking-wide text-stone-400">Or pay for a ride</p>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
             {RIDES.map((r) => {
               const q = quotes?.rides[r.id];
               return (
@@ -118,7 +118,7 @@ function PlaceBody({ id }: { id: string }) {
                   key={r.id}
                   disabled={!q || money < q.fare}
                   onClick={() => rideToPlace(id, r.id)}
-                  className="flex flex-col items-center gap-0.5 rounded-2xl bg-amber-50 px-2 py-2.5 text-center ring-1 ring-amber-200 transition hover:bg-amber-100 active:scale-[0.97] disabled:opacity-45"
+                  className="flex min-w-0 flex-col items-center gap-0.5 rounded-2xl bg-amber-50 px-1 py-2 text-center ring-1 ring-amber-200 sm:px-2 sm:py-2.5 transition hover:bg-amber-100 active:scale-[0.97] disabled:opacity-45"
                 >
                   <span className="text-xl leading-none">{r.emoji}</span>
                   <span className="text-xs font-bold text-amber-950">{r.name}</span>
@@ -216,21 +216,17 @@ export default function SidePanel() {
           transition={{ type: "spring", stiffness: 260, damping: 26 }}
           className={`absolute z-20 overflow-y-auto rounded-[1.6rem] bg-white/85 p-4 shadow-[0_12px_40px_-10px_rgba(0,0,0,0.35)] ring-1 ring-white/60 backdrop-blur-2xl sm:inset-x-auto sm:bottom-auto sm:right-5 sm:top-20 sm:max-h-[calc(100dvh-7rem)] sm:w-[24rem] sm:p-5 ${
             card
-              ? "left-3 top-[calc(env(safe-area-inset-top)+9.9rem)] max-h-[calc(100dvh-17rem-env(safe-area-inset-top))] w-[min(17rem,66vw)] sm:left-auto"
+              ? "left-3 top-[calc(env(safe-area-inset-top)+9.9rem)] max-h-[calc(100dvh-17rem-env(safe-area-inset-top))] w-[min(19.5rem,calc(100vw-1.5rem))] sm:left-auto"
               : `right-3 bottom-[calc(5.4rem+env(safe-area-inset-bottom))] w-[min(21.5rem,calc(100vw-1.5rem))] !rounded-[1.8rem] ${min ? "max-sm:max-h-12 max-sm:overflow-hidden max-sm:py-2" : "max-h-[52dvh]"}`
           }`}
         >
-          {card ? (
-            <button onClick={() => useGame.getState().select(null)} aria-label="Close" className="absolute right-2.5 top-2.5 z-10 grid size-8 place-items-center rounded-full bg-stone-100 text-stone-500 transition hover:bg-stone-200 active:scale-90">
-              <X className="size-4" />
-            </button>
-          ) : (
+          {card ? null : (
             <button onClick={setMin} aria-label={min ? "Show panel" : "Hide panel"} className="mx-auto -mt-2 mb-2 flex w-full items-center justify-center gap-1 text-[11px] font-semibold text-stone-400 sm:hidden">
               <span className="h-1 w-10 rounded-full bg-stone-300" />
               {min && !busy ? "Show panel" : ""}
             </button>
           )}
-          <div className={`${min ? "max-sm:hidden" : ""} ${card ? "pr-7 sm:pr-8" : ""}`}>
+          <div className={min ? "max-sm:hidden" : ""}>
             {interior ? <InteriorPanel /> : selected?.type === "place" ? <PlaceBody id={selected.id} /> : selected?.type === "player" ? <PlayerPanel id={selected.id} /> : selected?.type === "gate" ? <GatePanel id={selected.id} /> : selected?.type === "cab" ? <CabPanel id={selected.id} /> : selected ? <PlotPanelBody id={selected.id} /> : null}
           </div>
         </motion.aside>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { BatteryFull, Briefcase, ChevronLeft, DoorOpen, HeartHandshake, HelpCircle, ListChecks, MapPin, MessageCircle, Music2, Newspaper, Phone, Plane, Search, ShoppingBag, Signal, Store, Wifi } from "lucide-react";
+import { X, BatteryFull, Briefcase, ChevronLeft, DoorOpen, HeartHandshake, HelpCircle, ListChecks, MapPin, MessageCircle, Music2, Newspaper, Phone, Plane, Search, ShoppingBag, Signal, Store, Wifi } from "lucide-react";
 import { eventsAt } from "@/lib/events";
 import { useClock } from "@/lib/hooks";
 import { NEWS } from "@/lib/news";
@@ -190,7 +190,7 @@ function FamilyApp() {
 export type Renderers = { goals: () => React.ReactNode; buy: () => React.ReactNode; calls: () => React.ReactNode };
 
 /** A phone you hold in the game: home screen, dock and apps. Jobs, news, messages, calls, maps, goals, shopping, flights, music, family and the guide. */
-export default function PhoneOS({ initial = null, render }: { initial?: AppId | null; render: Renderers }) {
+export default function PhoneOS({ initial = null, render, fullscreen = false, onClose }: { initial?: AppId | null; render: Renderers; fullscreen?: boolean; onClose?: () => void }) {
   const [app, setApp] = useState<AppId | null>(initial);
   const { minutes, day } = useClock();
   const call = useGame((s) => s.call.phase);
@@ -248,8 +248,8 @@ export default function PhoneOS({ initial = null, render }: { initial?: AppId | 
   };
 
   return (
-    <div className="mx-auto w-full max-w-[17rem] rounded-[2.2rem] sm:max-w-[19.5rem] sm:rounded-[2.4rem] bg-stone-950 p-2 shadow-2xl ring-1 ring-black/40">
-      <div className="relative flex h-[min(34rem,70dvh)] flex-col overflow-hidden rounded-[1.9rem] bg-gradient-to-b from-indigo-950 via-[#3a2a3a] to-[#8a4326] text-white">
+    <div className={fullscreen ? "mx-auto h-full w-full max-w-lg bg-stone-950" : "mx-auto w-full max-w-[17rem] rounded-[2.2rem] sm:max-w-[19.5rem] sm:rounded-[2.4rem] bg-stone-950 p-2 shadow-2xl ring-1 ring-black/40"}>
+      <div className={`relative flex flex-col overflow-hidden bg-gradient-to-b from-indigo-950 via-[#3a2a3a] to-[#8a4326] text-white ${fullscreen ? "h-full pt-[env(safe-area-inset-top)]" : "h-[min(34rem,70dvh)] rounded-[1.9rem]"}`}>
         {/* status bar */}
         <div className="relative z-10 flex items-center justify-between px-5 pb-1 pt-2.5 text-[11px] font-semibold">
           <span>{formatClock(minutes)}</span>
@@ -264,11 +264,16 @@ export default function PhoneOS({ initial = null, render }: { initial?: AppId | 
         <AnimatePresence mode="wait" initial={false}>
           {!current ? (
             <motion.div key="home" initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.03 }} transition={{ duration: 0.18 }} className="relative flex flex-1 flex-col px-4 pb-3 pt-3">
+              {fullscreen && onClose && (
+                <button onClick={onClose} aria-label="Close the phone" className="absolute right-4 top-1 grid size-9 place-items-center rounded-full bg-white/15 backdrop-blur transition active:scale-90">
+                  <X className="size-4" />
+                </button>
+              )}
               <p className="text-center text-5xl font-extralight tabular-nums">{formatClock(minutes).replace(/ (am|pm)/, "")}</p>
               <p className="mt-0.5 text-center text-xs text-white/70">
                 Ibadan · {day > 0.5 ? "☀️ 29°C, sunny" : "🌙 24°C, clear"}
               </p>
-              <div className="mt-4 grid grid-cols-4 gap-x-3 gap-y-5 px-1">
+              <div className={`mt-4 grid grid-cols-4 gap-x-3 px-1 ${fullscreen ? "gap-y-7" : "gap-y-5"}`}>
                 {APPS.filter((a) => !DOCK.includes(a.id)).map((a) => (
                   <Icon key={a.id} id={a.id} />
                 ))}
@@ -282,10 +287,15 @@ export default function PhoneOS({ initial = null, render }: { initial?: AppId | 
           ) : (
             <motion.div key={current} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.16 }} className="relative flex flex-1 flex-col overflow-hidden">
               <div className="flex items-center gap-2 px-3 pb-2 pt-1">
-                <button onClick={() => setApp(null)} aria-label="Home" className="grid size-8 place-items-center rounded-full bg-white/15 backdrop-blur transition active:scale-90">
+                <button onClick={() => setApp(null)} aria-label="Home" className="grid size-9 place-items-center rounded-full bg-white/15 backdrop-blur transition active:scale-90">
                   <ChevronLeft className="size-5" strokeWidth={2.4} />
                 </button>
-                <p className="text-sm font-bold">{meta?.label ?? APPS.find((a) => a.id === current)?.label}</p>
+                <p className="flex-1 text-sm font-bold">{meta?.label ?? APPS.find((a) => a.id === current)?.label}</p>
+                {fullscreen && onClose && (
+                  <button onClick={onClose} aria-label="Close the phone" className="grid size-9 place-items-center rounded-full bg-white/15 backdrop-blur transition active:scale-90">
+                    <X className="size-4" />
+                  </button>
+                )}
               </div>
               <div className="mx-1.5 flex-1 overflow-y-auto rounded-t-[1.5rem] bg-stone-50 p-4 text-stone-900">{body()}</div>
             </motion.div>

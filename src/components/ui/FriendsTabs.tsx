@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Check, ChevronLeft, Copy, House, MessageCircle, PhoneCall, Send, UserMinus, UserPlus } from "lucide-react";
 import { homeOf, visitHome } from "@/lib/visit";
 import { LEVELS, levelOf, levelRank } from "@/lib/bonds";
+import AvatarPreview from "@/components/avatar/AvatarPreview";
 import { net } from "@/lib/net";
 import { blockPlayer, closeThread, friendRequest, friendRespond, loadSocial, openThread, removeFriend, setBond, unblockPlayer, type Person, type Thread } from "@/lib/social";
 import { useGame } from "@/lib/store";
@@ -72,6 +73,11 @@ function Thread_({ pid }: { pid: string }) {
       </div>
       {showProfile && (
         <div className="mb-3 rounded-2xl bg-white p-3 ring-1 ring-black/10">
+          {friend?.look && (
+            <div className="relative mb-3 h-40 overflow-hidden rounded-xl bg-gradient-to-b from-emerald-50 via-stone-50 to-amber-50">
+              <AvatarPreview look={friend.look} className="absolute inset-0" />
+            </div>
+          )}
           <div className="flex items-center gap-3">
             <Avatar name={name} online={friend?.online} />
             <div className="min-w-0 flex-1">

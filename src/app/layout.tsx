@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Omo'badan — live your life in Ibadan",
+  title: "Omo'badan: live your life in Ibadan",
   description: "A real-life simulation of Ibadan with live voice chat. Play free in your browser.",
   applicationName: "Omo'badan",
   appleWebApp: { capable: true, title: "Omo'badan", statusBarStyle: "black-translucent" },

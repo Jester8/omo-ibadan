@@ -66,19 +66,19 @@ export default function PlotPanelBody({ id }: { id: string }) {
 
   return (
     <>
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="grid size-12 place-items-center rounded-2xl text-2xl" style={{ background: `${state ? colorFor(state.ownerId) : "#10b981"}22` }}>
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <div className="grid size-11 shrink-0 place-items-center rounded-2xl text-2xl" style={{ background: `${state ? colorFor(state.ownerId) : "#10b981"}22` }}>
             {biz ? biz.emoji : state ? "🏠" : "🌱"}
           </div>
-          <div>
-            <h2 className="text-lg font-semibold leading-tight text-stone-900">{biz ? (mine ? `Your ${biz.name.toLowerCase()}` : `${state?.ownerName}'s ${biz.name.toLowerCase()}`) : state ? (mine ? "Your land" : `${state.ownerName}'s land`) : "Land for sale"}</h2>
+          <div className="min-w-0">
+            <h2 className="truncate text-base font-semibold leading-tight text-stone-900 sm:text-lg">{biz ? (mine ? `Your ${biz.name.toLowerCase()}` : `${state?.ownerName}'s ${biz.name.toLowerCase()}`) : state ? (mine ? "Your land" : `${state.ownerName}'s land`) : "Land for sale"}</h2>
             <p className="text-xs font-semibold text-emerald-700">
               {plot.district} · {biz ? "Business" : TIERS[tier].name}
             </p>
           </div>
         </div>
-        <button onClick={() => select(null)} aria-label="Close" className="rounded-full p-1.5 text-stone-400 transition hover:bg-stone-100 hover:text-stone-700">
+        <button onClick={() => select(null)} aria-label="Close" className="shrink-0 rounded-full p-1.5 text-stone-400 transition hover:bg-stone-100 hover:text-stone-700">
           <X className="size-5" />
         </button>
       </div>

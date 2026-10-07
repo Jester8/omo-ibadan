@@ -278,10 +278,11 @@ export function startUse(index: number) {
   }
   // sitting with people: no action to pay for, just take the seat. Others in the room see you sit.
   const others = Object.values(s.remotes).some((r) => rt.ref && r.room === interiorKey(rt.ref));
-  if (def.pose === "sit" && (others || !(it.action ?? def.action))) {
+  // at home you simply sit as long as you like (and slowly recover); elsewhere sitting costs the usual action
+  if (def.pose === "sit" && (others || !(it.action ?? def.action) || rt.ref?.kind === "home")) {
     me.use = { pose: "sit", x: it.x * S, z: it.z * S, ry: it.rot ?? 0, seatH: def.seatH ?? 0.45, standX: me.x, standZ: me.z, free: true };
     net.sit(me.use);
-    s.toast("You sat down. Tap anywhere to stand up.", "info");
+    s.toast(rt.ref?.kind === "home" ? "You sat down. Stay as long as you like. Tap anywhere to stand up." : "You sat down. Tap anywhere to stand up.", "info");
     return;
   }
   const action = it.action ?? def.action;

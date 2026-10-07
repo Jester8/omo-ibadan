@@ -22,22 +22,37 @@ import PhoneOS, { type AppId } from "./PhoneOS";
 import FriendsTabs from "./FriendsTabs";
 import { useSound } from "@/lib/soundStore";
 
-function Frame({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+/**
+ * A panel over the game. On a phone every panel fills the screen until you go back; on a laptop the phone and the
+ * friends list fill the screen as well, and the other panels sit at the side.
+ */
+function Frame({ title, onClose, children, full = false, bare = false }: { title: string; onClose: () => void; children: React.ReactNode; full?: boolean; bare?: boolean }) {
+  const shell = full
+    ? "inset-0 bg-stone-50"
+    : "inset-0 bg-stone-50 sm:inset-x-auto sm:bottom-[calc(5.4rem+env(safe-area-inset-bottom))] sm:right-5 sm:top-20 sm:w-[24rem] sm:rounded-[1.6rem] sm:bg-white/90 sm:shadow-[0_12px_40px_-10px_rgba(0,0,0,0.35)] sm:ring-1 sm:ring-white/60 sm:backdrop-blur-2xl";
   return (
     <motion.div
-      initial={{ opacity: 0, x: 40 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 40 }}
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 24 }}
       transition={{ type: "spring", stiffness: 280, damping: 28 }}
-      className="absolute inset-x-3 bottom-[calc(5.2rem+env(safe-area-inset-bottom))] z-30 flex max-h-[56dvh] flex-col overflow-hidden rounded-[1.4rem] sm:bottom-[calc(5.4rem+env(safe-area-inset-bottom))] sm:top-20 sm:max-h-none sm:rounded-[1.6rem] bg-white/85 shadow-[0_12px_40px_-10px_rgba(0,0,0,0.35)] ring-1 ring-white/60 backdrop-blur-2xl sm:inset-x-auto sm:right-5 sm:w-[24rem]"
+      className={`absolute z-[45] flex flex-col overflow-hidden ${shell} ${full ? "" : "max-sm:pt-[env(safe-area-inset-top)] max-sm:pb-[env(safe-area-inset-bottom)]"}`}
     >
-      <div className="flex items-center justify-between border-b border-stone-100 px-5 py-3.5">
-        <h2 className="text-base font-bold text-stone-900">{title}</h2>
-        <button onClick={onClose} aria-label="Close" className="rounded-full p-1.5 text-stone-400 transition hover:bg-stone-100 hover:text-stone-700">
-          <X className="size-5" />
-        </button>
-      </div>
-      <div className="flex-1 overflow-y-auto p-5">{children}</div>
+      {bare ? (
+        children
+      ) : (
+        <>
+          <div className={`flex shrink-0 items-center justify-between border-b border-stone-200 px-4 py-3 ${full ? "pt-[calc(env(safe-area-inset-top)+0.75rem)]" : ""}`}>
+            <h2 className="text-base font-bold text-stone-900">{title}</h2>
+            <button onClick={onClose} aria-label="Close" className="grid size-9 place-items-center rounded-full bg-stone-100 text-stone-600 transition hover:bg-stone-200 active:scale-90">
+              <X className="size-5" />
+            </button>
+          </div>
+          <div className={`min-h-0 flex-1 overflow-y-auto p-4 ${full ? "pb-[calc(env(safe-area-inset-bottom)+1rem)]" : ""}`}>
+            <div className={full ? "mx-auto flex h-full w-full max-w-xl flex-col" : ""}>{children}</div>
+          </div>
+        </>
+      )}
     </motion.div>
   );
 }
@@ -632,12 +647,12 @@ export default function Sheets() {
   return (
     <AnimatePresence>
       {phoneApp !== undefined && (
-        <Frame key="phone" title="Phone" onClose={() => setSheet(null)}>
-          <PhoneOS key={sheet} initial={phoneApp} render={{ goals: () => <QuestsSheet />, buy: () => <BuySheet />, calls: () => <PhoneSheet /> }} />
+        <Frame key="phone" title="Phone" onClose={() => setSheet(null)} full bare>
+          <PhoneOS key={sheet} fullscreen onClose={() => setSheet(null)} initial={phoneApp} render={{ goals: () => <QuestsSheet />, buy: () => <BuySheet />, calls: () => <PhoneSheet /> }} />
         </Frame>
       )}
       {sheet === "friends" && (
-        <Frame key="friends" title="Friends" onClose={() => setSheet(null)}>
+        <Frame key="friends" title="Friends" onClose={() => setSheet(null)} full>
           <FriendsTabs />
         </Frame>
       )}
