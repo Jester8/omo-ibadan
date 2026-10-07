@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { HelpCircle, LogOut, Car, Music2, Check, CheckCircle2, Circle, Copy, Eye, Footprints, Landmark, Moon, PencilLine, PhoneCall, PhoneOff, Sun, SunMoon, Volume2, VolumeX, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { useGame, ownedBy } from "@/lib/store";
 import { net } from "@/lib/net";
 import { PLOTS, TIERS, naira, plotById } from "@/lib/plots";
@@ -24,9 +24,21 @@ import { useSound } from "@/lib/soundStore";
 import { THEME_SONG } from "@/lib/themeSong";
 
 /**
- * A panel over the game. On a phone every panel fills the screen until you go back; on a laptop the phone and the
- * friends list fill the screen as well, and the other panels sit at the side.
+ * A panel over the game. On a phone every panel fills the screen until you go back; on a laptop they are popups at the side.
  */
+/** True on a phone-sized screen. */
+function useIsPhone() {
+  return useSyncExternalStore(
+    (cb) => {
+      const m = window.matchMedia("(max-width: 639px)");
+      m.addEventListener("change", cb);
+      return () => m.removeEventListener("change", cb);
+    },
+    () => window.matchMedia("(max-width: 639px)").matches,
+    () => false,
+  );
+}
+
 function Frame({ title, onClose, children, full = false, bare = false }: { title: string; onClose: () => void; children: React.ReactNode; full?: boolean; bare?: boolean }) {
   const shell = full
     ? "inset-0 bg-stone-50"
@@ -648,15 +660,16 @@ export default function Sheets() {
   // every phone-related sheet opens the phone, on the right app
   const PHONE_APPS: Record<string, AppId | null> = { phone: null, quests: "goals", buy: "buy", garage: "buy", flights: "flights", music: "music", guide: "guide" };
   const phoneApp = sheet && sheet in PHONE_APPS ? PHONE_APPS[sheet] : undefined;
+  const onPhone = useIsPhone();
   return (
     <AnimatePresence>
       {phoneApp !== undefined && (
-        <Frame key="phone" title="Phone" onClose={() => setSheet(null)} full bare>
-          <PhoneOS key={sheet} fullscreen onClose={() => setSheet(null)} initial={phoneApp} render={{ goals: () => <QuestsSheet />, buy: () => <BuySheet />, calls: () => <PhoneSheet /> }} />
+        <Frame key="phone" title="Phone" onClose={() => setSheet(null)} full={onPhone} bare={onPhone}>
+          <PhoneOS key={sheet} fullscreen={onPhone} onClose={() => setSheet(null)} initial={phoneApp} render={{ goals: () => <QuestsSheet />, buy: () => <BuySheet />, calls: () => <PhoneSheet /> }} />
         </Frame>
       )}
       {sheet === "friends" && (
-        <Frame key="friends" title="Friends" onClose={() => setSheet(null)} full>
+        <Frame key="friends" title="Friends" onClose={() => setSheet(null)}>
           <FriendsTabs />
         </Frame>
       )}

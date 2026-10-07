@@ -13,6 +13,7 @@ import MarketWomen from "./MarketWomen";
 import PlotsLayer from "./PlotsLayer";
 import Player from "./Player";
 import { Npcs, RemotePlayers } from "./People";
+import AdBoards from "./AdBoards";
 import { anchors } from "@/lib/overlay";
 import { cam, me } from "@/lib/playerState";
 import { useGame } from "@/lib/store";
@@ -136,6 +137,7 @@ function WorldContent() {
       <Buildings />
       <Gates />
       <Estates />
+      <AdBoards />
       <CabRanks />
       {!placesOnly && <PlotsLayer />}
       {!placesOnly && <Npcs />}
