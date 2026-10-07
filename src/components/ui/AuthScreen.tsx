@@ -70,7 +70,7 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
           alt=""
           aria-hidden
           draggable={false}
-          className={`home-drift absolute inset-0 size-full object-cover transition-opacity duration-1000 ${film === "on" ? "opacity-100" : "opacity-0"}`}
+          className={`home-drift absolute inset-0 size-full object-cover object-[22%_50%] transition-opacity sm:object-center duration-1000 ${film === "on" ? "opacity-100" : "opacity-0"}`}
           onLoad={() => setFilm("on")}
           onError={() => setFilm("off")}
         />
