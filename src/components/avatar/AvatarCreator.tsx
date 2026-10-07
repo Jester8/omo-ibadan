@@ -74,7 +74,7 @@ export default function AvatarCreator({
   initialName?: string;
   initialLook?: Look;
   isEdit?: boolean;
-  onDone: (name: string, look: Look, email: string) => void;
+  onDone: (name: string, look: Look, email: string, username: string) => void;
   onCancel?: () => void;
   /** first-time sign-up: also ask for an email address */
   askEmail?: boolean;
@@ -82,12 +82,14 @@ export default function AvatarCreator({
   busy?: boolean;
 }) {
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [name, setName] = useState(initialName);
   const [look, setLook] = useState<Look>(initialLook);
   const [walk, setWalk] = useState(false);
   const set = <K extends keyof Look>(k: K, v: Look[K]) => setLook((l) => ({ ...l, [k]: v }));
   const emailOk = !askEmail || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
-  const valid = name.trim().length >= 2 && emailOk && !busy;
+  const userOk = !askEmail || /^[a-z0-9_]{3,16}$/i.test(username);
+  const valid = name.trim().length >= 2 && emailOk && userOk && !busy;
 
   return (
     <motion.div
@@ -147,6 +149,25 @@ export default function AvatarCreator({
 
             {askEmail && (
               <label className="block">
+                <span className="mb-2 block text-xs font-semibold uppercase tracking-wider text-stone-400">Username</span>
+                <div className="flex items-center rounded-2xl bg-stone-100 pl-4 ring-2 ring-transparent transition focus-within:bg-white focus-within:ring-emerald-500">
+                  <span className="text-base font-medium text-stone-400">@</span>
+                  <input
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, "").slice(0, 16))}
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    placeholder="tunde_ibadan"
+                    className="min-w-0 flex-1 bg-transparent px-1.5 py-3 text-base font-medium text-stone-900 outline-none placeholder:text-stone-400"
+                  />
+                </div>
+                <span className="mt-1.5 block text-xs text-stone-400">3 to 16 letters, numbers or underscores. Friends find you by it, and you can log in with it.</span>
+              </label>
+            )}
+
+            {askEmail && (
+              <label className="block">
                 <span className="mb-2 block text-xs font-semibold uppercase tracking-wider text-stone-400">Email</span>
                 <input
                   type="email"
@@ -199,7 +220,7 @@ export default function AvatarCreator({
             )}
             <button
               disabled={!valid}
-              onClick={() => onDone(name.trim(), look, email.trim().toLowerCase())}
+              onClick={() => onDone(name.trim(), look, email.trim().toLowerCase(), username)}
               className="rounded-full bg-emerald-700 px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-700/25 transition hover:bg-emerald-800 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {isEdit ? "Save look" : busy ? "Creating…" : "Sign up & enter Ibadan"}

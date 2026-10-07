@@ -20,7 +20,7 @@ import { boost } from "./playerState";
 import { rebuildGrid } from "./pathing";
 import { EMPTY_STATS, QUESTS, type Stats } from "./quests";
 
-export type Profile = { id: string; name: string; look: Look; email?: string };
+export type Profile = { id: string; name: string; username?: string; look: Look; email?: string };
 export type Toast = { id: number; text: string; tone: "good" | "bad" | "info" };
 export type ChatMsg = {
   id: string;

@@ -340,6 +340,7 @@ function ProfileSheet() {
       <div className="mt-3 flex items-center justify-between">
         <div>
           <p className="text-xl font-bold text-stone-900">{profile.name}</p>
+          {profile.username && <p className="text-sm font-semibold text-stone-400">@{profile.username}</p>}
           <p className="text-sm font-semibold text-amber-600">{prog.cur.name}</p>
         </div>
         <button

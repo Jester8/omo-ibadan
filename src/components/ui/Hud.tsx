@@ -66,6 +66,7 @@ export default function Hud() {
             </span>
             <span className="min-w-0">
               <span className="block truncate text-sm font-bold leading-tight text-stone-900">{profile?.name}</span>
+              {profile?.username && <span className="block truncate text-[11px] font-semibold leading-tight text-stone-400">@{profile.username}</span>}
               <span className="block truncate text-[11px] font-semibold text-amber-600">{title.name}</span>
             </span>
           </button>

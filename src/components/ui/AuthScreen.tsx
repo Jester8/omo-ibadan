@@ -132,7 +132,7 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
               <div className="mt-6">
                 <div className="relative">
                   <Mail className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
-                  <input type="email" autoComplete="email" inputMode="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" className={`${field} pl-11`} />
+                  <input type="text" autoComplete="username" autoCapitalize="none" autoCorrect="off" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email or username" className={`${field} pl-11`} />
                 </div>
               </div>
               {err && <p className="mt-3 rounded-xl bg-rose-500/25 px-3.5 py-2.5 text-sm font-medium text-rose-100">{err}</p>}

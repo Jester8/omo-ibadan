@@ -165,7 +165,7 @@ export default function WorldClient() {
   const fade = useGame((s) => s.fade);
   const hideIcons = useGame((s) => s.hideIcons);
   const [creating, setCreating] = useState(false);
-  const [pending, setPending] = useState<{ name: string; look: Look; email: string; devCode?: string; cooldown: number } | null>(null);
+  const [pending, setPending] = useState<{ name: string; look: Look; email: string; username: string; devCode?: string; cooldown: number } | null>(null);
   const [signupError, setSignupError] = useState("");
   const [signingUp, setSigningUp] = useState(false);
 
@@ -211,7 +211,7 @@ export default function WorldClient() {
                 setCreating(true);
                 return;
               }
-              setProfile({ id: p.id, name: p.name, look: p.look, email: p.email });
+              setProfile({ id: p.id, name: p.name, username: p.username, look: p.look, email: p.email });
             }}
           />
         )}
@@ -220,13 +220,13 @@ export default function WorldClient() {
             key="code"
             email={pending.email}
             purpose="signup"
-            signup={{ name: pending.name, look: pending.look }}
+            signup={{ name: pending.name, look: pending.look, username: pending.username }}
             devCode={pending.devCode}
             cooldown={pending.cooldown}
             onBack={() => setPending(null)}
             onVerified={(p) => {
               if (p.isNew) useGame.setState({ money: SIGNUP_MONEY });
-              setProfile({ id: p.id, name: p.name, look: p.look ?? pending.look, email: p.email });
+              setProfile({ id: p.id, name: p.name, username: p.username ?? pending.username, look: p.look ?? pending.look, email: p.email });
               setPending(null);
             }}
           />
@@ -241,30 +241,30 @@ export default function WorldClient() {
             askEmail={!profile}
             error={signupError}
             busy={signingUp}
-            onDone={async (name, look, email) => {
+            onDone={async (name, look, email, username) => {
               if (profile) return setProfile({ ...profile, name, look });
               setSigningUp(true);
               setSignupError("");
               if (DEMO_AUTH) {
                 // demo mode: make the account right here, no server and no email code
-                const d = demoSignUp(name, email, look);
+                const d = demoSignUp(name, email, look, username);
                 setSigningUp(false);
                 if (!d.ok) return setSignupError(d.error);
                 useGame.setState({ money: SIGNUP_MONEY });
-                return setProfile({ id: d.profile.id, name, look, email: d.profile.email });
+                return setProfile({ id: d.profile.id, name, username, look, email: d.profile.email });
               }
-              const r = await requestCode(email, "signup");
+              const r = await requestCode(email, "signup", username);
               if (r.ok && r.skip) {
                 // no emailed codes for now: just save the details and go in
-                const v = await verifyCode(email, "", { name, look });
+                const v = await verifyCode(email, "", { name, look, username });
                 setSigningUp(false);
                 if (!v.ok) return setSignupError(v.error);
                 if (v.profile.isNew) useGame.setState({ money: SIGNUP_MONEY });
-                return setProfile({ id: v.profile.id, name: v.profile.name, look: v.profile.look ?? look, email: v.profile.email });
+                return setProfile({ id: v.profile.id, name: v.profile.name, username: v.profile.username ?? username, look: v.profile.look ?? look, email: v.profile.email });
               }
               setSigningUp(false);
               if (!r.ok) return setSignupError(r.error);
-              setPending({ name, look, email, devCode: r.devCode, cooldown: r.cooldown });
+              setPending({ name, look, email, username, devCode: r.devCode, cooldown: r.cooldown });
             }}
           />
         )}

@@ -17,7 +17,7 @@ export const DEMO_AUTH = process.env.NEXT_PUBLIC_REQUIRE_BACKEND !== "1";
 
 const DEMO_KEY = "omo-ibadan-demo-accounts";
 const STORE_KEY = "omo-ibadan-v1";
-type DemoAccount = { id: string; name: string; email: string; look: Look; saved?: string };
+type DemoAccount = { id: string; name: string; username?: string; email: string; look: Look; saved?: string };
 
 const demoAccounts = (): Record<string, DemoAccount> => {
   try {
@@ -35,24 +35,26 @@ const putDemo = (a: DemoAccount) => {
 };
 
 /** Create a demo account on this device. Returns an error message if the email is already used here. */
-export function demoSignUp(name: string, email: string, look: Look): { ok: true; profile: Verified } | { ok: false; error: string } {
+export function demoSignUp(name: string, email: string, look: Look, username = ""): { ok: true; profile: Verified } | { ok: false; error: string } {
   const key = email.trim().toLowerCase();
+  if (username && Object.values(demoAccounts()).some((a) => a.username?.toLowerCase() === username.toLowerCase())) return { ok: false, error: "That username is taken. Try another." };
   if (demoAccounts()[key]) return { ok: false, error: "That email already has a demo account on this device. Log in instead." };
   const id = crypto.randomUUID().replace(/-/g, "").slice(0, 20);
-  putDemo({ id, name, email: key, look });
-  return { ok: true, profile: { id, name, look, email: key, isNew: true } };
+  putDemo({ id, name, username: username || undefined, email: key, look });
+  return { ok: true, profile: { id, name, username: username || undefined, look, email: key, isNew: true } };
 }
 
 /** Log in to a demo account made on this device. Brings back its saved progress. */
 export function demoLogIn(email: string): { ok: true; profile: Verified } | { ok: false; error: string } {
-  const a = demoAccounts()[email.trim().toLowerCase()];
-  if (!a) return { ok: false, error: "No demo account with that email on this device. Sign up to make one." };
+  const ident = email.trim().toLowerCase();
+  const a = demoAccounts()[ident] ?? Object.values(demoAccounts()).find((x) => x.username?.toLowerCase() === ident);
+  if (!a) return { ok: false, error: "No demo account with that email or username on this device. Sign up to make one." };
   try {
     if (a.saved) localStorage.setItem(STORE_KEY, a.saved);
   } catch {
     /* ignore */
   }
-  return { ok: true, profile: { id: a.id, name: a.name, look: a.look, email: a.email, isNew: false } };
+  return { ok: true, profile: { id: a.id, name: a.name, username: a.username, look: a.look, email: a.email, isNew: false } };
 }
 
 /** Guest token for the current player, fetched once and kept in localStorage. */
@@ -80,9 +82,9 @@ export async function ensureToken(): Promise<string | null> {
 export const currentToken = () => cached;
 
 /** Step 1: email a six-digit code. In local development with no mail server, the server also returns the code (devCode). */
-export async function requestCode(email: string, purpose: "login" | "signup"): Promise<{ ok: true; devCode?: string; cooldown: number; skip?: boolean } | { ok: false; error: string }> {
+export async function requestCode(email: string, purpose: "login" | "signup", username?: string): Promise<{ ok: true; devCode?: string; cooldown: number; skip?: boolean } | { ok: false; error: string }> {
   try {
-    const res = await fetch(`${apiBase()}/api/auth/request-code`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, purpose }), signal: AbortSignal.timeout(8000) });
+    const res = await fetch(`${apiBase()}/api/auth/request-code`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, purpose, username }), signal: AbortSignal.timeout(8000) });
     const j = (await res.json().catch(() => ({}))) as { devCode?: string; cooldown?: number; skip?: boolean; error?: string };
     if (!res.ok) return { ok: false, error: j.error ?? "Could not send the code." };
     return { ok: true, devCode: j.devCode, cooldown: j.cooldown ?? 30, skip: j.skip };
@@ -91,17 +93,17 @@ export async function requestCode(email: string, purpose: "login" | "signup"): P
   }
 }
 
-export type Verified = { id: string; name: string; look: Look | null; email: string; isNew: boolean };
+export type Verified = { id: string; name: string; username?: string; look: Look | null; email: string; isNew: boolean };
 
 /** Step 2: check the code. An existing email logs in; a new one creates the account from the name and avatar. */
-export async function verifyCode(email: string, code: string, extra?: { name: string; look: Look }): Promise<{ ok: true; profile: Verified } | { ok: false; error: string }> {
+export async function verifyCode(email: string, code: string, extra?: { name: string; look: Look; username?: string }): Promise<{ ok: true; profile: Verified } | { ok: false; error: string }> {
   try {
     const res = await fetch(`${apiBase()}/api/auth/verify`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, code, ...extra }), signal: AbortSignal.timeout(8000) });
-    const j = (await res.json().catch(() => ({}))) as { pid?: string; name?: string; look?: Look | null; token?: string; isNew?: boolean; error?: string };
+    const j = (await res.json().catch(() => ({}))) as { pid?: string; name?: string; username?: string; email?: string; look?: Look | null; token?: string; isNew?: boolean; error?: string };
     if (!res.ok || !j.pid || !j.token) return { ok: false, error: j.error ?? "Could not verify the code." };
     localStorage.setItem(KEY, JSON.stringify({ pid: j.pid, token: j.token }));
     cached = j.token;
-    return { ok: true, profile: { id: j.pid, name: j.name ?? extra?.name ?? "", look: j.look ?? extra?.look ?? null, email, isNew: !!j.isNew } };
+    return { ok: true, profile: { id: j.pid, name: j.name ?? extra?.name ?? "", username: j.username ?? extra?.username, look: j.look ?? extra?.look ?? null, email: j.email ?? email, isNew: !!j.isNew } };
   } catch {
     return { ok: false, error: "Can't reach the server. Check your connection and try again." };
   }
