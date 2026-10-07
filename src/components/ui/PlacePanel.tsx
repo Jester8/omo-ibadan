@@ -6,14 +6,14 @@ import GatePanel from "./GatePanel";
 import PlayerPanel from "./PlayerPanel";
 import CabPanel from "./CabPanel";
 import { AnimatePresence, motion } from "motion/react";
-import { DoorOpen, Footprints, MapPin, X } from "lucide-react";
+import { DoorOpen, Footprints, MapPin, PanelRightOpen, X } from "lucide-react";
 import { PLACES, KIND_COLORS } from "@/lib/places";
 import { useGame } from "@/lib/store";
 import { useClock } from "@/lib/hooks";
 import { driveToPlace, quoteRide, rideToPlace, walkToPlace } from "@/lib/movement";
 import { RIDES, carById, type RideId } from "@/lib/cars";
 import { me } from "@/lib/playerState";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { naira } from "@/lib/plots";
 import { ActionRow, VoiceRoomCard } from "./parts";
 import HereNow from "./HereNow";
@@ -194,17 +194,26 @@ export default function SidePanel() {
   const selected = useGame((s) => s.selected);
   const interior = useGame((s) => s.interior);
   useClock();
-  // phones: rooms start with the panel folded away so the room itself is visible
-  const flip = useGame((s) => s.panelFlip);
-  const setFlip = (v: string | null) => useGame.getState().patch({ panelFlip: v });
   const shown = interior ? { type: "interior", id: `${interior.kind}:${interior.id}` } : selected;
   const key = shown ? `${shown.type}:${shown.id}` : "";
-  const busy = useGame((s) => !!s.busy || !!s.ride);
-  // inside a room the panel folds away on phones so you can see the room (it holds the way out)
-  const min = !!interior && (busy || flip !== key);
-  const setMin = () => setFlip(flip === key ? null : key);
-  // outside, on a phone, a tapped place or house is a small card at the top left with a close button that really closes it
+  const hidden = useGame((s) => s.panelHidden);
+  // a new room or a new selection brings the panel back
+  useEffect(() => {
+    useGame.setState({ panelHidden: false });
+  }, [key]);
+  // outside, a tapped place or house is a small card with its own close button
   const card = !interior;
+  if (interior && hidden) {
+    return (
+      <button
+        onClick={() => useGame.setState({ panelHidden: false })}
+        aria-label="Open the panel"
+        className="absolute bottom-[calc(5.4rem+env(safe-area-inset-bottom))] right-3 z-20 flex h-12 items-center gap-2 rounded-full bg-white/95 px-4 text-sm font-bold text-black shadow-xl ring-1 ring-black/10 backdrop-blur-xl transition active:scale-95 sm:right-5"
+      >
+        <PanelRightOpen className="size-5" /> Panel
+      </button>
+    );
+  }
   return (
     <AnimatePresence mode="wait">
       {shown && (
@@ -217,16 +226,10 @@ export default function SidePanel() {
           className={`absolute z-20 overflow-y-auto rounded-[1.6rem] bg-white/85 p-4 shadow-[0_12px_40px_-10px_rgba(0,0,0,0.35)] ring-1 ring-white/60 backdrop-blur-2xl sm:inset-x-auto sm:bottom-auto sm:right-5 sm:top-20 sm:max-h-[calc(100dvh-7rem)] sm:w-[24rem] sm:p-5 ${
             card
               ? "left-3 top-[calc(env(safe-area-inset-top)+13.2rem)] max-h-[calc(100dvh-20.5rem-env(safe-area-inset-top))] w-[min(19.5rem,calc(100vw-1.5rem))] sm:left-auto"
-              : `right-3 bottom-[calc(5.4rem+env(safe-area-inset-bottom))] w-[min(21.5rem,calc(100vw-1.5rem))] !rounded-[1.8rem] ${min ? "max-sm:max-h-12 max-sm:overflow-hidden max-sm:py-2" : "max-h-[52dvh]"}`
+              : "right-3 bottom-[calc(5.4rem+env(safe-area-inset-bottom))] max-h-[52dvh] w-[min(21.5rem,calc(100vw-1.5rem))] !rounded-[1.8rem]"
           }`}
         >
-          {card ? null : (
-            <button onClick={setMin} aria-label={min ? "Show panel" : "Hide panel"} className="mx-auto -mt-2 mb-2 flex w-full items-center justify-center gap-1 text-[11px] font-semibold text-stone-400 sm:hidden">
-              <span className="h-1 w-10 rounded-full bg-stone-300" />
-              {min && !busy ? "Show panel" : ""}
-            </button>
-          )}
-          <div className={min ? "max-sm:hidden" : ""}>
+          <div>
             {interior ? <InteriorPanel /> : selected?.type === "place" ? <PlaceBody id={selected.id} /> : selected?.type === "player" ? <PlayerPanel id={selected.id} /> : selected?.type === "gate" ? <GatePanel id={selected.id} /> : selected?.type === "cab" ? <CabPanel id={selected.id} /> : selected ? <PlotPanelBody id={selected.id} /> : null}
           </div>
         </motion.aside>

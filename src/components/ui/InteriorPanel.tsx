@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { DoorOpen, Lightbulb, ZapOff } from "lucide-react";
+import { DoorOpen, Lightbulb, X, ZapOff } from "lucide-react";
 import { PLACES } from "@/lib/places";
 import { useGame } from "@/lib/store";
 import { useClock } from "@/lib/hooks";
@@ -87,9 +87,14 @@ export default function InteriorPanel() {
             <p className="text-xs font-semibold text-amber-700 first-letter:uppercase">{subtitle}</p>
           </div>
         </div>
-        <button onClick={exitInterior} className="flex items-center gap-1.5 rounded-full bg-stone-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-stone-700 active:scale-95">
-          <DoorOpen className="size-3.5" /> Leave
-        </button>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <button onClick={exitInterior} className="flex items-center gap-1.5 rounded-full bg-stone-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-stone-700 active:scale-95">
+            <DoorOpen className="size-3.5" /> Leave
+          </button>
+          <button onClick={() => useGame.setState({ panelHidden: true })} aria-label="Close the panel" title="Close the panel" className="grid size-8 place-items-center rounded-full bg-stone-100 text-stone-600 transition hover:bg-stone-200 active:scale-90">
+            <X className="size-4" />
+          </button>
+        </div>
       </div>
 
       <HereNow />

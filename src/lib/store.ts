@@ -165,6 +165,8 @@ type State = {
   knocks: { from: string; name: string; plotId: string }[];
   /** a brand new account is still waiting to be given its starter home (not saved) */
   starterPending: boolean;
+  /** inside a room, the panel has been closed (a small button brings it back) */
+  panelHidden: boolean;
   /** friends asking to get closer, waiting for your answer */
   relAsks: { from: string; name: string; level: string }[];
   /** what other people in the room are doing right now (cooking, eating...), by connection id */
@@ -342,6 +344,7 @@ export const useGame = create<State>()(
       incoming: null,
       knocks: [],
       starterPending: false,
+      panelHidden: false,
       relAsks: [],
       doing: {},
       netQuality: "good",
