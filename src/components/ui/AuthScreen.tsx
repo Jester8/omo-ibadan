@@ -17,6 +17,8 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
   const [step, setStep] = useState<Step>("intro");
   const muted = useSound((s) => s.muted);
   const [email, setEmail] = useState("");
+  // the Mapo Hall film: shown once it is really playing, otherwise the painted skyline stays
+  const [film, setFilm] = useState<"loading" | "on" | "off">("loading");
   const [devCode, setDevCode] = useState<string | undefined>();
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
@@ -61,8 +63,24 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
 
   return (
     <div className="absolute inset-0 z-50 overflow-hidden bg-gradient-to-b from-[#1b1a2e] via-[#3a2a3a] to-[#7a3b22] text-white">
-      {/* the rust-roofed skyline of Ibadan */}
-      <svg aria-hidden className="absolute inset-x-0 bottom-0 h-[46%] w-full" viewBox="0 0 400 200" preserveAspectRatio="xMidYMax slice">
+      {film !== "off" && (
+        <video
+          className={`absolute inset-0 size-full object-cover transition-opacity duration-1000 ${film === "on" ? "opacity-100" : "opacity-0"}`}
+          src="/video/mapo-hall.mp4"
+          poster="/video/mapo-hall.jpg"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          aria-hidden
+          onPlaying={() => setFilm("on")}
+          onError={() => setFilm("off")}
+        />
+      )}
+      {film === "on" && <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/25 to-black/65" />}
+      {/* the rust-roofed skyline of Ibadan (the painted fallback) */}
+      <svg aria-hidden className={`absolute inset-x-0 bottom-0 h-[46%] w-full transition-opacity duration-1000 ${film === "on" ? "opacity-0" : "opacity-100"}`} viewBox="0 0 400 200" preserveAspectRatio="xMidYMax slice">
         {Array.from({ length: 22 }, (_, i) => {
           const x = i * 19 - 6;
           const h = 34 + ((i * 37) % 46);

@@ -9,6 +9,7 @@ import type { Policy } from "./protocol";
 import { voice } from "./voice";
 import { cleanChat } from "./moderation";
 import { interiorKey, type InteriorRef } from "./interiors";
+import { usePhotos } from "./photos";
 
 let ws: WebSocket | null = null;
 let want = false;
@@ -134,6 +135,13 @@ function handle(m: S2C) {
     case "election":
       useGame.setState({ election: m.e, myVote: m.myVote });
       break;
+    case "photo": {
+      const pid = Object.values(s.remotes).find((r) => r.name === m.name)?.pid;
+      if (pid && s.muted.includes(pid)) break;
+      usePhotos.getState().add({ id: m.photoId, name: m.name, data: m.data, at: Date.now() });
+      audio.pop();
+      break;
+    }
     case "emote":
       emotes.set(m.id, { e: m.e, until: Date.now() + (m.e === "wave" ? 2200 : 6000) });
       break;
@@ -270,6 +278,10 @@ export const net = {
   },
   dm(to: string, text: string) {
     send({ t: "dm", to, text });
+  },
+  /** Send a view-once photo to everyone on the call or in the voice room with you. */
+  photo(data: string) {
+    send({ t: "photo", data });
   },
   /** Re-announce name/look after the avatar is edited. */
   hello() {

@@ -32,6 +32,7 @@ import type { Look } from "@/lib/look";
 import { voice } from "@/lib/voice";
 import { streetRoom } from "@/lib/voiceRoom";
 import Comms from "@/components/ui/Comms";
+import PhotoDrop from "@/components/ui/PhotoDrop";
 import { enterInterior, goUpDeck, homeRef, rt, startUse, walkToFurn } from "@/lib/interiorRuntime";
 import { cam, me } from "@/lib/playerState";
 import { setOpenEstates } from "@/lib/pathing";
@@ -178,6 +179,7 @@ export default function WorldClient() {
           <Hud />
           <SidePanel />
           {!hideIcons && <Comms />}
+          <PhotoDrop />
           <Sheets />
           <DeckPanel />
           <ComputerScreen />

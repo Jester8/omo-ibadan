@@ -66,7 +66,7 @@ function Thread_({ pid }: { pid: string }) {
         {msgs.length === 0 && <p className="pt-6 text-center text-xs text-stone-400">No messages yet. Say hello 👋</p>}
         {msgs.map((m) => (
           <div key={m.id} className={`flex ${m.from === me ? "justify-end" : "justify-start"}`}>
-            <p className={`max-w-[80%] rounded-2xl px-3.5 py-2 text-[13px] leading-snug ${m.from === me ? "rounded-br-sm bg-emerald-600 text-white" : "rounded-bl-sm bg-white text-stone-800 ring-1 ring-black/5"}`}>{m.text}</p>
+            <p className={`max-w-[80%] rounded-2xl px-3.5 py-2 text-[13px] leading-snug ${m.from === me ? "rounded-br-sm bg-emerald-600 text-white" : "rounded-bl-sm bg-white text-black ring-1 ring-black/5"}`}>{m.text}</p>
           </div>
         ))}
         <div ref={end} />

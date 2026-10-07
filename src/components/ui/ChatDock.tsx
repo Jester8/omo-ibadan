@@ -67,9 +67,9 @@ export default function ChatDock({ open, onClose }: { open: boolean; onClose: ()
                           {m.from}
                         </button>
                       ) : (
-                        <span className={`font-semibold ${m.self ? "text-emerald-700" : "text-stone-400"}`}>{m.from}</span>
+                        <span className={`font-semibold ${m.self ? "text-emerald-700" : "text-stone-800"}`}>{m.from}</span>
                       )}
-                      <span className="text-stone-700"> {m.text}</span>
+                      <span className="text-black"> {m.text}</span>
                     </p>
                     {menu === m.id && canModerate && (
                       <div className="mt-1 flex gap-1.5">
@@ -106,7 +106,7 @@ export default function ChatDock({ open, onClose }: { open: boolean; onClose: ()
                 onChange={(e) => setText(e.target.value)}
                 maxLength={200}
                 placeholder="Say something…"
-                className="min-w-0 flex-1 rounded-full bg-stone-100 px-4 py-2 text-sm outline-none ring-2 ring-transparent transition focus:bg-white focus:ring-emerald-500"
+                className="min-w-0 flex-1 rounded-full bg-stone-100 px-4 py-2 text-sm text-black outline-none ring-2 ring-transparent transition focus:bg-white focus:ring-emerald-500"
               />
               <button type="submit" aria-label="Send" className="grid size-9 place-items-center rounded-full bg-emerald-700 text-white transition active:scale-90 disabled:opacity-40" disabled={!text.trim()}>
                 <Send className="size-4" />
