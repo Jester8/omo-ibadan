@@ -602,6 +602,5 @@ export function layoutFor(ref: InteriorRef, tierOf?: (plotId: string) => { tier:
   if (ref.id === "flat") return FLAT_LAYOUT;
   const plot = tierOf?.(ref.id);
   if (!plot || plot.tier < 1) return null;
-  const npc = plot.ownerId.startsWith("npc:");
-  return { ...homeLayout(plot.tier, plot.ownerId, plot.ownerName), id: ref.id, residents: npc ? [{ name: plot.ownerName, x: -2, z: 1.5, seed: plot.ownerName, lines: ["Welcome, welcome! Please sit down.", "You must be hungry. Have some pounded yam."] }] : undefined };
+  return { ...homeLayout(plot.tier, plot.ownerId, plot.ownerName), id: ref.id };
 }

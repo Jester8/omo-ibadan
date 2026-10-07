@@ -5,7 +5,6 @@ import { Check, ChevronLeft, Copy, MessageCircle, PhoneCall, Send, UserMinus, Us
 import { net } from "@/lib/net";
 import { blockPlayer, closeThread, friendRequest, friendRespond, loadSocial, openThread, removeFriend, unblockPlayer, type Person, type Thread } from "@/lib/social";
 import { useGame } from "@/lib/store";
-import { MetPanel } from "./MetPanel";
 
 const initial = (n: string) => n.slice(0, 1).toUpperCase();
 const ago = (t: number) => {
@@ -274,7 +273,7 @@ function NearbyPanel() {
   );
 }
 
-type Tab = "chats" | "friends" | "nearby" | "met";
+type Tab = "chats" | "friends" | "nearby";
 
 /** The Friends tab: chats, friends and requests, people nearby, and the people of Ibadan you've met. */
 export default function FriendsTabs() {
@@ -286,7 +285,6 @@ export default function FriendsTabs() {
     ["chats", "Chats", unread],
     ["friends", "Friends", reqs],
     ["nearby", "Nearby", 0],
-    ["met", "Locals", 0],
   ];
   return (
     <>
@@ -303,7 +301,6 @@ export default function FriendsTabs() {
       {tab === "chats" && <ChatsPanel />}
       {tab === "friends" && <FriendsPanel />}
       {tab === "nearby" && <NearbyPanel />}
-      {tab === "met" && <MetPanel />}
     </>
   );
 }

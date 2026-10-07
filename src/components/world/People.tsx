@@ -11,8 +11,7 @@ import { PLACES, doorOf } from "@/lib/places";
 import { findWorldPath, type Pt } from "@/lib/pathing";
 import { interiorKey } from "@/lib/interiors";
 import { seededLook, topsFor, type Look } from "@/lib/look";
-import { walkTo } from "@/lib/movement";
-import { emotes, me, remoteMotion } from "@/lib/playerState";
+import { emotes, remoteMotion } from "@/lib/playerState";
 import { useGame } from "@/lib/store";
 
 const angleDiff = (a: number, b: number) => {
@@ -104,17 +103,6 @@ function npcLook(name: string, female: boolean): Look {
   return tops.some((t) => t.id === look.top) ? look : { ...look, top: tops[0].id };
 }
 
-const LINES: Record<string, string[]> = {
-  default: ["How far? Una dey alright?", "Ibadan is peace o.", "Abeg make NEPA no take light again.", "E kaaro o!", "Who wan chop?"],
-  "amala-skye": ["Ewedu soft die!", "Abeg add one more ponmo.", "Gbegiri don finish for the first pot."],
-  "bodija-market": ["Madam, last price?", "Tomatoes fresh o, come see!", "Oya buy, no dull yourself."],
-  dugbe: ["Customer, what you dey find?", "Cloth dey here, original."],
-  stadium: ["Shooting Stars go win today!", "Who dey call that offside?!"],
-  "cocoa-house": ["Meeting by 2pm, don't be late.", "This deal is big, trust me."],
-  ui: ["Exam don dey near o.", "Who get the lecture notes?"],
-  "agodi": ["This lake is so calm.", "Fresh air, finally."],
-};
-
 export const NPCS: Npc[] = NAMES.map((name, i) => {
   const p = PLACES[(i * 5) % PLACES.length];
   const d = doorOf(p);
@@ -135,14 +123,6 @@ function NpcActor({ index }: { index: number }) {
     const npc = NPCS[index];
     const st = npc.st;
     const now = Date.now();
-    const gs = useGame.getState();
-    motion.current.eat = gs.dateWith && gs.selected?.id === npc.id ? "bowl" : null;
-    if (gs.selected?.type === "npc" && gs.selected.id === npc.id && Math.hypot(me.x - st.x, me.z - st.z) < 3.2) {
-      // she stops to talk and turns towards you
-      st.path = [];
-      st.waitUntil = now + 4000;
-      st.ry += angleDiff(st.ry, Math.atan2(me.x - st.x, me.z - st.z)) * Math.min(1, dt * 8);
-    }
     if (!st.path.length && now > st.waitUntil) {
       const dest = PLACES[Math.floor(Math.random() * PLACES.length)];
       if (dest.id !== st.place) {
@@ -182,33 +162,10 @@ function NpcActor({ index }: { index: number }) {
       g.current.position.set(st.x, 0, st.z);
       g.current.rotation.y = st.ry;
     }
-    // ambient chatter, only when the player is in this NPC's room
-    if (now > st.nextChat) {
-      st.nextChat = now + 20000 + Math.random() * 25000;
-      const s = useGame.getState();
-      if (st.place && s.atPlace === st.place) {
-        const pool = LINES[st.place] ?? LINES.default;
-        s.addChat({ room: st.place, from: npc.name, text: pool[Math.floor(Math.random() * pool.length)], at: now, npc: true }, npc.id);
-      }
-    }
   });
   return (
     <group ref={g}>
       <Avatar look={npcLook} motion={motion} scale={AVATAR_SCALE} />
-      {/* generous invisible hit area so a tap finds her */}
-      <mesh
-        position-y={0.5}
-        onClick={(e) => {
-          if (e.delta > 6) return;
-          e.stopPropagation();
-          useGame.getState().select({ type: "npc", id: NPCS[index].id });
-          const st = NPCS[index].st;
-          walkTo(st.x, st.z + 0.9);
-        }}
-      >
-        <cylinderGeometry args={[0.32, 0.32, 1.1, 8]} />
-        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
-      </mesh>
     </group>
   );
 }

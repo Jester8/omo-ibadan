@@ -78,13 +78,6 @@ export const QUESTS: Quest[] = [
     done: (s) => (s.stats.slept ?? 0) >= 1,
   },
   {
-    id: "romance",
-    title: "Love in Ibadan",
-    blurb: "Talk to a lady, ask her out, and take her on a date.",
-    reward: { money: 3000, rep: 3 },
-    done: (s) => (s.stats.dates ?? 0) >= 1,
-  },
-  {
     id: "fly",
     title: "Up, up and away",
     blurb: "Book a ticket at Ibadan Airport and take a flight.",
