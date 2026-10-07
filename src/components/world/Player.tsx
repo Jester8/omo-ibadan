@@ -214,6 +214,7 @@ export default function Player() {
 
     // network
     const now = performance.now();
+    audio.setMotion(me.speed);
     const o = sent.current;
     const changed = Math.abs(o.x - me.x) > 0.01 || Math.abs(o.z - me.z) > 0.01 || Math.abs(o.s - me.speed) > 0.3;
     if (s.net === "online" && now - o.t > 100 && changed) {

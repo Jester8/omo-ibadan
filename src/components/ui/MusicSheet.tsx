@@ -2,8 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Music2, Pause, Play, Trash2, Upload } from "lucide-react";
-import { introInfo } from "@/lib/api";
-import { introTrackFrom, play, useMusic, type PlayableTrack } from "@/lib/music";
+import { play, useMusic, type PlayableTrack } from "@/lib/music";
 import { listApproved, listMine, removeTrack, submitTrack, type MyTrack } from "@/lib/tracks";
 
 const STATUS: Record<MyTrack["status"], string> = { pending: "Waiting for review", approved: "Live in the city", rejected: "Not approved" };
@@ -33,7 +32,7 @@ function Listen() {
   const playing = useMusic((s) => s.playing);
   const error = useMusic((s) => s.error);
   useEffect(() => {
-    void Promise.all([listApproved(), introInfo()]).then(([list, intro]) => setTracks(intro.available ? [introTrackFrom(intro), ...list] : list));
+    void listApproved().then(setTracks);
   }, []);
 
   return (

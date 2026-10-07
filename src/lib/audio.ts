@@ -1,6 +1,8 @@
 /**
  * Procedural Nigerian soundscape (Web Audio, no sample files, so no licensing worries):
- *  - an Afrobeat / highlife groove: kick, log-drum bass, shekere, congas, guitar, talking-drum fills
+ *  - an Afrobeat / highlife groove: kick, log-drum bass, shekere, congas, guitar, talking-drum fills,
+ *    plus a warm pad, a kalimba melody and an echo. It is interactive: the groove builds as the player moves,
+ *    enters lively places (markets, clubs, stadium) or night falls, and thins out when things are calm.
  *  - street ambience: traffic, danfo horns, keke engines, morning birds, night crickets
  *  - NEPA: neighbours' generators roar when the light goes
  *  - UI and game sound effects
@@ -56,6 +58,11 @@ class Engine {
   private crowdGain!: GainNode;
   private chatterGain!: GainNode;
   private nextAmbient = 0;
+  /** 0 calm .. 1 lively; eased toward a target that depends on place, night and how fast the player moves */
+  private energy = 0.3;
+  private motion = 0;
+  private send!: GainNode;
+  private melodyIdx = 3;
   private ringTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
@@ -83,6 +90,20 @@ class Engine {
     this.musicFilter.frequency.value = 16000;
     this.musicBus = ctx.createGain();
     this.musicBus.connect(this.musicFilter).connect(this.master);
+    // a soft dotted-eighth echo shared by the bells and plucks
+    this.send = ctx.createGain();
+    const dly = ctx.createDelay(1.5);
+    dly.delayTime.value = 0.46;
+    const fb = ctx.createGain();
+    fb.gain.value = 0.38;
+    const dlp = ctx.createBiquadFilter();
+    dlp.type = "lowpass";
+    dlp.frequency.value = 2600;
+    const wet = ctx.createGain();
+    wet.gain.value = 0.42;
+    this.send.connect(dly);
+    dly.connect(dlp).connect(fb).connect(dly);
+    dlp.connect(wet).connect(this.musicBus);
     this.sfxBus = ctx.createGain();
     this.sfxBus.connect(this.master);
     this.ambBus = ctx.createGain();
@@ -95,7 +116,11 @@ class Engine {
 
     this.buildAmbience();
     this.applySettings();
-    this.apply(true);
+    // the music begins from the top and fades in
+    this.musicBus.gain.value = 0;
+    this.step = 0;
+    this.bar = 0;
+    this.apply();
     this.nextTime = ctx.currentTime + 0.1;
     this.timer = setInterval(() => this.schedule(), 40);
   }
@@ -109,6 +134,21 @@ class Engine {
     }
     this.applySettings();
     this.apply();
+  }
+
+  /** How fast the player is moving (world units per second): walking, running or riding lifts the groove. */
+  setMotion(speed: number) {
+    this.motion = Math.min(1, Math.max(0, speed / 7));
+  }
+
+  private targetEnergy() {
+    const c = this.ctxState;
+    const p = c.place ?? "";
+    let base = c.indoors ? 0.42 : 0.5;
+    if (/club|lounge|bar|night|palmwine|suya|stadium|amusement|ventura|cultural/.test(p)) base = 0.9;
+    else if (/market|dugbe|amala/.test(p)) base = 0.75;
+    else if (/mosque|cathedral|uch|grace|aladura|methodist/.test(p)) base = 0.1;
+    return Math.min(1, base + this.motion * 0.28 + c.night * (/club|lounge|bar|night|palmwine|suya/.test(p) ? 0.1 : -0.08));
   }
 
   setContext(c: SoundContext) {
@@ -235,6 +275,31 @@ class Engine {
     o.stop(at + dur + 0.05);
   }
 
+  /** A slow, soft chord tone. */
+  private pad(freq: number, at: number, dur: number, vol: number) {
+    const ctx = this.ctx!;
+    for (const detune of [-6, 6]) {
+      const o = ctx.createOscillator();
+      o.type = "triangle";
+      o.frequency.value = freq;
+      o.detune.value = detune;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, at);
+      g.gain.linearRampToValueAtTime(vol, at + dur * 0.35);
+      g.gain.linearRampToValueAtTime(0.0001, at + dur);
+      o.connect(g).connect(this.musicBus);
+      o.start(at);
+      o.stop(at + dur + 0.05);
+    }
+  }
+
+  /** A kalimba-like bell, with some of it sent through the echo. */
+  private bell(freq: number, at: number, vol: number) {
+    this.blip(freq, at, 0.55, "sine", vol, this.musicBus);
+    this.blip(freq * 2.76, at, 0.18, "sine", vol * 0.28, this.musicBus);
+    this.blip(freq, at, 0.55, "sine", vol * 0.8, this.send);
+  }
+
   private burst(at: number, dur: number, freq: number, q: number, vol: number, bus: GainNode) {
     const ctx = this.ctx!;
     const s = ctx.createBufferSource();
@@ -281,7 +346,8 @@ class Engine {
     const ctx = this.ctx;
     if (!ctx) return;
     this.ambientEvents(ctx.currentTime);
-    const bpm = 98 - this.ctxState.night * 8;
+    this.energy += (this.targetEnergy() - this.energy) * 0.012;
+    const bpm = 90 + this.energy * 14 - this.ctxState.night * 6;
     const stepLen = 60 / bpm / 4;
     while (this.nextTime < ctx.currentTime + 0.25) {
       this.playStep(this.step, this.nextTime, stepLen);
@@ -322,6 +388,19 @@ class Engine {
       const n = chord[idx % 3] + 12 + (idx % 5 === 4 ? 12 : 0);
       this.blip(NOTE(n), tt, 0.22, "sawtooth", 0.07, bus);
       this.blip(NOTE(n) * 2, tt, 0.1, "triangle", 0.035, bus);
+    }
+    const e = this.energy;
+    // warm pad: the chord swells in at the top of each bar
+    if (s === 0) for (const n of chord) this.pad(NOTE(n), tt, len * 16, 0.05 + 0.03 * (1 - e));
+    // hats and claps join as the groove builds
+    if (e > 0.3 && s % 2 === 1) this.burst(tt, 0.03, 9500, 3, 0.03 + 0.05 * e, bus);
+    if (e > 0.6 && (s === 6 || s === 14)) this.burst(tt, 0.12, 8000, 2, 0.06, bus);
+    if (e > 0.55 && (s === 4 || s === 12)) this.burst(tt, 0.09, 1700, 1.2, 0.12, bus);
+    // kalimba melody on A minor pentatonic: sparse when calm, chatty when lively
+    if (s % 2 === 0 && Math.random() < 0.1 + 0.4 * e && !(s === 0 && Math.random() < 0.5)) {
+      const scale = [57, 60, 62, 64, 67, 69, 72, 74, 76];
+      this.melodyIdx = Math.max(0, Math.min(scale.length - 1, this.melodyIdx + [-2, -1, -1, 0, 1, 1, 2][Math.floor(Math.random() * 7)]));
+      this.bell(NOTE(scale[this.melodyIdx] + 12), tt, 0.1 + 0.08 * e);
     }
     // talking drum phrase every 4th bar
     if (this.bar % 4 === 3 && [8, 10, 11, 13, 15].includes(s)) {

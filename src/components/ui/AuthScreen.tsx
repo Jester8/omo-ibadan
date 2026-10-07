@@ -1,38 +1,31 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight, ChevronLeft, Mail, Music2, Volume2, VolumeX } from "lucide-react";
-import { DEMO_AUTH, demoLogIn, introInfo, requestCode, verifyCode, type IntroInfo, type Verified } from "@/lib/api";
+import { DEMO_AUTH, demoLogIn, requestCode, verifyCode, type Verified } from "@/lib/api";
 import AuthCode from "./AuthCode";
-import { setIntroMuted, startIntro } from "@/lib/music";
+import { audio } from "@/lib/audio";
+import { useSound } from "@/lib/soundStore";
 
 type Step = "intro" | "choose" | "login" | "code";
 
-/** First screen: the intro song, then Sign up (name, email, avatar) or Log in (email and name). */
+/** First screen: the city's own live sound, then Sign up (name, email, avatar) or Log in (email and name). */
 export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => void; onLoggedIn: (p: Verified) => void }) {
   const [step, setStep] = useState<Step>("intro");
-  const [info, setInfo] = useState<IntroInfo>({ available: false });
-  const [muted, setMuted] = useState(false);
+  const muted = useSound((s) => s.muted);
   const [email, setEmail] = useState("");
   const [devCode, setDevCode] = useState<string | undefined>();
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
 
-  useEffect(() => {
-    void introInfo().then(setInfo);
-  }, []);
-
   const enter = () => {
-    if (info.available) startIntro(info);
+    audio.start(); // the groove begins from the top on this first tap
     setStep("choose");
   };
 
-  const toggleMute = () => {
-    setMuted(!muted);
-    setIntroMuted(!muted);
-  };
+  const toggleMute = () => useSound.getState().set({ muted: !muted });
 
   const submitLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,8 +77,8 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
       </svg>
       <div className="pointer-events-none absolute -top-24 left-1/2 size-80 -translate-x-1/2 rounded-full bg-amber-400/25 blur-3xl" />
 
-      {info.available && step !== "intro" && (
-        <button onClick={toggleMute} aria-label={muted ? "Unmute intro" : "Mute intro"} className="absolute right-4 top-4 z-10 grid size-10 place-items-center rounded-full bg-white/15 backdrop-blur transition hover:bg-white/25">
+      {step !== "intro" && (
+        <button onClick={toggleMute} aria-label={muted ? "Unmute sound" : "Mute sound"} className="absolute right-4 top-4 z-10 grid size-10 place-items-center rounded-full bg-white/15 backdrop-blur transition hover:bg-white/25">
           {muted ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}
         </button>
       )}
@@ -100,11 +93,9 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
               <button onClick={enter} className="mt-10 inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-base font-bold text-stone-900 shadow-xl transition active:scale-95">
                 Tap to enter <ArrowRight className="size-5" />
               </button>
-              {info.available && (
-                <p className="mt-6 flex items-center justify-center gap-1.5 text-xs text-white/60">
-                  <Music2 className="size-3.5" /> Intro sound on
-                </p>
-              )}
+              <p className="mt-6 flex items-center justify-center gap-1.5 text-xs text-white/60">
+                <Music2 className="size-3.5" /> Sound on
+              </p>
             </motion.div>
           )}
 
@@ -126,11 +117,6 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
                 </span>
                 <ArrowRight className="size-5" />
               </button>
-              {info.available && info.title && (
-                <p className="mt-8 text-center text-[11px] leading-relaxed text-white/50">
-                  Intro: “{info.title}”, {info.artist}. © {info.rightsHolder}.
-                </p>
-              )}
             </motion.div>
           )}
 

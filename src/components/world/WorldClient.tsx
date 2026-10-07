@@ -6,7 +6,6 @@ import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
 import Hud from "@/components/ui/Hud";
 import SidePanel from "@/components/ui/PlacePanel";
-import ChatDock from "@/components/ui/ChatDock";
 import Sheets from "@/components/ui/Sheets";
 import DeckPanel from "@/components/ui/DeckPanel";
 import BottomBar from "@/components/ui/BottomBar";
@@ -27,13 +26,12 @@ import { QUESTS } from "@/lib/quests";
 import { naira } from "@/lib/plots";
 import { useMounted } from "@/lib/hooks";
 import { net, roomOf } from "@/lib/net";
-import { DEMO_AUTH, demoSignUp, introInfo, requestCode, verifyCode, type Verified } from "@/lib/api";
+import { DEMO_AUTH, demoSignUp, requestCode, verifyCode, type Verified } from "@/lib/api";
 import AuthCode from "@/components/ui/AuthCode";
 import type { Look } from "@/lib/look";
-import { introToGame, playIntroOnce } from "@/lib/music";
 import { voice } from "@/lib/voice";
 import { streetRoom } from "@/lib/voiceRoom";
-import TalkButton from "@/components/ui/TalkButton";
+import Comms from "@/components/ui/Comms";
 import { enterInterior, goUpDeck, homeRef, rt, startUse, walkToFurn } from "@/lib/interiorRuntime";
 import { cam, me } from "@/lib/playerState";
 import { setOpenEstates } from "@/lib/pathing";
@@ -143,20 +141,6 @@ function Runtime() {
     return () => clearInterval(id);
   }, []);
 
-  // the intro chorus carries on into the city; returning players hear it once on their first tap
-  useEffect(() => {
-    if (!hasProfile) return;
-    introToGame();
-    let off = () => {};
-    void introInfo().then((info) => {
-      if (!info.available) return;
-      const start = () => void playIntroOnce(info);
-      window.addEventListener("pointerdown", start, { once: true });
-      off = () => window.removeEventListener("pointerdown", start);
-    });
-    return () => off();
-  }, [hasProfile]);
-
   // a street conversation follows you from block to block
   useEffect(() => {
     const id = setInterval(() => {
@@ -193,8 +177,7 @@ export default function WorldClient() {
           <Overlay />
           <Hud />
           <SidePanel />
-          {!hideIcons && <ChatDock />}
-          {!hideIcons && <TalkButton />}
+          {!hideIcons && <Comms />}
           <Sheets />
           <DeckPanel />
           <ComputerScreen />

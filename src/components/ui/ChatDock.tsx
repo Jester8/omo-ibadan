@@ -2,14 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { MessageCircle, Send, X } from "lucide-react";
+import { Send, X } from "lucide-react";
 import { useGame } from "@/lib/store";
 import { PLACES } from "@/lib/places";
 import { net, roomOf } from "@/lib/net";
 import { rt } from "@/lib/interiorRuntime";
 
-export default function ChatDock() {
-  const [open, setOpen] = useState(() => typeof window !== "undefined" && window.innerWidth >= 640);
+/** The chat card. Comms owns the round buttons and decides when this is open. */
+export default function ChatDock({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [text, setText] = useState("");
   const atPlace = useGame((s) => s.atPlace);
   const chat = useGame((s) => s.chat);
@@ -32,16 +32,15 @@ export default function ChatDock() {
   };
 
   return (
-    <div className="absolute bottom-[5.4rem] left-3 z-10 sm:bottom-24 sm:left-5">
-      <AnimatePresence mode="wait" initial={false}>
-        {open ? (
+    <AnimatePresence initial={false}>
+        {open && (
           <motion.div
             key="open"
             initial={{ opacity: 0, y: 16, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.97 }}
             transition={{ type: "spring", stiffness: 300, damping: 26 }}
-            className="flex h-64 w-[min(20rem,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-3xl bg-white/88 shadow-xl ring-1 ring-black/5 backdrop-blur-xl"
+            className="flex h-[min(20rem,45dvh)] w-[min(21rem,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-3xl bg-white/90 shadow-xl ring-1 ring-black/5 backdrop-blur-xl sm:h-80 sm:w-[22rem]"
           >
             <div className="flex items-center justify-between border-b border-stone-100 px-4 py-2.5">
               <div>
@@ -52,7 +51,7 @@ export default function ChatDock() {
                 <button onClick={() => net.emote("wave")} title="Wave (Z)" className="rounded-full px-2 py-1 text-base transition hover:bg-stone-100 active:scale-90">👋</button>
                 <button onClick={() => net.emote("dance")} title="Dance (X)" className="rounded-full px-2 py-1 text-base transition hover:bg-stone-100 active:scale-90">💃</button>
               </div>
-              <button onClick={() => setOpen(false)} aria-label="Hide chat" className="rounded-full p-1 text-stone-400 hover:bg-stone-100">
+              <button onClick={onClose} aria-label="Hide chat" className="rounded-full p-1 text-stone-400 hover:bg-stone-100">
                 <X className="size-4" />
               </button>
             </div>
@@ -114,19 +113,7 @@ export default function ChatDock() {
               </button>
             </form>
           </motion.div>
-        ) : (
-          <motion.button
-            key="closed"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            onClick={() => setOpen(true)}
-            className="flex items-center gap-2 rounded-full bg-white/90 px-4 py-2.5 text-sm font-semibold text-stone-700 shadow-xl ring-1 ring-black/5 backdrop-blur-xl"
-          >
-            <MessageCircle className="size-4" /> Chat
-          </motion.button>
         )}
-      </AnimatePresence>
-    </div>
+    </AnimatePresence>
   );
 }
