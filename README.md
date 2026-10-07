@@ -32,7 +32,6 @@ Env (optional): `NEXT_PUBLIC_WS_URL=wss://your-server` points the client at a de
 | `src/lib/store.ts` | Game state (zustand, persisted to localStorage) |
 | `src/lib/pathing.ts`, `movement.ts` | A* click-to-move around buildings |
 | `src/lib/net.ts`, `voice.ts`, `protocol.ts` | Realtime client, WebRTC voice, message types |
-| `server/index.ts` | Presence, chat, land ownership (`server/plots.json`), voice signalling, calls |
 | `src/components/avatar/` | Avatar model and the creator |
 | `src/components/world/` | 3D scene: terrain, buildings, plots, lighting, people, DOM overlay labels |
 | `src/components/ui/` | HUD, panels, chat, phone, profile |
@@ -46,4 +45,4 @@ gele, turban, hijab, fila, Hausa and Igbo caps and many hairstyles. See `public/
 See `docs/PLAN.md` for status and what is next.
 
 ## Backend
-See [server/README.md](server/README.md): HTTP + WebSocket on port 8787, SQLite storage, guest tokens and cloud saves. Needs Node 22.13+ and `npm install` after pulling.
+The server now lives in its own repo, [Jester8/ibadanserver-](https://github.com/Jester8/ibadanserver-): HTTP + WebSocket, Postgres (Supabase), LiveKit voice, deployed on Render. Point the game at it with `NEXT_PUBLIC_WS_URL` / `NEXT_PUBLIC_API_URL` (see `.env.example`).
