@@ -132,7 +132,8 @@ type State = {
   dms: Record<string, DmMsg[]>;
   openChat: string | null;
   ticket: string | null;
-  flight: { dest: string } | null;
+  flight: { dest: string; returning?: boolean } | null;
+  flyHome: () => void;
   bookTicket: (destId: string) => string | null;
   boardFlight: () => string | null;
   passes: Record<string, number>;
@@ -287,6 +288,13 @@ export const useGame = create<State>()(
         set({ ticket: null, flight: { dest: d.id } });
         get().recordStat("flights");
         return null;
+      },
+      flyHome: () => {
+        const s = get();
+        if (!s.flight) return;
+        const err = s.runAction({ id: "flighthome", label: "Flight to Ibadan", secs: FLIGHT_SECS, gain: { energy: -4 } });
+        if (err) return s.toast(err, "bad");
+        set({ flight: { ...s.flight, returning: true } });
       },
       passes: {},
       campus: false,

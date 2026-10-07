@@ -10,4 +10,5 @@ export const DESTINATIONS: Destination[] = [
 ];
 
 export const destById = (id: string) => DESTINATIONS.find((d) => d.id === id);
-export const FLIGHT_SECS = 14;
+/** Every flight, out or home, is over in four seconds. */
+export const FLIGHT_SECS = 4;

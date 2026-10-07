@@ -490,6 +490,29 @@ class Engine {
       }
     });
   }
+  /** A four-second flight: the seat-belt chime, then the engines spooling up and the rush of air. */
+  flight() {
+    this.sfx((t, bus) => {
+      this.blip(880, t + 0.05, 0.35, "sine", 0.18, bus);
+      this.blip(660, t + 0.45, 0.45, "sine", 0.16, bus);
+      // engines: a rising low roar
+      const ctx = this.ctx!;
+      const s = ctx.createBufferSource();
+      s.buffer = this.noise;
+      s.loop = true;
+      const f = ctx.createBiquadFilter();
+      f.type = "lowpass";
+      f.frequency.setValueAtTime(220, t + 0.8);
+      f.frequency.exponentialRampToValueAtTime(1400, t + 3.2);
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t + 0.8);
+      g.gain.exponentialRampToValueAtTime(0.5, t + 2.4);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 4.0);
+      s.connect(f).connect(g).connect(bus);
+      s.start(t + 0.8);
+      s.stop(t + 4.1);
+    });
+  }
   startRing() {
     this.stopRing();
     this.ringOnce();
