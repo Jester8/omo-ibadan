@@ -8,6 +8,8 @@ import { useClock } from "@/lib/hooks";
 import { exitInterior, GENERATOR_FUEL, powerOn, rt, walkToFurn } from "@/lib/interiorRuntime";
 import { naira, plotById } from "@/lib/plots";
 import { ActionRow, VoiceRoomCard } from "./parts";
+import HereNow from "./HereNow";
+import ShopPanel from "./ShopPanel";
 import { DECOR, MAX_PER_KIND } from "@/lib/decor";
 import { refreshInterior } from "@/lib/interiorRuntime";
 
@@ -52,6 +54,9 @@ export default function InteriorPanel() {
           <DoorOpen className="size-3.5" /> Leave
         </button>
       </div>
+
+      <HereNow />
+      {place?.kind === "shop" && <ShopPanel />}
 
       <div className={`mt-4 flex items-center justify-between gap-3 rounded-2xl px-4 py-3 ring-1 ${power ? "bg-emerald-50 ring-emerald-100" : "bg-amber-50 ring-amber-200"}`}>
         <div className="flex items-center gap-2.5">

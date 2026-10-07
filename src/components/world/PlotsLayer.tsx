@@ -16,7 +16,6 @@ export function Wall({ tint, w, h, d, p }: { tint: string; w: number; h: number;
   useEffect(() => {
     const glow = mats.filter((m): m is THREE.MeshStandardMaterial => !!(m as THREE.MeshStandardMaterial).emissiveMap);
     glow.forEach((m) => windowMats.add(m));
-    return () => glow.forEach((m) => windowMats.delete(m));
   }, [mats]);
   return (
     <mesh position={[p[0], p[1] + h / 2, p[2]]} material={mats} castShadow receiveShadow>

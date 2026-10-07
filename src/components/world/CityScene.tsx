@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import Lighting from "./Lighting";
@@ -158,15 +158,23 @@ function WorldContent() {
   );
 }
 
+/** Phones and modest laptops: a lighter picture (no shadows, no anti-aliasing, a smaller render size) keeps it fast. */
+const lowEnd = () => {
+  if (typeof window === "undefined") return false;
+  const nav = navigator as Navigator & { deviceMemory?: number };
+  return window.innerWidth < 768 || (nav.hardwareConcurrency ?? 8) <= 4 || (nav.deviceMemory ?? 8) <= 4 || matchMedia("(pointer: coarse)").matches;
+};
+
 export default function CityScene() {
   const inside = useGame((s) => !!s.interior);
   const placesOnly = useGame((s) => s.placesOnly);
+  const [light] = useState(lowEnd);
   return (
     <Canvas
-      dpr={[1, 1.5]}
-      shadows="percentage"
+      dpr={light ? [1, 1.25] : [1, 1.5]}
+      shadows={light ? false : "percentage"}
       camera={{ fov: 30, near: 0.5, far: 300, position: [24, 28, 24] }}
-      gl={{ antialias: true }}
+      gl={{ antialias: !light, powerPreference: "high-performance" }}
       className="!absolute inset-0 touch-none"
     >
       {inside ? <InteriorScene /> : <WorldContent />}

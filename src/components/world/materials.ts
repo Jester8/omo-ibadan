@@ -80,7 +80,20 @@ function makeTiles() {
   return { base: tb, lit: tl };
 }
 
+const faceCache = new Map<string, THREE.MeshStandardMaterial>();
+
+/** Shared by every building with the same colour and window grid: far fewer textures to build and upload. */
 function faceMat(tint: string, cols: number, rows: number) {
+  const key = `${tint}|${Math.max(1, cols)}|${Math.max(1, rows)}`;
+  const hit = faceCache.get(key);
+  if (hit) return hit;
+  const made = buildFaceMat(tint, cols, rows);
+  faceCache.set(key, made);
+  windowMats.add(made); // its windows glow at night for as long as it exists
+  return made;
+}
+
+function buildFaceMat(tint: string, cols: number, rows: number) {
   tiles ??= makeTiles();
   const b = tiles.base.clone();
   const l = tiles.lit.clone();
@@ -102,10 +115,16 @@ function faceMat(tint: string, cols: number, rows: number) {
 }
 
 /** BoxGeometry material array: [+x, -x, +y, -y, +z, -z] with window grids on the sides. */
+const roofCache = new Map<string, THREE.MeshStandardMaterial>();
+
 export function facadeMaterials(w: number, h: number, d: number, tint: string): THREE.Material[] {
   const rows = Math.round(h / 0.62);
   const sideW = faceMat(tint, Math.round(w / 0.62), rows);
   const sideD = faceMat(tint, Math.round(d / 0.62), rows);
-  const roof = new THREE.MeshStandardMaterial({ color: new THREE.Color(tint).multiplyScalar(0.8), roughness: 0.8 });
+  let roof = roofCache.get(tint);
+  if (!roof) {
+    roof = new THREE.MeshStandardMaterial({ color: new THREE.Color(tint).multiplyScalar(0.8), roughness: 0.8 });
+    roofCache.set(tint, roof);
+  }
   return [sideD, sideD, roof, roof, sideW, sideW];
 }

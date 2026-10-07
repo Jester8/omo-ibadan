@@ -35,7 +35,6 @@ function SkyTower({ t }: { t: Tower }) {
   useEffect(() => {
     const glow = mats.filter((m): m is THREE.MeshStandardMaterial => !!(m as THREE.MeshStandardMaterial).emissiveMap);
     glow.forEach((m) => windowMats.add(m));
-    return () => glow.forEach((m) => windowMats.delete(m));
   }, [mats]);
   return (
     <group position={[t.x, 0, t.z]} rotation-y={t.rot}>

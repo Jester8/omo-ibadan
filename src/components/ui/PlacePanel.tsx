@@ -16,6 +16,8 @@ import { me } from "@/lib/playerState";
 import { useMemo, useState } from "react";
 import { naira } from "@/lib/plots";
 import { ActionRow, VoiceRoomCard } from "./parts";
+import HereNow from "./HereNow";
+import ShopPanel from "./ShopPanel";
 import PlotPanelBody from "./PlotPanel";
 import InteriorPanel from "./InteriorPanel";
 import { enterInterior } from "@/lib/interiorRuntime";
@@ -74,6 +76,8 @@ function PlaceBody({ id }: { id: string }) {
         </button>
       </div>
       <p className="mt-3 text-sm text-stone-600">{place.blurb}</p>
+      {at && <HereNow />}
+      {at && place.kind === "shop" && open && <ShopPanel />}
 
       {!at && (
         <div className="mt-4">
@@ -213,7 +217,7 @@ export default function SidePanel() {
           className={`absolute z-20 overflow-y-auto rounded-[1.6rem] bg-white/85 p-4 shadow-[0_12px_40px_-10px_rgba(0,0,0,0.35)] ring-1 ring-white/60 backdrop-blur-2xl sm:inset-x-auto sm:bottom-auto sm:right-5 sm:top-20 sm:max-h-[calc(100dvh-7rem)] sm:w-[24rem] sm:p-5 ${
             card
               ? "left-3 top-[9.4rem] max-h-[calc(100dvh-16rem)] w-[min(17rem,66vw)] sm:left-auto"
-              : `inset-x-3 bottom-[5.4rem] ${min ? "max-sm:max-h-12 max-sm:overflow-hidden max-sm:py-2" : "max-h-[44dvh]"}`
+              : `right-3 bottom-[5.4rem] w-[min(21.5rem,calc(100vw-1.5rem))] !rounded-[1.8rem] ${min ? "max-sm:max-h-12 max-sm:overflow-hidden max-sm:py-2" : "max-h-[52dvh]"}`
           }`}
         >
           {card ? (
