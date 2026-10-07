@@ -561,10 +561,12 @@ PLACE_LAYOUTS["club"] = lay({
   ],
   residents: [
     res("DJ Kollington", 0, -5.2, { seed: "dj-kollington", lines: ["Make some noise for Ibadan!", "This one na for the ladies!", "Who wan hear Amapiano?"] }),
-    res("Tola", -2, 0.2, { seed: "tola", woman: true, lines: ["This song is my life!", "Dance with me na!"] }),
-    res("Bisola", 1.6, 1.4, { seed: "bisola", woman: true, lines: ["Spray the money o!", "Ibadan girls know how to party."] }),
-    res("Kunle", 3, -0.6, { seed: "kunle-club", lines: ["I came to dance, not to talk!", "Wetin dey?"] }),
     res("Bartender Gbenga", 8.25, 0, { seed: "gbenga", lines: ["What are you drinking?", "Cold Chapman coming up."] }),
+  ],
+  // the crowd on the dance floor, facing the DJ
+  dancers: [
+    { x: -3.4, z: -2.4, seed: "dn1", woman: true }, { x: -1.2, z: -3, seed: "dn2" }, { x: 1.4, z: -2.6, seed: "dn3", woman: true }, { x: 3.6, z: -2.2, seed: "dn4" },
+    { x: -2.6, z: 0, seed: "dn5" }, { x: -0.4, z: -0.6, seed: "dn6", woman: true }, { x: 2.0, z: 0.2, seed: "dn7", woman: true }, { x: 4.0, z: -0.2, seed: "dn8" },
   ],
 });
 reuse("club", "club-afrobeat", "Afrobeat Lounge", { accent: "#c026d3" });

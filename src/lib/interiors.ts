@@ -25,6 +25,9 @@ export type Item = {
 /** Axis-aligned partition wall. `door` is how far along the wall (0..1) the doorway sits. */
 export type Wall = { x1: number; z1: number; x2: number; z2: number; door?: number; doorW?: number };
 
+/** People on the dance floor: nameless, always dancing. */
+export type Dancer = { x: number; z: number; seed: string; woman?: boolean; ry?: number };
+
 export type Resident = {
   name: string;
   x: number;
@@ -59,6 +62,8 @@ export type Layout = {
   /** the exit mat sits on the front wall (z = +d/2) at this x */
   exitX: number;
   residents?: Resident[];
+  /** a crowd dancing to the music (clubs) */
+  dancers?: Dancer[];
   lines?: string[];
 };
 

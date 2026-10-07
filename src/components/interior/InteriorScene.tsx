@@ -5,7 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import Avatar from "@/components/avatar/Avatar";
 import { FURN, S } from "@/lib/furniture";
-import { interiorKey, type Layout, type Resident } from "@/lib/interiors";
+import { interiorKey, type Dancer, type Layout, type Resident } from "@/lib/interiors";
 import { seededLook, womanLook } from "@/lib/look";
 import { cam, me } from "@/lib/playerState";
 import { rt, powerOn, walkToExit, walkToFurn } from "@/lib/interiorRuntime";
@@ -355,6 +355,18 @@ function ResidentActor({ r, layout }: { r: Resident; layout: Layout }) {
   );
 }
 
+/** One of the crowd on the dance floor: nameless and always dancing, each a little out of step with the next. */
+function DancerActor({ d }: { d: Dancer }) {
+  const look = useMemo(() => (d.woman ? womanLook(d.seed) : seededLook(d.seed)), [d.seed, d.woman]);
+  const motion = useRef({ speed: 0, pose: null as null, emote: "dance" as const, phase: [...d.seed].reduce((n, c) => n + c.charCodeAt(0), 0) % 7 });
+  const ry = d.ry ?? Math.PI + (d.x > 0 ? 0.35 : -0.35) * 0.4;
+  return (
+    <group position={[d.x * S, 0, d.z * S]} rotation={[0, ry, 0]}>
+      <Avatar look={look} motion={motion} scale={S} />
+    </group>
+  );
+}
+
 /* ----------------------------------- scene ----------------------------------- */
 
 function Room({ layout }: { layout: Layout }) {
@@ -377,6 +389,9 @@ function Room({ layout }: { layout: Layout }) {
       </group>
       {(layout.residents ?? []).map((r) => (
         <ResidentActor key={r.name} r={r} layout={layout} />
+      ))}
+      {(layout.dancers ?? []).map((d) => (
+        <DancerActor key={d.seed} d={d} />
       ))}
       {/* click the floor to walk */}
       <mesh

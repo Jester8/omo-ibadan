@@ -6,29 +6,30 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { TOPICS, TOUR } from "@/lib/guide";
 import { useGame } from "@/lib/store";
 
-const KEY = "omo-ibadan-tour-v1";
+const KEY = "omo-ibadan-tour-v2";
 
 /** A short walkthrough the first time you enter the city. Open the full guide later with the ? button. */
 export default function GuideTour() {
-  const hasProfile = useGame((s) => !!s.profile);
+  const pid = useGame((s) => s.profile?.id);
+  const hasProfile = !!pid;
   const [open, setOpen] = useState(false);
   const [i, setI] = useState(0);
 
   useEffect(() => {
     if (!hasProfile) return;
     try {
-      if (localStorage.getItem(KEY)) return;
+      if (localStorage.getItem(`${KEY}:${pid}`)) return;
     } catch {
       /* private mode: just show it */
     }
     const t = setTimeout(() => setOpen(true), 1400);
     return () => clearTimeout(t);
-  }, [hasProfile]);
+  }, [hasProfile, pid]);
 
   const done = () => {
     setOpen(false);
     try {
-      localStorage.setItem(KEY, "1");
+      localStorage.setItem(`${KEY}:${pid}`, "1");
     } catch {
       /* ignore */
     }

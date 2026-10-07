@@ -123,6 +123,8 @@ type State = {
   clockOverride: number | null;
   timeMode: "auto" | "day" | "night";
   placesOnly: boolean;
+  /** the camera slowly circles your character while you stand still */
+  autoRotate: boolean;
   deck: boolean;
   friends: Person[];
   requestsIn: Person[];
@@ -261,6 +263,7 @@ export const useGame = create<State>()(
       clockOverride: null,
       timeMode: "auto",
       placesOnly: false,
+      autoRotate: false,
       deck: false,
       friends: [],
       requestsIn: [],
@@ -571,6 +574,7 @@ export const useGame = create<State>()(
       name: "omo-ibadan-v1",
       storage: createJSONStorage(() => (typeof window === "undefined" ? noopStorage : localStorage)),
       partialize: (s) => ({
+        autoRotate: s.autoRotate,
         profile: s.profile,
         money: s.money,
         needs: s.needs,

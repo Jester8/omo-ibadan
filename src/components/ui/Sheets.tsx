@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { HelpCircle, LogOut, Car, Music2, Check, CheckCircle2, Circle, Copy, Eye, Footprints, Landmark, Moon, PencilLine, PhoneCall, PhoneOff, Sun, SunMoon, Volume2, VolumeX, X } from "lucide-react";
+import { RotateCw, HelpCircle, LogOut, Car, Music2, Check, CheckCircle2, Circle, Copy, Eye, Footprints, Landmark, Moon, PencilLine, PhoneCall, PhoneOff, Sun, SunMoon, Volume2, VolumeX, X } from "lucide-react";
 import { useState, useSyncExternalStore } from "react";
 import { useGame, ownedBy } from "@/lib/store";
 import { net } from "@/lib/net";
@@ -238,6 +238,7 @@ function SoundSliders() {
 function ViewSettings() {
   const timeMode = useGame((s) => s.timeMode);
   const placesOnly = useGame((s) => s.placesOnly);
+  const autoRotate = useGame((s) => s.autoRotate);
   const hasCar = useGame((s) => s.cars.length > 0);
   const driving = useGame((s) => s.driving);
   const soundMuted = useSound((s) => s.muted);
@@ -263,6 +264,12 @@ function ViewSettings() {
 
       <p className="mb-2 mt-5 text-xs font-semibold uppercase tracking-wider text-stone-400">Quick settings</p>
       <div className="space-y-2">
+        <button onClick={() => patch({ autoRotate: !autoRotate })} className={row}>
+          <span className="flex items-center gap-2.5">
+            <RotateCw className="size-4 text-stone-500" /> Auto rotate the camera
+          </span>
+          <span className={`rounded-full px-2.5 py-0.5 text-xs ${autoRotate ? "bg-emerald-600 text-white" : "bg-stone-200 text-stone-600"}`}>{autoRotate ? "On" : "Off"}</span>
+        </button>
         <button onClick={() => patch({ placesOnly: !placesOnly })} className={row}>
           <span className="flex items-center gap-2.5">
             <Eye className="size-4 text-stone-500" /> Show only locations

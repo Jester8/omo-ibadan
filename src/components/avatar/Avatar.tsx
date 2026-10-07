@@ -8,7 +8,7 @@ import { clone as cloneSkinned } from "three/examples/jsm/utils/SkeletonUtils.js
 import type { Look } from "@/lib/look";
 import { ANIM_URL, BASE_URL, baseFor, dressAvatar } from "./rig";
 
-export type Motion = { current: { speed: number; pose?: "sit" | "lie" | null; emote?: "wave" | "dance" | null; eat?: "bowl" | "cup" | "snack" | null } };
+export type Motion = { current: { speed: number; pose?: "sit" | "lie" | null; emote?: "wave" | "dance" | null; eat?: "bowl" | "cup" | "snack" | null; /** shifts the dance so a crowd is not in lockstep */ phase?: number } };
 
 const SIT_THIGH = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -1.45);
 const SIT_KNEE = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), 1.5);
@@ -164,7 +164,7 @@ function Inner({ look: lookIn, motion, scale }: { look: Look; motion?: Motion; s
     }
     built.mixer.update(dt);
     if (emote === "dance" && !pose && ms <= 0.15) {
-      const t = state.clock.elapsedTime * 6.5;
+      const t = state.clock.elapsedTime * 6.5 + (motion?.current.phase ?? 0);
       const q = (x: number, y: number, z: number, a: number) => new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(x, y, z), a);
       built.legs.hips?.quaternion.multiply(q(0, 0, 1, Math.sin(t) * 0.22)).multiply(q(0, 1, 0, Math.sin(t * 0.5) * 0.3));
       built.legs.chest?.quaternion.multiply(q(0, 1, 0, -Math.sin(t * 0.5) * 0.35));

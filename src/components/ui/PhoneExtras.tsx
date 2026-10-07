@@ -9,7 +9,6 @@ import { bizById } from "@/lib/business";
 import { levelOf } from "@/lib/bonds";
 import { friendRequest, openThread, searchPeople, type Person } from "@/lib/social";
 import { goToPlot, homeOf, visitHome } from "@/lib/visit";
-import { walkToPlace } from "@/lib/movement";
 import { CAMPUS_PLACES } from "@/lib/world";
 import ShopPanel from "./ShopPanel";
 
@@ -186,9 +185,8 @@ export function SearchApp() {
                 <button
                   className={go}
                   onClick={() => {
-                    const s = useGame.getState();
-                    s.patch({ sheet: null, selected: { type: "place", id: p.id } });
-                    walkToPlace(p.id);
+                    // opens the place card, where you choose how to get there
+                    useGame.getState().patch({ sheet: null, selected: { type: "place", id: p.id } });
                   }}
                 >
                   Go

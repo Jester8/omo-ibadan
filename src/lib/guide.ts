@@ -6,6 +6,7 @@ export const TOPICS: Topic[] = [
     "Tap or click the ground and your character walks there. On a keyboard use W A S D or the arrow keys.",
     "Drag the screen to turn the camera and tilt it. On a keyboard use Q and E to turn. Pinch or scroll to zoom.",
     "Tap the small map in the corner to walk to any spot in the city.",
+    "Want the camera to circle your character on its own? Turn on Auto rotate in Me, under Quick settings.",
   ] },
   { id: "places", emoji: "🏢", title: "Places and buildings", lines: [
     "Tap a building to see its name, address and what you can do there. On phones the names stay hidden until you tap.",
@@ -38,6 +39,7 @@ export const TOPICS: Topic[] = [
   ] },
   { id: "wheels", emoji: "🛺", title: "Rides and cars", lines: [
     "Cab parks have parked cabs: tap one, search where you are going, pay the fare and ride.",
+    "Tap any place, house or business and choose how to get there: walk, drive yourself, or pay for an okada, a keke or a micra.",
     "Buy your own car in Buy, then Cars. Tap Me, then Drive your car, to hop in. Press H to honk.",
     "Traffic is polite: cars and okadas stop for people on foot and wait at red lights, and they may honk as they slow down.",
   ] },
@@ -68,4 +70,4 @@ export const SHORTCUTS: [string, string][] = [
 ];
 
 /** The short tour shown the first time you enter the city. */
-export const TOUR = ["move", "places", "bar", "needs", "lost"];
+export const TOUR = ["move", "places", "wheels", "bar", "needs", "lost"];

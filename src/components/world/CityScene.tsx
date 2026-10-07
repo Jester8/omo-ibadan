@@ -82,6 +82,8 @@ function CameraRig() {
       const f = st.deck ? cam.focus : null;
       target.current.lerp(new THREE.Vector3(f ? f.x : me.use ? me.use.x : me.x, st.deck ? (f ? 1.5 : DECK_Y + 0.5) : 0.5, f ? f.z : me.use ? me.use.z : me.z), k);
       if (cam.spin) cam.az += dt * 0.18;
+      // the optional slow orbit: only while you stand still
+      else if (st.autoRotate && !me.path.length && me.speed < 0.2 && !st.busy) cam.az += dt * 0.12;
     }
     const wantDist = hasProfile ? cam.dist : 40;
     dist.current += (wantDist - dist.current) * (1 - Math.exp(-3 * dt));
