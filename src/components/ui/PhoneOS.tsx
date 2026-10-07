@@ -238,7 +238,7 @@ export default function PhoneOS({ initial = null, render }: { initial?: AppId | 
   };
 
   return (
-    <div className="mx-auto w-full max-w-[19.5rem] rounded-[2.4rem] bg-stone-950 p-2 shadow-2xl ring-1 ring-black/40">
+    <div className="mx-auto w-full max-w-[17rem] rounded-[2.2rem] sm:max-w-[19.5rem] sm:rounded-[2.4rem] bg-stone-950 p-2 shadow-2xl ring-1 ring-black/40">
       <div className="relative flex h-[min(34rem,70dvh)] flex-col overflow-hidden rounded-[1.9rem] bg-gradient-to-b from-indigo-950 via-[#3a2a3a] to-[#8a4326] text-white">
         {/* status bar */}
         <div className="relative z-10 flex items-center justify-between px-5 pb-1 pt-2.5 text-[11px] font-semibold">

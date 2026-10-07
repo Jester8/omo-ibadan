@@ -232,7 +232,16 @@ const CARS: Car[] = [
 ];
 
 /** Traffic crawls through the streets at about half the old speed. */
-const TRAFFIC_PACE = 0.5;
+const TRAFFIC_PACE = 0.8;
+
+/** True when somebody on foot is within `r` of this point. */
+function personWithin(px: number, pz: number, r: number): boolean {
+  const st = useGame.getState();
+  if (!st.interior && !st.deck && Math.hypot(me.x - px, me.z - pz) < r) return true;
+  for (const n of NPCS) if (Math.hypot(n.st.x - px, n.st.z - pz) < r) return true;
+  for (const q of remoteMotion.values()) if (Math.hypot(q.x - px, q.z - pz) < r) return true;
+  return false;
+}
 
 /** True when somebody on foot is standing where this vehicle is about to go. */
 function personAhead(px: number, pz: number, x: number, z: number): boolean {
@@ -317,8 +326,19 @@ function Vehicle({ car, index }: { car: Car; index: number }) {
       }
     }
 
+    // someone right in front of the bumper: back away from them, as long as nothing is close behind
+    let target = stop ? 0 : 1;
+    if (personWithin(posAt(prog.current + 0.55).x, posAt(prog.current + 0.55).z, 0.6) || personWithin(x, z, 0.5)) {
+      const back = posAt(prog.current - 0.95);
+      let blocked = false;
+      for (let k = 0; k < traffic.length; k++) {
+        const o = traffic[k];
+        if (o && k !== index && Math.hypot(o.x - back.x, o.z - back.z) < 0.8) blocked = true;
+      }
+      target = blocked ? 0 : -0.7;
+    }
     // brake firmly, pull away gently
-    roll.current += ((stop ? 0 : 1) - roll.current) * Math.min(1, dt * (stop ? 7 : 1.8));
+    roll.current += (target - roll.current) * Math.min(1, dt * (target < roll.current ? 7 : 1.8));
     prog.current += car.speed * TRAFFIC_PACE * roll.current * dt;
 
     if (g.current) {

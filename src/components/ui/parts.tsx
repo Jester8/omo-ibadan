@@ -3,6 +3,7 @@
 import { Mic, MicOff, PhoneOff } from "lucide-react";
 import { useGame } from "@/lib/store";
 import { voice } from "@/lib/voice";
+import FoodArt, { dishFor } from "./FoodArt";
 import { naira } from "@/lib/plots";
 import type { ActionDef, Needs } from "@/lib/places";
 import { TITLES, titleIndex } from "@/lib/titles";
@@ -38,13 +39,15 @@ export function Chips({ a }: { a: ActionDef }) {
 }
 
 export function ActionRow({ a, enabled, onRun }: { a: ActionDef; enabled: boolean; onRun: () => void }) {
+  const dish = a.cost ? dishFor(a) : null;
   return (
     <button
       disabled={!enabled}
       onClick={onRun}
-      className="group flex w-full items-center justify-between rounded-2xl bg-stone-50 px-4 py-3 text-left ring-1 ring-black/5 transition hover:bg-emerald-50 hover:ring-emerald-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-stone-50 disabled:hover:ring-black/5"
+      className="group flex w-full items-center gap-3 rounded-2xl bg-stone-50 px-3 py-2.5 text-left ring-1 ring-black/5 transition hover:bg-emerald-50 hover:ring-emerald-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-stone-50 disabled:hover:ring-black/5 sm:px-4 sm:py-3"
     >
-      <span>
+      {dish && <FoodArt dish={dish} className="size-12 shrink-0 sm:size-14" />}
+      <span className="min-w-0">
         <span className="block text-sm font-semibold text-stone-900">{a.label}</span>
         <Chips a={a} />
       </span>

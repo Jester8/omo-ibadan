@@ -81,7 +81,7 @@ function Column({ p, h = 0.9, r = 0.07 }: { p: V3; h?: number; r?: number }) {
 
 /* -------------------------------- styles -------------------------------- */
 
-type SP = { size: V3; color: string };
+type SP = { size: V3; color: string; name?: string; id?: string };
 
 function Tower({ size: [w, h, d], color }: SP) {
   return (
@@ -334,6 +334,83 @@ function Mall({ size: [w, h, d], color }: SP) {
       <Box p={[0, 0.1, d / 2 + 0.3]} s={[1.5, 0.08, 0.6]} c="#2a2f3a" />
       <Box p={[-w * 0.35, 0.1, d / 2 + 0.22]} s={[0.1, 0.9, 0.1]} c="#2a2f3a" />
       <Box p={[w * 0.35, 0.1, d / 2 + 0.22]} s={[0.1, 0.9, 0.1]} c="#2a2f3a" />
+    </>
+  );
+}
+
+/** Sign board with the restaurant's name, drawn once into a texture. */
+function useSign(name: string, bg: string, fg: string) {
+  return useMemo(() => {
+    const c = document.createElement("canvas");
+    c.width = 512;
+    c.height = 128;
+    const g = c.getContext("2d")!;
+    g.fillStyle = bg;
+    g.fillRect(0, 0, 512, 128);
+    g.fillStyle = "rgba(255,255,255,0.18)";
+    g.fillRect(0, 0, 512, 10);
+    g.fillStyle = fg;
+    g.textAlign = "center";
+    g.textBaseline = "middle";
+    let size = 78;
+    g.font = `800 ${size}px system-ui, sans-serif`;
+    while (g.measureText(name).width > 470 && size > 28) {
+      size -= 4;
+      g.font = `800 ${size}px system-ui, sans-serif`;
+    }
+    g.fillText(name, 256, 68);
+    const t = new THREE.CanvasTexture(c);
+    t.colorSpace = THREE.SRGBColorSpace;
+    t.anisotropy = 4;
+    return t;
+  }, [name, bg, fg]);
+}
+
+/** Restaurant brand colours: sign background, sign text, awning stripe. */
+const BRANDS: Record<string, { bg: string; fg: string; stripe: string }> = {
+  item7: { bg: "#e8532a", fg: "#ffffff", stripe: "#ffffff" },
+  mrbiggs: { bg: "#d62f39", fg: "#ffe14d", stripe: "#ffe14d" },
+  chickenrepublic: { bg: "#c8202f", fg: "#ffffff", stripe: "#ffd23f" },
+  sweetsensation: { bg: "#ee7b22", fg: "#ffffff", stripe: "#3a2a1c" },
+  kilimanjaro: { bg: "#e7a915", fg: "#2a1f08", stripe: "#d62f39" },
+};
+
+/** A modern fast-food restaurant: glass front, brand colours, a lit sign, an awning, a paved forecourt and parking. */
+function Restaurant({ size: [w, h, d], color, name = "Restaurant", id = "" }: SP) {
+  const brand = BRANDS[id] ?? { bg: color, fg: "#ffffff", stripe: "#ffffff" };
+  const sign = useSign(name, brand.bg, brand.fg);
+  const front = d / 2;
+  return (
+    <>
+      {/* forecourt and parking */}
+      <Box s={[w + 1.4, 0.06, d + 2.2]} c="#cfd3d8" p={[0, 0, 0.5]} />
+      {[-0.45, -0.15, 0.15, 0.45].map((k) => (
+        <Box key={k} p={[k * (w + 0.8), 0.06, front + 1.15]} s={[0.04, 0.005, 0.5]} c="#ffffff" />
+      ))}
+      {/* the building */}
+      <Facade p={[0, 0.06, 0]} w={w} h={h} d={d} tint="#f7f4ee" />
+      <Box p={[0, 0.06 + h, 0]} s={[w + 0.16, 0.1, d + 0.16]} c="#3a3f48" />
+      {/* brand band under the roof */}
+      <Box p={[0, 0.06 + h - 0.34, front + 0.01]} s={[w + 0.02, 0.34, 0.03]} c={brand.bg} />
+      {/* big glass front, lit at night */}
+      <Box p={[-w * 0.12, 0.06 + 0.12, front + 0.02]} s={[w * 0.62, h * 0.55, 0.04]} c="#8fc3de" rough={0.15} />
+      <mesh position={[-w * 0.12, 0.06 + 0.12 + h * 0.28, front + 0.05]} material={lampMat}>
+        <boxGeometry args={[w * 0.56, h * 0.42, 0.01]} />
+      </mesh>
+      {/* door */}
+      <Box p={[w * 0.3, 0.06, front + 0.02]} s={[0.4, h * 0.52, 0.05]} c="#2b3038" />
+      {/* the sign: a lit board on the roof edge, facing the street */}
+      <mesh position={[0, 0.06 + h + 0.5, front - 0.1]} castShadow>
+        <boxGeometry args={[Math.min(w * 0.9, 2.6), 0.62, 0.08]} />
+        <meshBasicMaterial map={sign} toneMapped={false} />
+      </mesh>
+      <Box p={[-0.5, 0.06 + h + 0.1, front - 0.1]} s={[0.05, 0.4, 0.05]} c="#3a3f48" />
+      <Box p={[0.5, 0.06 + h + 0.1, front - 0.1]} s={[0.05, 0.4, 0.05]} c="#3a3f48" />
+      <Awning p={[w * 0.3, 0.06 + h * 0.62, front + 0.28]} w={0.9} colors={[brand.bg, brand.stripe]} />
+      {/* a menu stand and a small car in the car park */}
+      <Box p={[w * 0.46, 0.06, front + 0.7]} s={[0.3, 0.55, 0.06]} c={brand.bg} />
+      <Box p={[-w * 0.2, 0.06, front + 1.2]} s={[0.55, 0.2, 0.95]} c="#4a90e2" />
+      <Box p={[-w * 0.2, 0.26, front + 1.2]} s={[0.5, 0.14, 0.5]} c="#dfe9f2" />
     </>
   );
 }
@@ -635,6 +712,7 @@ const STYLES: Record<Place["style"], (p: SP) => React.ReactNode> = {
   hotel: Hotel,
   lookout: Lookout,
   eatery: Eatery,
+  restaurant: Restaurant,
   amusement: Amusement,
   zoo: Zoo,
   terminal: Terminal,
@@ -649,7 +727,7 @@ const STYLES: Record<Place["style"], (p: SP) => React.ReactNode> = {
 function Extras({ place }: { place: Place }) {
   const [w, , d] = place.size;
   const front = d / 2 + 0.55;
-  const food = place.style === "eatery" || place.style === "market";
+  const food = place.style === "eatery" || place.style === "market" || place.style === "restaurant";
   return (
     <>
       {[-1, 1].map((k) => (
@@ -726,7 +804,7 @@ function PlaceBuilding({ place }: { place: Place }) {
           useGame.getState().select({ type: "place", id: place.id });
         }}
       >
-        <Style size={place.size} color={place.color} />
+        <Style size={place.size} color={place.color} name={place.name} id={place.id} />
         <Extras place={place} />
       </group>
       {(isSel || atPlace === place.id) && (

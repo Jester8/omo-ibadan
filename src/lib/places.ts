@@ -16,6 +16,7 @@ export type PlaceStyle =
   | "hotel"
   | "lookout"
   | "eatery"
+  | "restaurant"
   | "amusement"
   | "zoo"
   | "terminal"
@@ -576,6 +577,19 @@ PLACES.push(
 export const isSolid = (p: Place) => p.style !== "park" && p.style !== "golf" && p.style !== "zoo";
 
 /** Where the player stands to use a place. */
+PLACES.push(
+  { id: "item7", name: "Item 7", emoji: "🍗", kind: "food", district: "Bodija", blurb: "Ibadan's favourite fast-food stop. Jollof, grilled chicken and a drive-in crowd.", pos: [5, -24.6], size: [3.4, 1.7, 2.4], color: "#e8532a", style: "restaurant", voice: true,
+    actions: [A("jollof", "Jollof rice & grilled chicken", 5, { cost: 4500, gain: { hunger: 72, fun: 8 } }), A("pounded", "Pounded yam & egusi", 5, { cost: 5000, gain: { hunger: 80, fun: 6 } }), A("suya", "Suya platter", 4, { cost: 3500, gain: { hunger: 45, fun: 12 } }), A("cashier", "Cashier shift", 6, { gain: { energy: -22 }, pay: 4200, rep: 1 })] },
+  { id: "mrbiggs", name: "Mr Biggs", emoji: "🥧", kind: "food", district: "UI Junction", blurb: "Meat pies, fried rice and the classic fast-food counter.", pos: [-15, -24.6], size: [3.4, 1.7, 2.4], color: "#d62f39", style: "restaurant", voice: true,
+    actions: [A("pie", "Meat pie & drink", 3, { cost: 1500, gain: { hunger: 30, fun: 4 } }), A("rice", "Fried rice & chicken", 5, { cost: 4000, gain: { hunger: 70, fun: 6 } }), A("burger", "Chicken burger", 4, { cost: 3500, gain: { hunger: 55, fun: 8 } }), A("counter", "Counter shift", 6, { gain: { energy: -20 }, pay: 3800, rep: 1 })] },
+  { id: "chickenrepublic", name: "Chicken Republic", emoji: "🍟", kind: "food", district: "Challenge", blurb: "Spicy chicken, refuel meals and a busy dine-in hall.", pos: [15, -24.6], size: [3.4, 1.7, 2.4], color: "#c8202f", style: "restaurant", voice: true,
+    actions: [A("refuel", "Refuel meal (rice & chicken)", 5, { cost: 4500, gain: { hunger: 75, fun: 8 } }), A("wings", "Spicy chicken wings", 4, { cost: 3200, gain: { hunger: 45, fun: 12 } }), A("burger", "Chicken burger", 4, { cost: 3500, gain: { hunger: 55, fun: 8 } }), A("crew", "Crew member shift", 6, { gain: { energy: -22 }, pay: 4000, rep: 1 })] },
+  { id: "sweetsensation", name: "Sweet Sensation", emoji: "🥐", kind: "food", district: "Mokola", blurb: "Snacks, pies, jollof and cold drinks for the quick lunch.", pos: [-5, -24.6], size: [3.4, 1.7, 2.4], color: "#ee7b22", style: "restaurant", voice: true,
+    actions: [A("jollof", "Jollof rice & turkey", 5, { cost: 4200, gain: { hunger: 70, fun: 6 } }), A("pie", "Meat pie & drink", 3, { cost: 1500, gain: { hunger: 30, fun: 4 } }), A("akara", "Akara & pap", 3, { cost: 1200, gain: { hunger: 30, fun: 5 } }), A("till", "Till shift", 6, { gain: { energy: -20 }, pay: 3800, rep: 1 })] },
+  { id: "kilimanjaro", name: "Kilimanjaro", emoji: "🍛", kind: "food", district: "Oluyole", blurb: "Rice, stew and ofada for a long lunch break.", pos: [5, 24.6], size: [3.4, 1.7, 2.4], color: "#e7a915", style: "restaurant", voice: true,
+    actions: [A("jollof", "Jollof rice & moin-moin", 5, { cost: 3600, gain: { hunger: 68, fun: 6 } }), A("rice", "Fried rice & plantain", 5, { cost: 3700, gain: { hunger: 70, fun: 6 } }), A("ofada", "Ofada rice & stew", 5, { cost: 4200, gain: { hunger: 74, fun: 8 } }), A("serve", "Serve the lunch crowd", 6, { gain: { energy: -22 }, pay: 4000, rep: 1 })] },
+);
+
 export const doorOf = (p: Place) => ({ x: p.pos[0], z: p.pos[1] + p.size[2] / 2 + 0.9 });
 
 export const DISTRICTS: { name: string; pos: [number, number] }[] = [

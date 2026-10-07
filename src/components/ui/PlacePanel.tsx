@@ -13,13 +13,21 @@ import { useClock } from "@/lib/hooks";
 import { driveToPlace, quoteRide, rideToPlace, walkToPlace } from "@/lib/movement";
 import { RIDES, carById, type RideId } from "@/lib/cars";
 import { me } from "@/lib/playerState";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { naira } from "@/lib/plots";
 import { ActionRow, VoiceRoomCard } from "./parts";
 import PlotPanelBody from "./PlotPanel";
 import InteriorPanel from "./InteriorPanel";
 import { enterInterior } from "@/lib/interiorRuntime";
 import { placeLayout } from "@/lib/layouts";
+
+/** A photo of the place, if one has been added to public/places. Without one, nothing is shown. */
+function PlacePhoto({ id }: { id: string }) {
+  const [ok, setOk] = useState(true);
+  if (!ok) return null;
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={`/places/${id}.jpg`} alt="" onError={() => setOk(false)} className="mb-3 h-24 w-full rounded-2xl object-cover sm:h-32" />;
+}
 
 function PlaceBody({ id }: { id: string }) {
   const place = PLACES.find((p) => p.id === id)!;
@@ -48,6 +56,7 @@ function PlaceBody({ id }: { id: string }) {
 
   return (
     <>
+      <PlacePhoto id={id} />
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="grid size-12 place-items-center rounded-2xl text-2xl" style={{ background: `${color}22` }}>

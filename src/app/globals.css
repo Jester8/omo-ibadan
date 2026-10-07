@@ -36,6 +36,15 @@ body {
   }
 }
 
+/* whatever you type is black, unless a field sets its own colour */
+@layer base {
+  input,
+  textarea,
+  select {
+    color: #000;
+  }
+}
+
 html { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 button { touch-action: manipulation; }
 

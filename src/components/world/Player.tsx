@@ -121,7 +121,7 @@ export default function Player() {
     const energy = s.needs.energy;
     const tired = energy < 3 ? 0.4 : energy < 15 ? 0.65 : 1;
     const ownCar = s.driving && !s.interior ? carById(s.activeCar) : undefined;
-    const base = s.interior ? 2.2 * tired : ownCar ? ownCar.speed : me.ride ? rideById(s.ride)?.speed ?? 8.5 : Date.now() < boost.until ? 6.5 : 3.1 * tired;
+    const base = s.interior ? 2.2 * tired : ownCar ? ownCar.speed : me.ride ? rideById(s.ride)?.speed ?? 8.5 : Date.now() < boost.until ? 8 : 4.7 * tired;
     let moving = false;
     let tx = me.ry;
 
