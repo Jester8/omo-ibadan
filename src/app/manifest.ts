@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Omo'badan",
     short_name: "Omo'badan",
-    description: "Live the life. A real-life simulation of Ibadan, the city of rust roofs.",
+    description: "Live the life. A real-life simulation of Ibadan, the city of brown roofs.",
     id: "/play",
     start_url: "/play",
     scope: "/",

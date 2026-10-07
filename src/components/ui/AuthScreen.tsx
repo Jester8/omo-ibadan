@@ -77,7 +77,7 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
         />
       )}
       {film === "on" && <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/25 to-black/65" />}
-      {/* the rust-roofed skyline of Ibadan (the painted fallback) */}
+      {/* the brown-roofed skyline of Ibadan (the painted fallback) */}
       <svg aria-hidden className={`absolute inset-x-0 bottom-0 h-[46%] w-full transition-opacity duration-1000 ${film === "on" ? "opacity-0" : "opacity-100"}`} viewBox="0 0 400 200" preserveAspectRatio="xMidYMax slice">
         {Array.from({ length: 22 }, (_, i) => {
           const x = i * 19 - 6;
@@ -106,7 +106,7 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
             <motion.div key="intro" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="text-center">
               <Image src="/logo.png" alt="Omo'badan" width={112} height={112} priority className="mx-auto size-28 drop-shadow-[0_10px_30px_rgba(224,162,31,0.35)]" />
               <h1 className="mt-6 text-5xl font-black tracking-tight">Omo&apos;badan</h1>
-              <p className="mt-3 text-lg text-white/80">Live the life. Rust roofs, amala and good vibes.</p>
+              <p className="mt-3 text-lg text-white/80">Live the life. Brown roofs, amala and good vibes.</p>
               <button onClick={enter} className="mt-10 inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-base font-bold text-stone-900 shadow-xl transition active:scale-95">
                 Tap to enter <ArrowRight className="size-5" />
               </button>

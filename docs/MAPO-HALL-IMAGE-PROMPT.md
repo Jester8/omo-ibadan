@@ -8,7 +8,7 @@ attach a real photo of Mapo Hall so the building is accurate.
 Stylised animated-film illustration of Mapo Hall in Ibadan, Nigeria, at golden hour, in the look of a modern 3D
 animated movie or a Studio Ghibli background painting. The stately cream-white colonial-era hall with its columned
 portico and tower stands on Mapo hill among round, chunky palm trees and a bright green lawn, and below it a
-sea of charming rust-brown corrugated-iron rooftops rolls to a soft hazy horizon. Warm peach and orange sky with
+sea of charming brown corrugated-iron rooftops rolls to a soft hazy horizon. Warm peach and orange sky with
 fluffy storybook clouds, glowing sunlight, tiny yellow danfo buses and little okada riders on the roads far below,
 a few birds, cooking smoke curls, cheerful colours, clean shapes, soft gradients, gentle rim light. Wide view from
 slightly above and in front, the hall in the left third so there is open sky and rooftops on the right for text.

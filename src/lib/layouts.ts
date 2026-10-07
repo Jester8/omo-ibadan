@@ -462,7 +462,7 @@ const PLACE_LAYOUTS: Record<string, Layout> = {
     id: "bowers", name: "Bower's Tower Gallery", w: 7, d: 7, floor: "wood", wall: "#c97a52", trim: "#5a3a24", accent: OCHRE, exitX: 0,
     walls: [],
     items: [I("stairs", -2.4, -1.6, H, { w: 3.0, d: 1.1 }), I("displaycase", 2.2, -2.2, 0, { w: 1.4 }), I("bench", 2.2, 0.8, -H, { w: 1.4 }), I("plant", 2.8, -2.9), I("rug", 0, 1, 0, { w: 2.4, d: 1.4, c: OCHRE }), I("wallart", 0, -3.43, 0, { y: 1.7, c: RUST })],
-    residents: [res("Curator", -0.5, 0.2, { seed: "curator", lines: ["From the top you can see all of Ibadan's rust roofs."] })],
+    residents: [res("Curator", -0.5, 0.2, { seed: "curator", lines: ["From the top you can see all of Ibadan's brown roofs."] })],
   }),
 
   mosque: lay({

@@ -42,7 +42,7 @@ export default function DeckPanel() {
           <p className="flex items-center gap-1.5 text-base font-bold text-stone-900">
             <Binoculars className="size-4 text-amber-600" /> Bower&apos;s Tower · Viewing deck
           </p>
-          <p className="text-xs text-stone-500">Ibadan&apos;s sea of rusted roofs, 40 metres below.</p>
+          <p className="text-xs text-stone-500">Ibadan&apos;s sea of brown roofs, 40 metres below.</p>
         </div>
         <button onClick={leaveDeck} className="flex shrink-0 items-center gap-1.5 rounded-full bg-stone-900 px-3 py-2 text-xs font-semibold text-white transition active:scale-95">
           <ArrowDownToLine className="size-3.5" /> Down

@@ -7,7 +7,7 @@ import { PLOTS, PLOT_SIZE } from "@/lib/plots";
 import { BLOCKS, CAMPUS, ESTATES, inLake, inRect } from "@/lib/world";
 import { RANKS } from "./CabRanks";
 
-/** Ibadan's famous sea of rust-brown corrugated roofs: small gabled houses filling the free lots. */
+/** Ibadan's famous sea of brown corrugated roofs: small gabled houses filling the free lots. */
 const RUST = ["#9c4f2f", "#a85a3c", "#8f4a2b", "#b0623f", "#7f4128", "#a24f2e", "#b56a45"];
 const WALLS = ["#efe3cc", "#e8d9bd", "#f4ead7", "#d9c8a8", "#e6d3b3"];
 

@@ -294,7 +294,7 @@ export const PLACES: Place[] = [
     emoji: "🗼",
     kind: "culture",
     district: "Dugbe",
-    blurb: "Climb it and see the whole city of rusted roofs.",
+    blurb: "Climb it and see the whole city of brown roofs.",
     pos: [-2.5, 3.2],
     size: [1.2, 4.4, 1.2],
     color: "#b9855a",

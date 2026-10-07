@@ -19,8 +19,8 @@ export const metadata: Metadata = {
   applicationName: "Omo'badan",
   appleWebApp: { capable: true, title: "Omo'badan", statusBarStyle: "black-translucent" },
   formatDetection: { telephone: false },
-  openGraph: { title: "Omo'badan", description: "Live the life. A real-life simulation of Ibadan, the city of rust roofs.", siteName: "Omo'badan", type: "website" },
-  twitter: { card: "summary_large_image", title: "Omo'badan", description: "Live the life. A real-life simulation of Ibadan, the city of rust roofs." },
+  openGraph: { title: "Omo'badan", description: "Live the life. A real-life simulation of Ibadan, the city of brown roofs.", siteName: "Omo'badan", type: "website" },
+  twitter: { card: "summary_large_image", title: "Omo'badan", description: "Live the life. A real-life simulation of Ibadan, the city of brown roofs." },
 };
 
 export const viewport: Viewport = { themeColor: "#1E1B3A", viewportFit: "cover", width: "device-width", initialScale: 1, maximumScale: 1, userScalable: false };

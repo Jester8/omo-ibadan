@@ -76,7 +76,7 @@ Owners can buy decor (plants, lamps, rugs, adire wall hangings, calabash, carved
 - Sign-in flow: intro screen with the intro song, Sign up (name, email, avatar), Log in (email + name), Sign out (saves, clears the device).
 - Intro song is served from a git-ignored private folder and only in production when INTRO_LICENSED=1 (needs the artists' written permission).
 - Artist music platform: upload with a rights declaration, admin review, credited playback, owner takedown (Me > Music and sounds; /admin/tracks).
-- Rust-brown roofscape across the city and brown roofs on houses.
+- Brown roofscape across the city and brown roofs on houses.
 - Traffic crawls at half speed; okadas carry riders.
 - Ibadan Airport: book a ticket, board, fly, fly home.
 - Nightlife: five late-night venues with dancing, drinks and spraying money; opening hours past midnight.
