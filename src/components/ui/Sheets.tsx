@@ -203,6 +203,7 @@ function QuestsSheet() {
 function SoundSliders() {
   const music = useSound((s) => s.music);
   const sfx = useSound((s) => s.sfx);
+  const theme = useSound((s) => s.theme);
   const set = useSound((s) => s.set);
   return (
     <div className="mt-5 rounded-2xl bg-stone-50 p-4 ring-1 ring-black/5">
@@ -218,8 +219,17 @@ function SoundSliders() {
           <input type="range" min={0} max={1} step={0.05} value={value} onChange={(e) => onChange(Number(e.target.value))} className="h-1.5 w-full accent-emerald-600" />
         </label>
       ))}
+      <label className="mt-3 flex items-center justify-between gap-3 rounded-xl bg-white px-3 py-2.5 text-sm font-semibold text-stone-800 ring-1 ring-black/5">
+        <span>
+          Intro song
+          <span className="block text-[11px] font-normal text-stone-500">The song that plays on the welcome screen and in the city</span>
+        </span>
+        <button type="button" role="switch" aria-checked={theme} onClick={() => set({ theme: !theme })} className={`relative h-6 w-11 shrink-0 rounded-full transition ${theme ? "bg-emerald-600" : "bg-stone-300"}`}>
+          <span className={`absolute top-0.5 size-5 rounded-full bg-white shadow transition-all ${theme ? "left-[1.35rem]" : "left-0.5"}`} />
+        </button>
+      </label>
       <p className="mt-3 text-[11px] text-stone-400">
-        Music: {THEME_SONG.artist} — {THEME_SONG.title}
+        Music: {THEME_SONG.artist}, {THEME_SONG.title}
       </p>
     </div>
   );

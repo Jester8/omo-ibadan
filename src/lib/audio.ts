@@ -8,14 +8,14 @@
  *  - UI and game sound effects
  */
 
-export type SoundSettings = { music: number; sfx: number; muted: boolean };
+export type SoundSettings = { music: number; sfx: number; muted: boolean; /** the intro (theme) song on the landing page and in the city */ theme: boolean };
 
 const KEY = "omo-ibadan-audio";
 const load = (): SoundSettings => {
   try {
-    return { music: 0.5, sfx: 0.7, muted: false, ...JSON.parse(localStorage.getItem(KEY) ?? "{}") };
+    return { music: 0.5, sfx: 0.7, muted: false, theme: true, ...JSON.parse(localStorage.getItem(KEY) ?? "{}") };
   } catch {
-    return { music: 0.5, sfx: 0.7, muted: false };
+    return { music: 0.5, sfx: 0.7, muted: false, theme: true };
   }
 };
 
@@ -40,7 +40,7 @@ const BASS = [33, 29, 36, 31];
 
 class Engine {
   ctx: AudioContext | null = null;
-  settings: SoundSettings = { music: 0.5, sfx: 0.7, muted: false };
+  settings: SoundSettings = { music: 0.5, sfx: 0.7, muted: false, theme: true };
   private master!: GainNode;
   private musicBus!: GainNode;
   private musicFilter!: BiquadFilterNode;

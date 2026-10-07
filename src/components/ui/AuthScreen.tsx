@@ -184,7 +184,7 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
       </div>
       {step !== "intro" && (
         <p className="pointer-events-none absolute inset-x-0 bottom-[max(env(safe-area-inset-bottom),0.75rem)] z-10 px-6 text-center text-[11px] text-white/45">
-          Music: {THEME_SONG.artist} — {THEME_SONG.title}
+          Music: {THEME_SONG.artist}, {THEME_SONG.title}
         </p>
       )}
     </div>

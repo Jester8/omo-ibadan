@@ -8,6 +8,7 @@ export const useSound = create<SoundState>((set) => ({
   music: 0.5,
   sfx: 0.7,
   muted: false,
+  theme: true,
   set: (s) => {
     audio.setSettings(s);
     set(s);

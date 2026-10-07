@@ -25,7 +25,7 @@ let blocked = false;
 let fadeTimer: ReturnType<typeof setTimeout> | null = null;
 let rampTimer: ReturnType<typeof setInterval> | null = null;
 
-const wanted = () => started && !audio.settings.muted && !document.hidden && !useMusic.getState().playing;
+const wanted = () => started && !audio.settings.muted && audio.settings.theme && !document.hidden && !useMusic.getState().playing;
 
 let routed = false;
 
@@ -161,7 +161,12 @@ export function startThemeSong() {
 if (typeof window !== "undefined") {
   let muted = useSound.getState().muted;
   let music = useSound.getState().music;
+  let theme = useSound.getState().theme;
   useSound.subscribe((s) => {
+    if (s.theme !== theme) {
+      theme = s.theme;
+      sync();
+    }
     if (s.muted !== muted) {
       muted = s.muted;
       sync();
