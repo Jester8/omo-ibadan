@@ -1,6 +1,8 @@
 import type { C2S, PeerInfo, S2C } from "./protocol";
 import { hooks, useGame } from "./store";
-import { emotes, remoteMotion, remoteSits } from "./playerState";
+import { emotes, me, remoteMotion, remoteSits } from "./playerState";
+import { PLOTS, PLOT_SIZE, plotById } from "./plots";
+import { ESTATES } from "./world";
 import { audio } from "./audio";
 import { rideById } from "./cars";
 import { loadSocial, openThread } from "./social";
@@ -52,6 +54,18 @@ function handle(m: S2C) {
       for (const [id, p] of mine) {
         useGame.getState().setPlot(id, p);
         send({ t: "plotSet", plotId: id, plot: p });
+      }
+      // a brand new account is given a bungalow in a walled estate: offer the server a few free plots to choose from
+      if (useGame.getState().starterPending) {
+        useGame.setState({ starterPending: false });
+        const taken = useGame.getState().plots;
+        const estates = new Set(ESTATES.flatMap((e) => e.districts));
+        const free = PLOTS.filter((p) => estates.has(p.district) && !taken[p.id]).map((p) => p.id);
+        for (let i = free.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [free[i], free[j]] = [free[j], free[i]];
+        }
+        if (free.length) send({ t: "claimStarter", candidates: free.slice(0, 12) });
       }
       remoteMotion.clear();
       useGame.setState({ remotes: {} });
@@ -155,6 +169,17 @@ function handle(m: S2C) {
       if (pid && s.muted.includes(pid)) break;
       usePhotos.getState().add({ id: m.photoId, name: m.name, data: m.data, at: Date.now() });
       audio.pop();
+      break;
+    }
+    case "starterHome": {
+      // your starter home is ready: land at its door
+      const p = plotById(m.plotId);
+      if (!p) break;
+      me.path = [];
+      me.x = p.pos[0];
+      me.z = p.pos[1] + PLOT_SIZE / 2 + 0.7;
+      useGame.setState({ selected: { type: "plot", id: p.id } });
+      s.toast(`Welcome home! A bungalow in ${p.district} is yours.`, "good");
       break;
     }
     case "knock":

@@ -242,7 +242,7 @@ export default function WorldClient() {
             cooldown={pending.cooldown}
             onBack={() => setPending(null)}
             onVerified={(p) => {
-              if (p.isNew) useGame.setState({ money: SIGNUP_MONEY });
+              if (p.isNew) useGame.setState({ money: SIGNUP_MONEY, starterPending: true });
               setProfile({ id: p.id, name: p.name, username: p.username ?? pending.username, look: p.look ?? pending.look, email: p.email });
               setPending(null);
             }}
@@ -267,7 +267,7 @@ export default function WorldClient() {
                 const d = demoSignUp(name, email, look, username);
                 setSigningUp(false);
                 if (!d.ok) return setSignupError(d.error);
-                useGame.setState({ money: SIGNUP_MONEY });
+                useGame.setState({ money: SIGNUP_MONEY, starterPending: true });
                 return setProfile({ id: d.profile.id, name, username, look, email: d.profile.email });
               }
               const r = await requestCode(email, "signup", username);
@@ -276,7 +276,7 @@ export default function WorldClient() {
                 const v = await verifyCode(email, "", { name, look, username, password });
                 setSigningUp(false);
                 if (!v.ok) return setSignupError(v.error);
-                if (v.profile.isNew) useGame.setState({ money: SIGNUP_MONEY });
+                if (v.profile.isNew) useGame.setState({ money: SIGNUP_MONEY, starterPending: true });
                 return setProfile({ id: v.profile.id, name: v.profile.name, username: v.profile.username ?? username, look: v.profile.look ?? look, email: v.profile.email });
               }
               setSigningUp(false);

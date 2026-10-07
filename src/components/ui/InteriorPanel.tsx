@@ -11,6 +11,8 @@ import { ActionRow, VoiceRoomCard } from "./parts";
 import HereNow from "./HereNow";
 import ShopPanel from "./ShopPanel";
 import { DECOR, MAX_PER_KIND } from "@/lib/decor";
+import { bizById } from "@/lib/business";
+import type { ActionDef } from "@/lib/places";
 import { refreshInterior } from "@/lib/interiorRuntime";
 
 export default function InteriorPanel() {
@@ -29,10 +31,24 @@ export default function InteriorPanel() {
 
   const place = interior.kind === "place" ? PLACES.find((p) => p.id === interior.id) : undefined;
   const plot = interior.kind === "home" && interior.id !== "flat" ? plots[interior.id] : undefined;
+  const biz = interior.kind === "home" ? bizById(plot?.biz) : undefined;
+  const mineBiz = !!biz && plot?.ownerId === pid;
+  // what you can do inside someone's business
+  const BIZ_ACTIONS: Record<string, ActionDef> = {
+    shop: { id: "snack", label: "Buy snacks & a cold drink", secs: 3, cost: 800, gain: { hunger: 22, fun: 4 } },
+    salon: { id: "cut", label: "Get a fresh cut", secs: 5, cost: 2500, gain: { fun: 26, social: 8 } },
+    cafe: { id: "coffee", label: "Coffee & a pastry", secs: 4, cost: 1500, gain: { hunger: 26, fun: 8, energy: 6 } },
+    pharmacy: { id: "vitamins", label: "Buy vitamins", secs: 3, cost: 1200, gain: { energy: 14 } },
+    gym: { id: "workout", label: "Day-pass workout", secs: 6, cost: 2000, gain: { fun: 22, energy: -10, social: 6 } },
+    mart: { id: "bigshop", label: "Do a big shop (+3 provisions)", secs: 4, cost: 3500, pantry: 3 },
+  };
+  const bizAction = biz ? BIZ_ACTIONS[biz.id] : undefined;
   const power = powerOn();
   const genLeft = Math.max(0, Math.ceil((generatorUntil - now) / 1000));
   const genIndex = layout.items.findIndex((it) => it.kind === "generator");
-  const subtitle = place
+  const subtitle = biz
+    ? `${plotById(interior.id)?.district} · ${biz.emoji} ${biz.name}`
+    : place
     ? `${place.kind} · ${place.district}`
     : interior.id === "flat"
       ? "Your rented room and parlour"
@@ -58,7 +74,7 @@ export default function InteriorPanel() {
       <HereNow />
       {interior.kind === "home" && (
         <div className="mt-3">
-          <VoiceRoomCard room={`home:${interior.id}`} label="Talk together" />
+          <VoiceRoomCard room={`home:${interior.id}`} label={biz ? "Chat with customers" : "Talk together"} />
         </div>
       )}
       {place?.kind === "shop" && <ShopPanel />}
@@ -109,7 +125,36 @@ export default function InteriorPanel() {
         </ul>
       )}
 
-      {interior.kind === "home" && (
+      {biz && (
+        <ul className="mt-4 space-y-2">
+          {bizAction && (
+            <li>
+              <ActionRow
+                a={bizAction}
+                enabled={!busy}
+                onRun={() => {
+                  const err = useGame.getState().runAction(bizAction);
+                  if (err) useGame.getState().toast(err, "bad");
+                }}
+              />
+            </li>
+          )}
+          {mineBiz && (
+            <li>
+              <ActionRow
+                a={{ id: "serve", label: "Serve customers", secs: 6, gain: { energy: -18 }, pay: 2500, rep: 1 }}
+                enabled={!busy}
+                onRun={() => {
+                  const err = useGame.getState().runAction({ id: "serve", label: "Serve customers", secs: 6, gain: { energy: -18 }, pay: 2500, rep: 1 });
+                  if (err) useGame.getState().toast(err, "bad");
+                }}
+              />
+            </li>
+          )}
+        </ul>
+      )}
+
+      {interior.kind === "home" && !biz && (
         <div className="mt-3 rounded-2xl bg-amber-50 p-3.5 ring-1 ring-amber-100">
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -133,7 +178,7 @@ export default function InteriorPanel() {
         </div>
       )}
 
-      {interior.kind === "home" && (interior.id === "flat" || plot?.ownerId === pid) && (
+      {interior.kind === "home" && !biz && (interior.id === "flat" || plot?.ownerId === pid) && (
         <details className="mt-3 rounded-2xl bg-stone-50 ring-1 ring-black/5">
           <summary className="cursor-pointer select-none px-4 py-3 text-sm font-semibold text-stone-800">Decorate your home</summary>
           <ul className="space-y-2 px-3 pb-3">

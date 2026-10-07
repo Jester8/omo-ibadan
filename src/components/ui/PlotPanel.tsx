@@ -39,6 +39,21 @@ export default function PlotPanelBody({ id }: { id: string }) {
     if (mine) enterInterior({ kind: "home", id });
     else net.knock(id);
   };
+  // a business is open to everyone: walk up and step inside (unless the owner has closed for now)
+  const shut = state?.visit === "closed";
+  const enterBiz = () => {
+    if (!near) return walkTo(plot.pos[0], plot.pos[1] + PLOT_SIZE / 2 + 0.6);
+    if (shut && !mine) return useGame.getState().toast("Closed for now. Come back later.", "info");
+    enterInterior({ kind: "home", id });
+  };
+  const bizButton = biz ? (
+    <button
+      onClick={enterBiz}
+      className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 py-3 text-sm font-semibold text-white shadow-lg shadow-amber-500/20 transition hover:bg-amber-600 active:scale-[0.98]"
+    >
+      <DoorOpen className="size-4" /> {near ? (mine ? "Go inside your business" : shut ? "Closed for now" : `Step inside ${biz.name}`) : "Walk to the door"}
+    </button>
+  ) : null;
   const enterButton =
     tier >= 1 ? (
       <button
@@ -113,6 +128,20 @@ export default function PlotPanelBody({ id }: { id: string }) {
               <span className="text-sm font-bold tabular-nums">{naira(next.cost)}</span>
             </button>
           )}
+
+          {biz && (
+            <div className="mt-3 rounded-2xl bg-white p-3 ring-1 ring-black/5">
+              <p className="text-[11px] font-bold uppercase tracking-wide text-stone-400">Opening</p>
+              <div className="mt-2 grid grid-cols-2 gap-1.5">
+                {([["ask", "Open for customers"], ["closed", "Closed"]] as const).map(([mode, label]) => (
+                  <button key={mode} onClick={() => useGame.getState().setVisit(id, mode)} className={`rounded-xl py-2 text-xs font-bold transition active:scale-95 ${(shut ? "closed" : "ask") === mode ? "bg-stone-900 text-white" : "bg-stone-100 text-stone-700"}`}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          {bizButton}
 
           {tier >= 1 && (
             <div className="mt-3 rounded-2xl bg-white p-3 ring-1 ring-black/5">
@@ -191,7 +220,8 @@ export default function PlotPanelBody({ id }: { id: string }) {
           <p className="flex items-center gap-2 font-semibold text-stone-800">
             <KeyRound className="size-4" /> Owned by {state.ownerName}
           </p>
-          <p className="mt-1">Ask them to host a house party, or just knock and go in.</p>
+          <p className="mt-1">{biz ? `${biz.emoji} ${biz.name}: open to customers. Step inside to look around, say hello and buy something.` : "Knock and wait for them to let you in, or ask to be invited to a house party."}</p>
+          {bizButton}
           {enterButton}
           {tier >= 1 && (
             <button

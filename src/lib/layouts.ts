@@ -1,5 +1,6 @@
 import type { FurnKind } from "./furniture";
 import type { FloorKind, InteriorRef, Item, Layout, Resident, Wall } from "./interiors";
+import { bizById } from "./business";
 
 /* ------------------------------------------------------------------------------------------------
  * Interior layouts, authored in metres. x spans -w/2..w/2 (left..right), z spans -d/2..d/2
@@ -597,10 +598,33 @@ export function placeLayout(id: string): Layout | null {
 
 export const ALL_PLACE_LAYOUT_IDS = Object.keys(PLACE_LAYOUTS);
 
-export function layoutFor(ref: InteriorRef, tierOf?: (plotId: string) => { tier: number; ownerId: string; ownerName: string } | undefined): Layout | null {
+/** The inside of a player's business: a counter at the back, stock on the shelves, and room for customers. */
+export function bizLayout(bizId: string, ownerName?: string): Layout {
+  const b = bizById(bizId);
+  const name = `${ownerName ? `${ownerName}'s ` : ""}${b?.name ?? "Shop"}`;
+  const base = { name, w: 10, d: 8, wall: "#f4efe6", trim: "#3a3f48", accent: b?.color ?? "#16a34a", light: "bright" as const, exitX: 0, walls: [] as Wall[] };
+  const fans = [I("ceilingfan", -2.5, 0), I("ceilingfan", 2.5, 0), I("plant", -4.5, 3.4), I("plant", 4.5, 3.4)];
+  switch (bizId) {
+    case "salon":
+      return lay({ ...base, id: "biz", floor: "tile", items: [I("counter", 0, -3.4, 0, { w: 2.6 }), ...row("armchair", -3.4, -1.4, 3, 2.2, R), ...row("chair", -3, 2.2, 4, 2, 0), I("sink", -4.2, -3.5, 0), I("sidetable", 3.6, -3.5), I("tv", 4.9, 0, -H), ...fans] });
+    case "cafe":
+      return lay({ ...base, id: "biz", floor: "wood", items: [I("bar", 0, -2.8, 0, { w: 4.4 }), ...row("barstool", -1.8, -1.8, 4, 1.2, 0), I("fridge", -4.2, -3.5, 0), I("stove", 3.8, -3.5, 0), ...[[-3.4, 1.4], [0, 0.3], [3.4, 1.4]].flatMap(([x, z]) => [I("roundtable", x, z), ...around("chair", x, z, 0.8, 3, 0.5)]), I("tv", 4.9, 0, -H), ...fans] });
+    case "pharmacy":
+      return lay({ ...base, id: "biz", floor: "tile", light: "cool", items: [I("counter", 0, -3.4, 0, { w: 3.4 }), ...row("displaycase", -3.8, -1.2, 3, 2.2, 0), ...row("rack", -4.4, -3.6, 2, 1.0, 0), I("fridge", 4.2, -3.6, 0), ...row("bench", -3.4, 2.6, 2, 6.8, 0), I("waterdispenser", 4.5, 2.4), ...fans] });
+    case "gym":
+      return lay({ ...base, id: "biz", floor: "concrete", light: "cool", w: 12, d: 9, items: [I("counter", -4, -4, 0, { w: 2.2 }), ...row("bench", -3.5, -0.8, 3, 2.4, 0), ...row("rack", -4.5, -3.6, 1, 1, 0), ...row("crates", 1.2, -3.8, 3, 1.2, 0), I("rug", 2, 1.4, 0), I("tv", 5.9, 0.4, -H), I("standingfan", 4.8, 3.4), I("standingfan", -4.8, 3.4), I("cooler", 5.4, -3.6), ...fans.slice(0, 2)] });
+    case "mart":
+      return lay({ ...base, id: "biz", floor: "tile", w: 12, d: 9, items: [I("counter", -4.2, 3, 0, { w: 1.6 }), I("counter", -2.2, 3, 0, { w: 1.6 }), ...row("rack", -4, -3, 5, 2, 0), ...row("rack", -4, -0.6, 5, 2, 0), ...row("provisions", -4.4, -4, 3, 3, 0), I("cooler", 5.4, -4), I("fridge", 5.4, -2.4, -H), I("cooler", 5.4, 0.2, -H), ...fans.slice(0, 2)] });
+    default:
+      return lay({ ...base, id: "biz", floor: "redoxide", items: [I("counter", 0, -3.2, 0, { w: 3 }), I("provisions", -3.8, -3.6, 0), I("provisions", 3.8, -3.6, 0), ...row("rack", -4.2, -0.6, 3, 1.1, 0), ...row("crates", 1.2, -0.6, 3, 1.1, 0), I("cooler", 4.5, 1.8), I("fridge", -4.5, 1.8, H), I("radio", -0.6, -3.3), ...fans] });
+  }
+}
+
+export function layoutFor(ref: InteriorRef, tierOf?: (plotId: string) => { tier: number; ownerId: string; ownerName: string; biz?: string } | undefined): Layout | null {
   if (ref.kind === "place") return placeLayout(ref.id);
   if (ref.id === "flat") return FLAT_LAYOUT;
   const plot = tierOf?.(ref.id);
   if (!plot || plot.tier < 1) return null;
+  if (plot.biz) return { ...bizLayout(plot.biz, plot.ownerName), id: ref.id };
   return { ...homeLayout(plot.tier, plot.ownerId, plot.ownerName), id: ref.id };
 }
