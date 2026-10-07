@@ -27,7 +27,7 @@ import { QUESTS } from "@/lib/quests";
 import { naira } from "@/lib/plots";
 import { useMounted } from "@/lib/hooks";
 import { net, roomOf } from "@/lib/net";
-import { introInfo, requestCode, type Verified } from "@/lib/api";
+import { DEMO_AUTH, demoSignUp, introInfo, requestCode, type Verified } from "@/lib/api";
 import AuthCode from "@/components/ui/AuthCode";
 import type { Look } from "@/lib/look";
 import { introToGame, playIntroOnce } from "@/lib/music";
@@ -261,6 +261,13 @@ export default function WorldClient() {
               if (profile) return setProfile({ ...profile, name, look });
               setSigningUp(true);
               setSignupError("");
+              if (DEMO_AUTH) {
+                // demo mode: make the account right here, no server and no email code
+                const d = demoSignUp(name, email, look);
+                setSigningUp(false);
+                if (!d.ok) return setSignupError(d.error);
+                return setProfile({ id: d.profile.id, name, look, email: d.profile.email });
+              }
               const r = await requestCode(email, "signup");
               setSigningUp(false);
               if (!r.ok) return setSignupError(r.error);

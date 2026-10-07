@@ -9,10 +9,56 @@ export const apiBase = () =>
 const KEY = "omo-ibadan-token";
 let cached: string | null = null;
 
+/**
+ * Demo mode (the default): sign up and log in work entirely in this browser. No backend call, no email code.
+ * Set NEXT_PUBLIC_REQUIRE_BACKEND=1 to use the real server accounts instead.
+ */
+export const DEMO_AUTH = process.env.NEXT_PUBLIC_REQUIRE_BACKEND !== "1";
+
+const DEMO_KEY = "omo-ibadan-demo-accounts";
+const STORE_KEY = "omo-ibadan-v1";
+type DemoAccount = { id: string; name: string; email: string; look: Look; saved?: string };
+
+const demoAccounts = (): Record<string, DemoAccount> => {
+  try {
+    return JSON.parse(localStorage.getItem(DEMO_KEY) ?? "{}") as Record<string, DemoAccount>;
+  } catch {
+    return {};
+  }
+};
+const putDemo = (a: DemoAccount) => {
+  try {
+    localStorage.setItem(DEMO_KEY, JSON.stringify({ ...demoAccounts(), [a.email]: a }));
+  } catch {
+    /* private mode: the account just lasts this session */
+  }
+};
+
+/** Create a demo account on this device. Returns an error message if the email is already used here. */
+export function demoSignUp(name: string, email: string, look: Look): { ok: true; profile: Verified } | { ok: false; error: string } {
+  const key = email.trim().toLowerCase();
+  if (demoAccounts()[key]) return { ok: false, error: "That email already has a demo account on this device. Log in instead." };
+  const id = crypto.randomUUID().replace(/-/g, "").slice(0, 20);
+  putDemo({ id, name, email: key, look });
+  return { ok: true, profile: { id, name, look, email: key, isNew: true } };
+}
+
+/** Log in to a demo account made on this device. Brings back its saved progress. */
+export function demoLogIn(email: string): { ok: true; profile: Verified } | { ok: false; error: string } {
+  const a = demoAccounts()[email.trim().toLowerCase()];
+  if (!a) return { ok: false, error: "No demo account with that email on this device. Sign up to make one." };
+  try {
+    if (a.saved) localStorage.setItem(STORE_KEY, a.saved);
+  } catch {
+    /* ignore */
+  }
+  return { ok: true, profile: { id: a.id, name: a.name, look: a.look, email: a.email, isNew: false } };
+}
+
 /** Guest token for the current player, fetched once and kept in localStorage. */
 export async function ensureToken(): Promise<string | null> {
   const profile = useGame.getState().profile;
-  if (!profile) return null;
+  if (!profile || DEMO_AUTH) return null;
   try {
     const saved = JSON.parse(localStorage.getItem(KEY) ?? "null") as { pid: string; token: string } | null;
     if (saved?.pid === profile.id) return (cached = saved.token);
@@ -65,6 +111,7 @@ let ice: { at: number; cfg: RTCConfiguration } | null = null;
 
 /** STUN, plus a TURN relay with short-lived credentials when the server has one. Cached for an hour. */
 export async function getIce(): Promise<RTCConfiguration> {
+  if (DEMO_AUTH) return { iceServers: [{ urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun1.l.google.com:19302" }] };
   if (ice && Date.now() - ice.at < 3600_000) return ice.cfg;
   const fallback: RTCConfiguration = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun1.l.google.com:19302" }] };
   try {
@@ -84,6 +131,12 @@ export async function getIce(): Promise<RTCConfiguration> {
 export async function signOut() {
   await pushState();
   try {
+    // a demo account keeps its progress on this device, ready for the next log in
+    const email = useGame.getState().profile?.email;
+    if (DEMO_AUTH && email) {
+      const acc = demoAccounts()[email];
+      if (acc) putDemo({ ...acc, saved: localStorage.getItem(STORE_KEY) ?? undefined });
+    }
     localStorage.removeItem(KEY);
     useGame.persist.clearStorage();
   } catch {
@@ -120,6 +173,7 @@ const snapshot = () => {
 
 /** Upload the player's progress. Quietly does nothing when the server is unreachable. */
 export async function pushState() {
+  if (DEMO_AUTH) return;
   const token = cached ?? (await ensureToken());
   const profile = useGame.getState().profile;
   if (!token || !profile) return;
@@ -132,6 +186,7 @@ export async function pushState() {
 
 /** On a new device (or after clearing data) bring the cloud save down. */
 export async function pullState() {
+  if (DEMO_AUTH) return;
   const token = cached ?? (await ensureToken());
   if (!token) return;
   try {

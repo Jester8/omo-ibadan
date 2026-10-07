@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight, ChevronLeft, Mail, Music2, Volume2, VolumeX } from "lucide-react";
-import { introInfo, requestCode, type IntroInfo, type Verified } from "@/lib/api";
+import { DEMO_AUTH, demoLogIn, introInfo, requestCode, type IntroInfo, type Verified } from "@/lib/api";
 import AuthCode from "./AuthCode";
 import { setIntroMuted, startIntro } from "@/lib/music";
 
@@ -38,6 +38,13 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
     e.preventDefault();
     setBusy(true);
     setErr("");
+    if (DEMO_AUTH) {
+      const d = demoLogIn(email);
+      setBusy(false);
+      if (d.ok) onLoggedIn(d.profile);
+      else setErr(d.error);
+      return;
+    }
     const r = await requestCode(email.trim().toLowerCase(), "login");
     setBusy(false);
     if (r.ok) {
@@ -125,7 +132,7 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
                 <ChevronLeft className="size-5" strokeWidth={2.4} /> Back
               </button>
               <h2 className="text-3xl font-extrabold tracking-tight">Log in</h2>
-              <p className="mt-1 text-white/70">We will email you a 6-digit code. No password to remember.</p>
+              <p className="mt-1 text-white/70">{DEMO_AUTH ? "Demo mode: use the email you signed up with on this device. Nothing is sent." : "We will email you a 6-digit code. No password to remember."}</p>
               <div className="mt-6">
                 <div className="relative">
                   <Mail className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
@@ -134,7 +141,7 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
               </div>
               {err && <p className="mt-3 rounded-xl bg-rose-500/25 px-3.5 py-2.5 text-sm font-medium text-rose-100">{err}</p>}
               <button disabled={busy || !email} className="mt-5 w-full rounded-2xl bg-amber-500 py-4 text-base font-extrabold text-stone-900 shadow-xl transition active:scale-[0.98] disabled:opacity-50">
-                {busy ? "Sending…" : "Email me a code"}
+                {busy ? "Please wait…" : DEMO_AUTH ? "Log in" : "Email me a code"}
               </button>
               <p className="mt-4 text-center text-xs text-white/50">New here?{" "}
                 <button type="button" onClick={onSignup} className="font-semibold text-amber-300 underline">
