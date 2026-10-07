@@ -1,4 +1,4 @@
-export type Needs = { hunger: number; energy: number; fun: number; social: number };
+export type Needs = { hunger: number; energy: number; fun: number; social: number; bladder: number; hygiene: number };
 
 export type PlaceKind = "night" | "air" | "food" | "work" | "fun" | "culture" | "health" | "learn" | "shop" | "faith" | "gov" | "transport";
 
@@ -44,6 +44,8 @@ export type ActionDef = {
   pantry?: number;
   /** cooked meals added (+) or eaten (-) */
   plates?: number;
+  /** which dish the cooked meal is (see menu.ts), so the kitchen can show what you have */
+  dish?: string;
 };
 
 export type Place = {

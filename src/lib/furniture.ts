@@ -108,12 +108,12 @@ export const FURN: Record<FurnKind, FurnDef> = {
     w: 0.35, d: 0.35, h: 1.1, solid: true,
     use: { verb: "Drink water", action: { id: "water", label: "Drink some water", secs: 2, gain: { hunger: 3, energy: 2 } } },
   },
-  toilet: { w: 0.4, d: 0.7, h: 0.8, solid: true },
+  toilet: { w: 0.4, d: 0.7, h: 0.8, solid: true, use: { verb: "Use the toilet", action: { id: "toilet", label: "Use the toilet", secs: 4, gain: { bladder: 100 } } } },
   shower: {
     w: 0.9, d: 0.9, h: 2.0, solid: true,
-    use: { verb: "Freshen up", action: { id: "shower", label: "Freshen up", secs: 4, gain: { energy: 5, fun: 4 } } },
+    use: { verb: "Take a bath", action: { id: "bath", label: "Take a bath", secs: 7, gain: { hygiene: 100, energy: 6, fun: 5 } } },
   },
-  basin: { w: 0.5, d: 0.4, h: 0.9, solid: true },
+  basin: { w: 0.5, d: 0.4, h: 0.9, solid: true, use: { verb: "Wash up", action: { id: "wash", label: "Wash your hands and face", secs: 2, gain: { hygiene: 15 } } } },
 
   podium: { w: 0.6, d: 0.5, h: 1.1, solid: true },
   blackboard: { w: 3.0, d: 0.1, h: 1.3, solid: false },

@@ -59,10 +59,12 @@ const START_MONEY = 25000;
 export const FULL_AT = 80;
 /** a brand-new account starts with this much (₦) */
 export const SIGNUP_MONEY = 2_000_000;
-const START_NEEDS: Needs = { hunger: 80, energy: 90, fun: 65, social: 55 };
+const START_NEEDS: Needs = { hunger: 80, energy: 90, fun: 65, social: 55, bladder: 85, hygiene: 85 };
 const clamp = (n: number) => Math.max(0, Math.min(100, n));
 
 const decayNeeds = (n: Needs, secs: number): Needs => ({
+  bladder: clamp(n.bladder - 0.09 * secs),
+  hygiene: clamp(n.hygiene - 0.035 * secs),
   hunger: clamp(n.hunger - 0.12 * secs),
   energy: clamp(n.energy - 0.08 * secs),
   fun: clamp(n.fun - 0.07 * secs),
@@ -74,8 +76,10 @@ const WARN: Record<keyof Needs, string> = {
   energy: "You're getting tired. Rest or sleep soon.",
   fun: "You're bored. Do something fun.",
   social: "You feel lonely. Chat or join a voice room.",
+  bladder: "You need the toilet. Find one soon.",
+  hygiene: "You could do with a bath.",
 };
-const warned: Record<keyof Needs, boolean> = { hunger: false, energy: false, fun: false, social: false };
+const warned: Record<keyof Needs, boolean> = { hunger: false, energy: false, fun: false, social: false, bladder: false, hygiene: false };
 
 /** Injected by net.ts so the store can push land changes to the server without importing it. */
 export const hooks = {
@@ -112,7 +116,7 @@ type State = {
   setCarColor: (id: string, color: string) => void;
   toggleDrive: (id?: string) => string | null;
   dateWith: string | null;
-  adjustNeeds: (d: Partial<Record<"hunger" | "energy" | "fun" | "social", number>>) => void;
+  adjustNeeds: (d: Partial<Record<keyof Needs, number>>) => void;
   decorRev: number;
   buyDecor: (homeId: string, decorId: string, tier: number) => string | null;
   buildBusiness: (id: string, bizId: string) => string | null;
@@ -145,6 +149,8 @@ type State = {
   buyPass: (estateId: string) => string | null;
   pantry: number;
   plates: number;
+  /** how many plates of each dish you have cooked or ordered (see menu.ts) */
+  dishes: Record<string, number>;
   computer: boolean;
   ride: RideId | null;
   hideCard: boolean;
@@ -326,6 +332,7 @@ export const useGame = create<State>()(
       },
       pantry: 0,
       plates: 0,
+      dishes: {},
       computer: false,
       ride: null,
       hideCard: false,
@@ -377,6 +384,8 @@ export const useGame = create<State>()(
           energy: clamp(s.needs.energy - (starving ? 0.16 : 0.08) * dt),
           fun: clamp(s.needs.fun - 0.07 * dt),
           social: clamp(s.needs.social - 0.05 * dt + (inVoice ? 0.5 * dt : 0)),
+          bladder: clamp((s.needs.bladder ?? 80) - 0.09 * dt),
+          hygiene: clamp((s.needs.hygiene ?? 80) - 0.035 * dt),
         };
         set({ needs: next, savedAt: Date.now() });
         for (const k of Object.keys(next) as (keyof Needs)[]) {
@@ -394,6 +403,7 @@ export const useGame = create<State>()(
         if ((a.gain?.hunger ?? 0) >= 15 && s.needs.hunger >= FULL_AT) return "You are full. You have eaten enough for now. Come back when you are hungry again.";
         if (a.pantry && a.pantry < 0 && s.pantry < -a.pantry) return "No foodstuff left. Buy some at a market, or order groceries at home.";
         if (a.plates && a.plates < 0 && s.plates < -a.plates) return "No cooked food. Cook a meal first.";
+        if (a.plates && a.plates < 0 && a.dish && (s.dishes[a.dish] ?? 0) < -a.plates) return "You have not got that dish. Cook it or order it first.";
         if (a.minRep && s.rep < a.minRep) return `Needs ${a.minRep} reputation (${TITLES[titleIndex(a.minRep)].name}).`;
         if (a.cost && s.money < a.cost) return `You need ${naira(a.cost)}.`;
         if (a.gain?.energy && a.gain.energy < 0 && s.needs.energy + a.gain.energy < 0) return "Too tired. Eat or rest first.";
@@ -434,9 +444,10 @@ export const useGame = create<State>()(
           };
           const pantry = Math.max(0, cur.pantry + (a.pantry ?? 0));
           const plates = Math.max(0, cur.plates + (a.plates ?? 0));
+          const dishes = a.dish && a.plates ? { ...cur.dishes, [a.dish]: Math.max(0, (cur.dishes[a.dish] ?? 0) + a.plates) } : cur.dishes;
           if (a.pantry && a.pantry > 0) parts.push(`+${a.pantry} foodstuff`);
           if (a.plates && a.plates > 0) parts.push("meal ready");
-          set({ busy: null, needs, money, rep, stats, pantry, plates });
+          set({ busy: null, needs, money, rep, stats, pantry, plates, dishes });
           get().toast(`${a.label}${parts.length ? ` · ${parts.join(" · ")}` : ""}`, "good");
           const afterTitle = titleIndex(rep);
           if (afterTitle > beforeTitle) get().toast(`New title: ${TITLES[afterTitle].name}!`, "good");
@@ -605,6 +616,7 @@ export const useGame = create<State>()(
         savedAt: s.savedAt,
         pantry: s.pantry,
         plates: s.plates,
+        dishes: s.dishes,
         passes: s.passes,
         ticket: s.ticket,
         decor: s.decor,
@@ -618,12 +630,14 @@ export const useGame = create<State>()(
         const p = persisted as Partial<State> | undefined;
         if (!p) return current;
         const merged = { ...current, ...p } as State;
+        // saves from before the toilet and bath needs have no values for them: start those at a sensible level
+        merged.needs = { ...current.needs, ...(p.needs ?? {}) };
         merged.plots = { ...NPC_PLOTS, ...(p.plots ?? {}) };
         const away = p.savedAt ? Math.min(1200, (Date.now() - p.savedAt) / 1000) : 0;
         if (away > 30 && p.needs) {
           const d = decayNeeds(p.needs, away * 0.4);
           // coming back should never mean starting from rock bottom
-          merged.needs = { hunger: Math.max(20, d.hunger), energy: Math.max(20, d.energy), fun: Math.max(20, d.fun), social: Math.max(20, d.social) };
+          merged.needs = { hunger: Math.max(20, d.hunger), energy: Math.max(20, d.energy), fun: Math.max(20, d.fun), social: Math.max(20, d.social), bladder: Math.max(25, d.bladder), hygiene: Math.max(25, d.hygiene) };
           merged.awaySecs = away;
         }
         return merged;

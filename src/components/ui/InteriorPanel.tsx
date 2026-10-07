@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "motion/react";
 import { DoorOpen, Lightbulb, X, ZapOff } from "lucide-react";
 import { PLACES } from "@/lib/places";
@@ -9,6 +10,9 @@ import { exitInterior, GENERATOR_FUEL, powerOn, rt, walkToFurn } from "@/lib/int
 import { naira, plotById } from "@/lib/plots";
 import { ActionRow, VoiceRoomCard } from "./parts";
 import HereNow from "./HereNow";
+import HomeLife from "./HomeLife";
+import FoodArt from "./FoodArt";
+import { HOME_MENU } from "@/lib/menu";
 import ShopPanel from "./ShopPanel";
 import { DECOR, MAX_PER_KIND } from "@/lib/decor";
 import { bizById } from "@/lib/business";
@@ -25,10 +29,11 @@ export default function InteriorPanel() {
   const decor = useGame((s) => s.decor);
   const money = useGame((s) => s.money);
   const pid = useGame((s) => s.profile?.id);
-  const pantry = useGame((s) => s.pantry);
   const remotes = useGame((s) => s.remotes);
   const doing = useGame((s) => s.doing);
   const plates = useGame((s) => s.plates);
+  const dishes = useGame((s) => s.dishes);
+  const [serveId, setServeId] = useState<string | null>(null);
   const { now } = useClock();
   const layout = interior ? rt.layout : null;
   if (!interior || !layout) return null;
@@ -51,8 +56,10 @@ export default function InteriorPanel() {
   const mineHome = interior.kind === "home" && !biz && !!plot && plot.ownerId === pid;
   const guests = Object.values(remotes).filter((r) => r.room === interiorKey(interior));
   const SERVE_BIZ: Record<string, string> = { cafe: "coffee and a pastry", shop: "snacks and a cold drink", gym: "a cold drink" };
-  const HOME_DISHES = ["jollof rice and chicken", "pounded yam and egusi", "amala and ewedu", "fried rice and plantain"];
-  const canServe = (mineHome && plates > 0) || (mineBiz && !!biz && !!SERVE_BIZ[biz.id]);
+  // what you have cooked, so you choose which dish to serve
+  const cookedDishes = HOME_MENU.filter((d) => (dishes[d.id] ?? 0) > 0);
+  const picked = cookedDishes.find((d) => d.id === serveId) ?? cookedDishes[0];
+  const canServe = (mineHome && (!!picked || plates > 0)) || (mineBiz && !!biz && !!SERVE_BIZ[biz.id]);
   // visiting someone at home: they are the host, and you can join in with what they are doing
   const visiting = interior.kind === "home" && !biz && !!plot && plot.ownerId !== pid;
   const host = visiting ? Object.values(remotes).find((r) => r.pid === plot?.ownerId && r.room === interiorKey(interior)) : undefined;
@@ -154,7 +161,17 @@ export default function InteriorPanel() {
       {(mineHome || (mineBiz && biz && SERVE_BIZ[biz.id])) && guests.length > 0 && (
         <div className="mt-3 rounded-2xl bg-amber-50 p-3 ring-1 ring-amber-100">
           <p className="text-sm font-bold text-amber-950">Serve your guests</p>
-          <p className="mt-0.5 text-xs text-amber-900/80">{mineHome ? (plates > 0 ? `You have ${plates} cooked meal${plates > 1 ? "s" : ""}. Each plate you serve uses one.` : "No cooked food. Cook a meal first, then serve it.") : "Serve a guest from your stock."}</p>
+          <p className="mt-0.5 text-xs text-amber-900/80">{mineHome ? (plates > 0 ? `You have ${plates} cooked meal${plates > 1 ? "s" : ""}. Each plate you serve uses one.` : "No cooked food. Cook or order a dish first, then serve it.") : "Serve a guest from your stock."}</p>
+          {mineHome && cookedDishes.length > 0 && (
+            <div className="mt-2 flex gap-1.5 overflow-x-auto pb-0.5 [scrollbar-width:none]">
+              {cookedDishes.map((d) => (
+                <button key={d.id} onClick={() => setServeId(d.id)} className={`flex shrink-0 items-center gap-1.5 rounded-full py-1 pl-1 pr-2.5 text-[11px] font-bold transition active:scale-95 ${picked?.id === d.id ? "bg-amber-500 text-white" : "bg-white text-stone-800 ring-1 ring-black/10"}`}>
+                  <FoodArt dish={d.art} className="size-6" />
+                  {d.name.split(" ")[0]} x{dishes[d.id]}
+                </button>
+              ))}
+            </div>
+          )}
           <ul className="mt-2 space-y-1.5">
             {guests.map((g) => (
               <li key={g.id} className="flex items-center gap-2.5 rounded-xl bg-white px-3 py-2 ring-1 ring-black/5">
@@ -162,8 +179,8 @@ export default function InteriorPanel() {
                 <button
                   disabled={!canServe}
                   onClick={() => {
-                    const dish = mineBiz && biz ? SERVE_BIZ[biz.id] : HOME_DISHES[Math.floor(Math.random() * HOME_DISHES.length)];
-                    net.serve(g.id, dish, mineHome);
+                    const dish = mineBiz && biz ? SERVE_BIZ[biz.id] : picked ? picked.name : "a home meal";
+                    net.serve(g.id, dish, mineHome, picked?.id);
                     useGame.getState().toast(`Served ${g.name}: ${dish}`, "info");
                   }}
                   className="shrink-0 rounded-full bg-amber-500 px-3 py-1.5 text-[11px] font-bold text-white transition active:scale-95 disabled:opacity-40"
@@ -226,29 +243,7 @@ export default function InteriorPanel() {
         </ul>
       )}
 
-      {interior.kind === "home" && !biz && (
-        <div className="mt-3 rounded-2xl bg-amber-50 p-3.5 ring-1 ring-amber-100">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-sm font-bold text-amber-950">🍲 Kitchen</p>
-              <p className="text-xs text-amber-800/80">
-                Foodstuff <b>{pantry}</b> · Cooked meals <b>{plates}</b>
-              </p>
-            </div>
-            <button
-              disabled={!!busy || money < 2200}
-              onClick={() => {
-                const err = useGame.getState().runAction({ id: "groceries", label: "Order groceries", secs: 3, cost: 2200, pantry: 4 });
-                if (err) useGame.getState().toast(err, "bad");
-              }}
-              className="shrink-0 rounded-full bg-amber-600 px-3.5 py-2 text-xs font-bold text-white transition active:scale-95 disabled:opacity-40"
-            >
-              Groceries · {naira(2200)}
-            </button>
-          </div>
-          <p className="mt-2 text-xs text-amber-900/70">Buy foodstuff here or at a market, cook at the stove, then eat at the dining table.</p>
-        </div>
-      )}
+      {interior.kind === "home" && !biz && (interior.id === "flat" || mineHome) && <HomeLife />}
 
       {interior.kind === "home" && !biz && (interior.id === "flat" || plot?.ownerId === pid) && (
         <details className="mt-3 rounded-2xl bg-stone-50 ring-1 ring-black/5">

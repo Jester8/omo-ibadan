@@ -259,7 +259,7 @@ export async function pullState() {
     }
     if (!firstTime && updatedAt <= s.savedAt + 60_000) return;
     markSynced(pid);
-    useGame.setState({ money: state.money, rep: state.rep, needs: state.needs, questsDone: state.questsDone, cars: state.cars, activeCar: state.activeCar, romance: { ...s.romance, ...state.romance }, stats: { ...s.stats, ...state.stats } });
+    useGame.setState({ money: state.money, rep: state.rep, needs: { ...s.needs, ...state.needs }, questsDone: state.questsDone, cars: state.cars, activeCar: state.activeCar, romance: { ...s.romance, ...state.romance }, stats: { ...s.stats, ...state.stats } });
     if (firstTime) s.toast("Welcome back! Your progress is restored.", "good");
     else s.toast("Progress restored from the cloud.", "info");
   } catch {

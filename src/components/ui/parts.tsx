@@ -8,7 +8,7 @@ import { naira } from "@/lib/plots";
 import type { ActionDef, Needs } from "@/lib/places";
 import { TITLES, titleIndex } from "@/lib/titles";
 
-const NEED_LABEL: Record<keyof Needs, string> = { hunger: "hunger", energy: "energy", fun: "fun", social: "social" };
+const NEED_LABEL: Record<keyof Needs, string> = { hunger: "hunger", energy: "energy", fun: "fun", social: "social", bladder: "bladder", hygiene: "hygiene" };
 
 export function Chips({ a }: { a: ActionDef }) {
   const out: { t: string; tone: "good" | "bad" | "lock" }[] = [];

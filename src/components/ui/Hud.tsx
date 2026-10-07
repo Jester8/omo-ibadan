@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { X, EyeOff, Eye, HelpCircle, Drumstick, Moon, PartyPopper, Sun, Target, UserRound, Users, Zap, ZapOff, Wifi, WifiOff } from "lucide-react";
+import { Droplets, Toilet, X, EyeOff, Eye, HelpCircle, Drumstick, Moon, PartyPopper, Sun, Target, UserRound, Users, Zap, ZapOff, Wifi, WifiOff } from "lucide-react";
 import { useGame } from "@/lib/store";
 import { useClock } from "@/lib/hooks";
 import { formatClock } from "@/lib/time";
@@ -16,6 +16,8 @@ const NEEDS = [
   { key: "energy", label: "Energy", icon: Zap, color: "bg-amber-400" },
   { key: "fun", label: "Fun", icon: PartyPopper, color: "bg-fuchsia-500" },
   { key: "social", label: "Social", icon: Users, color: "bg-sky-500" },
+  { key: "bladder", label: "Toilet", icon: Toilet, color: "bg-lime-500" },
+  { key: "hygiene", label: "Clean", icon: Droplets, color: "bg-cyan-500" },
 ] as const;
 
 export default function Hud() {
@@ -102,7 +104,7 @@ export default function Hud() {
 
           {/* needs, side by side, with the time of day */}
           <div className="mt-2.5 flex items-center gap-3">
-            <div className="grid flex-1 grid-cols-4 gap-2">
+            <div className="grid flex-1 grid-cols-6 gap-2">
               {NEEDS.map(({ key, label, icon: Icon, color }) => {
                 const v = needs[key];
                 const low = v < 25;

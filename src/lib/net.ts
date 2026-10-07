@@ -201,7 +201,13 @@ function handle(m: S2C) {
     case "serveResult":
       if (m.accept) {
         // they ate: it comes out of a home's cooked meals, and you earn a little standing
-        if (pendingServe.get(`${m.from}|${m.dish}`)) useGame.setState((st) => ({ plates: Math.max(0, st.plates - 1) }));
+        const p = pendingServe.get(`${m.from}|${m.dish}`);
+        if (p?.usesMeal) {
+          useGame.setState((st) => ({
+            plates: Math.max(0, st.plates - 1),
+            dishes: p.dishId ? { ...st.dishes, [p.dishId]: Math.max(0, (st.dishes[p.dishId] ?? 0) - 1) } : st.dishes,
+          }));
+        }
         useGame.getState().adjustNeeds({ social: 8, fun: 4 });
         useGame.setState((st) => ({ rep: st.rep + 1 }));
         s.toast(`${m.name} enjoyed the ${m.dish}. +1 rep`, "good");
@@ -434,7 +440,7 @@ useGame.subscribe((s) => {
 });
 
 /** food I have served, waiting to hear if it was eaten: "guest|dish" -> comes from my cooked meals */
-const pendingServe = new Map<string, boolean>();
+const pendingServe = new Map<string, { usesMeal: boolean; dishId?: string }>();
 let lastTypingSent = 0;
 let lastPong = 0;
 let pingTimer: ReturnType<typeof setInterval> | null = null;
@@ -486,8 +492,8 @@ export const net = {
     send({ t: "typing", to });
   },
   /** Serve a guest in the room. They choose whether to eat; a meal from a home's kitchen is used up when they do. */
-  serve(to: string, dish: string, usesMeal: boolean) {
-    pendingServe.set(`${to}|${dish}`, usesMeal);
+  serve(to: string, dish: string, usesMeal: boolean, dishId?: string) {
+    pendingServe.set(`${to}|${dish}`, { usesMeal, dishId });
     send({ t: "serve", to, dish });
   },
   /** Eat what a host served you, or say no thanks. */
