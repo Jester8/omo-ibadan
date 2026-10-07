@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { audio } from "@/lib/audio";
+import { startThemeSong } from "@/lib/themeSong";
 import { useGame } from "@/lib/store";
 import { useSound } from "@/lib/soundStore";
 import { daylight, gameMinutes, nepaOut } from "@/lib/time";
@@ -23,7 +24,11 @@ const stopBuzz = () => {
 export default function AudioBridge() {
   useEffect(() => {
     useSound.getState().sync();
-    const start = () => audio.start();
+    const start = () => {
+      audio.start();
+      // a returning player never sees "Tap to enter", so their first tap starts the theme song
+      if (useGame.getState().profile) startThemeSong();
+    };
     window.addEventListener("pointerdown", start);
     window.addEventListener("keydown", start);
 

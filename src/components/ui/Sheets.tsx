@@ -21,6 +21,7 @@ import CallAlerts from "./CallAlerts";
 import PhoneOS, { type AppId } from "./PhoneOS";
 import FriendsTabs from "./FriendsTabs";
 import { useSound } from "@/lib/soundStore";
+import { THEME_SONG } from "@/lib/themeSong";
 
 /**
  * A panel over the game. On a phone every panel fills the screen until you go back; on a laptop the phone and the
@@ -205,6 +206,9 @@ function SoundSliders() {
           <input type="range" min={0} max={1} step={0.05} value={value} onChange={(e) => onChange(Number(e.target.value))} className="h-1.5 w-full accent-emerald-600" />
         </label>
       ))}
+      <p className="mt-3 text-[11px] text-stone-400">
+        Music: {THEME_SONG.artist} — {THEME_SONG.title}
+      </p>
     </div>
   );
 }

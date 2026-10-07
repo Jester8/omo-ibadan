@@ -9,6 +9,7 @@ import AuthCode from "./AuthCode";
 import InstallApp from "./InstallApp";
 import LandingBackdrop from "./LandingBackdrop";
 import { audio } from "@/lib/audio";
+import { startThemeSong, THEME_SONG } from "@/lib/themeSong";
 import { useSound } from "@/lib/soundStore";
 
 type Step = "intro" | "choose" | "login" | "code";
@@ -33,6 +34,7 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
 
   const enter = () => {
     audio.start(); // the groove begins from the top on this first tap
+    startThemeSong(); // play() has to happen inside this tap for iOS
     setStep("choose");
   };
 
@@ -123,9 +125,9 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
               <button onClick={enter} className="landing-cta mt-10 inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-base font-bold text-stone-900 shadow-xl transition active:scale-95">
                 Tap to enter <ArrowRight className="size-5" />
               </button>
-              <p className="landing-hint mt-6 flex items-center justify-center gap-1.5 text-xs text-white/70">
-                <Music2 className="size-3.5" /> Sound on
-              </p>
+              <button type="button" onClick={toggleMute} aria-pressed={!muted} className="landing-hint mx-auto mt-6 flex items-center justify-center gap-1.5 rounded-full px-3 py-1 text-xs text-white/70 transition hover:bg-white/10 hover:text-white">
+                {muted ? <VolumeX className="size-3.5" /> : <Music2 className="size-3.5" />} {muted ? "Sound off · tap to turn on" : "Sound on"}
+              </button>
             </motion.div>
           )}
 
@@ -181,6 +183,11 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
           )}
         </AnimatePresence>
       </div>
+      {step !== "intro" && (
+        <p className="pointer-events-none absolute inset-x-0 bottom-[max(env(safe-area-inset-bottom),0.75rem)] z-10 px-6 text-center text-[11px] text-white/45">
+          Music: {THEME_SONG.artist} — {THEME_SONG.title}
+        </p>
+      )}
     </div>
   );
 }
