@@ -1,4 +1,8 @@
 import type { Pt } from "./pathing";
+import type { Seat } from "./protocol";
+
+/** Other players currently sitting or lying on furniture, by connection id. */
+export const remoteSits = new Map<string, Seat>();
 
 /** High-frequency state kept outside React/zustand; mutated from render-loop callbacks. */
 
@@ -22,7 +26,7 @@ export const me = {
   /** currently seated or lying on furniture (positions in world units) */
   /** knocked down until this time (ms epoch) */
   fallUntil: 0,
-  use: null as null | { pose: "sit" | "lie"; x: number; z: number; ry: number; seatH: number; standX: number; standZ: number },
+  use: null as null | { pose: "sit" | "lie"; x: number; z: number; ry: number; seatH: number; standX: number; standZ: number; /** sitting just to be with people, no action running */ free?: boolean },
 };
 
 export type RemoteMotion = { x: number; z: number; ry: number; speed: number; tx: number; tz: number; tr: number };

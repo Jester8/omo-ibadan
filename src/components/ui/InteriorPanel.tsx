@@ -56,6 +56,11 @@ export default function InteriorPanel() {
       </div>
 
       <HereNow />
+      {interior.kind === "home" && (
+        <div className="mt-3">
+          <VoiceRoomCard room={`home:${interior.id}`} label="Talk together" />
+        </div>
+      )}
       {place?.kind === "shop" && <ShopPanel />}
 
       <div className={`mt-4 flex items-center justify-between gap-3 rounded-2xl px-4 py-3 ring-1 ${power ? "bg-emerald-50 ring-emerald-100" : "bg-amber-50 ring-amber-200"}`}>
@@ -83,7 +88,7 @@ export default function InteriorPanel() {
       )}
 
       <p className="mt-3 hidden text-sm text-stone-600 sm:block">
-        Tap furniture to use it: sofas and chairs to relax, beds to sleep, the stove to cook, the TV for a show.
+        Tap furniture to use it: sofas and chairs to sit (friends in the room see you settle in), beds to sleep, the stove to cook, the TV for a show.
       </p>
 
       {place && (

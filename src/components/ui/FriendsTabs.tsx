@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronLeft, Copy, MessageCircle, PhoneCall, Send, UserMinus, UserPlus } from "lucide-react";
+import { Check, ChevronLeft, Copy, House, MessageCircle, PhoneCall, Send, UserMinus, UserPlus } from "lucide-react";
+import { homeOf, visitHome } from "@/lib/visit";
 import { net } from "@/lib/net";
 import { blockPlayer, closeThread, friendRequest, friendRespond, loadSocial, openThread, removeFriend, unblockPlayer, type Person, type Thread } from "@/lib/social";
 import { useGame } from "@/lib/store";
@@ -188,6 +189,11 @@ function FriendsPanel() {
               <button onClick={() => callPlayer(p.pid, p.name)} aria-label={`Call ${p.name}`} className={`${round} bg-emerald-600 text-white`}>
                 <PhoneCall className="size-4" />
               </button>
+              {homeOf(p.pid) && (
+                <button onClick={() => visitHome(p.pid, p.name)} aria-label={`Visit ${p.name}'s home`} title="Visit their home" className={`${round} bg-amber-500 text-white`}>
+                  <House className="size-4" />
+                </button>
+              )}
               <button
                 onClick={() => {
                   if (confirm(`Remove ${p.name} from your friends?`)) void removeFriend(p.pid);

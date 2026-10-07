@@ -11,7 +11,8 @@ import { PLACES, doorOf } from "@/lib/places";
 import { findWorldPath, type Pt } from "@/lib/pathing";
 import { interiorKey } from "@/lib/interiors";
 import { seededLook, topsFor, type Look } from "@/lib/look";
-import { emotes, remoteMotion } from "@/lib/playerState";
+import { emotes, remoteMotion, remoteSits } from "@/lib/playerState";
+import { S } from "@/lib/furniture";
 import { useGame } from "@/lib/store";
 
 const angleDiff = (a: number, b: number) => {
@@ -28,8 +29,22 @@ function Remote({ id }: { id: string }) {
   const car = useGame((s) => s.remotes[id]?.car);
   const kind = vehicleKind(car?.id);
   const g = useRef<THREE.Group>(null);
-  const motion = useRef<{ speed: number; emote: "wave" | "dance" | null; pose: "sit" | null }>({ speed: 0, emote: null, pose: null });
+  const motion = useRef<{ speed: number; emote: "wave" | "dance" | null; pose: "sit" | "lie" | null }>({ speed: 0, emote: null, pose: null });
   useFrame((_, dt) => {
+    // settled into a sofa, chair or bed: hold the pose where they sat, the same way you see yourself
+    const seat = remoteSits.get(id);
+    if (seat && g.current) {
+      motion.current.pose = seat.pose;
+      motion.current.speed = 0;
+      if (seat.pose === "sit") {
+        g.current.position.set(seat.x, (seat.seatH + 0.04 - 0.865) * S, seat.z);
+        g.current.rotation.set(0, seat.ry, 0);
+      } else {
+        g.current.position.set(seat.x + Math.sin(seat.ry) * 0.85 * S, (seat.seatH + 0.12) * S, seat.z + Math.cos(seat.ry) * 0.85 * S);
+        g.current.rotation.set(-Math.PI / 2, seat.ry, 0, "YXZ");
+      }
+      return;
+    }
     motion.current.pose = useGame.getState().remotes[id]?.car?.id === "okada" ? "sit" : null;
     const em = emotes.get(id);
     motion.current.emote = em && em.until > Date.now() ? em.e : null;
@@ -42,7 +57,7 @@ function Remote({ id }: { id: string }) {
     const gap = Math.hypot(r.tx - r.x, r.tz - r.z);
     motion.current.speed = gap > 0.04 ? Math.max(r.speed, 1.5) : 0;
     g.current.position.set(r.x, 0, r.z);
-    g.current.rotation.y = r.ry;
+    g.current.rotation.set(0, r.ry, 0);
   });
   if (!look) return null;
   return (

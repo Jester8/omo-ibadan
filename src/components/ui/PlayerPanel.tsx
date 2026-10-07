@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Flag, Hand, MessageCircle, PhoneCall, ShieldOff, UserCheck, UserPlus, X } from "lucide-react";
+import { Flag, Hand, House, MessageCircle, PhoneCall, ShieldOff, UserCheck, UserPlus, X } from "lucide-react";
+import { homeOf, visitHome } from "@/lib/visit";
 import { net } from "@/lib/net";
 import { blockPlayer, friendRequest, loadSocial, openThread, playerProfile, type Profile } from "@/lib/social";
 import { useGame } from "@/lib/store";
@@ -60,6 +61,11 @@ export default function PlayerPanel({ id }: { id: string }) {
         <button onClick={() => net.call(id, peer.name)} className={`${act} bg-emerald-600 text-white`}>
           <PhoneCall className="size-4" /> Call
         </button>
+        {friendship === "friends" && homeOf(pid) && (
+          <button onClick={() => visitHome(pid, peer.name)} className={`${act} col-span-2 bg-amber-500 text-white`}>
+            <House className="size-4" /> Visit their home
+          </button>
+        )}
         {friendship === "friends" ? (
           <button
             onClick={() => {

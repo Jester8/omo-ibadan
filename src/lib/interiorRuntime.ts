@@ -1,5 +1,6 @@
 import { FURN, S } from "./furniture";
-import { buildInteriorGrid, spawnOf, type InteriorRef, type Layout } from "./interiors";
+import { buildInteriorGrid, interiorKey, spawnOf, type InteriorRef, type Layout } from "./interiors";
+import { net } from "./net";
 import { FLAT, layoutFor } from "./layouts";
 import { Grid, findPath, setActiveGrid } from "./pathing";
 import { cam, me } from "./playerState";
@@ -130,6 +131,7 @@ export function exitInterior() {
     me.ry = 0;
     me.path = [];
     me.use = null;
+    net.sit(null);
     me.pendingUse = null;
     me.pendingExit = false;
     setActiveGrid(null);
@@ -274,6 +276,14 @@ export function startUse(index: number) {
     s.toast(`Generator running for 5 minutes · −${naira(GENERATOR_FUEL)}`, "good");
     return;
   }
+  // sitting with people: no action to pay for, just take the seat. Others in the room see you sit.
+  const others = Object.values(s.remotes).some((r) => rt.ref && r.room === interiorKey(rt.ref));
+  if (def.pose === "sit" && (others || !(it.action ?? def.action))) {
+    me.use = { pose: "sit", x: it.x * S, z: it.z * S, ry: it.rot ?? 0, seatH: def.seatH ?? 0.45, standX: me.x, standZ: me.z, free: true };
+    net.sit(me.use);
+    s.toast("You sat down. Tap anywhere to stand up.", "info");
+    return;
+  }
   const action = it.action ?? def.action;
   if (!action) return;
   const sleeping = def.pose === "lie";
@@ -285,6 +295,7 @@ export function startUse(index: number) {
   }
   if (def.pose) {
     me.use = { pose: def.pose, x: it.x * S, z: it.z * S, ry: it.rot ?? 0, seatH: def.seatH ?? 0.45, standX: me.x, standZ: me.z };
+    net.sit(me.use);
   }
   if (action.id === "drum") audio.drum();
   s.recordStat("used");
@@ -297,4 +308,5 @@ export function endUse() {
   me.x = me.use.standX;
   me.z = me.use.standZ;
   me.use = null;
+  net.sit(null);
 }

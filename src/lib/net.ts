@@ -1,6 +1,6 @@
 import type { C2S, PeerInfo, S2C } from "./protocol";
 import { hooks, useGame } from "./store";
-import { emotes, remoteMotion } from "./playerState";
+import { emotes, remoteMotion, remoteSits } from "./playerState";
 import { audio } from "./audio";
 import { rideById } from "./cars";
 import { loadSocial, openThread } from "./social";
@@ -60,6 +60,7 @@ function handle(m: S2C) {
       const next = { ...s.remotes };
       delete next[m.id];
       remoteMotion.delete(m.id);
+      remoteSits.delete(m.id);
       useGame.setState({ remotes: next });
       voice.peerLeft(m.id);
       if (s.call.peerId === m.id) endCallLocal();
@@ -142,6 +143,10 @@ function handle(m: S2C) {
       audio.pop();
       break;
     }
+    case "sit":
+      if (m.u) remoteSits.set(m.id, m.u);
+      else remoteSits.delete(m.id);
+      break;
     case "emote":
       emotes.set(m.id, { e: m.e, until: Date.now() + (m.e === "wave" ? 2200 : 6000) });
       break;
@@ -278,6 +283,10 @@ export const net = {
   },
   dm(to: string, text: string) {
     send({ t: "dm", to, text });
+  },
+  /** Tell the room you sat down (or stood up, with null). */
+  sit(u: { pose: "sit" | "lie"; x: number; z: number; ry: number; seatH: number } | null) {
+    send({ t: "sit", u: u ? { pose: u.pose, x: u.x, z: u.z, ry: u.ry, seatH: u.seatH } : null });
   },
   /** Send a view-once photo to everyone on the call or in the voice room with you. */
   photo(data: string) {

@@ -96,8 +96,9 @@ export default function Player() {
     }
 
     // seated or sleeping on furniture: hold the pose until the action finishes
+    if (me.use && me.use.free && (me.path.length > 0 || keys.current.size > 0)) endUse(); // walked off: stand up
     if (me.use) {
-      if (!s.busy) {
+      if (!s.busy && !me.use.free) {
         endUse();
       } else {
         me.speed = 0;
