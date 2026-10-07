@@ -50,8 +50,31 @@ export function VoiceBar() {
 
 export function IncomingCall() {
   const inc = useGame((s) => s.incoming);
+  const call = useGame((s) => s.call);
+  const calling = call.phase === "calling";
   return (
     <AnimatePresence>
+      {calling && (
+        <motion.div
+          key="calling"
+          initial={{ opacity: 0, y: -30, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -30 }}
+          transition={{ type: "spring", stiffness: 300, damping: 24 }}
+          className="absolute left-1/2 top-[calc(env(safe-area-inset-top)+1rem)] z-50 flex w-[min(24rem,calc(100vw-1.5rem))] -translate-x-1/2 items-center gap-3 rounded-3xl bg-white p-3 pr-3.5 text-black shadow-2xl ring-1 ring-black/10"
+        >
+          <motion.span animate={{ scale: [1, 1.12, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="grid size-12 place-items-center rounded-full bg-emerald-500 text-lg font-bold text-white">
+            {call.peerName.slice(0, 1).toUpperCase()}
+          </motion.span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-bold">{call.peerName}</p>
+            <p className="text-xs text-stone-500">Ringing…</p>
+          </div>
+          <button onClick={() => net.hangup()} className="grid size-11 place-items-center rounded-full bg-rose-600 text-white transition active:scale-90" aria-label="Cancel call">
+            <PhoneOff className="size-5" />
+          </button>
+        </motion.div>
+      )}
       {inc && (
         <motion.div
           initial={{ opacity: 0, y: -30, scale: 0.95 }}

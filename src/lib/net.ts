@@ -164,9 +164,20 @@ function handle(m: S2C) {
       break;
     case "incomingCall":
       if (s.call.phase !== "idle" || s.incoming) send({ t: "callReply", to: m.from, accept: false });
-      else useGame.setState({ incoming: { from: m.from, name: m.name } });
+      else {
+        // rings the moment it arrives, and stops by itself if nobody picks up
+        useGame.setState({ incoming: { from: m.from, name: m.name } });
+        if (missedTimer) clearTimeout(missedTimer);
+        missedTimer = setTimeout(() => {
+          if (useGame.getState().incoming?.from === m.from) {
+            useGame.setState({ incoming: null });
+            useGame.getState().toast(`Missed call from ${m.name}`, "info");
+          }
+        }, 32_000);
+      }
       break;
     case "callReply":
+      clearCallTimer();
       if (m.accept && s.call.phase === "calling" && s.call.peerId === m.from) {
         const room = callRoom(s.connId ?? "", m.from);
         useGame.setState({ call: { ...s.call, phase: "live", room } });
@@ -193,7 +204,15 @@ async function joinCallVoice(room: string) {
   if (!ok && useGame.getState().call.room === room) net.hangup();
 }
 
+let callTimer: ReturnType<typeof setTimeout> | null = null;
+let missedTimer: ReturnType<typeof setTimeout> | null = null;
+const clearCallTimer = () => {
+  if (callTimer) clearTimeout(callTimer);
+  callTimer = null;
+};
+
 function endCallLocal() {
+  clearCallTimer();
   voice.leave();
   useGame.setState({ call: { phase: "idle", peerId: null, peerName: "", room: null } });
 }
@@ -317,12 +336,23 @@ export const net = {
     if (s.call.phase !== "idle") return;
     useGame.setState({ call: { phase: "calling", peerId: to, peerName: name, room: null } });
     send({ t: "call", to });
+    // nobody answered: stop ringing them and say so
+    clearCallTimer();
+    callTimer = setTimeout(() => {
+      const c = useGame.getState().call;
+      if (c.phase === "calling" && c.peerId === to) {
+        send({ t: "hangup", to });
+        useGame.getState().toast(`${name} did not pick up.`, "info");
+        endCallLocal();
+      }
+    }, 30_000);
   },
   answer(accept: boolean) {
     const s = useGame.getState();
     const inc = s.incoming;
     if (!inc) return;
     send({ t: "callReply", to: inc.from, accept });
+    if (missedTimer) clearTimeout(missedTimer);
     useGame.setState({ incoming: null });
     if (accept) {
       const room = callRoom(s.connId ?? "", inc.from);

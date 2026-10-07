@@ -17,6 +17,7 @@ import type { Policy } from "@/lib/protocol";
 import { CARS } from "@/lib/cars";
 import { signOut } from "@/lib/api";
 import InstallApp from "./InstallApp";
+import CallAlerts from "./CallAlerts";
 import PhoneOS, { type AppId } from "./PhoneOS";
 import FriendsTabs from "./FriendsTabs";
 import { useSound } from "@/lib/soundStore";
@@ -417,7 +418,8 @@ function ProfileSheet() {
 
       <ViewSettings />
 
-      <InstallApp className="mt-5" />
+      <CallAlerts className="mt-5" />
+      <InstallApp className="mt-3" />
 
       <button
         onClick={() => {
