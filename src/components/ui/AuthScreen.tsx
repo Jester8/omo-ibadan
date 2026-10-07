@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight, ChevronLeft, Mail, Music2, Volume2, VolumeX } from "lucide-react";
-import { DEMO_AUTH, demoLogIn, introInfo, requestCode, type IntroInfo, type Verified } from "@/lib/api";
+import { DEMO_AUTH, demoLogIn, introInfo, requestCode, verifyCode, type IntroInfo, type Verified } from "@/lib/api";
 import AuthCode from "./AuthCode";
 import { setIntroMuted, startIntro } from "@/lib/music";
 
@@ -46,6 +46,14 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
       return;
     }
     const r = await requestCode(email.trim().toLowerCase(), "login");
+    if (r.ok && r.skip) {
+      // the server is not asking for emailed codes right now: the email alone logs in
+      const v = await verifyCode(email.trim().toLowerCase(), "");
+      setBusy(false);
+      if (v.ok) onLoggedIn(v.profile);
+      else setErr(v.error);
+      return;
+    }
     setBusy(false);
     if (r.ok) {
       setDevCode(r.devCode);

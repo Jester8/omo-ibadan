@@ -27,7 +27,7 @@ import { QUESTS } from "@/lib/quests";
 import { naira } from "@/lib/plots";
 import { useMounted } from "@/lib/hooks";
 import { net, roomOf } from "@/lib/net";
-import { DEMO_AUTH, demoSignUp, introInfo, requestCode, type Verified } from "@/lib/api";
+import { DEMO_AUTH, demoSignUp, introInfo, requestCode, verifyCode, type Verified } from "@/lib/api";
 import AuthCode from "@/components/ui/AuthCode";
 import type { Look } from "@/lib/look";
 import { introToGame, playIntroOnce } from "@/lib/music";
@@ -269,6 +269,13 @@ export default function WorldClient() {
                 return setProfile({ id: d.profile.id, name, look, email: d.profile.email });
               }
               const r = await requestCode(email, "signup");
+              if (r.ok && r.skip) {
+                // no emailed codes for now: just save the details and go in
+                const v = await verifyCode(email, "", { name, look });
+                setSigningUp(false);
+                if (!v.ok) return setSignupError(v.error);
+                return setProfile({ id: v.profile.id, name: v.profile.name, look: v.profile.look ?? look, email: v.profile.email });
+              }
               setSigningUp(false);
               if (!r.ok) return setSignupError(r.error);
               setPending({ name, look, email, devCode: r.devCode, cooldown: r.cooldown });

@@ -80,12 +80,12 @@ export async function ensureToken(): Promise<string | null> {
 export const currentToken = () => cached;
 
 /** Step 1: email a six-digit code. In local development with no mail server, the server also returns the code (devCode). */
-export async function requestCode(email: string, purpose: "login" | "signup"): Promise<{ ok: true; devCode?: string; cooldown: number } | { ok: false; error: string }> {
+export async function requestCode(email: string, purpose: "login" | "signup"): Promise<{ ok: true; devCode?: string; cooldown: number; skip?: boolean } | { ok: false; error: string }> {
   try {
     const res = await fetch(`${apiBase()}/api/auth/request-code`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, purpose }), signal: AbortSignal.timeout(8000) });
-    const j = (await res.json().catch(() => ({}))) as { devCode?: string; cooldown?: number; error?: string };
+    const j = (await res.json().catch(() => ({}))) as { devCode?: string; cooldown?: number; skip?: boolean; error?: string };
     if (!res.ok) return { ok: false, error: j.error ?? "Could not send the code." };
-    return { ok: true, devCode: j.devCode, cooldown: j.cooldown ?? 30 };
+    return { ok: true, devCode: j.devCode, cooldown: j.cooldown ?? 30, skip: j.skip };
   } catch {
     return { ok: false, error: "Can't reach the server. Check your connection and try again." };
   }
