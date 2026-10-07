@@ -163,6 +163,8 @@ type State = {
   starterPending: boolean;
   /** friends asking to get closer, waiting for your answer */
   relAsks: { from: string; name: string; level: string }[];
+  /** what other people in the room are doing right now (cooking, eating...), by connection id */
+  doing: Record<string, string | null>;
 
   setProfile: (p: Profile) => void;
   select: (s: Selection) => void;
@@ -328,6 +330,7 @@ export const useGame = create<State>()(
       knocks: [],
       starterPending: false,
       relAsks: [],
+      doing: {},
 
       setProfile: (profile) => set({ profile, editingAvatar: false }),
       select: (selected) => set({ selected }),

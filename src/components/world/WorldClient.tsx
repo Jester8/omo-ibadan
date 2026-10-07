@@ -16,6 +16,8 @@ import AvatarCreator from "@/components/avatar/AvatarCreator";
 import AuthScreen from "@/components/ui/AuthScreen";
 import Overlay from "./Overlay";
 import { NPCS } from "./People";
+import { forceExit } from "@/lib/interiorRuntime";
+import { interiorKey } from "@/lib/interiors";
 import { ownedBy, pendingRent, SIGNUP_MONEY, useGame } from "@/lib/store";
 import { QUESTS } from "@/lib/quests";
 import { naira } from "@/lib/plots";
@@ -143,6 +145,28 @@ function Runtime() {
     const id = setInterval(tick, 400);
     return () => clearInterval(id);
   }, []);
+
+  // a visit lasts only while the host is home: when they step out, you are shown out too
+  useEffect(() => {
+    if (!hasProfile) return;
+    let away = 0;
+    const id = setInterval(() => {
+      const s = useGame.getState();
+      const it = s.interior;
+      if (!it || it.kind !== "home" || it.id === "flat") return void (away = 0);
+      const plot = s.plots[it.id];
+      if (!plot || plot.biz || plot.ownerId === s.profile?.id) return void (away = 0);
+      const hostHere = Object.values(s.remotes).some((r) => r.pid === plot.ownerId && r.room === interiorKey(it));
+      if (hostHere) return void (away = 0);
+      away += 1;
+      if (away >= 3) {
+        away = 0;
+        forceExit();
+        s.toast(`${plot.ownerName} has stepped out, so you were shown out.`, "info");
+      }
+    }, 1000);
+    return () => clearInterval(id);
+  }, [hasProfile]);
 
   // a saved login is only good if the server still knows the account: after a wiped database, start at the sign-in screen
   useEffect(() => {

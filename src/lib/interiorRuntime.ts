@@ -303,6 +303,15 @@ export function startUse(index: number) {
   if (sleeping && action.id === "sleep") s.recordStat("slept");
 }
 
+/** The host left (or the visit is over): step outside even if you are in the middle of something. */
+export function forceExit() {
+  const s = useGame.getState();
+  if (!s.interior) return;
+  if (s.busy) useGame.setState({ busy: null });
+  me.use = null;
+  exitInterior();
+}
+
 /** Stand back up after a seated or sleeping action finishes. */
 export function endUse() {
   if (!me.use) return;

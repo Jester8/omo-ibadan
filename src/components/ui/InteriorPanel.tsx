@@ -13,6 +13,7 @@ import ShopPanel from "./ShopPanel";
 import { DECOR, MAX_PER_KIND } from "@/lib/decor";
 import { bizById } from "@/lib/business";
 import type { ActionDef } from "@/lib/places";
+import { interiorKey } from "@/lib/interiors";
 import { refreshInterior } from "@/lib/interiorRuntime";
 
 export default function InteriorPanel() {
@@ -24,6 +25,8 @@ export default function InteriorPanel() {
   const money = useGame((s) => s.money);
   const pid = useGame((s) => s.profile?.id);
   const pantry = useGame((s) => s.pantry);
+  const remotes = useGame((s) => s.remotes);
+  const doing = useGame((s) => s.doing);
   const plates = useGame((s) => s.plates);
   const { now } = useClock();
   const layout = interior ? rt.layout : null;
@@ -43,6 +46,17 @@ export default function InteriorPanel() {
     mart: { id: "bigshop", label: "Do a big shop (+3 provisions)", secs: 4, cost: 3500, pantry: 3 },
   };
   const bizAction = biz ? BIZ_ACTIONS[biz.id] : undefined;
+  // visiting someone at home: they are the host, and you can join in with what they are doing
+  const visiting = interior.kind === "home" && !biz && !!plot && plot.ownerId !== pid;
+  const host = visiting ? Object.values(remotes).find((r) => r.pid === plot?.ownerId && r.room === interiorKey(interior)) : undefined;
+  const hostDoing = host ? (doing[host.id] ?? "").toLowerCase() : "";
+  const joinAction: ActionDef | null = !host
+    ? null
+    : hostDoing.includes("cook")
+      ? { id: "helpcook", label: `Help ${host.name} cook`, secs: 5, gain: { fun: 6, social: 12, energy: -4 } }
+      : hostDoing.includes("eat")
+        ? { id: "sharemeal", label: `Share the meal with ${host.name}`, secs: 5, gain: { hunger: 45, fun: 5, social: 10 } }
+        : null;
   const power = powerOn();
   const genLeft = Math.max(0, Math.ceil((generatorUntil - now) / 1000));
   const genIndex = layout.items.findIndex((it) => it.kind === "generator");
@@ -123,6 +137,27 @@ export default function InteriorPanel() {
             </li>
           ))}
         </ul>
+      )}
+
+      {visiting && (
+        <div className="mt-3 rounded-2xl bg-emerald-50 p-3 ring-1 ring-emerald-100">
+          <p className="text-sm font-bold text-emerald-900">{host ? `At ${host.name}'s home` : "Visiting"}</p>
+          <p className="mt-0.5 text-xs text-emerald-800/80">
+            {host ? (hostDoing ? `${host.name} is: ${hostDoing}. Join in below, or tap a seat to sit together.` : `${host.name} is here. Tap a sofa or chair to sit together.`) : "The host has stepped out."}
+          </p>
+          {joinAction && (
+            <div className="mt-2">
+              <ActionRow
+                a={joinAction}
+                enabled={!busy}
+                onRun={() => {
+                  const err = useGame.getState().runAction(joinAction);
+                  if (err) useGame.getState().toast(err, "bad");
+                }}
+              />
+            </div>
+          )}
+        </div>
       )}
 
       {biz && (

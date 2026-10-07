@@ -215,7 +215,7 @@ export default function PlotPanelBody({ id }: { id: string }) {
           <p className="flex items-center gap-2 font-semibold text-stone-800">
             <KeyRound className="size-4" /> Owned by {state.ownerName}
           </p>
-          <p className="mt-1">{biz ? `${biz.emoji} ${biz.name}: open to customers. Step inside to look around, say hello and buy something.` : "Knock and wait for them to let you in, or ask to be invited to a house party."}</p>
+          <p className="mt-1">{biz ? `${biz.emoji} ${biz.name}: open to customers. Step inside to look around, say hello and buy something.` : "Knock to be let in. You can only visit while they are home, and you are shown out when they leave."}</p>
           {(tier >= 1 || biz) && !near && <TravelOptions x={door.x} z={door.z} label="Choose how to get there" />}
           {(tier >= 1 || biz) && near && (
             <>

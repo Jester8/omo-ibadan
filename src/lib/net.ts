@@ -78,6 +78,11 @@ function handle(m: S2C) {
       upsert(m.peer);
       break;
     case "leave": {
+      useGame.setState((st) => {
+        const rest = { ...st.doing };
+        delete rest[m.id];
+        return { doing: rest };
+      });
       const next = { ...s.remotes };
       delete next[m.id];
       remoteMotion.delete(m.id);
@@ -172,6 +177,9 @@ function handle(m: S2C) {
       audio.pop();
       break;
     }
+    case "doing":
+      useGame.setState((st) => ({ doing: { ...st.doing, [m.id]: m.label } }));
+      break;
     case "relAsk":
       if (!s.relAsks.some((a) => a.from === m.from && a.level === m.level)) useGame.setState({ relAsks: [...s.relAsks, { from: m.from, name: m.name, level: m.level }] });
       audio.pop();
@@ -355,6 +363,15 @@ useGame.subscribe((s) => {
   if (key === lastCar) return;
   lastCar = key;
   if (ws?.readyState === WebSocket.OPEN) sendCar();
+});
+
+// tell the room what I am doing (cooking, eating...), so a visitor can join in
+let lastDoing: string | null = null;
+useGame.subscribe((s) => {
+  const label = s.busy?.label ?? null;
+  if (label === lastDoing) return;
+  lastDoing = label;
+  if (s.net === "online") send({ t: "doing", label });
 });
 
 export const net = {
