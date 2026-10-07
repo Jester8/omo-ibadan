@@ -94,6 +94,12 @@ class Voice {
       const prev = useGame.getState().voice;
       useGame.setState({ voice: { ...prev, speaking: next } });
     });
+    // a struggling connection is shown to the player rather than failing silently
+    lk.on(RoomEvent.Reconnecting, () => useGame.setState({ voiceWeak: true }));
+    lk.on(RoomEvent.Reconnected, () => useGame.setState({ voiceWeak: false }));
+    lk.on(RoomEvent.ConnectionQualityChanged, (q, p) => {
+      if (p.isLocal) useGame.setState({ voiceWeak: q === "poor" || q === "lost" });
+    });
     lk.on(RoomEvent.Disconnected, () => {
       if (this.lk === lk) this.leave();
     });
@@ -127,7 +133,7 @@ class Voice {
       this.lkPeers.clear();
       this.room = null;
       this.muted = false;
-      useGame.setState({ voice: { room: null, muted: false, peers: [], speaking: {} } });
+      useGame.setState({ voice: { room: null, muted: false, peers: [], speaking: {} }, voiceWeak: false });
       return;
     }
     for (const id of [...this.peers.keys()]) this.drop(id);

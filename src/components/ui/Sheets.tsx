@@ -88,7 +88,7 @@ function PhoneSheet() {
           {call.peerName.slice(0, 1).toUpperCase()}
         </motion.div>
         <p className="mt-4 text-xl font-bold text-stone-900">{call.peerName}</p>
-        <p className="mt-1 text-sm text-stone-500">{call.phase === "calling" ? "Calling…" : "Connected"}</p>
+        <p className="mt-1 text-sm text-stone-500">{call.phase === "calling" ? "Ringing..." : call.phase === "connecting" ? "Connecting..." : "Connected"}</p>
         <div className="mt-6 flex items-center gap-3">
           {call.phase === "live" && <MuteButton />}
           <button onClick={() => net.hangup()} className="grid size-14 place-items-center rounded-full bg-rose-600 text-white shadow-lg shadow-rose-600/30 transition active:scale-90" aria-label="Hang up">

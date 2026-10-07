@@ -47,7 +47,7 @@ export function foodFor(a: { id: string; gain?: { hunger?: number } }): Food | u
   return "bowl";
 }
 export type CallState = {
-  phase: "idle" | "calling" | "ringing" | "live";
+  phase: "idle" | "calling" | "ringing" | "connecting" | "live";
   peerId: string | null;
   peerName: string;
   room: string | null;
@@ -167,6 +167,10 @@ type State = {
   relAsks: { from: string; name: string; level: string }[];
   /** what other people in the room are doing right now (cooking, eating...), by connection id */
   doing: Record<string, string | null>;
+  /** how the connection to the server is doing: weak links are shown to the player */
+  netQuality: "good" | "poor";
+  /** the voice connection is struggling or reconnecting */
+  voiceWeak: boolean;
   /** who is typing right now: "dm:<pid>" for a chat with a friend, "room:<id>" for the room chat */
   typing: Record<string, { name: string; at: number }>;
   /** food a host has served you, waiting for you to eat or say no thanks */
@@ -338,6 +342,8 @@ export const useGame = create<State>()(
       starterPending: false,
       relAsks: [],
       doing: {},
+      netQuality: "good",
+      voiceWeak: false,
       typing: {},
       serves: [],
 

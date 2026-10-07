@@ -181,6 +181,13 @@ function handle(m: S2C) {
     case "credit":
       void takeCredit(m);
       break;
+    case "pong": {
+      const rtt = Date.now() - m.at;
+      lastPong = Date.now();
+      const q = rtt > 1500 ? "poor" : "good";
+      if (useGame.getState().netQuality !== q) useGame.setState({ netQuality: q });
+      break;
+    }
     case "doing":
       useGame.setState((st) => ({ doing: { ...st.doing, [m.id]: m.label } }));
       break;
@@ -276,7 +283,7 @@ function handle(m: S2C) {
       clearCallTimer();
       if (m.accept && s.call.phase === "calling" && s.call.peerId === m.from) {
         const room = callRoom(s.connId ?? "", m.from);
-        useGame.setState({ call: { ...s.call, phase: "live", room } });
+        useGame.setState({ call: { ...s.call, phase: "connecting", room } });
         s.recordStat("calls");
         void joinCallVoice(room);
       } else {
@@ -295,9 +302,22 @@ function handle(m: S2C) {
 }
 
 /** A call without a working microphone is pointless, so hang up if we can't start voice. */
+/** Join the call's voice room. The call shows "Connecting" until the other person is in, then goes live. */
 async function joinCallVoice(room: string) {
   const ok = await voice.join(room);
-  if (!ok && useGame.getState().call.room === room) net.hangup();
+  if (!ok) {
+    if (useGame.getState().call.room === room) net.hangup();
+    return;
+  }
+  const t0 = Date.now();
+  const id = setInterval(() => {
+    const st = useGame.getState();
+    if (st.call.room !== room || st.call.phase === "idle") return clearInterval(id);
+    if (st.voice.peers.length > 0 || Date.now() - t0 > 10_000) {
+      clearInterval(id);
+      useGame.setState({ call: { ...st.call, phase: "live" } });
+    }
+  }, 300);
 }
 
 let callTimer: ReturnType<typeof setTimeout> | null = null;
@@ -346,6 +366,14 @@ function openSocket() {
     void pullState().then(() => pushState());
     void loadSocial();
     void collectPending();
+    // watch the link: a slow or missing answer means a weak network, and the player is told
+    lastPong = Date.now();
+    if (pingTimer) clearInterval(pingTimer);
+    pingTimer = setInterval(() => {
+      if (Date.now() - lastPong > 8000 && useGame.getState().netQuality !== "poor") useGame.setState({ netQuality: "poor" });
+      send({ t: "ping", at: Date.now() });
+    }, 4000);
+    send({ t: "ping", at: Date.now() });
     if (autosave) clearInterval(autosave);
     autosave = setInterval(() => void pushState(), 30_000);
   };
@@ -365,6 +393,8 @@ function openSocket() {
       setTimeout(() => void signOut(), 1500);
     }
     if (autosave) clearInterval(autosave);
+    if (pingTimer) clearInterval(pingTimer);
+    pingTimer = null;
     remoteMotion.clear();
     if (useGame.getState().call.phase !== "idle") endCallLocal();
     else voice.leave();
@@ -401,6 +431,8 @@ useGame.subscribe((s) => {
 /** food I have served, waiting to hear if it was eaten: "guest|dish" -> comes from my cooked meals */
 const pendingServe = new Map<string, boolean>();
 let lastTypingSent = 0;
+let lastPong = 0;
+let pingTimer: ReturnType<typeof setInterval> | null = null;
 
 export const net = {
   connect,
@@ -515,7 +547,7 @@ export const net = {
     useGame.setState({ incoming: null });
     if (accept) {
       const room = callRoom(s.connId ?? "", inc.from);
-      useGame.setState({ call: { phase: "live", peerId: inc.from, peerName: inc.name, room } });
+      useGame.setState({ call: { phase: "connecting", peerId: inc.from, peerName: inc.name, room } });
       s.recordStat("calls");
       void joinCallVoice(room);
     }

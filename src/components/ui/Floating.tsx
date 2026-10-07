@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Phone, PhoneOff, Users } from "lucide-react";
 import { useGame } from "@/lib/store";
@@ -32,7 +33,7 @@ export function VoiceBar() {
             <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex size-2.5 rounded-full bg-emerald-500" />
           </span>
-          <span className="text-sm font-semibold">{call.phase === "live" ? `On a call with ${call.peerName}` : roomLabel(v.room)}</span>
+          <span className="text-sm font-semibold">{call.phase === "live" ? `On a call with ${call.peerName}` : call.phase === "connecting" ? `Connecting to ${call.peerName}...` : roomLabel(v.room)}</span>
           <span className="flex items-center gap-1 text-xs text-stone-600">
             <Users className="size-3.5" /> {v.peers.length + 1}
           </span>
@@ -53,7 +54,8 @@ export function VoiceBar() {
 export function IncomingCall() {
   const inc = useGame((s) => s.incoming);
   const call = useGame((s) => s.call);
-  const calling = call.phase === "calling";
+  const calling = call.phase === "calling" || call.phase === "connecting";
+  const connecting = call.phase === "connecting";
   return (
     <AnimatePresence>
       {calling && (
@@ -70,9 +72,12 @@ export function IncomingCall() {
           </motion.span>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-bold">{call.peerName}</p>
-            <p className="text-xs text-stone-500">Ringing…</p>
+            <p className="flex items-center gap-1.5 text-xs text-stone-500">
+              {connecting && <span className="size-3 animate-spin rounded-full border-2 border-stone-300 border-t-emerald-600" />}
+              {connecting ? "Connecting..." : "Ringing..."}
+            </p>
           </div>
-          <button onClick={() => net.hangup()} className="grid size-11 place-items-center rounded-full bg-rose-600 text-white transition active:scale-90" aria-label="Cancel call">
+          <button onClick={() => net.hangup()} className="grid size-11 place-items-center rounded-full bg-rose-600 text-white transition active:scale-90" aria-label={connecting ? "End call" : "Cancel call"}>
             <PhoneOff className="size-5" />
           </button>
         </motion.div>
@@ -98,6 +103,36 @@ export function IncomingCall() {
           <button onClick={() => net.answer(true)} className="grid size-11 place-items-center rounded-full bg-emerald-500 transition active:scale-90" aria-label="Answer">
             <Phone className="size-5" />
           </button>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+/** Shown whenever the connection is weak or being re-made, so you know why things are slow. */
+export function NetBanner() {
+  const net = useGame((s) => s.net);
+  const quality = useGame((s) => s.netQuality);
+  const voiceWeak = useGame((s) => s.voiceWeak);
+  const profile = useGame((s) => !!s.profile);
+  const [offline, setOffline] = useState(false);
+  useEffect(() => {
+    const sync = () => setOffline(!navigator.onLine);
+    sync();
+    window.addEventListener("online", sync);
+    window.addEventListener("offline", sync);
+    return () => {
+      window.removeEventListener("online", sync);
+      window.removeEventListener("offline", sync);
+    };
+  }, []);
+  const text = offline ? "No internet. Waiting for the network..." : net === "connecting" ? "Network is weak. Connecting..." : net === "offline" && profile ? "Connection lost. Reconnecting..." : quality === "poor" ? "Network is weak. Connecting..." : voiceWeak ? "Voice is weak. Reconnecting..." : "";
+  return (
+    <AnimatePresence>
+      {text && profile && (
+        <motion.div key="net" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 14 }} className="pointer-events-none absolute left-1/2 bottom-[calc(env(safe-area-inset-bottom)+5.6rem)] z-[56] flex -translate-x-1/2 items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold text-black shadow-xl ring-1 ring-black/10">
+          <span className="size-3.5 animate-spin rounded-full border-2 border-amber-200 border-t-amber-500" />
+          {text}
         </motion.div>
       )}
     </AnimatePresence>

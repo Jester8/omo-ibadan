@@ -11,7 +11,7 @@ import NowPlaying from "@/components/ui/NowPlaying";
 import Minimap from "@/components/ui/Minimap";
 import ViewControls from "@/components/ui/ViewControls";
 import AudioBridge from "@/components/ui/AudioBridge";
-import { Hint, IncomingCall, Knocks, RelAsks, Serves, Toasts, VoiceBar } from "@/components/ui/Floating";
+import { Hint, IncomingCall, Knocks, NetBanner, RelAsks, Serves, Toasts, VoiceBar } from "@/components/ui/Floating";
 import AvatarCreator from "@/components/avatar/AvatarCreator";
 import AuthScreen from "@/components/ui/AuthScreen";
 import Overlay from "./Overlay";
@@ -241,6 +241,7 @@ export default function WorldClient() {
       {mounted && <Knocks />}
       {mounted && <RelAsks />}
       {mounted && <Serves />}
+      {mounted && <NetBanner />}
       {mounted && <Runtime />}
       {mounted && <AudioBridge />}
       <AnimatePresence>
