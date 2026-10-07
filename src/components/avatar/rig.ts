@@ -78,14 +78,14 @@ type Roles = {
 const ROLES: Record<BaseId, Roles> = {
   "m-casual": { body: ["LightBrown"], legs: ["LightBlue"], feet: ["Red_Dark"], hair: ["Hair"], brows: ["Eyebrows"], baked: true },
   "m-hoodie": { body: ["Purple"], legs: ["LightBlue"], feet: ["Purple"], hair: ["Hair"], brows: ["Eyebrows"], baked: true },
-  "m-business": { body: ["Suit"], legs: ["Suit"], feet: [], hair: ["Hair"], brows: ["Eyebrows"], baked: true },
-  "m-worker": { body: ["Worker_Vest"], legs: ["Brown", "Brown2"], feet: [], hair: [], brows: ["Eyebrows", "Moustache"], hide: ["Worker_Yellow"], baked: false },
+  "m-business": { body: ["Suit"], legs: ["Suit"], feet: ["Black"], hair: ["Hair"], brows: ["Eyebrows"], baked: true },
+  "m-worker": { body: ["Worker_Vest"], legs: ["Brown", "Brown2"], feet: ["Black", "Grey"], hair: [], brows: ["Eyebrows", "Moustache"], hide: ["Worker_Yellow"], baked: false },
   "m-farmer": { body: ["Brown"], bodyBottom: ["LightBlue"], legs: ["LightBlue"], feet: ["Brown", "Brown2"], hair: [], brows: ["Eyebrows"], hide: ["Beige"], baked: false },
   "m-beach": { body: ["LightBrown"], legs: ["Red_Dark"], feet: ["Red_Dark"], hair: ["Hair"], brows: ["Eyebrows"], baked: true },
   "f-casual-b": { body: ["White"], legs: ["Orange"], feet: ["Grey"], hair: ["Hair_Blond"], brows: ["Hair_Brown"], baked: true },
   "f-casual-a": { body: ["LimeGreen"], legs: ["LimeGreen"], feet: ["Red"], hair: ["Red"], brows: [], baked: true },
-  "f-suit": { body: ["Black"], legs: ["Black"], feet: [], hair: ["Hair_Blond"], brows: ["Hair_Brown"], baked: true },
-  "f-worker": { body: ["Worker_Vest"], legs: ["Brown_02", "Brown2"], feet: [], hair: ["DarkBrown"], brows: [], hide: ["Worker_Yellow"], baked: true },
+  "f-suit": { body: ["Black"], legs: ["Black"], feet: ["Black"], hair: ["Hair_Blond"], brows: ["Hair_Brown"], baked: true },
+  "f-worker": { body: ["Worker_Vest"], legs: ["Brown_02", "Brown2"], feet: ["Black"], hair: ["DarkBrown"], brows: [], hide: ["Worker_Yellow"], baked: true },
 };
 
 const V = THREE.Vector3;
@@ -303,6 +303,15 @@ export function dressAvatar(root: THREE.Object3D, look: Look, base: BaseId): Dre
       }
     } else if (part === "Feet" && roles.feet.includes(n)) {
       mat.color.set(look.shoeColor);
+      mat.roughness = 0.42; // polished leather and canvas rather than flat plastic
+      mat.metalness = 0.06;
+    }
+    // a finer finish: cloth is matte, hair is soft, skin keeps a little life
+    if (part === "Body" || part === "Legs") {
+      if (mat.name !== "Skin" && mat.name !== "Skin_Darker") {
+        mat.roughness = 0.86;
+        mat.metalness = 0;
+      }
     }
   });
 

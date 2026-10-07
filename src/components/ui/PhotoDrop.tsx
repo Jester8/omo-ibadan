@@ -25,14 +25,14 @@ export default function PhotoDrop() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -16, scale: 0.95 }}
                 onClick={() => usePhotos.getState().open(p.id)}
-                className="pointer-events-auto flex w-[min(22rem,100%)] items-center gap-3 rounded-2xl bg-stone-900 px-4 py-3 text-left text-white shadow-2xl ring-1 ring-white/10 transition active:scale-[0.98]"
+                className="pointer-events-auto flex w-[min(22rem,100%)] items-center gap-3 rounded-2xl bg-white px-4 py-3 text-left text-black shadow-2xl ring-1 ring-black/10 transition active:scale-[0.98]"
               >
-                <span className="grid size-10 shrink-0 place-items-center rounded-full bg-emerald-500">
+                <span className="grid size-10 shrink-0 place-items-center rounded-full bg-emerald-500 text-white">
                   <Camera className="size-5" />
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-bold">{p.name} sent a photo</span>
-                  <span className="flex items-center gap-1 text-xs text-white/70">
+                  <span className="flex items-center gap-1 text-xs text-stone-500">
                     <Eye className="size-3.5" /> Tap to view once
                   </span>
                 </span>

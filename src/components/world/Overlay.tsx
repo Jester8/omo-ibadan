@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { bizById } from "@/lib/business";
 import { Mic } from "lucide-react";
 import type { Vector3 } from "three";
 import { anchors } from "@/lib/overlay";
@@ -102,7 +103,7 @@ function PlotLabels() {
               }`}
               style={state && !sel ? { background: colorFor(state.ownerId) } : undefined}
             >
-              {state ? `${mine ? "🏠 Yours" : `🏠 ${state.ownerName}`}` : `For sale · ${naira(p.price).replace(/,000$/, "k")}`}
+              {state ? (state.biz ? `${bizById(state.biz)?.emoji ?? "🏪"} ${mine ? "Yours" : (bizById(state.biz)?.name ?? "Business")}` : `${mine ? "🏠 Yours" : `🏠 ${state.ownerName}`}`) : `For sale · ${naira(p.price).replace(/,000$/, "k")}`}
             </button>
           </Anchored>
         );

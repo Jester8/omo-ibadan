@@ -10,6 +10,7 @@ import { walkTo } from "@/lib/movement";
 import { nepaOut } from "@/lib/time";
 import { useSecond } from "@/lib/hooks";
 import { ActionRow, VoiceRoomCard } from "./parts";
+import { BUSINESSES, bizById } from "@/lib/business";
 
 export default function PlotPanelBody({ id }: { id: string }) {
   const plot = plotById(id)!;
@@ -21,8 +22,10 @@ export default function PlotPanelBody({ id }: { id: string }) {
   const sec = useSecond();
   const mine = state?.ownerId === myId;
   const near = Math.hypot(me.x - plot.pos[0], me.z - (plot.pos[1] + PLOT_SIZE / 2 + 0.6)) < 3.6;
-  const tier = state?.tier ?? 0;
-  const next = TIERS[tier + 1];
+  const biz = bizById(state?.biz);
+  // a business is not a house: no bungalow upgrades, no going inside
+  const tier = biz ? 0 : (state?.tier ?? 0);
+  const next = biz ? undefined : TIERS[tier + 1];
   const rent = state && mine ? pendingRent(state, sec * 1000) : 0;
   const act = (fn: () => string | null) => {
     const err = fn();
@@ -48,12 +51,12 @@ export default function PlotPanelBody({ id }: { id: string }) {
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="grid size-12 place-items-center rounded-2xl text-2xl" style={{ background: `${state ? colorFor(state.ownerId) : "#10b981"}22` }}>
-            {state ? "🏠" : "🌱"}
+            {biz ? biz.emoji : state ? "🏠" : "🌱"}
           </div>
           <div>
-            <h2 className="text-lg font-semibold leading-tight text-stone-900">{state ? (mine ? "Your land" : `${state.ownerName}'s land`) : "Land for sale"}</h2>
+            <h2 className="text-lg font-semibold leading-tight text-stone-900">{biz ? (mine ? `Your ${biz.name.toLowerCase()}` : `${state?.ownerName}'s ${biz.name.toLowerCase()}`) : state ? (mine ? "Your land" : `${state.ownerName}'s land`) : "Land for sale"}</h2>
             <p className="text-xs font-semibold text-emerald-700">
-              {plot.district} · {TIERS[tier].name}
+              {plot.district} · {biz ? "Business" : TIERS[tier].name}
             </p>
           </div>
         </div>
@@ -83,8 +86,8 @@ export default function PlotPanelBody({ id }: { id: string }) {
         <>
           <div className="mt-4 grid grid-cols-2 gap-2">
             <div className="rounded-2xl bg-stone-50 p-3 ring-1 ring-black/5">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-stone-400">Rent income</p>
-              <p className="text-sm font-bold text-stone-900">{naira(TIERS[tier].rentPerMin)}/min</p>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-stone-400">{biz ? "Business income" : "Rent income"}</p>
+              <p className="text-sm font-bold text-stone-900">{naira(biz?.perMin ?? TIERS[tier].rentPerMin)}/min</p>
             </div>
             <button
               onClick={() => useGame.getState().collectRent(id)}
@@ -106,6 +109,28 @@ export default function PlotPanelBody({ id }: { id: string }) {
               </span>
               <span className="text-sm font-bold tabular-nums">{naira(next.cost)}</span>
             </button>
+          )}
+
+          {tier === 0 && !biz && (
+            <div className="mt-3 rounded-2xl bg-white ring-1 ring-black/5">
+              <p className="px-3.5 pt-3 text-[11px] font-bold uppercase tracking-wide text-stone-400">Or build a business</p>
+              <ul className="divide-y divide-stone-100">
+                {BUSINESSES.map((b) => (
+                  <li key={b.id} className="flex items-center gap-3 px-3.5 py-2">
+                    <span className="grid size-9 shrink-0 place-items-center rounded-xl text-lg" style={{ background: `${b.color}22` }}>
+                      {b.emoji}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[13px] font-semibold text-stone-900">{b.name}</span>
+                      <span className="block truncate text-[11px] text-stone-500">{naira(b.perMin)}/min · {b.blurb}</span>
+                    </span>
+                    <button disabled={money + rent < b.cost} onClick={() => act(() => useGame.getState().buildBusiness(id, b.id))} className="shrink-0 rounded-full bg-stone-900 px-3 py-1.5 text-xs font-bold text-white transition active:scale-95 disabled:opacity-40">
+                      {naira(b.cost)}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
 
           {enterButton}

@@ -7,6 +7,7 @@ import { PLOTS, PLOT_SIZE } from "@/lib/plots";
 import type { PlotState } from "@/lib/protocol";
 import { useGame } from "@/lib/store";
 import { colorFor } from "@/lib/look";
+import { bizById } from "@/lib/business";
 import { facadeMaterials, lampMat, windowMats } from "./materials";
 
 type V3 = [number, number, number];
@@ -94,6 +95,16 @@ function geos() {
     ]),
     t3accent: merge([box(2.1, 0.09, 1.45, "#ffffff", [-0.2, B + 1.5 + 0.04, -0.35])]),
     t3glow: merge([box(0.32, 0.34, 0.03, "#fff4d6", [-0.9, B + 1.0, 0.33]), box(0.32, 0.34, 0.03, "#fff4d6", [-0.2, B + 1.0, 0.33]), box(0.32, 0.34, 0.03, "#fff4d6", [0.5, B + 1.0, 0.33])]),
+    // a shop front: flat roof, a big window, and a coloured awning (the colour belongs to the kind of business)
+    biz: merge([
+      ...fence("#d9d6d0"),
+      box(1.8, 0.9, 1.3, "#f6f3ec", [0, B + 0.45, -0.1]),
+      box(1.9, 0.07, 1.4, "#3a3f48", [0, B + 0.93, -0.1]),
+      box(0.5, 0.5, 0.03, "#2a2f3a", [-0.55, B + 0.25, 0.56]),
+      post(0.025, 0.7, "#6b7380", [1.15, B + 0.35, 0.95]),
+    ]),
+    bizaccent: merge([box(1.9, 0.22, 1.42, "#ffffff", [0, B + 1.03, -0.1]), box(1.5, 0.06, 0.5, "#ffffff", [0.1, B + 0.74, 0.7], { rx: -0.35 }), box(0.46, 0.2, 0.04, "#ffffff", [1.15, B + 0.72, 0.95])]),
+    bizglow: merge([box(0.75, 0.4, 0.03, "#fff4d6", [0.35, B + 0.38, 0.56])]),
     // land that is bought but not built on: corner stakes and a flag
     claimed: merge([
       ...([[-1.35, -1.35], [1.35, -1.35], [-1.35, 1.35], [1.35, 1.35]] as [number, number][]).map(([x, z]) => box(0.07, 0.28, 0.07, "#ffffff", [x, 0.2, z])),
@@ -133,7 +144,7 @@ function Inst({ geometry, material, items, shadow = false, tint = false }: { geo
   return <instancedMesh ref={ref} args={[geometry, material, PLOTS.length]} frustumCulled={false} castShadow={shadow} receiveShadow />;
 }
 
-const kindOf = (st?: PlotState) => (!st ? "sale" : st.tier >= 3 ? "t3" : st.tier === 2 ? "t2" : st.tier === 1 ? "t1" : "claimed");
+const kindOf = (st?: PlotState) => (!st ? "sale" : st.biz ? "biz" : st.tier >= 3 ? "t3" : st.tier === 2 ? "t2" : st.tier === 1 ? "t1" : "claimed");
 
 export default function PlotsLayer() {
   const plots = useGame((s) => s.plots);
@@ -142,14 +153,15 @@ export default function PlotsLayer() {
   const g = geos();
 
   const lists = useMemo(() => {
-    const by: Record<string, Item[]> = { t1: [], t2: [], t3: [], claimed: [], sale: [] };
+    const by: Record<string, Item[]> = { t1: [], t2: [], t3: [], claimed: [], sale: [], biz: [] };
     const pads: Item[] = [];
     const white = new THREE.Color("#ffffff");
     const sand = new THREE.Color("#f5f2e6");
     for (const p of PLOTS) {
       const st = plots[p.id];
       const accent = st ? new THREE.Color(colorFor(st.ownerId)) : undefined;
-      by[kindOf(st)].push({ x: p.pos[0], z: p.pos[1], color: accent });
+      const kind = kindOf(st);
+      by[kind].push({ x: p.pos[0], z: p.pos[1], color: kind === "biz" ? new THREE.Color(bizById(st?.biz)?.color ?? "#16a34a") : accent });
       pads.push({ x: p.pos[0], z: p.pos[1], color: accent ? accent.clone().lerp(white, 0.75) : sand });
     }
     return { by, pads };
@@ -168,6 +180,9 @@ export default function PlotsLayer() {
       <Inst geometry={g.t3} material={bodyMat} items={lists.by.t3} shadow />
       <Inst geometry={g.t3accent} material={tintMat} tint items={lists.by.t3} />
       <Inst geometry={g.t3glow} material={lampMat} items={lists.by.t3} />
+      <Inst geometry={g.biz} material={bodyMat} items={lists.by.biz} shadow />
+      <Inst geometry={g.bizaccent} material={tintMat} items={lists.by.biz} tint />
+      <Inst geometry={g.bizglow} material={lampMat} items={lists.by.biz} />
       <Inst geometry={g.claimed} material={tintMat} tint items={lists.by.claimed} />
       <Inst geometry={g.sale} material={bodyMat} items={lists.by.sale} />
       <PlotHits />

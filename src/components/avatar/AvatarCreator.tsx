@@ -231,7 +231,7 @@ export default function AvatarCreator({
               options={[...CLOTH_COLORS.slice(0, 4), "#3a3f4b", "#7c5a3a"]}
               onPick={(c) => set("bottomColor", c)}
             />
-            <Swatches label="Shoes" value={look.shoeColor} options={["#f4f4f2", "#1d2433", "#dc2626", "#f59e0b", "#0ea5e9"]} onPick={(c) => set("shoeColor", c)} />
+            <Swatches label="Shoes" value={look.shoeColor} options={["#f4f4f2", "#1d2433", "#6b7280", "#7c5a3a", "#dc2626", "#f59e0b", "#16a34a", "#0ea5e9", "#7c3aed", "#ec4899"]} onPick={(c) => set("shoeColor", c)} />
             <Chips label="Accessory" value={look.accessory} options={ACCESSORIES} onPick={(v) => set("accessory", v)} />
           </div>
 

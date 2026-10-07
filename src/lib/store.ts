@@ -3,6 +3,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import type { Look } from "./look";
 import { type ActionDef, type Needs } from "./places";
 import { TIERS, plotById, RENT_CAP_MIN, naira, PLOTS, NPC_PLOTS } from "./plots";
+import { bizById } from "./business";
 import type { InteriorRef } from "./interiors";
 import type { Rel } from "./romance";
 import { carById, type RideId } from "./cars";
@@ -112,6 +113,7 @@ type State = {
   adjustNeeds: (d: Partial<Record<"hunger" | "energy" | "fun" | "social", number>>) => void;
   decorRev: number;
   buyDecor: (homeId: string, decorId: string, tier: number) => string | null;
+  buildBusiness: (id: string, bizId: string) => string | null;
   myVote: string | null;
   selected: Selection;
   atPlace: string | null;
@@ -183,7 +185,7 @@ let busyTimer: ReturnType<typeof setTimeout> | null = null;
 
 export const pendingRent = (plot: PlotState, now: number) => {
   const mins = Math.min(RENT_CAP_MIN, Math.max(0, (now - plot.collectedAt) / 60000));
-  return Math.floor(TIERS[plot.tier].rentPerMin * mins);
+  return Math.floor((bizById(plot.biz)?.perMin ?? TIERS[plot.tier].rentPerMin) * mins);
 };
 
 export const useGame = create<State>()(
@@ -434,10 +436,27 @@ export const useGame = create<State>()(
         return null;
       },
 
+      buildBusiness: (id, bizId) => {
+        const s = get();
+        const cur = s.plots[id];
+        const b = bizById(bizId);
+        if (!cur || cur.ownerId !== s.profile?.id) return "Not your land.";
+        if (!b) return "Pick a business.";
+        if (cur.tier > 0 || cur.biz) return "Only empty land can take a business.";
+        const pending = pendingRent(cur, Date.now());
+        if (s.money + pending < b.cost) return `You need ${naira(b.cost)}.`;
+        const state: PlotState = { ...cur, tier: 1, biz: b.id, collectedAt: Date.now() };
+        set({ money: s.money + pending - b.cost, plots: { ...s.plots, [id]: state }, rep: s.rep + 10 });
+        hooks.plotSet?.(id, state);
+        get().toast(`${b.name} is open for business! +10 rep`, "good");
+        return null;
+      },
+
       upgradePlot: (id) => {
         const s = get();
         const cur = s.plots[id];
         if (!cur || cur.ownerId !== s.profile?.id) return "Not your land.";
+        if (cur.biz) return "A business can't be turned into a house.";
         if (cur.tier >= 3) return "Already a mansion.";
         const next = TIERS[cur.tier + 1];
         const pending = pendingRent(cur, Date.now());
