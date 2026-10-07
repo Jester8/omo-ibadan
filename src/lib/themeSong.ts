@@ -3,10 +3,12 @@ import { useMusic } from "./music";
 import { useSound } from "./soundStore";
 
 /**
- * The city's theme song, played (with permission) from "Tap to enter" onwards, looping.
+ * The city's theme song, played (with permission) from the landing page onwards, looping.
+ * It tries to start as soon as the page has loaded; browsers usually refuse sound before the visitor
+ * has touched the page, so it then starts on the first tap, click or key press anywhere.
  * It follows the one Sound switch (remembered in localStorage by the audio engine), fades in and out
- * through a Web Audio gain (iOS ignores element volume), pauses while the tab is hidden or an artist's
- * track is playing, and tucks the built-in groove down while it plays.
+ * (through a Web Audio gain once the engine is running, as iOS ignores element volume), pauses while the
+ * tab is hidden or an artist's track is playing, and tucks the built-in groove down while it plays.
  */
 export const THEME_SONG = { title: "Ise Oluwa Ko Si Eni To Ye", artist: "Haruna Ishola", src: "/bg/ise-oluwa-v1.mp3" };
 
@@ -18,29 +20,41 @@ const level = () => Math.min(1, audio.settings.music * 1.2);
 let el: HTMLAudioElement | null = null;
 let gain: GainNode | null = null;
 let started = false;
+/** the browser refused to play before the visitor touched the page */
+let blocked = false;
 let fadeTimer: ReturnType<typeof setTimeout> | null = null;
 let rampTimer: ReturnType<typeof setInterval> | null = null;
 
 const wanted = () => started && !audio.settings.muted && !document.hidden && !useMusic.getState().playing;
 
-/** Built on the first wanted play, inside a tap, so nothing is fetched on page load. */
+let routed = false;
+
+/** Send the song through a Web Audio gain once the engine is running; until then element volume does the fades. */
+function route() {
+  const ctx = audio.ctx;
+  if (routed || !el || !ctx || ctx.state !== "running") return;
+  routed = true;
+  try {
+    if (rampTimer) clearInterval(rampTimer);
+    rampTimer = null;
+    const g = ctx.createGain();
+    g.gain.value = el.volume;
+    ctx.createMediaElementSource(el).connect(g).connect(ctx.destination);
+    el.volume = 1;
+    gain = g;
+  } catch {
+    gain = null; // stays on element volume (no fades on iOS, but it still plays)
+  }
+}
+
+/** Built on the first wanted play: after the page has loaded, and never for someone who left the sound off. */
 function ensure(): HTMLAudioElement {
   if (el) return el;
   el = new Audio();
   el.src = THEME_SONG.src;
   el.loop = true;
   el.preload = "auto";
-  const ctx = audio.ctx;
-  if (ctx) {
-    try {
-      gain = ctx.createGain();
-      gain.gain.value = 0;
-      ctx.createMediaElementSource(el).connect(gain).connect(ctx.destination);
-    } catch {
-      gain = null; // no Web Audio routing: element volume instead (no fades on iOS, but it still plays)
-    }
-  }
-  if (!gain) el.volume = 0;
+  el.volume = 0;
 
   if ("mediaSession" in navigator) {
     navigator.mediaSession.metadata = new MediaMetadata({
@@ -85,10 +99,24 @@ function sync() {
   if (!started) return;
   if (wanted()) {
     const a = ensure();
-    if (audio.ctx?.state === "suspended") void audio.ctx.resume();
-    if (a.paused) a.play().catch(() => {}); // stays called straight from the tap or the unmute click (iOS needs that)
+    route();
+    if (a.paused) {
+      // called straight from the tap or the unmute click when there is one (iOS needs that)
+      a.play().then(
+        () => {
+          blocked = false;
+          disarm();
+        },
+        () => {
+          blocked = true; // no sound allowed yet: wait for the first touch, silent until then
+          fadeTo(0, 0);
+          if (!useMusic.getState().playing) audio.setDuck(false);
+        },
+      );
+    }
     fadeTo(level(), FADE_IN);
     audio.setDuck(true);
+    if (!a.paused) disarm();
     return;
   }
   if (!el || el.paused) return;
@@ -102,11 +130,32 @@ function sync() {
   fadeTo(0, FADE_OUT, () => !wanted() && a.pause());
 }
 
-/** Call from the "Tap to enter" tap (or a returning player's first tap). Nothing plays or downloads before it. */
+const GESTURES = ["pointerdown", "pointerup", "touchend", "click", "keydown"] as const;
+
+/** The first touch of the page: start the sound engine and, if autoplay was refused, the song. */
+function onGesture() {
+  audio.start();
+  const ctx = audio.ctx;
+  if (ctx && ctx.state !== "running") void ctx.resume().then(sync, () => {});
+  if (blocked || (el && !routed)) sync();
+}
+function arm() {
+  for (const g of GESTURES) window.addEventListener(g, onGesture, { capture: true, passive: true });
+}
+function disarm() {
+  // once the song plays and is routed through the engine, the listeners have done their job
+  if (!routed) return;
+  for (const g of GESTURES) window.removeEventListener(g, onGesture, { capture: true });
+}
+
+/** Start the theme song from the landing page: right away if the browser allows it, otherwise on the first touch. */
 export function startThemeSong() {
   if (started || typeof window === "undefined") return;
   started = true;
-  sync();
+  arm();
+  // after the page (and the landing video) has loaded, so the song does not compete for bandwidth
+  if (document.readyState === "complete") sync();
+  else window.addEventListener("load", () => sync(), { once: true });
 }
 
 if (typeof window !== "undefined") {

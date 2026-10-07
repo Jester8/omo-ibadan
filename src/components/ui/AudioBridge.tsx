@@ -24,11 +24,9 @@ const stopBuzz = () => {
 export default function AudioBridge() {
   useEffect(() => {
     useSound.getState().sync();
-    const start = () => {
-      audio.start();
-      // a returning player never sees "Tap to enter", so their first tap starts the theme song
-      if (useGame.getState().profile) startThemeSong();
-    };
+    // the theme song starts from the landing page (or as soon as the browser allows sound)
+    startThemeSong();
+    const start = () => audio.start();
     window.addEventListener("pointerdown", start);
     window.addEventListener("keydown", start);
 

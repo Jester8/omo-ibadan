@@ -9,7 +9,7 @@ import AuthCode from "./AuthCode";
 import InstallApp from "./InstallApp";
 import LandingBackdrop from "./LandingBackdrop";
 import { audio } from "@/lib/audio";
-import { startThemeSong, THEME_SONG } from "@/lib/themeSong";
+import { THEME_SONG } from "@/lib/themeSong";
 import { useSound } from "@/lib/soundStore";
 
 type Step = "intro" | "choose" | "login" | "code";
@@ -33,8 +33,7 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
   const [busy, setBusy] = useState(false);
 
   const enter = () => {
-    audio.start(); // the groove begins from the top on this first tap
-    startThemeSong(); // play() has to happen inside this tap for iOS
+    audio.start(); // the groove begins from the top on this first tap (the theme song is already under way)
     setStep("choose");
   };
 
