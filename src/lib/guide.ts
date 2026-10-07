@@ -4,7 +4,7 @@ export type Topic = { id: string; emoji: string; title: string; lines: string[] 
 export const TOPICS: Topic[] = [
   { id: "move", emoji: "🚶", title: "Moving around", lines: [
     "Tap or click the ground and your character walks there. On a keyboard use W A S D or the arrow keys.",
-    "Drag the screen to turn the camera and tilt it. On a keyboard use Q and E to turn. Pinch or scroll to zoom.",
+    "Drag one finger to turn the camera and tilt it. Use two fingers to pinch and zoom, or twist them to rotate the view. On a keyboard use Q and E to turn, and scroll to zoom.",
     "Tap the small map in the corner to walk to any spot in the city.",
     "Want the camera to circle your character on its own? Turn on Auto rotate in Me, under Quick settings.",
   ] },

@@ -31,38 +31,59 @@ function CameraRig() {
 
   useEffect(() => {
     const el = gl.domElement;
+    // one finger drags to turn and tilt; two fingers pinch to zoom, twist to rotate and slide up or down to tilt
     const pts = new Map<number, { x: number; y: number }>();
-    let pinch = 0;
-    const down = (e: PointerEvent) => pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    let prev = { d: 0, ang: 0, my: 0 };
+    const two = () => {
+      const [a, b] = [...pts.values()];
+      return { d: Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)), ang: Math.atan2(b.y - a.y, b.x - a.x), my: (a.y + b.y) / 2 };
+    };
+    const down = (e: PointerEvent) => {
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pts.size === 2) prev = two();
+    };
     const move = (e: PointerEvent) => {
       const p = pts.get(e.pointerId);
       if (!p) return;
-      if (pts.size === 1) {
-        cam.az -= (e.clientX - p.x) * 0.006;
-        cam.el = clamp(cam.el + (e.clientY - p.y) * 0.004, 0.35, 1.25);
-      } else if (pts.size === 2) {
-        const [a, b] = [...pts.values()];
-        const d = Math.hypot(a.x - b.x, a.y - b.y);
-        if (pinch) cam.dist = clamp(cam.dist * (pinch / d), ...limits());
-        pinch = d;
-      }
+      const dx = e.clientX - p.x;
+      const dy = e.clientY - p.y;
       p.x = e.clientX;
       p.y = e.clientY;
+      if (pts.size === 1) {
+        cam.az -= dx * 0.006;
+        cam.el = clamp(cam.el + dy * 0.004, 0.35, 1.25);
+      } else if (pts.size === 2) {
+        const t = two();
+        cam.dist = clamp(cam.dist * (prev.d / t.d), ...limits());
+        let da = t.ang - prev.ang;
+        if (da > Math.PI) da -= Math.PI * 2;
+        if (da < -Math.PI) da += Math.PI * 2;
+        cam.az -= da;
+        cam.el = clamp(cam.el - (t.my - prev.my) * 0.004, 0.35, 1.25);
+        prev = t;
+      }
     };
     const up = (e: PointerEvent) => {
       pts.delete(e.pointerId);
-      pinch = 0;
+      // the finger that stays down carries on as a one-finger drag from where it is
+      if (pts.size === 2) prev = two();
     };
+    // iOS Safari wants to zoom the whole page on a pinch: keep the gesture for the camera
+    const noPageZoom = (e: Event) => e.preventDefault();
     const wheel = (e: WheelEvent) => {
       e.preventDefault();
       cam.dist = clamp(cam.dist + e.deltaY * 0.02, ...limits());
     };
+    el.addEventListener("gesturestart", noPageZoom);
+    el.addEventListener("gesturechange", noPageZoom);
     el.addEventListener("pointerdown", down);
     el.addEventListener("pointermove", move);
     el.addEventListener("pointerup", up);
     el.addEventListener("pointercancel", up);
     el.addEventListener("wheel", wheel, { passive: false });
     return () => {
+      el.removeEventListener("gesturestart", noPageZoom);
+      el.removeEventListener("gesturechange", noPageZoom);
       el.removeEventListener("pointerdown", down);
       el.removeEventListener("pointermove", move);
       el.removeEventListener("pointerup", up);
