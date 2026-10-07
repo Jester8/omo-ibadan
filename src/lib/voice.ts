@@ -1,11 +1,12 @@
 import type { C2S } from "./protocol";
 import { useGame } from "./store";
-import { getIce } from "./api";
+import { Room, RoomEvent, Track } from "livekit-client";
+import { getIce, getVoiceTicket } from "./api";
 
 /**
  * Peer-to-peer voice using WebRTC, with the game server as the signalling channel.
  * A full mesh is fine for small rooms (a venue, a house party, a 1:1 call).
- * To scale to big rooms later, swap this for an SFU such as LiveKit behind the same API.
+ * When the server has LiveKit configured, the same API runs through LiveKit Cloud instead (bigger rooms, fewer dropped calls).
  */
 
 const ICE: RTCConfiguration = {
@@ -28,6 +29,10 @@ class Voice {
   private local: AnalyserNode | null = null;
   private poll: ReturnType<typeof setInterval> | null = null;
   private muted = false;
+  /** set while this room runs on LiveKit instead of peer-to-peer */
+  private lk: Room | null = null;
+  private lkPeers = new Set<string>();
+  private lkAudio = new Map<string, HTMLMediaElement[]>();
 
   init(send: (m: C2S) => void) {
     this.send = send;
@@ -35,7 +40,7 @@ class Voice {
 
   private publish() {
     const prev = useGame.getState().voice;
-    useGame.setState({ voice: { ...prev, room: this.room, muted: this.muted, peers: [...this.peers.keys()] } });
+    useGame.setState({ voice: { ...prev, room: this.room, muted: this.muted, peers: this.lk ? [...this.lkPeers] : [...this.peers.keys()] } });
   }
 
   private ice: RTCConfiguration = ICE;
@@ -44,6 +49,9 @@ class Voice {
     if (this.room === room) return true;
     this.ice = await getIce();
     if (this.room) this.leave();
+    const connId = useGame.getState().connId;
+    const ticket = connId ? await getVoiceTicket(room, connId) : null;
+    if (ticket && (await this.joinLiveKit(room, ticket))) return true;
     if (!navigator.mediaDevices?.getUserMedia) {
       useGame.getState().toast("Voice needs a secure (https) page and a microphone.", "bad");
       return false;
@@ -67,9 +75,61 @@ class Voice {
     return true;
   }
 
+  private async joinLiveKit(room: string, ticket: { url: string; token: string }): Promise<boolean> {
+    const lk = new Room({ adaptiveStream: true, dynacast: true });
+    lk.on(RoomEvent.TrackSubscribed, (track, _pub, p) => {
+      if (track.kind !== Track.Kind.Audio) return;
+      const el = track.attach();
+      el.style.display = "none";
+      document.body.appendChild(el);
+      this.lkAudio.set(p.identity, [...(this.lkAudio.get(p.identity) ?? []), el]);
+    });
+    lk.on(RoomEvent.TrackUnsubscribed, (track, _pub, p) => {
+      track.detach().forEach((e) => e.remove());
+      this.lkAudio.delete(p.identity);
+    });
+    lk.on(RoomEvent.ActiveSpeakersChanged, (speakers) => {
+      const next: Record<string, boolean> = {};
+      for (const s of speakers) next[s.isLocal ? "me" : s.identity] = true;
+      const prev = useGame.getState().voice;
+      useGame.setState({ voice: { ...prev, speaking: next } });
+    });
+    lk.on(RoomEvent.Disconnected, () => {
+      if (this.lk === lk) this.leave();
+    });
+    try {
+      await lk.connect(ticket.url, ticket.token);
+      await lk.localParticipant.setMicrophoneEnabled(true, { echoCancellation: true, noiseSuppression: true, autoGainControl: true });
+    } catch {
+      lk.disconnect();
+      useGame.getState().toast("Microphone blocked or voice unavailable. Check your browser permission.", "bad");
+      return false;
+    }
+    this.lk = lk;
+    this.lkPeers.clear();
+    this.room = room;
+    this.muted = false;
+    this.send({ t: "voiceJoin", room });
+    this.publish();
+    useGame.getState().recordStat("voiceJoins");
+    return true;
+  }
+
   leave() {
     if (!this.room && !this.stream) return;
     this.send({ t: "voiceLeave" });
+    if (this.lk) {
+      const lk = this.lk;
+      this.lk = null;
+      lk.disconnect();
+      for (const els of this.lkAudio.values()) els.forEach((e) => e.remove());
+      this.lkAudio.clear();
+      this.lkPeers.clear();
+      this.room = null;
+      this.muted = false;
+      useGame.setState({ voice: { room: null, muted: false, peers: [], speaking: {} } });
+      return;
+    }
     for (const id of [...this.peers.keys()]) this.drop(id);
     this.stream?.getTracks().forEach((t) => t.stop());
     this.stream = null;
@@ -85,6 +145,7 @@ class Voice {
 
   setMuted(m: boolean) {
     this.muted = m;
+    if (this.lk) void this.lk.localParticipant.setMicrophoneEnabled(!m);
     this.stream?.getAudioTracks().forEach((t) => (t.enabled = !m));
     this.publish();
   }
@@ -92,20 +153,35 @@ class Voice {
   /** Server told us who is already in the room: we are the newcomer, so we make the offers. */
   members(room: string, ids: string[]) {
     if (room !== this.room) return;
+    if (this.lk) {
+      ids.forEach((id) => this.lkPeers.add(id));
+      this.publish();
+      return;
+    }
     for (const id of ids) void this.connect(id, true);
   }
 
   peerJoined(room: string, id: string) {
     if (room !== this.room) return;
+    if (this.lk) {
+      this.lkPeers.add(id);
+      this.publish();
+      return;
+    }
     void this.connect(id, false);
   }
 
   peerLeft(id: string) {
+    if (this.lk) {
+      this.lkPeers.delete(id);
+      this.publish();
+      return;
+    }
     this.drop(id);
   }
 
   async signal(from: string, data: unknown) {
-    if (!this.room) return;
+    if (!this.room || this.lk) return;
     const d = data as { sdp?: RTCSessionDescriptionInit; candidate?: RTCIceCandidateInit };
     let peer = this.peers.get(from);
     if (!peer) peer = await this.connect(from, false);

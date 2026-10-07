@@ -7,6 +7,8 @@ import { sendCode } from "../mail";
 import { handleSocial } from "./social";
 import { handleTracks } from "./tracks";
 import { handleIntro } from "./intro";
+import { AccessToken } from "livekit-server-sdk";
+import { clients } from "../presence";
 
 type Handler = (ctx: { req: IncomingMessage; body: unknown; pid: string | null; url: URL }) => { status?: number; json: unknown } | Promise<{ status?: number; json: unknown }>;
 
@@ -53,14 +55,14 @@ const routes: Record<string, Handler> = {
   "GET /health": () => ({ json: { ok: true, uptime: Math.round(process.uptime()) } }),
 
   /** Guests get an id + token. Send the old id to keep an identity that already exists. */
-  "POST /api/auth/guest": ({ body }) => {
+  "POST /api/auth/guest": async ({ body }) => {
     const b = (body ?? {}) as { pid?: unknown; name?: unknown };
     const asked = typeof b.pid === "string" && /^[a-zA-Z0-9]{8,40}$/.test(b.pid) ? b.pid : null;
     // an id that already exists belongs to somebody: never hand out a token for it
-    if (asked && getPlayer(asked)) return { status: 409, json: { error: "That player already exists. Log in with your email." } };
+    if (asked && (await getPlayer(asked))) return { status: 409, json: { error: "That player already exists. Log in with your email." } };
     const pid = asked ?? randomUUID().replace(/-/g, "").slice(0, 20);
     const name = String(b.name ?? "Guest").replace(/[\u0000-\u001f<>]/g, "").slice(0, 16) || "Guest";
-    touchPlayer(pid, name);
+    await touchPlayer(pid, name);
     return { json: { pid, token: issueToken(pid) } };
   },
 
@@ -73,19 +75,19 @@ const routes: Record<string, Handler> = {
     const email = String(b.email ?? "").trim().toLowerCase();
     if (!EMAIL.test(email) || email.length > 80) return { status: 400, json: { error: "Enter a valid email address." } };
     const signup = b.purpose === "signup";
-    const exists = getPlayerByEmail(email);
+    const exists = await getPlayerByEmail(email);
     if (signup && exists) return { status: 409, json: { error: "That email already has an account. Log in instead." } };
     const ip = String(req.socket.remoteAddress);
     const ipHit = ipCodes.get(ip);
     const nowMs = Date.now();
     if (ipHit && nowMs < ipHit.until && ipHit.n >= 20) return { status: 429, json: { error: "Too many codes requested. Try again later." } };
     ipCodes.set(ip, { n: ipHit && nowMs < ipHit.until ? ipHit.n + 1 : 1, until: ipHit && nowMs < ipHit.until ? ipHit.until : nowMs + 3600_000 });
-    const prev = getCode(email);
+    const prev = await getCode(email);
     if (prev && nowMs - prev.sent_at < 30_000) return { status: 429, json: { error: "Please wait 30 seconds before asking for another code." } };
     if (prev && nowMs - prev.window_start < 3600_000 && prev.sends_window >= 5) return { status: 429, json: { error: "Too many codes for this email. Try again in an hour." } };
     if (!signup && !exists) return { json: { ok: true, cooldown: 30 } }; // look the same as a real send
     const code = String(randomInt(0, 1_000_000)).padStart(6, "0");
-    saveCode(email, hashCode(email, code), nowMs + 10 * 60_000, nowMs);
+    await saveCode(email, hashCode(email, code), nowMs + 10 * 60_000, nowMs);
     let delivered = false;
     try {
       delivered = await sendCode(email, code);
@@ -98,26 +100,26 @@ const routes: Record<string, Handler> = {
   },
 
   /** Step 2: check the code. An existing email logs in; a new one creates the account (name + avatar). */
-  "POST /api/auth/verify": ({ body }) => {
+  "POST /api/auth/verify": async ({ body }) => {
     const b = (body ?? {}) as { email?: unknown; code?: unknown; name?: unknown; look?: unknown };
     const email = String(b.email ?? "").trim().toLowerCase();
     const code = String(b.code ?? "").trim();
-    const row = getCode(email);
+    const row = await getCode(email);
     if (!row || Date.now() > row.expires_at) return { status: 400, json: { error: "That code has expired. Ask for a new one." } };
     if (row.attempts >= 5) return { status: 429, json: { error: "Too many wrong tries. Ask for a new code." } };
     if (!/^\d{6}$/.test(code) || !same(row.code_hash, hashCode(email, code))) {
-      bumpAttempts(email);
+      await bumpAttempts(email);
       return { status: 401, json: { error: "That code is not right." } };
     }
-    deleteCode(email);
-    const existing = getPlayerByEmail(email);
+    await deleteCode(email);
+    const existing = await getPlayerByEmail(email);
     if (existing) {
       return { json: { isNew: false, pid: existing.pid, name: existing.name, look: existing.profile_json ? JSON.parse(existing.profile_json) : null, token: issueToken(existing.pid) } };
     }
     const name = String(b.name ?? "").replace(/[\u0000-\u001f<>]/g, "").trim().slice(0, 16);
     if (name.length < 2) return { status: 400, json: { error: "Choose a name (2 to 16 characters)." } };
     const pid = randomUUID().replace(/-/g, "").slice(0, 20);
-    createVerifiedPlayer(pid, name, email, b.look && typeof b.look === "object" ? b.look : null);
+    await createVerifiedPlayer(pid, name, email, b.look && typeof b.look === "object" ? b.look : null);
     return { json: { isNew: true, pid, name, look: b.look ?? null, token: issueToken(pid) } };
   },
 
@@ -132,15 +134,30 @@ const routes: Record<string, Handler> = {
     return { json: { iceServers } };
   },
 
-  "GET /api/state": ({ pid }) => {
+  /** A short-lived LiveKit ticket for one voice room. 404 when LiveKit is not configured (the game then uses peer-to-peer). */
+  "POST /api/voice/token": async ({ pid, body }) => {
     if (!pid) return { status: 401, json: { error: "unauthorised" } };
-    return { json: getState(pid) ?? { state: null, updatedAt: 0 } };
+    if (!config.livekitUrl || !config.livekitKey || !config.livekitSecret) return { status: 404, json: { error: "livekit off" } };
+    const b = (body ?? {}) as { room?: unknown; id?: unknown };
+    const room = typeof b.room === "string" ? b.room.slice(0, 80) : "";
+    const id = typeof b.id === "string" ? b.id : "";
+    // the identity must be this player's own live connection, so nobody can speak as somebody else
+    const me = clients.get(id);
+    if (!room || !me || me.info.pid !== pid) return { status: 403, json: { error: "not connected" } };
+    const at = new AccessToken(config.livekitKey, config.livekitSecret, { identity: id, name: me.info.name, ttl: "2h" });
+    at.addGrant({ room, roomJoin: true, canPublish: true, canSubscribe: true, canPublishData: false });
+    return { json: { url: config.livekitUrl, token: await at.toJwt() } };
   },
 
-  "PUT /api/state": ({ pid, body }) => {
+  "GET /api/state": async ({ pid }) => {
+    if (!pid) return { status: 401, json: { error: "unauthorised" } };
+    return { json: (await getState(pid)) ?? { state: null, updatedAt: 0 } };
+  },
+
+  "PUT /api/state": async ({ pid, body }) => {
     if (!pid) return { status: 401, json: { error: "unauthorised" } };
     const b = (body ?? {}) as { name?: unknown; state?: unknown; look?: unknown };
-    putState(pid, String(b.name ?? "Guest").slice(0, 16), sanitizeState(b.state), b.look && typeof b.look === "object" ? b.look : undefined);
+    await putState(pid, String(b.name ?? "Guest").slice(0, 16), sanitizeState(b.state), b.look && typeof b.look === "object" ? b.look : undefined);
     return { json: { ok: true } };
   },
 };
@@ -192,7 +209,7 @@ export async function handleHttp(req: IncomingMessage, res: ServerResponse) {
   }
   const auth = req.headers.authorization?.replace(/^Bearer /i, "");
   try {
-    const out = await handler({ req, body, pid: verifyToken(auth), url });
+    const out = await handler({ req, body, pid: await verifyToken(auth), url });
     send(out.status ?? 200, out.json);
   } catch (e) {
     console.error("[http]", e);

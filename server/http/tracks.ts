@@ -1,7 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { randomUUID, timingSafeEqual } from "node:crypto";
-import { createReadStream, existsSync, mkdirSync, statSync, unlinkSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { storage } from "../storage";
 import { config } from "../config";
 import { countRecentTracks, createTrack, deleteTrackRow, getTrack, listTracks, reviewTrack, setTrackFile, tracksOf, type TrackRow } from "../db/repo";
 import { verifyToken } from "./auth";
@@ -58,39 +57,22 @@ async function readJson(req: IncomingMessage): Promise<Record<string, unknown> |
   }
 }
 
-function stream(req: IncomingMessage, res: ServerResponse, t: TrackRow) {
-  const path = t.file ? join(config.tracksDir, t.file) : "";
-  if (!path || !existsSync(path)) return res.writeHead(404).end();
-  const size = statSync(path).size;
-  const range = /bytes=(\d*)-(\d*)/.exec(String(req.headers.range ?? ""));
-  const base = { "content-type": t.mime ?? "audio/mpeg", "accept-ranges": "bytes", "cache-control": "private, max-age=300", "x-content-type-options": "nosniff" };
-  if (range) {
-    const start = range[1] ? Number(range[1]) : 0;
-    const end = range[2] ? Math.min(Number(range[2]), size - 1) : size - 1;
-    if (start > end || start >= size) return res.writeHead(416, { "content-range": `bytes */${size}` }).end();
-    res.writeHead(206, { ...base, "content-range": `bytes ${start}-${end}/${size}`, "content-length": end - start + 1 });
-    return void createReadStream(path, { start, end }).pipe(res);
-  }
-  res.writeHead(200, { ...base, "content-length": size });
-  createReadStream(path).pipe(res);
-}
-
 /** Returns true when it handled the request. */
 export async function handleTracks(req: IncomingMessage, res: ServerResponse, url: URL): Promise<boolean> {
   const path = url.pathname;
   if (!path.startsWith("/api/tracks") && !path.startsWith("/api/admin/tracks")) return false;
   const send = (status: number, json: unknown) => void res.writeHead(status, { "content-type": "application/json" }).end(JSON.stringify(json));
-  const pid = verifyToken(req.headers.authorization?.replace(/^Bearer /i, ""));
+  const pid = await verifyToken(req.headers.authorization?.replace(/^Bearer /i, ""));
   const parts = path.split("/").filter(Boolean); // api, tracks, :id, audio
 
   // ---- public catalogue: approved tracks only
   if (req.method === "GET" && path === "/api/tracks") {
-    send(200, { tracks: listTracks("approved").map(publicView) });
+    send(200, { tracks: (await listTracks("approved")).map(publicView) });
     return true;
   }
   if (req.method === "GET" && path === "/api/tracks/mine") {
     if (!pid) return send(401, { error: "unauthorised" }), true;
-    send(200, { tracks: tracksOf(pid).map(ownerView) });
+    send(200, { tracks: (await tracksOf(pid)).map(ownerView) });
     return true;
   }
 
@@ -104,10 +86,10 @@ export async function handleTracks(req: IncomingMessage, res: ServerResponse, ur
     const rightsHolder = clean(b.rightsHolder, 80);
     if (!title || !artist || !rightsHolder) return send(400, { error: "title, artist and rights holder are required" }), true;
     if (b.declare !== true) return send(400, { error: "you must confirm you own the rights or have written permission" }), true;
-    if (countRecentTracks(pid, Date.now() - 24 * 3600_000) >= 5) return send(429, { error: "daily upload limit reached" }), true;
+    if ((await countRecentTracks(pid, Date.now() - 24 * 3600_000)) >= 5) return send(429, { error: "daily upload limit reached" }), true;
     const id = randomUUID().replace(/-/g, "").slice(0, 16);
     const statement = `On ${new Date().toISOString()} ${pid} declared: "I own the copyright in this recording and composition, or have the owner's written permission, and I allow Omo Ibadan to stream it in the game. I keep all my rights and can remove it at any time." Rights holder: ${rightsHolder}.`;
-    createTrack({ id, title, artist, ownerPid: pid, rightsHolder, statement });
+    await createTrack({ id, title, artist, ownerPid: pid, rightsHolder, statement });
     send(200, { id });
     return true;
   }
@@ -115,38 +97,37 @@ export async function handleTracks(req: IncomingMessage, res: ServerResponse, ur
   // ---- upload the audio file (raw body)
   if (req.method === "PUT" && parts.length === 4 && parts[1] === "tracks" && parts[3] === "audio") {
     if (!pid) return send(401, { error: "unauthorised" }), true;
-    const t = getTrack(parts[2]);
+    const t = await getTrack(parts[2]);
     if (!t || t.owner_pid !== pid) return send(404, { error: "not found" }), true;
     const buf = await readRaw(req, MAX_BYTES);
     if (!buf) return send(413, { error: "file is larger than 12 MB" }), true;
     const kind = sniff(buf);
     if (!kind) return send(415, { error: "unsupported audio. Use mp3, m4a, ogg, wav or webm" }), true;
-    mkdirSync(config.tracksDir, { recursive: true });
-    if (t.file && existsSync(join(config.tracksDir, t.file))) unlinkSync(join(config.tracksDir, t.file));
+    if (t.file) await storage.remove(t.file);
     const file = `${t.id}.${kind.ext}`;
-    writeFileSync(join(config.tracksDir, file), buf);
-    setTrackFile(t.id, file, kind.mime, buf.length);
+    await storage.put(file, buf, kind.mime);
+    await setTrackFile(t.id, file, kind.mime, buf.length);
     send(200, { ok: true, status: "pending" });
     return true;
   }
 
   // ---- stream (approved to everyone; otherwise owner or admin)
   if (req.method === "GET" && parts.length === 4 && parts[1] === "tracks" && parts[3] === "audio") {
-    const t = getTrack(parts[2]);
+    const t = await getTrack(parts[2]);
     if (!t || !t.file) return send(404, { error: "not found" }), true;
     const allowed = t.status === "approved" || (pid && pid === t.owner_pid) || isAdmin(req);
     if (!allowed) return send(403, { error: "not available" }), true;
-    stream(req, res, t);
+    if (!(await storage.serve(req, res, t.file, t.mime ?? "audio/mpeg"))) send(404, { error: "not found" });
     return true;
   }
 
   // ---- takedown by the owner (or an admin)
   if (req.method === "DELETE" && parts.length === 3 && parts[1] === "tracks") {
-    const t = getTrack(parts[2]);
+    const t = await getTrack(parts[2]);
     if (!t) return send(404, { error: "not found" }), true;
     if (!(pid && pid === t.owner_pid) && !isAdmin(req)) return send(403, { error: "not yours" }), true;
-    if (t.file && existsSync(join(config.tracksDir, t.file))) unlinkSync(join(config.tracksDir, t.file));
-    deleteTrackRow(t.id);
+    if (t.file) await storage.remove(t.file);
+    await deleteTrackRow(t.id);
     send(200, { ok: true });
     return true;
   }
@@ -156,16 +137,16 @@ export async function handleTracks(req: IncomingMessage, res: ServerResponse, ur
     if (!isAdmin(req)) return send(401, { error: "admin only" }), true;
     if (req.method === "GET" && path === "/api/admin/tracks") {
       const status = ["pending", "approved", "rejected"].includes(url.searchParams.get("status") ?? "") ? url.searchParams.get("status")! : "pending";
-      send(200, { tracks: listTracks(status).map((t) => ({ ...ownerView(t), ownerPid: t.owner_pid, statement: t.rights_statement })) });
+      send(200, { tracks: (await listTracks(status)).map((t) => ({ ...ownerView(t), ownerPid: t.owner_pid, statement: t.rights_statement })) });
       return true;
     }
     if (req.method === "POST" && parts.length === 5 && parts[4] === "review") {
       const b = await readJson(req);
-      const t = getTrack(parts[3]);
+      const t = await getTrack(parts[3]);
       if (!b || !t) return send(404, { error: "not found" }), true;
       if (b.status !== "approved" && b.status !== "rejected") return send(400, { error: "status must be approved or rejected" }), true;
       if (b.status === "approved" && !t.file) return send(400, { error: "no audio uploaded yet" }), true;
-      reviewTrack(t.id, b.status, clean(b.note, 200));
+      await reviewTrack(t.id, b.status, clean(b.note, 200));
       send(200, { ok: true });
       return true;
     }

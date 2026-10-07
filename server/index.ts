@@ -6,10 +6,10 @@
  * NOTE: money/needs are still client-side (trusted). Move them server-side before a public launch.
  */
 import { createServer } from "node:http";
-import { WebSocketServer } from "ws";
+import { WebSocketServer, type RawData } from "ws";
 import { randomUUID } from "node:crypto";
 import { config } from "./config";
-import { migrate } from "./db";
+import { db, migrate } from "./db";
 import { addReport, addRoomMessage, blockedEither, blocksOf, friendshipsOf, hasEmail, importLegacyPlots, loadPlots, recordElection, roomHistory, savePlot, touchPlayer } from "./db/repo";
 import { handleHttp } from "./http/router";
 import { broadcast, clients, isOnline, sendToPid, tx, type Client } from "./presence";
@@ -18,18 +18,22 @@ import { verifyToken } from "./http/auth";
 import { cleanChat } from "../src/lib/moderation";
 import type { C2S, Election, PeerInfo, PlotState, Policy, S2C } from "../src/lib/protocol";
 
-migrate();
-importLegacyPlots(__dirname);
+/** Open the database, apply migrations and load the land before anyone connects. */
+const plots: Record<string, PlotState> = {};
+const ready = (async () => {
+  await migrate();
+  await importLegacyPlots(__dirname);
+  Object.assign(plots, await loadPlots());
+})();
 
 const voiceRooms = new Map<string, Set<string>>();
-const plots: Record<string, PlotState> = loadPlots();
 
 const clean = (s: unknown, max: number) => String(s ?? "").replace(/[\u0000-\u001f<>]/g, "").trim().slice(0, max);
 const num = (n: unknown, fallback = 0) => (typeof n === "number" && Number.isFinite(n) ? n : fallback);
 
 /** Let a player's accepted friends know they came online or went offline. */
-function tellFriends(pid: string, online: boolean) {
-  for (const f of friendshipsOf(pid)) if (f.status === "accepted") sendToPid(f.a === pid ? f.b : f.a, { t: "presence", pid, online });
+async function tellFriends(pid: string, online: boolean) {
+  for (const f of await friendshipsOf(pid)) if (f.status === "accepted") sendToPid(f.a === pid ? f.b : f.a, { t: "presence", pid, online });
 }
 
 function leaveVoice(c: Client) {
@@ -70,7 +74,7 @@ setInterval(() => {
   const e = snapshot();
   const win = [...e.candidates].sort((a, b) => b.votes - a.votes)[0];
   if (win && win.votes > 0) governor = { pid: win.pid, name: win.name, slogan: win.slogan, policy: "none" };
-  recordElection(term, win && win.votes > 0 ? win : null);
+  void recordElection(term, win && win.votes > 0 ? win : null).catch((e) => console.error("[election]", e));
   term++;
   endsAt = Date.now() + TERM_MS;
   candidates.clear();
@@ -85,7 +89,9 @@ wss.on("connection", (ws) => {
   const id = randomUUID().slice(0, 8);
   let client: Client | null = null;
 
-  ws.on("message", (raw) => {
+  // handle one message at a time per connection, so database waits never reorder things
+  let chain: Promise<void> = Promise.resolve();
+  const onMessage = async (raw: RawData) => {
     let m: C2S;
     try {
       m = JSON.parse(String(raw));
@@ -96,9 +102,9 @@ wss.on("connection", (ws) => {
     if (m.t === "hello") {
       // with REQUIRE_AUTH on, only players holding a genuine token get in, and only as themselves.
       // An account with a verified email can never be used without its token.
-      const tokenPid = verifyToken(m.token);
+      const tokenPid = await verifyToken(m.token);
       const verified = !!tokenPid && tokenPid === m.pid;
-      if ((config.requireAuth || hasEmail(String(m.pid))) && !verified) {
+      if ((config.requireAuth || (await hasEmail(String(m.pid)))) && !verified) {
         ws.close(4401, "unauthorised");
         return;
       }
@@ -112,13 +118,13 @@ wss.on("connection", (ws) => {
         z: client?.info.z ?? 8.2,
         ry: 0,
       };
-      touchPlayer(info.pid, info.name);
+      await touchPlayer(info.pid, info.name);
       if (!client) {
         client = { ws, info, moved: false, speed: 0, voiceRoom: null, lastChat: 0, verified };
         clients.set(id, client);
         tx(ws, { t: "welcome", id, peers: [...clients.values()].filter((c) => c.info.id !== id).map((c) => c.info), plots });
         tx(ws, { t: "election", e: snapshot(), myVote: votes.get(info.pid) ?? null });
-        if (verified) tellFriends(info.pid, true);
+        if (verified) void tellFriends(info.pid, true);
       } else {
         client.info = { ...client.info, name: info.name, look: info.look };
       }
@@ -143,8 +149,8 @@ wss.on("connection", (ws) => {
         broadcast({ t: "join", peer: c.info }, id);
         // show what was said here recently, minus anyone you have blocked
         const mine = c.info.pid;
-        const hidden = new Set(blocksOf(mine));
-        const messages = roomHistory(c.info.room).filter((h) => !hidden.has(h.from_pid) && !blockedEither(mine, h.from_pid)).map((h) => ({ pid: h.from_pid, name: h.from_name, text: h.text, at: h.at }));
+        const hidden = new Set(await blocksOf(mine));
+        const messages = (await roomHistory(c.info.room)).filter((h) => !hidden.has(h.from_pid)).map((h) => ({ pid: h.from_pid, name: h.from_name, text: h.text, at: h.at }));
         if (messages.length) tx(ws, { t: "history", room: c.info.room, messages });
         break;
       }
@@ -154,16 +160,16 @@ wss.on("connection", (ws) => {
         if (!text || now - c.lastChat < 400) return;
         c.lastChat = now;
         const msg: S2C = { t: "chat", id, name: c.info.name, room: c.info.room, text, at: now };
-        if (!c.info.room.startsWith("call:")) addRoomMessage(c.info.room, c.info.pid, c.info.name, text, now);
+        if (!c.info.room.startsWith("call:")) void addRoomMessage(c.info.room, c.info.pid, c.info.name, text, now).catch((e) => console.error("[chat]", e));
         for (const other of clients.values()) {
           if (other.info.room !== c.info.room) continue;
-          if (other.info.id !== id && blockedEither(c.info.pid, other.info.pid)) continue; // blocked either way: not delivered
+          if (other.info.id !== id && (await blockedEither(c.info.pid, other.info.pid))) continue; // blocked either way: not delivered
           tx(other.ws, msg);
         }
         break;
       }
       case "dm": {
-        const r = sendDm(c.info.pid, clean(m.to, 40), m.text);
+        const r = await sendDm(c.info.pid, clean(m.to, 40), m.text);
         if (!r.ok) tx(ws, { t: "dmError", error: r.error });
         break;
       }
@@ -183,7 +189,7 @@ wss.on("connection", (ws) => {
           decor: Array.isArray(m.plot.decor) ? m.plot.decor.filter((d) => typeof d === "string" && /^[a-z0-9]{1,20}$/.test(d)).slice(0, 21) : existing?.decor,
         };
         plots[m.plotId] = plot;
-        savePlot(m.plotId, plot);
+        await savePlot(m.plotId, plot);
         broadcast({ t: "plot", plotId: m.plotId, plot });
         break;
       }
@@ -192,7 +198,7 @@ wss.on("connection", (ws) => {
         const room = clean(m.room, 80);
         if (!room) return;
         const set = voiceRooms.get(room) ?? new Set<string>();
-        if (set.size >= 8) return;
+        if (set.size >= (config.livekitUrl ? 30 : 8)) return;
         tx(ws, { t: "voiceMembers", room, ids: [...set] });
         for (const peerId of set) {
           const peer = clients.get(peerId);
@@ -214,7 +220,7 @@ wss.on("connection", (ws) => {
       }
       case "call": {
         const target = clients.get(m.to);
-        if (target && !blockedEither(c.info.pid, target.info.pid)) tx(target.ws, { t: "incomingCall", from: id, name: c.info.name });
+        if (target && !(await blockedEither(c.info.pid, target.info.pid))) tx(target.ws, { t: "incomingCall", from: id, name: c.info.name });
         else tx(ws, { t: "callReply", from: m.to, accept: false });
         break;
       }
@@ -225,7 +231,7 @@ wss.on("connection", (ws) => {
       }
       case "report": {
         const target = clients.get(m.id);
-        addReport(`${c.info.pid}(${c.info.name})`, target ? `${target.info.pid}(${target.info.name})` : clean(m.id, 40), clean(m.reason, 120));
+        await addReport(`${c.info.pid}(${c.info.name})`, target ? `${target.info.pid}(${target.info.name})` : clean(m.id, 40), clean(m.reason, 120));
         break;
       }
       case "car": {
@@ -265,6 +271,9 @@ wss.on("connection", (ws) => {
         break;
       }
     }
+  };
+  ws.on("message", (raw) => {
+    chain = chain.then(() => onMessage(raw)).catch((e) => console.error("[ws]", e));
   });
 
   ws.on("close", () => {
@@ -272,7 +281,7 @@ wss.on("connection", (ws) => {
     if (!c) return;
     leaveVoice(c);
     clients.delete(id);
-    if (c.verified && !isOnline(c.info.pid)) tellFriends(c.info.pid, false);
+    if (c.verified && !isOnline(c.info.pid)) void tellFriends(c.info.pid, false);
     broadcast({ t: "leave", id });
     broadcast({ t: "online", n: clients.size });
   });
@@ -289,4 +298,9 @@ setInterval(() => {
   if (m.length) broadcast({ t: "moves", m });
 }, 100);
 
-httpServer.listen(config.port, () => console.log(`Omo Ibadan server listening on http/ws://localhost:${config.port}`));
+ready
+  .then(() => httpServer.listen(config.port, () => console.log(`Omo Ibadan server listening on http/ws://localhost:${config.port} (database: ${db.kind})`)))
+  .catch((e) => {
+    console.error("Could not start:", e);
+    process.exit(1);
+  });

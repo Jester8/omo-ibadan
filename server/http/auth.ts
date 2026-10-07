@@ -18,7 +18,7 @@ export function issueToken(pid: string, days = TOKEN_DAYS) {
 }
 
 /** Returns the player id if the token is genuine and unexpired. */
-export function verifyToken(token: string | undefined | null): string | null {
+export async function verifyToken(token: string | undefined | null): Promise<string | null> {
   if (!token) return null;
   if (token.startsWith("v2.")) {
     const [, pid, exp, sig] = token.split(".");
@@ -31,7 +31,7 @@ export function verifyToken(token: string | undefined | null): string | null {
   if (i < 1) return null;
   const pid = token.slice(0, i);
   if (!same(token.slice(i + 1), mac(pid))) return null;
-  return hasEmail(pid) ? null : pid;
+  return (await hasEmail(pid)) ? null : pid;
 }
 
 /** A short-lived signature for a TURN username (coturn "use-auth-secret"). */

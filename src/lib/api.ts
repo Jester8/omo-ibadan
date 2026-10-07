@@ -127,6 +127,24 @@ export async function getIce(): Promise<RTCConfiguration> {
   }
 }
 
+/** A LiveKit ticket for a voice room, or null when the server has no LiveKit (voice then goes peer-to-peer). */
+export async function getVoiceTicket(room: string, id: string): Promise<{ url: string; token: string } | null> {
+  if (DEMO_AUTH) return null;
+  try {
+    const token = cached ?? (await ensureToken());
+    if (!token) return null;
+    const r = await fetch(`${apiBase()}/api/voice/token`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
+      body: JSON.stringify({ room, id }),
+      signal: AbortSignal.timeout(4000),
+    });
+    return r.ok ? ((await r.json()) as { url: string; token: string }) : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Save progress, forget this device, and return to the sign-in screen. */
 export async function signOut() {
   await pushState();

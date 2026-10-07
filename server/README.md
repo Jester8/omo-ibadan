@@ -6,14 +6,15 @@ One Node process serves **HTTP (REST)** and **WebSocket (realtime)** on the same
 server/
   index.ts            entry: boots HTTP + WebSocket, presence, chat, voice signalling, calls, election
   config.ts           environment config (see ../.env.example)
-  db/index.ts         SQLite connection (node:sqlite, no native deps) + migration runner
+  db/index.ts         Postgres (Supabase) via pg, or in-process PGlite when DATABASE_URL is empty; migration runner
   db/migrations/      numbered .sql files, applied once each at start-up
   db/repo.ts          all SQL lives here: players, plots, reports, elections, cloud saves
   http/router.ts      REST routes, CORS, body limits, rate limit, state sanitising
   http/auth.ts        signed guest tokens (pid.signature)
 ```
 
-Requires **Node 22.13+** (built-in `node:sqlite`). Run: `npm run server`, or `npm run dev:all` with the web app.
+Requires **Node 22+**. With no `DATABASE_URL` it runs a local Postgres (PGlite) in `server/data/pgdata`, so nothing to install.
+Deploying: see [../docs/DEPLOY.md](../docs/DEPLOY.md). Run: `npm run server`, or `npm run dev:all` with the web app.
 
 ## REST API
 
@@ -26,6 +27,7 @@ All routes except `/health`, auth and the public track list need `Authorization:
 | POST | `/api/auth/verify` | `{email, code, name?, look?}` existing email logs in; a new one creates the account. Returns a 30-day token |
 | POST | `/api/auth/guest` | legacy anonymous players only; refuses an id that already exists |
 | GET / PUT | `/api/state` | cloud save |
+| POST | `/api/voice/token` | `{room, id}` LiveKit ticket for a voice room (404 when LiveKit is not configured, so the game falls back to peer-to-peer) |
 | GET | `/api/rtc` | ICE servers for voice: STUN, plus TURN with short-lived credentials when `TURN_URLS` + `TURN_SECRET` are set |
 | GET | `/api/friends` | friends (with online flag), incoming and outgoing requests, blocked ids |
 | POST | `/api/friends/request`, `/api/friends/respond` | send, accept or decline; `DELETE /api/friends/:pid` removes |
@@ -49,7 +51,7 @@ All routes except `/health`, auth and the public track list need `Authorization:
 
 ## Data
 
-SQLite tables: `players`, `auth_codes`, `plots`, `friendships`, `blocks`, `dms`, `room_messages`, `tracks`, `reports`, `elections`.
+Postgres tables: `players`, `auth_codes`, `plots`, `friendships`, `blocks`, `dms`, `room_messages`, `tracks`, `reports`, `elections`.
 Add a migration by creating `db/migrations/002_whatever.sql`; never edit one that has shipped.
 The first start imports an old `server/plots.json` if it exists.
 
