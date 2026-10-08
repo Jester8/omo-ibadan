@@ -4,7 +4,8 @@ import { emotes, me, remoteMotion, remoteSits } from "./playerState";
 import { PLOTS, PLOT_SIZE, plotById } from "./plots";
 import { ESTATES } from "./world";
 import { rideById } from "./cars";
-import { loadSocial, openThread } from "./social";
+import { loadFamily, loadSocial, openThread } from "./social";
+import { roleOf } from "./family";
 import { currentToken, ensureToken, pullState, pushState, signOut } from "./api";
 import type { Policy } from "./protocol";
 import { voice } from "./voice";
@@ -235,6 +236,15 @@ function handle(m: S2C) {
       s.toast(m.by === "accepted" ? `${m.name} said yes: you are now ${l.label} ${l.emoji}` : `${m.name} made you ${l.label} ${l.emoji}`, "good");
       break;
     }
+    case "famEvent": {
+      const wasMember = s.family.members.some((x) => x.pid === m.pid);
+      void loadFamily();
+      if (m.kind === "ask") s.toast(`${m.name} wants you to be their ${roleOf(m.role).label.toLowerCase()}.`, "info");
+      else if (m.kind === "accepted") s.toast(`${m.name} said yes: they are your ${roleOf(m.role).label.toLowerCase()} now.`, "good");
+      else if (m.kind === "declined") s.toast(`${m.name} said not yet.`, "info");
+      else if (wasMember) s.toast("A family link ended.", "info");
+      break;
+    }
     case "relDeclined":
       s.toast(`${m.name} is not ready for that yet.`, "info");
       break;
@@ -379,6 +389,7 @@ function openSocket() {
     sendCar();
     void pullState().then(() => pushState());
     void loadSocial();
+    void loadFamily();
     void collectPending();
     void collectDebits();
     // watch the link: a slow or missing answer means a weak network, and the player is told

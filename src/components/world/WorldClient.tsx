@@ -11,9 +11,10 @@ import NowPlaying from "@/components/ui/NowPlaying";
 import Minimap from "@/components/ui/Minimap";
 import ViewControls from "@/components/ui/ViewControls";
 import AudioBridge from "@/components/ui/AudioBridge";
-import { Hint, IncomingCall, Knocks, NetBanner, RelAsks, Serves, Toasts, VoiceBar } from "@/components/ui/Floating";
+import { FamilyAsks, Hint, IncomingCall, Knocks, NetBanner, RelAsks, Serves, Toasts, VoiceBar } from "@/components/ui/Floating";
 import AvatarCreator from "@/components/avatar/AvatarCreator";
 import AuthScreen from "@/components/ui/AuthScreen";
+import Onboarding from "@/components/ui/Onboarding";
 import Overlay from "./Overlay";
 import { NPCS } from "./People";
 import { forceExit } from "@/lib/interiorRuntime";
@@ -203,6 +204,7 @@ export default function WorldClient() {
   const patch = useGame((s) => s.patch);
   const fade = useGame((s) => s.fade);
   const hideIcons = useGame((s) => s.hideIcons);
+  const onboard = useGame((s) => s.onboard);
   const [creating, setCreating] = useState(false);
   const [pending, setPending] = useState<{ name: string; look: Look; email: string; username: string; password: string; devCode?: string; cooldown: number } | null>(null);
   const [signupError, setSignupError] = useState("");
@@ -240,10 +242,12 @@ export default function WorldClient() {
       {mounted && <IncomingCall />}
       {mounted && <Knocks />}
       {mounted && <RelAsks />}
+      {mounted && <FamilyAsks />}
       {mounted && <Serves />}
       {mounted && <NetBanner />}
       {mounted && <Runtime />}
       {mounted && <AudioBridge />}
+      <AnimatePresence>{mounted && profile && onboard && <Onboarding key="onboarding" />}</AnimatePresence>
       <AnimatePresence>
         {mounted && !profile && !creating && (
           <AuthScreen
@@ -269,7 +273,7 @@ export default function WorldClient() {
             cooldown={pending.cooldown}
             onBack={() => setPending(null)}
             onVerified={(p) => {
-              if (p.isNew) useGame.setState({ money: SIGNUP_MONEY, starterPending: true });
+              if (p.isNew) useGame.setState({ money: SIGNUP_MONEY, starterPending: true, onboard: true, background: null });
               setProfile({ id: p.id, name: p.name, username: p.username ?? pending.username, look: p.look ?? pending.look, email: p.email });
               setPending(null);
             }}
@@ -294,7 +298,7 @@ export default function WorldClient() {
                 const d = demoSignUp(name, email, look, username);
                 setSigningUp(false);
                 if (!d.ok) return setSignupError(d.error);
-                useGame.setState({ money: SIGNUP_MONEY, starterPending: true });
+                useGame.setState({ money: SIGNUP_MONEY, starterPending: true, onboard: true, background: null });
                 return setProfile({ id: d.profile.id, name, username, look, email: d.profile.email });
               }
               const r = await requestCode(email, "signup", username);
@@ -303,7 +307,7 @@ export default function WorldClient() {
                 const v = await verifyCode(email, "", { name, look, username, password });
                 setSigningUp(false);
                 if (!v.ok) return setSignupError(v.error);
-                if (v.profile.isNew) useGame.setState({ money: SIGNUP_MONEY, starterPending: true });
+                if (v.profile.isNew) useGame.setState({ money: SIGNUP_MONEY, starterPending: true, onboard: true, background: null });
                 return setProfile({ id: v.profile.id, name: v.profile.name, username: v.profile.username ?? username, look: v.profile.look ?? look, email: v.profile.email });
               }
               setSigningUp(false);

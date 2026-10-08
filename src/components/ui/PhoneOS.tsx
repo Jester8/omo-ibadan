@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { X, BatteryFull, Briefcase, ChevronLeft, DoorOpen, Landmark, HeartHandshake, HelpCircle, ListChecks, MapPin, MessageCircle, Music2, Newspaper, Phone, Plane, Search, ShoppingBag, Signal, Store, Wifi } from "lucide-react";
 import { eventsAt } from "@/lib/events";
@@ -8,8 +8,9 @@ import { useClock } from "@/lib/hooks";
 import { NEWS } from "@/lib/news";
 import { PLACES } from "@/lib/places";
 import { me } from "@/lib/playerState";
-import { naira } from "@/lib/plots";
 import { useGame } from "@/lib/store";
+import { relationOf, roleOf, ROLES, type FamilyRole } from "@/lib/family";
+import { answerFamily, askFamily, leaveFamily, loadFamily } from "@/lib/social";
 import { formatClock } from "@/lib/time";
 import { CAMPUS_PLACES } from "@/lib/world";
 import GuideSheet from "./GuideSheet";
@@ -122,67 +123,158 @@ function MapsApp() {
   );
 }
 
-const FAMILY = [
-  { id: "mummy", name: "Mummy", emoji: "👩🏾", msgs: ["Have you eaten? Don't skip meals o.", "I'm praying for you. Greet your landlord.", "Don't stay out late. Ibadan is not Lagos but still."], gift: "Send ₦5,000 to Mummy", rep: 1 },
-  { id: "bola", name: "Sis Bola", emoji: "👩🏽", msgs: ["Are you coming to the owambe on Saturday?", "That your agbada is old school. Let's go shopping.", "I got the job! Celebrate me."], gift: "Send ₦5,000 to Bola", rep: 0 },
-  { id: "tayo", name: "Bro Tayo", emoji: "🧑🏿", msgs: ["Abeg, can you borrow me small money? 😅", "Shooting Stars will win. Bet?", "I saw you with that girl o. I will tell Mummy!"], gift: "Send ₦5,000 to Tayo", rep: 0 },
-];
-const cooldown = new Map<string, number>();
-
-/** Run `fn` unless the same action was done in the last 45 seconds. */
-function tryAct(key: string, fn: () => void, tooSoon: () => void) {
-  if (Date.now() < (cooldown.get(key) ?? 0)) return tooSoon();
-  cooldown.set(key, Date.now() + 45_000);
-  fn();
-}
-
+/** Everyone starts with no family. Ask a friend to be your dad, mum or sibling; they have to accept. */
 function FamilyApp() {
-  const { hour } = useClock();
-  const money = useGame((s) => s.money);
+  const family = useGame((s) => s.family);
+  const friends = useGame((s) => s.friends);
+  const [adding, setAdding] = useState(false);
+  const [role, setRole] = useState<FamilyRole>("dad");
   const [note, setNote] = useState("");
-  const act = (id: string, fn: () => void, label: string) => tryAct(`${id}:${label}`, fn, () => setNote("Give them a little time to reply."));
+  const [busy, setBusy] = useState<string | null>(null);
+
+  useEffect(() => {
+    void loadFamily();
+  }, []);
+
+  const linked = new Set([...family.members, ...family.incoming, ...family.outgoing].map((p) => p.pid));
+  const askable = friends.filter((f) => !linked.has(f.pid));
+  // one dad and one mum: taken once someone is, or has been asked to be
+  const taken = (r: FamilyRole) => r !== "sibling" && (family.members.some((m) => m.relation === r) || family.outgoing.some((o) => o.role === r));
+  const roleChoice = taken(role) ? (ROLES.find((r) => !taken(r.id))?.id ?? "sibling") : role;
+
+  const ask = async (pid: string) => {
+    setBusy(pid);
+    const r = await askFamily(pid, roleChoice);
+    setBusy(null);
+    setNote(r.message);
+    if (r.ok) setAdding(false);
+  };
+  const who = (p: { name: string; username?: string | null }) => (
+    <span className="min-w-0 flex-1">
+      <span className="block truncate text-sm font-bold">{p.name}</span>
+      {p.username && <span className="block truncate text-[11px] font-semibold text-stone-400">@{p.username}</span>}
+    </span>
+  );
+  const pill = "rounded-full px-3 py-1.5 text-xs font-bold transition active:scale-95";
+
   return (
     <>
       <h3 className="text-xl font-extrabold tracking-tight">Family</h3>
-      <p className="text-xs text-stone-500">The people who miss you, and want to be sure you&apos;ve eaten.</p>
+      <p className="text-xs text-stone-500">Real people, not characters. Ask a friend to be your dad, mum or sibling, and they have to say yes.</p>
       {note && <p className="mt-2 rounded-xl bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">{note}</p>}
-      <ul className="mt-3 space-y-3">
-        {FAMILY.map((f) => (
-          <li key={f.id} className="rounded-2xl bg-white p-4 ring-1 ring-black/5">
-            <p className="text-sm font-bold">
-              <span className="mr-1.5 text-lg">{f.emoji}</span>
-              {f.name}
-            </p>
-            <p className="mt-2 rounded-2xl rounded-tl-sm bg-stone-100 px-3.5 py-2 text-[13px] text-stone-700">{f.msgs[Math.floor(hour) % f.msgs.length]}</p>
-            <div className="mt-3 flex gap-2">
-              <button
-                onClick={() =>
-                  act(f.id, () => {
-                    useGame.getState().adjustNeeds({ social: 10 });
-                    setNote(`${f.name}: “Ah, my pikin! E se o.” +10 social`);
-                  }, "reply")
-                }
-                className="flex-1 rounded-xl bg-stone-900 py-2 text-xs font-bold text-white transition active:scale-95"
-              >
-                Reply & chat
+
+      {family.incoming.length > 0 && (
+        <>
+          <p className="mb-2 mt-4 text-[11px] font-semibold uppercase tracking-wider text-stone-400">Asking you</p>
+          <ul className="space-y-2">
+            {family.incoming.map((a) => (
+              <li key={a.pid} className="flex items-center gap-3 rounded-2xl bg-white p-3 ring-1 ring-black/5">
+                <span className="grid size-10 shrink-0 place-items-center rounded-full bg-orange-100 text-xl">{roleOf(a.role).emoji}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-bold">{a.name}</span>
+                  <span className="block text-[11px] text-stone-500">wants you to be their {roleOf(a.role).label.toLowerCase()}</span>
+                </span>
+                <button onClick={() => void answerFamily(a.pid, false)} className={`${pill} bg-stone-100 text-stone-700`}>
+                  Not yet
+                </button>
+                <button onClick={() => void answerFamily(a.pid, true)} className={`${pill} bg-emerald-600 text-white`}>
+                  Yes
+                </button>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      <p className="mb-2 mt-4 text-[11px] font-semibold uppercase tracking-wider text-stone-400">Your family</p>
+      {family.members.length === 0 ? (
+        <div className="rounded-2xl bg-white p-5 text-center ring-1 ring-black/5">
+          <p className="text-3xl">🫥</p>
+          <p className="mt-1 text-sm font-bold">No family yet</p>
+          <p className="mt-1 text-xs text-stone-500">You start on your own. Ask a friend to be your dad, mum or sibling.</p>
+        </div>
+      ) : (
+        <ul className="space-y-2">
+          {family.members.map((m) => (
+            <li key={m.pid} className="flex items-center gap-3 rounded-2xl bg-white p-3 ring-1 ring-black/5">
+              <span className="relative grid size-10 shrink-0 place-items-center rounded-full bg-orange-100 text-xl">
+                {relationOf(m.relation).emoji}
+                {m.online && <span className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full bg-emerald-500 ring-2 ring-white" />}
+              </span>
+              {who(m)}
+              <span className="rounded-full bg-orange-50 px-2.5 py-1 text-[11px] font-bold text-orange-700">{relationOf(m.relation).label}</span>
+              <button onClick={() => void leaveFamily(m.pid)} className="rounded-full px-2 py-1 text-[11px] font-semibold text-stone-400 transition hover:bg-stone-100 hover:text-stone-700">
+                Remove
               </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {family.outgoing.length > 0 && (
+        <>
+          <p className="mb-2 mt-4 text-[11px] font-semibold uppercase tracking-wider text-stone-400">Waiting for an answer</p>
+          <ul className="space-y-2">
+            {family.outgoing.map((o) => (
+              <li key={o.pid} className="flex items-center gap-3 rounded-2xl bg-stone-50 p-3 ring-1 ring-black/5">
+                <span className="grid size-10 shrink-0 place-items-center rounded-full bg-stone-200 text-xl">{roleOf(o.role).emoji}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-bold">{o.name}</span>
+                  <span className="block text-[11px] text-stone-500">asked to be your {roleOf(o.role).label.toLowerCase()}</span>
+                </span>
+                <button onClick={() => void leaveFamily(o.pid)} className={`${pill} bg-stone-200 text-stone-700`}>
+                  Cancel
+                </button>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      {!adding ? (
+        <button onClick={() => setAdding(true)} className="mt-4 w-full rounded-2xl bg-stone-900 py-3 text-sm font-bold text-white transition active:scale-[0.98]">
+          Add family
+        </button>
+      ) : (
+        <div className="mt-4 rounded-2xl bg-white p-4 ring-1 ring-black/5">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-bold">Ask a friend to be your…</p>
+            <button onClick={() => setAdding(false)} className="text-xs font-semibold text-stone-400 hover:text-stone-700">
+              Close
+            </button>
+          </div>
+          <div className="mt-2 flex gap-2">
+            {ROLES.map((r) => (
               <button
-                disabled={money < 5000}
-                onClick={() =>
-                  act(f.id, () => {
-                    useGame.setState((s) => ({ money: s.money - 5000, rep: s.rep + f.rep }));
-                    useGame.getState().adjustNeeds({ social: 14, fun: 4 });
-                    setNote(`${f.name} is so happy. “God bless you!” +14 social${f.rep ? `, +${f.rep} rep` : ""}`);
-                  }, "gift")
-                }
-                className="flex-1 rounded-xl bg-emerald-600 py-2 text-xs font-bold text-white transition active:scale-95 disabled:opacity-40"
+                key={r.id}
+                disabled={taken(r.id)}
+                onClick={() => setRole(r.id)}
+                className={`flex-1 rounded-xl py-2 text-xs font-bold transition active:scale-95 disabled:opacity-35 ${roleChoice === r.id ? "bg-orange-500 text-white" : "bg-stone-100 text-stone-700"}`}
               >
-                {f.gift.replace("₦5,000", naira(5000))}
+                {r.emoji} {r.label}
               </button>
-            </div>
-          </li>
-        ))}
-      </ul>
+            ))}
+          </div>
+          {askable.length === 0 ? (
+            <p className="mt-3 rounded-xl bg-stone-50 px-3 py-2.5 text-xs text-stone-500">{friends.length === 0 ? "You need friends first. Add some from the Friends tab, then come back." : "All your friends are already family, or have a request waiting."}</p>
+          ) : (
+            <ul className="mt-3 max-h-56 space-y-1.5 overflow-y-auto">
+              {askable.map((f) => (
+                <li key={f.pid} className="flex items-center gap-3 rounded-xl bg-stone-50 px-3 py-2">
+                  <span className="relative grid size-8 shrink-0 place-items-center rounded-full bg-amber-500 text-sm font-bold text-white">
+                    {f.name.slice(0, 1).toUpperCase()}
+                    {f.online && <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-emerald-500 ring-2 ring-stone-50" />}
+                  </span>
+                  {who(f)}
+                  <button disabled={busy === f.pid} onClick={() => void ask(f.pid)} className={`${pill} bg-orange-500 text-white disabled:opacity-50`}>
+                    {busy === f.pid ? "Asking…" : "Ask"}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
     </>
   );
 }

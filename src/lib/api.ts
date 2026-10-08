@@ -204,7 +204,7 @@ export async function signOut() {
 
 const snapshot = () => {
   const s = useGame.getState();
-  return { money: s.money, rep: s.rep, needs: s.needs, questsDone: s.questsDone, cars: s.cars, activeCar: s.activeCar, romance: s.romance, stats: s.stats };
+  return { money: s.money, rep: s.rep, needs: s.needs, questsDone: s.questsDone, cars: s.cars, activeCar: s.activeCar, romance: s.romance, stats: s.stats, background: s.background };
 };
 
 /** Upload the player's progress. Quietly does nothing when the server is unreachable. */
@@ -259,7 +259,7 @@ export async function pullState() {
     }
     if (!firstTime && updatedAt <= s.savedAt + 60_000) return;
     markSynced(pid);
-    useGame.setState({ money: state.money, rep: state.rep, needs: { ...s.needs, ...state.needs }, questsDone: state.questsDone, cars: state.cars, activeCar: state.activeCar, romance: { ...s.romance, ...state.romance }, stats: { ...s.stats, ...state.stats } });
+    useGame.setState({ money: state.money, rep: state.rep, needs: { ...s.needs, ...state.needs }, questsDone: state.questsDone, cars: state.cars, activeCar: state.activeCar, romance: { ...s.romance, ...state.romance }, stats: { ...s.stats, ...state.stats }, background: state.background ?? s.background, onboard: state.background ? false : s.onboard });
     if (firstTime) s.toast("Welcome back! Your progress is restored.", "good");
     else s.toast("Progress restored from the cloud.", "info");
   } catch {

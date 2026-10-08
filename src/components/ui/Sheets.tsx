@@ -21,6 +21,7 @@ import CallAlerts from "./CallAlerts";
 import PhoneOS, { type AppId } from "./PhoneOS";
 import FriendsTabs from "./FriendsTabs";
 import { useSound } from "@/lib/soundStore";
+import { decide, hobbyById, jobById, pathById } from "@/lib/background";
 import { THEME_SONG } from "@/lib/themeSong";
 
 /**
@@ -370,6 +371,9 @@ function ProfileSheet() {
   const plots = useGame((s) => s.plots);
   const owned = ownedBy(plots, profile.id);
   const prog = titleProgress(rep);
+  const bg = useGame((s) => s.background);
+  const path = pathById(bg?.path);
+  const story = bg && path ? { path, job: jobById(bg.job), hobby: hobbyById(bg.hobby), verdict: decide(bg.path, bg.job, bg.hobby) } : null;
   const muted = useGame((s) => s.muted);
   const clearMuted = useGame((s) => s.clearMuted);
 
@@ -417,6 +421,19 @@ function ProfileSheet() {
           <p className="text-[11px] font-semibold uppercase tracking-wide text-stone-400">Plots owned</p>
         </div>
       </div>
+
+      {story && (
+        <div className="mt-4 rounded-2xl bg-stone-50 p-4 ring-1 ring-black/5">
+          <p className="text-xs font-semibold uppercase tracking-wider text-stone-400">Your story</p>
+          <p className="mt-1.5 text-base font-extrabold text-stone-900">
+            {story.path.emoji} {story.path.id === "nepo" ? "Nepo baby" : "Lapo"} <span className="font-semibold text-stone-500">· {story.verdict.wealthLabel.replace("From a ", "").replace(" family", "")} roots</span>
+          </p>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {story.job && <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-stone-700 ring-1 ring-black/5">{story.job.emoji} {story.job.label}</span>}
+            {story.hobby && <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-stone-700 ring-1 ring-black/5">{story.hobby.emoji} {story.hobby.label}</span>}
+          </div>
+        </div>
+      )}
 
       {owned.length > 0 && (
         <>

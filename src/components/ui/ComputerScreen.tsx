@@ -167,7 +167,7 @@ export default function ComputerScreen() {
                         {app === "mail" && (
                           <ul className="space-y-2">
                             {[
-                              { from: "Mummy", subj: "Have you eaten?", body: "Please eat well o. And call your aunty." },
+                              { from: "Ibadan Eats", subj: "Have you eaten?", body: "Mama Put, Mr Biggs and Chicken Republic are open. Tap the map." },
                               { from: "Landlord", subj: rent > 0 ? `Rent from your houses: ${naira(rent)}` : "Welcome, landlord", body: rent > 0 ? "Your tenants have paid. Collect it from your plot." : "Buy land and build to start collecting rent." },
                               { from: "Oyo State Govt", subj: "Governor election is on", body: "Run, or vote. Open the Landmark icon in the menu." },
                               { from: "Ibadan Autos", subj: "New arrivals", body: "Corolla, RX 350 and G-Wagon on the lot. Tap the car icon." },

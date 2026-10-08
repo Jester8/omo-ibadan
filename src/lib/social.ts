@@ -1,6 +1,7 @@
 import { apiBase, ensureToken } from "./api";
 import type { Look } from "./look";
 import { useGame } from "./store";
+import type { Family, FamilyRole } from "./family";
 
 export type Person = { pid: string; name: string; username?: string | null; look: Look | null; online?: boolean; level?: string };
 export type Thread = Person & { unread: number; last: { text: string; at: number; mine: boolean } };
@@ -94,4 +95,29 @@ export type Profile = Person & { friendship: "none" | "friends" | "sent" | "rece
 export async function playerProfile(pid: string): Promise<Profile | null> {
   const r = await call<Profile>("GET", `/api/players/${pid}`);
   return r.data;
+}
+
+/** Reload your family: the people who said yes, and requests waiting either way. */
+export async function loadFamily() {
+  const r = await call<Family>("GET", "/api/family");
+  if (r.data) useGame.setState({ family: r.data });
+}
+
+/** Ask a friend to be your dad, mum or sibling. They have to accept. */
+export async function askFamily(pid: string, role: FamilyRole): Promise<{ ok: boolean; message: string }> {
+  const r = await call<{ status?: string; error?: string }>("POST", "/api/family/request", { pid, role });
+  if (!r.ok) return { ok: false, message: r.data?.error ?? "Could not send the request." };
+  await loadFamily();
+  return { ok: true, message: "Request sent. Waiting for them to answer." };
+}
+
+export async function answerFamily(pid: string, accept: boolean) {
+  await call("POST", "/api/family/respond", { pid, accept });
+  await loadFamily();
+}
+
+/** Leave a family link, or take back a request you sent. */
+export async function leaveFamily(pid: string) {
+  await call("DELETE", `/api/family/${pid}`);
+  await loadFamily();
 }

@@ -20,6 +20,8 @@ import { titleIndex, TITLES } from "./titles";
 import { boost } from "./playerState";
 import { rebuildGrid } from "./pathing";
 import { EMPTY_STATS, QUESTS, type Stats } from "./quests";
+import type { Background } from "./background";
+import { NO_FAMILY, type Family } from "./family";
 
 export type Profile = { id: string; name: string; username?: string; look: Look; email?: string };
 export type Toast = { id: number; text: string; tone: "good" | "bad" | "info" };
@@ -97,6 +99,10 @@ type State = {
   questsDone: string[];
   muted: string[];
   savedAt: number;
+  /** nepo or lapo, the work and the hobby chosen at sign-up; null for older accounts */
+  background: Background | null;
+  /** a brand-new account has not finished the sign-up questions yet */
+  onboard: boolean;
 
   // session
   awaySecs: number;
@@ -175,6 +181,8 @@ type State = {
   starterPending: boolean;
   /** inside a room, the panel has been closed (a small button brings it back) */
   panelHidden: boolean;
+  /** your family: real players who said yes. Empty until you ask a friend and they accept (session, the server holds it) */
+  family: Family;
   /** friends asking to get closer, waiting for your answer */
   relAsks: { from: string; name: string; level: string }[];
   /** what other people in the room are doing right now (cooking, eating...), by connection id */
@@ -234,6 +242,8 @@ export const useGame = create<State>()(
       questsDone: [],
       muted: [],
       savedAt: 0,
+      background: null,
+      onboard: false,
       awaySecs: 0,
       interior: null,
       fade: false,
@@ -356,6 +366,7 @@ export const useGame = create<State>()(
       knocks: [],
       starterPending: false,
       panelHidden: false,
+      family: NO_FAMILY,
       relAsks: [],
       doing: {},
       netQuality: "good",
@@ -628,6 +639,8 @@ export const useGame = create<State>()(
         questsDone: s.questsDone,
         muted: s.muted,
         savedAt: s.savedAt,
+        background: s.background,
+        onboard: s.onboard,
         pantry: s.pantry,
         plates: s.plates,
         dishes: s.dishes,

@@ -12,11 +12,13 @@ const KEY = "omo-ibadan-tour-v2";
 export default function GuideTour() {
   const pid = useGame((s) => s.profile?.id);
   const hasProfile = !!pid;
+  // a new account answers the sign-up questions first
+  const onboard = useGame((s) => s.onboard);
   const [open, setOpen] = useState(false);
   const [i, setI] = useState(0);
 
   useEffect(() => {
-    if (!hasProfile) return;
+    if (!hasProfile || onboard) return;
     try {
       if (localStorage.getItem(`${KEY}:${pid}`)) return;
     } catch {
@@ -24,7 +26,7 @@ export default function GuideTour() {
     }
     const t = setTimeout(() => setOpen(true), 1400);
     return () => clearTimeout(t);
-  }, [hasProfile, pid]);
+  }, [hasProfile, pid, onboard]);
 
   const done = () => {
     setOpen(false);
