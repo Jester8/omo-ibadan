@@ -51,6 +51,7 @@ export const TOPICS: Topic[] = [
   { id: "view", emoji: "👁️", title: "Clean view and settings", lines: [
     "The eye button at the top right hides the whole menu. Tap it again to bring it back.",
     "In Me you can switch between Auto, Day and Night, show only locations, turn sound on or off and open Music & sounds.",
+    "In Music & sounds, the Spotify tab plays your own Spotify playlist: paste its link and it follows you around the city. Only you hear it.",
     "Tap the profile card's small arrow to fold it away.",
   ] },
   { id: "lost", emoji: "🧭", title: "Feeling lost?", lines: [

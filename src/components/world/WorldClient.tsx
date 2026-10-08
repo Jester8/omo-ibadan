@@ -8,6 +8,7 @@ import Hud from "@/components/ui/Hud";
 import SidePanel from "@/components/ui/PlacePanel";
 import BottomBar from "@/components/ui/BottomBar";
 import NowPlaying from "@/components/ui/NowPlaying";
+import SpotifyDock from "@/components/ui/SpotifyDock";
 import Minimap from "@/components/ui/Minimap";
 import ViewControls from "@/components/ui/ViewControls";
 import AudioBridge from "@/components/ui/AudioBridge";
@@ -226,6 +227,7 @@ export default function WorldClient() {
           <GuideTour />
           {!hideIcons && <BottomBar />}
           {!hideIcons && <NowPlaying />}
+          <SpotifyDock />
           <VoiceBar />
           {!hideIcons && <Minimap />}
           {!hideIcons && <ViewControls />}

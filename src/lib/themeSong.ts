@@ -1,6 +1,7 @@
 import { audio } from "./audio";
 import { useMusic } from "./music";
 import { useSound } from "./soundStore";
+import { useSpotify } from "./spotify";
 
 /**
  * The city's theme song, played (with permission) from the landing page onwards, looping.
@@ -25,7 +26,8 @@ let blocked = false;
 let fadeTimer: ReturnType<typeof setTimeout> | null = null;
 let rampTimer: ReturnType<typeof setInterval> | null = null;
 
-const wanted = () => started && !audio.settings.muted && audio.settings.theme && !document.hidden && !useMusic.getState().playing;
+// it also steps aside while the player is playing their own Spotify playlist
+const wanted = () => started && !audio.settings.muted && audio.settings.theme && !document.hidden && !useMusic.getState().playing && !useSpotify.getState().playing;
 
 let routed = false;
 
@@ -174,6 +176,13 @@ if (typeof window !== "undefined") {
   useMusic.subscribe((s) => {
     if (s.playing !== artist) {
       artist = s.playing;
+      sync();
+    }
+  });
+  let spotify = useSpotify.getState().playing;
+  useSpotify.subscribe((s) => {
+    if (s.playing !== spotify) {
+      spotify = s.playing;
       sync();
     }
   });
