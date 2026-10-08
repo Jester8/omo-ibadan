@@ -5,7 +5,7 @@ import { Map as MapIcon, X } from "lucide-react";
 import { cam, me, remoteMotion } from "@/lib/playerState";
 import { KIND_COLORS, PLACES } from "@/lib/places";
 import { PLOTS } from "@/lib/plots";
-import { CAMPUS_PLACES, ROAD_LINES, WORLD_HALF } from "@/lib/world";
+import { AD_PLAZA, CAMPUS_PLACES, ROAD_LINES, WORLD_HALF } from "@/lib/world";
 import { colorFor } from "@/lib/look";
 import { useGame } from "@/lib/store";
 import { walkTo } from "@/lib/movement";
@@ -125,6 +125,9 @@ function MinimapCanvas() {
           ctx.stroke();
         }
       }
+      // the Ad Plaza
+      ctx.fillStyle = "#fbbf24";
+      ctx.fillRect(AD_PLAZA.x - 1.7, AD_PLAZA.z - 1.7, 3.4, 3.4);
       ctx.fillStyle = "#6366f1";
       for (const r of remoteMotion.values()) {
         ctx.beginPath();

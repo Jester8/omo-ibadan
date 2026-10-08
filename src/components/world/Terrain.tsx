@@ -3,7 +3,7 @@
 import Skyline from "./Skyline";
 import Roofscape from "./Roofscape";
 import TrafficLights from "./TrafficLights";
-import { BLOCKS, ESTATES, HILLS, ROAD_LINES, WORLD_HALF, inLake } from "@/lib/world";
+import { AD_PLAZA, BLOCKS, ESTATES, HILLS, ROAD_LINES, WORLD_HALF, inLake } from "@/lib/world";
 import { me, remoteMotion, traffic } from "@/lib/playerState";
 import { junctionNear, lightAt } from "@/lib/traffic";
 import { useGame } from "@/lib/store";
@@ -83,6 +83,8 @@ function makeTrees() {
     ...PLOTS.map((p) => ({ x: p.pos[0], z: p.pos[1], hw: PLOT_SIZE / 2 + 0.4, hd: PLOT_SIZE / 2 + 0.4 })),
     // the estates plant their own parks and clubhouses
     ...ESTATES.flatMap((e) => [e.park, e.club].map((c) => ({ x: c[0], z: c[1], hw: 4.3, hd: 4.3 }))),
+    // the Ad Plaza is paved
+    { x: AD_PLAZA.x, z: AD_PLAZA.z, hw: AD_PLAZA.half + 0.3, hd: AD_PLAZA.half + 0.3 },
   ];
   let seed = 42;
   const rnd = () => {

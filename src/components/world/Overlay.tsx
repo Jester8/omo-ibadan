@@ -17,7 +17,8 @@ import { rt, walkToExit } from "@/lib/interiorRuntime";
 import { TAG_Y } from "./Player";
 import { useHour } from "@/lib/hooks";
 import { isOpen } from "@/lib/events";
-import { CAMPUS_PLACES } from "@/lib/world";
+import { AD_PLAZA, CAMPUS_PLACES } from "@/lib/world";
+import { walkTo } from "@/lib/movement";
 
 function Anchored({
   id,
@@ -81,6 +82,25 @@ function PlaceLabels() {
         );
       })}
     </>
+  );
+}
+
+/** The Ad Plaza is not a building you enter, so it has its own little label: tap it to walk there. */
+function PlazaLabel() {
+  const [phone] = useState(() => typeof window !== "undefined" && window.innerWidth < 640);
+  return (
+    <Anchored id="landmark:adplaza" get={(o) => o.set(AD_PLAZA.x, 1.2, AD_PLAZA.z)} maxCam={phone ? 38 : 46} maxDist={phone ? 26 : 38}>
+      <button
+        onClick={() => {
+          useGame.getState().select(null);
+          walkTo(AD_PLAZA.x, AD_PLAZA.z + AD_PLAZA.half + 0.9);
+        }}
+        className="pointer-events-auto flex items-center gap-1.5 whitespace-nowrap rounded-full bg-amber-400 px-3 py-1.5 text-[13px] font-semibold text-stone-900 shadow-lg ring-1 ring-black/10 backdrop-blur transition-all duration-300 hover:scale-105 max-sm:gap-1 max-sm:px-2 max-sm:py-1 max-sm:text-[10.5px]"
+      >
+        <span>📢</span>
+        {AD_PLAZA.name}
+      </button>
+    </Anchored>
   );
 }
 
@@ -211,6 +231,7 @@ export default function Overlay() {
           <DistrictLabels />
           <PlotLabels />
           <PlaceLabels />
+          <PlazaLabel />
         </>
       )}
       <PeopleTags />

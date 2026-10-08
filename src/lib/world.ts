@@ -8,6 +8,9 @@ export const BLOCKS: { c: [number, number]; tint: string }[] = BLOCK_CENTERS.fla
   BLOCK_CENTERS.map((cx, i) => ({ c: [cx, cz] as [number, number], tint: TINTS[(i * 5 + j * 3) % TINTS.length] })),
 );
 
+/** The Ad Plaza: one whole city block set aside for advertising, with the banners lying on the ground like mats. */
+export const AD_PLAZA = { name: "Ad Plaza", x: 5, z: -15, half: 4.3 };
+
 /** The ring of low hills round the city. Terrain draws them; the far billboards stand on some of them. */
 export const HILLS: { x: number; z: number; r: number; h: number; c: string }[] = Array.from({ length: 44 }, (_, i) => {
   const a = (i / 44) * Math.PI * 2;

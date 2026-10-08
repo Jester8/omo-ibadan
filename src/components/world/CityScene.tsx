@@ -12,7 +12,7 @@ import CabRanks from "./CabRanks";
 import PlotsLayer from "./PlotsLayer";
 import Player from "./Player";
 import { RemotePlayers } from "./People";
-import AdBoards from "./AdBoards";
+import AdPlaza from "./AdPlaza";
 import Billboards from "./Billboards";
 import { anchors } from "@/lib/overlay";
 import { cam, me } from "@/lib/playerState";
@@ -160,7 +160,7 @@ function WorldContent() {
       <Buildings />
       <Gates />
       <Estates />
-      <AdBoards />
+      <AdPlaza />
       {!placesOnly && <Billboards />}
       <CabRanks />
       {!placesOnly && <PlotsLayer />}
