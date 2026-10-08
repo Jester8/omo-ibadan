@@ -6,7 +6,7 @@ import { DoorOpen, Lightbulb, X, ZapOff } from "lucide-react";
 import { PLACES } from "@/lib/places";
 import { useGame } from "@/lib/store";
 import { useClock } from "@/lib/hooks";
-import { exitInterior, GENERATOR_FUEL, powerOn, rt, walkToFurn } from "@/lib/interiorRuntime";
+import { climbTower, exitInterior, GENERATOR_FUEL, powerOn, rt, walkToFurn } from "@/lib/interiorRuntime";
 import { naira, plotById } from "@/lib/plots";
 import { ActionRow, VoiceRoomCard } from "./parts";
 import HereNow from "./HereNow";
@@ -151,6 +151,8 @@ export default function InteriorPanel() {
                 enabled={!busy}
                 onRun={() => {
                   if (place.id === "airport" && (a.id === "book" || a.id === "board")) return useGame.getState().setSheet("flights");
+                  // the tower's stairs: pay, climb, and arrive on the viewing deck
+                  if (a.id === "climb") return climbTower();
                   const err = useGame.getState().runAction(a);
                   if (err) useGame.getState().toast(err, "bad");
                 }}

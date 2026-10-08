@@ -421,7 +421,7 @@ export const useGame = create<State>()(
         if (a.plates && a.plates < 0 && a.dish && (s.dishes[a.dish] ?? 0) < -a.plates) return "You have not got that dish. Cook it or order it first.";
         if (a.minRep && s.rep < a.minRep) return `Needs ${a.minRep} reputation (${TITLES[titleIndex(a.minRep)].name}).`;
         if (a.cost && s.money < a.cost) return `You need ${naira(a.cost)}.`;
-        if (a.gain?.energy && a.gain.energy < 0 && s.needs.energy + a.gain.energy < 0) return "Too tired. Eat or rest first.";
+        if (a.gain?.energy && a.gain.energy < 0 && s.needs.energy + a.gain.energy < 0) return `Too tired (energy ${Math.round(s.needs.energy)}%). Eating will not fix it: sleep at home, rest in a ward or sit and relax first.`;
         if (s.atPlace && !isOpen(s.atPlace, gameMinutes(Date.now(), s.clockOverride) / 60)) return `Closed for now. Opens at ${opensAt(s.atPlace)}.`;
         const policy = s.election?.governor?.policy;
         const price = (a.cost ?? 0) * (policy === "food" && (a.gain?.hunger ?? 0) > 0 ? 0.8 : 1);
