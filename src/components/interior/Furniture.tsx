@@ -6,72 +6,12 @@ import * as THREE from "three";
 import { FURN } from "@/lib/furniture";
 import type { Item } from "@/lib/interiors";
 import { mat } from "@/components/world/materials";
-import { adireTexture } from "./textures";
 import { interiorState } from "./power";
 
-type V3 = [number, number, number];
+import { Bx, Cy, DARK, LIGHT, METAL, Sp, WHITE, WOOD, artMat, glass, glow, Legs, water } from "./prims";
+import { EXTRA_BODIES } from "./extras";
 
-const WOOD = "#8a5a3c";
-const DARK = "#5a3a24";
-const LIGHT = "#b8895a";
-const METAL = "#8c9096";
-const WHITE = "#efece4";
-
-/* ---- glowing materials, dimmed centrally by the interior scene ---- */
-export const glow = {
-  screen: new THREE.MeshStandardMaterial({ color: "#1b2a3a", emissive: new THREE.Color("#8fc8ff"), emissiveIntensity: 0, roughness: 0.3 }),
-  bulb: new THREE.MeshStandardMaterial({ color: "#fff4d6", emissive: new THREE.Color("#ffd98a"), emissiveIntensity: 0, roughness: 0.4 }),
-  lantern: new THREE.MeshStandardMaterial({ color: "#ffe2a8", emissive: new THREE.Color("#ffb347"), emissiveIntensity: 0.4, roughness: 0.4, transparent: true, opacity: 0.9 }),
-  neon: new THREE.MeshStandardMaterial({ color: "#ffffff", emissive: new THREE.Color("#ff6fb1"), emissiveIntensity: 0, roughness: 0.4 }),
-};
-
-const glass = new THREE.MeshStandardMaterial({ color: "#bfe0f2", roughness: 0.1, metalness: 0.1, transparent: true, opacity: 0.28 });
-const water = new THREE.MeshStandardMaterial({ color: "#5fb8e6", roughness: 0.15, metalness: 0.1, transparent: true, opacity: 0.85 });
-
-const artCache = new Map<string, THREE.MeshStandardMaterial>();
-function artMat(color: string) {
-  let m = artCache.get(color);
-  if (!m) {
-    m = new THREE.MeshStandardMaterial({ map: adireTexture(color), roughness: 0.85 });
-    artCache.set(color, m);
-  }
-  return m;
-}
-
-/* ---- primitives: bottom-based boxes and cylinders ---- */
-
-function Bx({ p = [0, 0, 0], s, c, r = 0.75, rot, m }: { p?: V3; s: V3; c?: string; r?: number; rot?: V3; m?: THREE.Material }) {
-  return (
-    <mesh position={[p[0], p[1] + s[1] / 2, p[2]]} rotation={rot} material={m ?? mat(c ?? WOOD, r)} castShadow receiveShadow>
-      <boxGeometry args={s} />
-    </mesh>
-  );
-}
-
-function Cy({ p = [0, 0, 0], r, r2, h, c, seg = 18, rough = 0.75, m, rot }: { p?: V3; r: number; r2?: number; h: number; c?: string; seg?: number; rough?: number; m?: THREE.Material; rot?: V3 }) {
-  return (
-    <mesh position={[p[0], p[1] + h / 2, p[2]]} rotation={rot} material={m ?? mat(c ?? WOOD, rough)} castShadow receiveShadow>
-      <cylinderGeometry args={[r2 ?? r, r, h, seg]} />
-    </mesh>
-  );
-}
-
-function Sp({ p, r, c, sc, rough = 0.7 }: { p: V3; r: number; c: string; sc?: V3; rough?: number }) {
-  return (
-    <mesh position={p} scale={sc} material={mat(c, rough)} castShadow>
-      <sphereGeometry args={[r, 16, 12]} />
-    </mesh>
-  );
-}
-
-/** Four legs at the corners of a w x d footprint. */
-function Legs({ w, d, h, c = DARK, r = 0.025 }: { w: number; d: number; h: number; c?: string; r?: number }) {
-  return (
-    <>
-      {[-1, 1].flatMap((sx) => [-1, 1].map((sz) => <Cy key={`${sx}${sz}`} p={[sx * (w / 2 - r * 2), 0, sz * (d / 2 - r * 2)]} r={r} h={h} c={c} seg={8} />))}
-    </>
-  );
-}
+export { glow };
 
 /* ---- animated bits ---- */
 
@@ -1012,8 +952,11 @@ function Body({ item, W, D, c, c2 }: { item: Item; W: number; D: number; c: stri
           {[-1, 1].map((s) => <Bx key={s} p={[s * (W / 4), 0.02, 0.05]} s={[W / 2 - 0.02, H - 0.05, 0.02]} c="#b8bcc2" r={0.3} />)}
         </>
       );
-    default:
-      return <Bx s={[W, H || 0.5, D]} c={WOOD} />;
+    default: {
+      const Extra = EXTRA_BODIES[item.kind];
+      // rendered as a component so a renderer can use hooks (animation) of its own
+      return Extra ? <Extra item={item} W={W} D={D} H={H} c={c} c2={c2} /> : <Bx s={[W, H || 0.5, D]} c={WOOD} />;
+    }
   }
 }
 

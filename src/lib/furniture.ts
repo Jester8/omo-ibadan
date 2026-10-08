@@ -14,7 +14,13 @@ export type FurnKind =
   | "mortar" | "calabash" | "ibeji" | "mannequin" | "carvedstool" | "gascooker" | "radio" | "sewingmachine" | "meterbox" | "calendar" | "provisions" | "cooler" | "watertank" | "agbadastand"
   | "treadmill" | "dumbbells" | "weightbench" | "punchingbag" | "exercisebike" | "yogamat" | "gymmirror"
   | "salonchair" | "dryer" | "mirrorstation" | "espresso" | "menuboard" | "medshelf" | "scale" | "trolley" | "freezer"
-  | "curtain" | "flag" | "trophycase" | "goalpost" | "ticketbooth" | "tank" | "stairs" | "wallart" | "clock" | "pitch" | "liftdoor";
+  | "curtain" | "flag" | "trophycase" | "goalpost" | "ticketbooth" | "tank" | "stairs" | "wallart" | "clock" | "pitch" | "liftdoor"
+  // shops and malls (drawn in bodiesRetail.tsx)
+  | "clothesrail" | "foldedshelf" | "shoeshelf" | "displaytable" | "bagwall" | "jewelrycase" | "perfumeshelf" | "electronicswall" | "gondola" | "produce" | "cashdesk" | "dressedmannequin"
+  // eateries and food counters (bodiesFood.tsx)
+  | "hotcase" | "foodcounter" | "pastrycase" | "bukapots" | "grillstand" | "drinkfridge" | "prepcounter" | "tray" | "boothseat" | "menulight"
+  // lights, signs and nightlife (bodiesLights.tsx)
+  | "tubelight" | "pendant" | "neonsign" | "signboard" | "lightstring" | "spotlight" | "discoball" | "ledfloor" | "speaker" | "djbooth" | "bottleshelf" | "vipbooth" | "wallsconce";
 
 export type Pose = "sit" | "lie";
 
@@ -211,4 +217,52 @@ export const FURN: Record<FurnKind, FurnDef> = {
   clock: { w: 0.4, d: 0.05, h: 0.4, solid: false },
   pitch: { w: 8, d: 5, h: 0.02, solid: false },
   liftdoor: { w: 1.2, d: 0.1, h: 2.1, solid: false },
+
+  /* ---- shops and malls ---- */
+  clothesrail: { w: 1.4, d: 0.7, h: 1.55, solid: true, use: { verb: "Try on clothes", action: { id: "tryclothes", label: "Try on some clothes", secs: 4, gain: { fun: 12, social: 2 } } } },
+  foldedshelf: { w: 1.4, d: 0.5, h: 1.9, solid: true },
+  shoeshelf: { w: 1.6, d: 0.45, h: 1.7, solid: true, use: { verb: "Try on shoes", action: { id: "tryshoes", label: "Try on some shoes", secs: 4, gain: { fun: 12 } } } },
+  /** a display table in the middle of a shop floor; `variant` says what is on it (shoes, bags, folded, watches, phones, perfume) */
+  displaytable: { w: 1.2, d: 1.2, h: 0.85, solid: true },
+  bagwall: { w: 1.8, d: 0.4, h: 2.0, solid: true },
+  jewelrycase: { w: 1.4, d: 0.6, h: 1.05, solid: true },
+  perfumeshelf: { w: 1.4, d: 0.45, h: 1.8, solid: true, use: { verb: "Try a perfume", action: { id: "tryperfume", label: "Try a perfume", secs: 3, gain: { fun: 8, hygiene: 2 } } } },
+  electronicswall: { w: 2.4, d: 0.3, h: 2.0, solid: true, use: { verb: "Watch the demo screens", needsPower: true, action: { id: "demotv", label: "Watch the demo screens", secs: 4, gain: { fun: 10 } } } },
+  /** a supermarket aisle shelf stocked on both sides; `variant`: snacks, drinks, cereal, cans */
+  gondola: { w: 1.8, d: 0.7, h: 1.5, solid: true },
+  /** fruit and vegetable bins; `variant`: fruit, veg */
+  produce: { w: 1.4, d: 0.8, h: 0.9, solid: true },
+  cashdesk: { w: 1.6, d: 0.75, h: 1.1, solid: true },
+  /** dressed in a full outfit; `variant`: agbada, suit, dress, ankara */
+  dressedmannequin: { w: 0.55, d: 0.5, h: 1.8, solid: true },
+
+  /* ---- eateries and food counters ---- */
+  hotcase: { w: 1.8, d: 0.7, h: 1.25, solid: true, use: { verb: "Order a plate", action: { id: "hotplate", label: "Order a plate of jollof and chicken", secs: 5, cost: 2200, gain: { hunger: 50, fun: 4 } } } },
+  foodcounter: { w: 2.4, d: 0.8, h: 1.1, solid: true, use: { verb: "Order at the counter", action: { id: "order", label: "Order a meal", secs: 5, cost: 2500, gain: { hunger: 55, fun: 5 } } } },
+  pastrycase: { w: 1.6, d: 0.7, h: 1.3, solid: true, use: { verb: "Buy a meat pie", action: { id: "pie", label: "Buy a meat pie", secs: 3, cost: 800, gain: { hunger: 22, fun: 3 } } } },
+  bukapots: { w: 2.0, d: 0.8, h: 1.05, solid: true, use: { verb: "Dish up a plate", action: { id: "bukaplate", label: "Get a plate from the pots", secs: 5, cost: 1800, gain: { hunger: 55, fun: 4 } } } },
+  grillstand: { w: 1.4, d: 0.7, h: 1.0, solid: true, use: { verb: "Buy suya", action: { id: "suya", label: "Buy fresh suya", secs: 4, cost: 1200, gain: { hunger: 28, fun: 5 } } } },
+  drinkfridge: { w: 1.0, d: 0.7, h: 2.0, solid: true, use: { verb: "Take a cold drink", needsPower: true, action: { id: "coldbottle", label: "Take a cold drink", secs: 2, cost: 400, gain: { hunger: 3, fun: 6 } } } },
+  prepcounter: { w: 2.0, d: 0.75, h: 1.0, solid: true },
+  /** a food tray to put on a table (set `y` to the table height); `variant`: burger, rice, chicken, pie */
+  tray: { w: 0.5, d: 0.35, h: 0.12, solid: false },
+  boothseat: { w: 1.8, d: 0.75, h: 1.0, solid: true, use: sit() },
+  menulight: { w: 1.8, d: 0.1, h: 0.9, solid: false },
+
+  /* ---- lights, signs and nightlife ---- */
+  tubelight: { w: 1.2, d: 0.15, h: 0, solid: false },
+  pendant: { w: 0.4, d: 0.4, h: 0, solid: false },
+  /** text sign on a wall: `label` is the text, `c` its colour */
+  neonsign: { w: 1.4, d: 0.06, h: 0.5, solid: false },
+  /** lit shop-name board: `label` is the text, `c` the board colour */
+  signboard: { w: 2.0, d: 0.1, h: 0.6, solid: false },
+  lightstring: { w: 4.0, d: 0.1, h: 0, solid: false },
+  spotlight: { w: 0.3, d: 0.3, h: 0, solid: false },
+  discoball: { w: 0.6, d: 0.6, h: 0, solid: false },
+  ledfloor: { w: 4, d: 4, h: 0.02, solid: false },
+  speaker: { w: 0.7, d: 0.6, h: 1.6, solid: true },
+  djbooth: { w: 2.6, d: 1.0, h: 1.2, solid: true },
+  bottleshelf: { w: 3.0, d: 0.35, h: 2.0, solid: true },
+  vipbooth: { w: 2.2, d: 1.0, h: 0.95, solid: true, use: sit() },
+  wallsconce: { w: 0.2, d: 0.15, h: 0, solid: false },
 };

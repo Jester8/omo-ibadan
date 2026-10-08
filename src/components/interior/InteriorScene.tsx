@@ -12,6 +12,7 @@ import { daylight, gameMinutes } from "@/lib/time";
 import { mat } from "@/components/world/materials";
 import { walkTo } from "@/lib/movement";
 import FurnitureItem, { glow } from "./Furniture";
+import { litMats } from "./prims";
 import { floorMaterial, louvreTexture } from "./textures";
 import { interiorState } from "./power";
 
@@ -60,6 +61,7 @@ function Lights({ layout }: { layout: Layout }) {
     glow.bulb.emissiveIntensity = power ? 0.7 + (1 - day) * 1.6 : 0;
     glow.neon.emissiveIntensity = power ? 1.6 : 0;
     glow.lantern.emissiveIntensity = power ? 0.25 : 1.4;
+    for (const m of litMats) m.emissiveIntensity = power ? (m.userData.on as number) : 0;
     windowMat.emissiveIntensity = 0.1 + day * 0.9;
   });
 

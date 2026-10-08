@@ -1,6 +1,9 @@
-import type { FurnKind } from "./furniture";
-import type { FloorKind, InteriorRef, Item, Layout, Wall } from "./interiors";
+import type { InteriorRef, Layout, Wall } from "./interiors";
 import { bizById } from "./business";
+import { addCeilingLights } from "./ceilingLights";
+import { FOOD_LAYOUTS } from "./layoutsFood";
+import { NIGHT_LAYOUTS } from "./layoutsNight";
+import { RETAIL_LAYOUTS } from "./layoutsRetail";
 
 /* ------------------------------------------------------------------------------------------------
  * Interior layouts, authored in metres. x spans -w/2..w/2 (left..right), z spans -d/2..d/2
@@ -9,45 +12,9 @@ import { bizById } from "./business";
  * Ibadan look: rust and terracotta walls, red-oxide cement floors, adire-indigo rugs, ceiling fans.
  * ---------------------------------------------------------------------------------------------- */
 
-const R = Math.PI;
-const H = Math.PI / 2;
+import { CREAM, COCOA, H, I, INDIGO, OCHRE, R, RUST, SAND, TEAL, W, around, col, grid, lay, row, PALETTES, type Palette } from "./layoutKit";
+export { PALETTES, type Palette };
 
-const I = (kind: FurnKind, x: number, z: number, rot = 0, o: Partial<Item> = {}): Item => ({ kind, x, z, rot, ...o });
-const W = (x1: number, z1: number, x2: number, z2: number, door?: number, doorW = 1.4): Wall => ({ x1, z1, x2, z2, door, doorW });
-const row = (kind: FurnKind, x0: number, z: number, n: number, dx: number, rot = 0, o: Partial<Item> = {}) =>
-  Array.from({ length: n }, (_, i) => I(kind, x0 + i * dx, z, rot, o));
-const col = (kind: FurnKind, x: number, z0: number, n: number, dz: number, rot = 0, o: Partial<Item> = {}) =>
-  Array.from({ length: n }, (_, i) => I(kind, x, z0 + i * dz, rot, o));
-/** n items on a circle, all facing the centre */
-const around = (kind: FurnKind, cx: number, cz: number, r: number, n: number, start = 0, o: Partial<Item> = {}) =>
-  Array.from({ length: n }, (_, i) => {
-    const a = start + (i / n) * Math.PI * 2;
-    const x = cx + Math.sin(a) * r;
-    const z = cz + Math.cos(a) * r;
-    return I(kind, x, z, Math.atan2(cx - x, cz - z), o);
-  });
-const grid = (kind: FurnKind, x0: number, z0: number, nx: number, nz: number, dx: number, dz: number, rot = 0, o: Partial<Item> = {}) =>
-  Array.from({ length: nx * nz }, (_, k) => I(kind, x0 + (k % nx) * dx, z0 + Math.floor(k / nx) * dz, rot, o));
-
-const RUST = "#b5533c";
-const OCHRE = "#d89b3c";
-const COCOA = "#6b4a2f";
-const INDIGO = "#2f3b82";
-const TEAL = "#2f8f83";
-const SAND = "#ead7b7";
-const CREAM = "#f1e4c8";
-
-export type Palette = { wall: string; trim: string; accent: string; floor: FloorKind };
-
-export const PALETTES: Palette[] = [
-  { wall: SAND, trim: "#7a4a2c", accent: RUST, floor: "redoxide" },
-  { wall: CREAM, trim: COCOA, accent: INDIGO, floor: "tile" },
-  { wall: "#d9b08c", trim: "#5a3a24", accent: OCHRE, floor: "wood" },
-  { wall: "#cfe0d0", trim: COCOA, accent: TEAL, floor: "tile" },
-  { wall: "#efe6d8", trim: "#3b2a1d", accent: "#8a2f3c", floor: "marble" },
-];
-
-const lay = (l: Omit<Layout, "light"> & { light?: Layout["light"] }): Layout => ({ light: "warm", ...l });
 
 /* ----------------------------------------------------------------------------------------------
  * Homes
@@ -253,10 +220,14 @@ function mansion(p: Palette, owner?: string): Layout {
   });
 }
 
-const FLAT_LAYOUT = flat(PALETTES[0]);
+const FLAT_LAYOUT = addCeilingLights(flat(PALETTES[0]));
 
 /** Home interior for a plot tier, styled by owner. */
 export function homeLayout(plotTier: number | "flat", ownerSeed: string, ownerName?: string): Layout {
+  return addCeilingLights(rawHomeLayout(plotTier, ownerSeed, ownerName));
+}
+
+function rawHomeLayout(plotTier: number | "flat", ownerSeed: string, ownerName?: string): Layout {
   let h = 0;
   for (let i = 0; i < ownerSeed.length; i++) h = (h * 31 + ownerSeed.charCodeAt(i)) >>> 0;
   const pal = PALETTES[h % PALETTES.length];
@@ -545,14 +516,28 @@ reuse("cathedral", "akobo-chapel", "Akobo Faith Chapel", { accent: "#7a3a1a" });
 reuse("cocoa-house", "central-bank", "Central Bank Banking Hall", { accent: "#2b4a6a" });
 reuse("mosque", "oje-mosque", "Oje Central Mosque");
 
+/* The per-area files replace the generic layouts above (and add the ones that had none). */
+Object.assign(PLACE_LAYOUTS, RETAIL_LAYOUTS, FOOD_LAYOUTS, NIGHT_LAYOUTS);
+
+const lit = new Map<string, Layout>();
+
+/** The interior of a public place, with ceiling lights added. */
 export function placeLayout(id: string): Layout | null {
-  return PLACE_LAYOUTS[id] ?? null;
+  const base = PLACE_LAYOUTS[id];
+  if (!base) return null;
+  let l = lit.get(id);
+  if (!l) lit.set(id, (l = addCeilingLights(base)));
+  return l;
 }
 
 export const ALL_PLACE_LAYOUT_IDS = Object.keys(PLACE_LAYOUTS);
 
 /** The inside of a player's business: it looks like what it is, a gym with gym equipment, a salon with chairs and mirrors... */
 export function bizLayout(bizId: string, ownerName?: string): Layout {
+  return addCeilingLights(rawBizLayout(bizId, ownerName));
+}
+
+function rawBizLayout(bizId: string, ownerName?: string): Layout {
   const b = bizById(bizId);
   const name = `${ownerName ? `${ownerName}'s ` : ""}${b?.name ?? "Shop"}`;
   const base = { name, w: 10, d: 8, wall: "#f4efe6", trim: "#3a3f48", accent: b?.color ?? "#16a34a", light: "bright" as const, exitX: 0, walls: [] as Wall[] };
