@@ -1,15 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Music2, Pause, Play, Trash2, Upload } from "lucide-react";
+import { Eye, EyeOff, Music2, Pause, Play, Trash2, Upload } from "lucide-react";
 import { play, useMusic, type PlayableTrack } from "@/lib/music";
 import { listApproved, listMine, removeTrack, submitTrack, type MyTrack } from "@/lib/tracks";
+import { parseSpotifyLink, spotifyPage, useSpotify } from "@/lib/spotify";
 
 const STATUS: Record<MyTrack["status"], string> = { pending: "Waiting for review", approved: "Live in the city", rejected: "Not approved" };
 
 /** Listen to artists' music, or share your own. The artist always keeps the copyright. */
 export default function MusicSheet() {
-  const [tab, setTab] = useState<"listen" | "share">("listen");
+  const [tab, setTab] = useState<"listen" | "spotify" | "share">("listen");
   const seg = (on: boolean) => `flex-1 rounded-xl py-2 text-sm font-semibold transition active:scale-95 ${on ? "bg-stone-900 text-white" : "bg-stone-100 text-stone-700"}`;
   return (
     <>
@@ -17,11 +18,14 @@ export default function MusicSheet() {
         <button onClick={() => setTab("listen")} className={seg(tab === "listen")}>
           Listen
         </button>
+        <button onClick={() => setTab("spotify")} className={seg(tab === "spotify")}>
+          Spotify
+        </button>
         <button onClick={() => setTab("share")} className={seg(tab === "share")}>
-          Share your music
+          Share yours
         </button>
       </div>
-      {tab === "listen" ? <Listen /> : <Share />}
+      {tab === "listen" ? <Listen /> : tab === "spotify" ? <SpotifyTab /> : <Share />}
     </>
   );
 }
@@ -63,6 +67,63 @@ function Listen() {
           );
         })}
       </ul>
+    </>
+  );
+}
+
+/** Play your own Spotify playlist in the game: paste its link, add songs in Spotify whenever you like. */
+function SpotifyTab() {
+  const link = useSpotify((s) => s.link);
+  const open = useSpotify((s) => s.open);
+  const [text, setText] = useState("");
+  const parsed = parseSpotifyLink(text);
+  const input = "w-full rounded-2xl bg-stone-100 px-4 py-2.5 text-sm outline-none ring-2 ring-transparent transition placeholder:text-stone-400 focus:bg-white focus:ring-emerald-500";
+  return (
+    <>
+      <div className="rounded-2xl bg-emerald-50 p-3.5 text-xs leading-relaxed text-emerald-950 ring-1 ring-emerald-100">
+        <p className="font-bold">Your own music, from your Spotify account.</p>
+        <p>
+          Paste a playlist link and it plays here with Spotify&apos;s own player. Add or remove songs in Spotify any time and the game shows the change the next time it loads. Only you hear it, nobody else in the city does.
+        </p>
+      </div>
+
+      {link ? (
+        <div className="mt-3 rounded-2xl bg-stone-50 p-3.5 ring-1 ring-black/5">
+          <p className="text-[11px] font-bold uppercase tracking-wide text-stone-400">Playing from</p>
+          <a href={spotifyPage(link)} target="_blank" rel="noreferrer noopener" className="mt-0.5 block truncate text-sm font-semibold text-emerald-800 underline-offset-2 hover:underline">
+            {spotifyPage(link).replace("https://", "")}
+          </a>
+          <div className="mt-3 flex gap-2">
+            <button onClick={() => useSpotify.getState().setOpen(!open)} className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-stone-900 py-2.5 text-xs font-semibold text-white transition active:scale-95">
+              {open ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />} {open ? "Hide the player" : "Show the player"}
+            </button>
+            <button onClick={() => useSpotify.getState().clear()} className="flex items-center justify-center gap-1.5 rounded-xl bg-white px-4 py-2.5 text-xs font-semibold text-rose-600 ring-1 ring-rose-200 transition active:scale-95">
+              <Trash2 className="size-3.5" /> Remove
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      <div className="mt-4 space-y-2.5">
+        <p className="text-xs font-semibold text-stone-700">{link ? "Use a different playlist" : "Add your playlist"}</p>
+        <input value={text} onChange={(e) => setText(e.target.value.slice(0, 300))} placeholder="https://open.spotify.com/playlist/…" autoCapitalize="none" autoCorrect="off" spellCheck={false} className={input} />
+        {text.trim() && !parsed && <p className="text-xs font-medium text-rose-600">That is not a Spotify link. In Spotify choose ⋯, then Share, then Copy link to playlist. Short spotify.link links do not work: use the one that starts with open.spotify.com.</p>}
+        <button
+          disabled={!parsed}
+          onClick={() => {
+            if (!parsed) return;
+            useSpotify.getState().save(parsed);
+            setText("");
+          }}
+          className="w-full rounded-2xl bg-emerald-600 py-3 text-sm font-semibold text-white transition active:scale-[0.98] disabled:opacity-40"
+        >
+          {link ? "Switch to this playlist" : "Play my playlist"}
+        </button>
+      </div>
+
+      <p className="mt-4 text-[11px] leading-relaxed text-stone-500">
+        Log in to Spotify in this browser to hear full songs; without it Spotify plays 30-second previews. Songs come from Spotify and stay Spotify&apos;s: the game does not copy or share them. Tap the green note at the top left to bring the player back after hiding it.
+      </p>
     </>
   );
 }
