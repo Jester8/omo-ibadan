@@ -9,6 +9,7 @@ export const TOPICS: Topic[] = [
     "Want the camera to circle your character on its own? Turn on Auto rotate in Me, under Quick settings.",
   ] },
   { id: "places", emoji: "🏢", title: "Places and buildings", lines: [
+    "The Ad Plaza (the yellow square on the map, beside Bodija Market) is where the ads live: banners lie on the ground like mats. Want yours there? The email is on the sign.",
     "Tap a building to see its name, address and what you can do there. On phones the names stay hidden until you tap.",
     "In the panel choose Walk here (free) or pay for an Okada, Keke or Micra and the vehicle takes you there.",
     "When you arrive, tap Go inside to enter, then tap the things you want to do. A closed place shows when it opens.",

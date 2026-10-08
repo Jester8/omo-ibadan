@@ -4,7 +4,7 @@ import { useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { PLACES } from "@/lib/places";
 import { PLOTS, PLOT_SIZE } from "@/lib/plots";
-import { BLOCKS, CAMPUS, ESTATES, inLake, inRect } from "@/lib/world";
+import { AD_PLAZA, BLOCKS, CAMPUS, ESTATES, inLake, inRect } from "@/lib/world";
 import { RANKS } from "./CabRanks";
 
 /** Ibadan's famous sea of brown corrugated roofs: small gabled houses filling the free lots. */
@@ -23,6 +23,8 @@ function build(): House[] {
     ...PLACES.map((p) => ({ x: p.pos[0], z: p.pos[1], hw: p.size[0] / 2 + 1.1, hd: p.size[2] / 2 + 1.7 })),
     ...PLOTS.map((p) => ({ x: p.pos[0], z: p.pos[1], hw: PLOT_SIZE / 2 + 0.6, hd: PLOT_SIZE / 2 + 0.6 })),
     ...RANKS.map((r) => ({ x: r.pos[0], z: r.pos[1], hw: 4.2, hd: 2 })),
+    // the Ad Plaza is paved: no houses on it
+    { x: AD_PLAZA.x, z: AD_PLAZA.z, hw: AD_PLAZA.half + 0.4, hd: AD_PLAZA.half + 0.4 },
   ];
   const out: House[] = [];
   for (const b of BLOCKS) {

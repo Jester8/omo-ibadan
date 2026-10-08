@@ -1,4 +1,4 @@
-/** Street banner ads. Edit this list to change what the roadside boards show. */
+/** Sample ads. The Ad Plaza mats and the billboards outside the city show these; edit the lists to change what they show. */
 export type Ad = { id: string; title: string; line: string; bg: string; bg2: string; fg: string };
 
 export const AD_CONTACT = "ibadangameplay@gmail.com";
@@ -28,3 +28,9 @@ export const ADS: Ad[] = [
   { id: "danfo", title: "Danfo Express", line: "Safe rides across the city, all day", bg: "#854d0e", bg2: "#eab308", fg: "#1c1917" },
   { id: "yours2", title: "ADVERTISE HERE", line: `Reach every player: ${AD_CONTACT}`, bg: "#111827", bg2: "#4b5563", fg: "#34d399" },
 ];
+
+/**
+ * What lies on each mat of the Ad Plaza, in order: the long headline mat first, then four standard mats, then four small ones.
+ * An advertiser takes a mat by replacing its "PUT YOUR ADS HERE" with their own ad here.
+ */
+export const PLAZA_MATS: Ad[] = [SLOGAN_ADS[0], ADS[1], SLOGAN_ADS[1], SLOGAN_ADS[2], ADS[3], SLOGAN_ADS[3], SLOGAN_ADS[4], ADS[6], SLOGAN_ADS[5]];
