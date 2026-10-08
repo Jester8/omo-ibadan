@@ -8,11 +8,11 @@ import Hud from "@/components/ui/Hud";
 import SidePanel from "@/components/ui/PlacePanel";
 import BottomBar from "@/components/ui/BottomBar";
 import NowPlaying from "@/components/ui/NowPlaying";
-import SpotifyDock from "@/components/ui/SpotifyDock";
+import SpotifyEngine from "@/components/ui/SpotifyEngine";
 import Minimap from "@/components/ui/Minimap";
 import ViewControls from "@/components/ui/ViewControls";
 import AudioBridge from "@/components/ui/AudioBridge";
-import { FamilyAsks, Hint, IncomingCall, Knocks, NetBanner, RelAsks, Serves, Toasts, VoiceBar } from "@/components/ui/Floating";
+import { FamilyAsks, Hint, IncomingCall, Knocks, ListenAsks, NetBanner, RelAsks, Serves, Toasts, VoiceBar } from "@/components/ui/Floating";
 import AvatarCreator from "@/components/avatar/AvatarCreator";
 import AuthScreen from "@/components/ui/AuthScreen";
 import Onboarding from "@/components/ui/Onboarding";
@@ -227,7 +227,7 @@ export default function WorldClient() {
           <GuideTour />
           {!hideIcons && <BottomBar />}
           {!hideIcons && <NowPlaying />}
-          <SpotifyDock />
+          <SpotifyEngine />
           <VoiceBar />
           {!hideIcons && <Minimap />}
           {!hideIcons && <ViewControls />}
@@ -239,6 +239,7 @@ export default function WorldClient() {
       {mounted && <Toasts />}
       {mounted && <IncomingCall />}
       {mounted && <Knocks />}
+      {mounted && <ListenAsks />}
       {mounted && <RelAsks />}
       {mounted && <FamilyAsks />}
       {mounted && <Serves />}

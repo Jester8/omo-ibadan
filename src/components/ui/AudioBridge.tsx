@@ -39,7 +39,7 @@ export default function AudioBridge() {
         startBuzz();
         if (document.hidden && "Notification" in window && Notification.permission === "granted") {
           try {
-            new Notification("Incoming call", { body: `${s.incoming.name} is calling you on Omo'badan`, tag: "omo-call", requireInteraction: true });
+            new Notification("Incoming call", { body: `${s.incoming.name} is calling you on Omo'badan`, tag: "omo-call", requireInteraction: true, silent: true });
           } catch {
             /* some browsers only allow notifications from the service worker */
           }

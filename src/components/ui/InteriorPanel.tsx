@@ -37,7 +37,7 @@ function ClubLine() {
   const title = off ? "Club music is off" : blocked ? "Tap anywhere to start the music" : track ? `${track.title} · ${track.artist}` : "Getting the music on…";
   const sub = off ? "The house band is on standby" : muted ? "Sound is muted" : track ? `© ${track.rightsHolder}. All rights reserved.` : "";
   return (
-    <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl bg-violet-50 px-4 py-2.5 ring-1 ring-violet-100">
+    <div data-music-card className="mt-3 flex items-center justify-between gap-3 rounded-2xl bg-violet-50 px-4 py-2.5 ring-1 ring-violet-100">
       <div className="flex min-w-0 items-center gap-2.5">
         <Music2 className={`size-4 shrink-0 ${playing && !muted ? "animate-pulse text-violet-600" : "text-stone-400"}`} />
         <div className="min-w-0">

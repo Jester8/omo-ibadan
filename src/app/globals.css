@@ -78,3 +78,9 @@ button { touch-action: manipulation; }
   .landing-stack .landing-cta { margin-top: 1rem; padding-top: 0.75rem; padding-bottom: 0.75rem; }
   .landing-stack .landing-hint { margin-top: 0.625rem; }
 }
+
+/* the little bars in the Music app that dance while a song plays */
+@keyframes eq {
+  0%, 100% { transform: scaleY(0.25); }
+  50% { transform: scaleY(3.2); }
+}

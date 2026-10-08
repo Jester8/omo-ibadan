@@ -3,7 +3,7 @@ import { grooveRewind, grooveRunning, grooveSetLevel, grooveStart, grooveStop } 
 import { rt } from "./interiorRuntime";
 import { onMusicEnd, outputLevel, pause, playQueue, playSynth, resume, stopFading, useMusic, type PlayableTrack } from "./music";
 import { useClub, useSound } from "./soundStore";
-import { useSpotify } from "./spotify";
+import { spotifyBridge, useSpotify } from "./spotify";
 import { useGame } from "./store";
 import { listApproved, type Track } from "./tracks";
 
@@ -91,6 +91,11 @@ function silence(secs: number) {
   outSecs = FADE_OUT;
 }
 
+/** The player has the floor with something of their own: the club steps aside and offers its Play button. */
+function floorTaken() {
+  giveWay(useSpotify.getState().playing ? "spotify" : "track");
+}
+
 function giveWay(reason: "track" | "stop" | "spotify") {
   if (yielded) return;
   yielded = true;
@@ -102,31 +107,41 @@ function giveWay(reason: "track" | "stop" | "spotify") {
 }
 
 /** The house band: the mix goes on the card and the groove follows it. */
-function playHouse() {
-  if (!alive() || userHasFloor()) return;
+function playHouse(force = false) {
+  if (!alive()) return;
+  if (document.hidden) {
+    hiddenPause = true; // it starts when the tab is back
+    return;
+  }
+  if (!force && userHasFloor()) return floorTaken();
   clearStall();
   grooveRewind();
   playSynth(HOUSE_MIX, "club");
 }
 
-function launch(list: Track[] | null, my: number) {
-  if (my !== token || !alive() || userHasFloor()) return;
-  if (!list || !list.length) return playHouse();
-  playQueue(list, { source: "club", loop: true, shuffle: true, fadeIn: FADE_IN, onDead: playHouse });
+function launch(list: Track[] | null, my: number, force = false) {
+  if (my !== token || !alive()) return;
+  if (document.hidden) {
+    hiddenPause = true; // it starts when the tab is back
+    return;
+  }
+  if (!force && userHasFloor()) return floorTaken();
+  if (!list || !list.length) return playHouse(force);
+  playQueue(list, { source: "club", loop: true, shuffle: true, fadeIn: FADE_IN, onDead: () => playHouse(force) });
   clearStall();
   stall = setTimeout(() => {
     const m = useMusic.getState();
-    if (my === token && alive() && m.source === "club" && !m.current?.synth && !m.playing && !m.blocked) playHouse();
+    if (my === token && alive() && m.source === "club" && !m.current?.synth && !m.playing && !m.blocked) playHouse(force);
   }, STALL_MS);
 }
 
 /** Start the club's music: from the remembered list right away when there is one (a tap's permission is still fresh then). */
-function begin() {
+function begin(force = false) {
   const my = ++token;
   const hit = cachedList();
-  if (hit) return launch(hit, my);
+  if (hit) return launch(hit, my, force);
   const late = new Promise<null>((done) => setTimeout(() => done(null), ASK_MS));
-  void Promise.race([fetchList(), late]).then((list) => launch(list, my));
+  void Promise.race([fetchList(), late]).then((list) => launch(list, my, force));
 }
 
 function enter() {
@@ -169,7 +184,9 @@ export function playClubMusic() {
   yielded = false;
   why = null;
   useClub.setState({ yielded: false });
-  begin();
+  // a tap on Play is a request: Spotify, if it is on, is paused and the club takes the floor
+  spotifyBridge.current?.pause();
+  begin(true);
 }
 
 /* ------------------------------------------------------ the groove ------------------------------------------------------ */
@@ -210,6 +227,8 @@ function mirror() {
 
 function onMusic(s: ReturnType<typeof useMusic.getState>, prev: typeof s) {
   mirror();
+  // the club's track is on: the wait for it to start is over (a pause or a hidden tab later must not bring the house band in)
+  if (s.source === "club" && s.playing) clearStall();
   if (!inClub) return;
   // the player picked a track from the Music sheet: it wins
   if (!yielded && s.source === "user" && s.current && (prev.source !== "user" || prev.current?.id !== s.current.id)) giveWay("track");
@@ -223,7 +242,9 @@ const GESTURES = ["pointerdown", "pointerup", "touchend", "click", "keydown"] as
 let armed = false;
 
 /** A tap or key in the club: wake the audio engine from inside the gesture and retry anything the browser refused. */
-function onGesture() {
+function onGesture(e: Event) {
+  // a tap on a Music card's own button does its own thing: resuming here first would make that tap undo itself
+  if (e.target instanceof Element && e.target.closest("[data-music-card]")) return;
   audio.start();
   const m = useMusic.getState();
   if (alive() && m.source === "club" && m.blocked) resume();
@@ -248,7 +269,11 @@ function onVisibility() {
     }
   } else if (hiddenPause) {
     hiddenPause = false;
-    if (alive() && clubOwns() && !useMusic.getState().playing) resume();
+    if (!alive()) return;
+    const m = useMusic.getState();
+    if (m.current) {
+      if (clubOwns() && !m.playing) resume();
+    } else if (!userHasFloor()) begin();
   }
 }
 

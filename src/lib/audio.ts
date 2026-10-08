@@ -50,6 +50,13 @@ class Engine {
     const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     if (!Ctor) return;
     this.ctx = new Ctor();
+    // iOS mutes Web Audio when the ringer switch is on silent unless the page is marked as playing media (Safari 16.4+)
+    try {
+      const session = (navigator as unknown as { audioSession?: { type: string } }).audioSession;
+      if (session) session.type = "playback";
+    } catch {
+      /* not supported */
+    }
   }
 
   setSettings(s: Partial<SoundSettings>) {

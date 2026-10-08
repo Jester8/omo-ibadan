@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { trackUrl, type Track } from "./tracks";
 import { useSound } from "./soundStore";
+import { spotifyBridge } from "./spotify";
 
 /** An artist's track, or the club's house mix (`synth`: drawn in code by clubGroove.ts, not an audio file). */
 export type PlayableTrack = Track & { url?: string; synth?: boolean };
@@ -22,6 +23,17 @@ export const useMusic = create<MusicState>(() => ({ current: null, playing: fals
 const CLEAR = { current: null, playing: false, error: "", source: null, blocked: false, queued: 0 } as const;
 
 let el: HTMLAudioElement | null = null;
+
+/** How far into the track the player is, in seconds (0 for the house mix, which has no end, and when nothing is loaded). */
+export function trackTime(): { pos: number; dur: number } {
+  if (!el || !el.getAttribute("src")) return { pos: 0, dur: 0 };
+  return { pos: el.currentTime || 0, dur: Number.isFinite(el.duration) ? el.duration : 0 };
+}
+
+/** Jump to a place in the track that is playing. */
+export function seekTrack(secs: number) {
+  if (el && el.getAttribute("src") && Number.isFinite(el.duration)) el.currentTime = Math.min(Math.max(0, secs), el.duration);
+}
 
 /** The Music slider (a little hotter than the theme song), nothing while muted. */
 export const outputLevel = () => {
@@ -66,7 +78,7 @@ function fade(to: number, secs: number, done?: () => void) {
 /** Bumped by every start and stop, so a late answer from an older play() is ignored. */
 let seq = 0;
 
-type Queue = { tracks: PlayableTrack[]; i: number; loop: boolean; shuffle: boolean; source: MusicSource; fails: number; onDead?: () => void };
+type Queue = { tracks: PlayableTrack[]; i: number; loop: boolean; shuffle: boolean; source: MusicSource; fails: number; lastOk?: PlayableTrack; onDead?: () => void };
 let q: Queue | null = null;
 
 /** Told when a single track the player started has played to its end (not when they stopped it). */
@@ -144,6 +156,7 @@ function advance(failed: boolean) {
     return;
   }
   q.fails = failed ? q.fails + 1 : 0;
+  if (!failed) q.lastOk = q.tracks[q.i];
   // every track in a row failed (no server, files gone): hand back to whoever asked, or give up
   if (q.fails >= q.tracks.length) {
     const dead = q.onDead;
@@ -157,7 +170,7 @@ function advance(failed: boolean) {
   if (q.i >= q.tracks.length) {
     if (!q.loop) return stop();
     q.i = 0;
-    if (q.shuffle) q.tracks = shuffled(q.tracks, last);
+    if (q.shuffle) q.tracks = shuffled(q.tracks, q.lastOk ?? last);
   }
   void begin(q.tracks[q.i], q.source);
 }
@@ -170,6 +183,8 @@ export async function play(track: PlayableTrack) {
     if (!s.error && el?.getAttribute("src")) return resume();
   }
   q = null;
+  // one thing at a time: Spotify, if it is playing, is paused (it picks up from the same place)
+  spotifyBridge.current?.pause();
   await begin(track, "user");
 }
 
@@ -240,7 +255,10 @@ export function resume() {
   volume();
   a.play().then(
     () => {
-      if (my === seq) useMusic.setState({ playing: true, blocked: false, error: "" });
+      if (my !== seq) return;
+      useMusic.setState({ playing: true, blocked: false, error: "" });
+      // a track whose start was refused (so its fade-in never began) would otherwise play on at volume 0
+      if (fadeK < 1 && !fadeTimer) fade(1, 0.6);
     },
     (e) => {
       if (my === seq) refused(e);

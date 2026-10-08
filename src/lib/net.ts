@@ -9,6 +9,7 @@ import { roleOf } from "./family";
 import { currentToken, ensureToken, pullState, pushState, signOut } from "./api";
 import type { Policy } from "./protocol";
 import { voice } from "./voice";
+import * as listen from "./listenTogether";
 import { cleanChat } from "./moderation";
 import { interiorKey, type InteriorRef } from "./interiors";
 import { usePhotos } from "./photos";
@@ -34,6 +35,7 @@ function send(m: C2S) {
 }
 
 voice.init(send);
+listen.init(send);
 hooks.plotSet = (plotId, plot) => send({ t: "plotSet", plotId, plot });
 
 export const roomOf = (atPlace: string | null, interior?: InteriorRef | null) => (interior ? interiorKey(interior) : (atPlace ?? "streets"));
@@ -162,7 +164,11 @@ function handle(m: S2C) {
       if (m.kind === "request") s.toast(`${m.name} sent you a friend request`, "info");
       if (m.kind === "accepted") s.toast(`${m.name} is now your friend`, "good");
       break;
+    case "listen":
+      listen.onMessage(m);
+      break;
     case "presence":
+      if (!m.online) listen.onPeerOffline(m.pid);
       useGame.setState((st) => ({ friends: st.friends.map((f) => (f.pid === m.pid ? { ...f, online: m.online } : f)), threads: st.threads.map((t) => (t.pid === m.pid ? { ...t, online: m.online } : t)) }));
       break;
     case "plots":
@@ -436,6 +442,7 @@ function openSocket() {
     if (pingTimer) clearInterval(pingTimer);
     pingTimer = null;
     remoteMotion.clear();
+    listen.onDisconnect();
     if (useGame.getState().call.phase !== "idle") endCallLocal();
     else voice.leave();
     useGame.setState({ net: "offline", connId: null, remotes: {}, online: 0, incoming: null });

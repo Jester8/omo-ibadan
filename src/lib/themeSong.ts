@@ -175,7 +175,19 @@ if (typeof window !== "undefined") {
     music = s.music;
   });
   let artist = useMusic.getState().playing;
+  let credited = "";
   useMusic.subscribe((s) => {
+    // the lock screen and car displays credit what is really playing, not always the theme song
+    const id = s.current?.id ?? "";
+    if (id !== credited && el && "mediaSession" in navigator) {
+      credited = id;
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: s.current?.title ?? THEME_SONG.title,
+        artist: s.current?.artist ?? THEME_SONG.artist,
+        album: "Omo'badan",
+        artwork: [{ src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" }],
+      });
+    }
     if (s.playing !== artist) {
       artist = s.playing;
       sync();
