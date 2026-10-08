@@ -17,6 +17,10 @@ export type Item = {
   y?: number;
   c?: string;
   c2?: string;
+  /** text on a sign (signboard, neonsign) */
+  label?: string;
+  /** which goods a display shows, e.g. "shoes" / "bags" on a displaytable, "burger" / "rice" on a tray */
+  variant?: string;
   /** override what happens when the player uses this item */
   action?: ActionDef;
   verb?: string;
@@ -44,6 +48,8 @@ export type Layout = {
   items: Item[];
   /** the exit mat sits on the front wall (z = +d/2) at this x */
   exitX: number;
+  /** nightlife rooms get moving coloured lights and music */
+  vibe?: "club";
 };
 
 export type InteriorRef = { kind: "place" | "home"; id: string };
