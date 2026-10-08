@@ -35,7 +35,7 @@ export const TOPICS: Topic[] = [
   ] },
   { id: "home", emoji: "🏠", title: "Houses and land", lines: [
     "Buy land from the Buy tab, build it up from a bungalow to a mansion, collect rent and decorate the rooms.",
-    "Gated estates need a pass: tap the gate, and the guard sells a 30-minute visitor pass. If you own a house inside, the gate opens for you.",
+    "Gated estates need a pass: tap the gate, and the guard sells a 30-minute visitor pass. After you pay, he writes you into the visitors' book and the boom goes up a minute later. If you own a house inside, the gate opens for you.",
     "At home: buy foodstuff (market or Groceries), cook at the stove, then eat at the dining table.",
   ] },
   { id: "wheels", emoji: "🛺", title: "Rides and cars", lines: [
