@@ -22,7 +22,8 @@ import { walkTo } from "@/lib/movement";
 import InteriorScene from "@/components/interior/InteriorScene";
 
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
-const limits = (): [number, number] => (useGame.getState().interior ? [4, 30] : useGame.getState().deck ? [6, 75] : [9, 60]);
+/** How far in and out the camera may go. The near limits keep people, rooms and buildings from filling the screen. */
+const limits = (): [number, number] => (useGame.getState().interior ? [10, 30] : useGame.getState().deck ? [10, 75] : [16, 60]);
 
 function CameraRig() {
   const { camera, gl, size } = useThree();
@@ -106,6 +107,8 @@ function CameraRig() {
       // the optional slow orbit: only while you stand still
       else if (st.autoRotate && !me.path.length && me.speed < 0.2 && !st.busy) cam.az += dt * 0.12;
     }
+    // whoever changed the zoom (a pinch, a room, the tower), it stays inside the limits
+    if (hasProfile) cam.dist = clamp(cam.dist, ...limits());
     const wantDist = hasProfile ? cam.dist : 40;
     dist.current += (wantDist - dist.current) * (1 - Math.exp(-3 * dt));
     const el = cam.el;

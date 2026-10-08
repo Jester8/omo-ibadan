@@ -26,6 +26,9 @@ const demoAccounts = (): Record<string, DemoAccount> => {
     return {};
   }
 };
+/** How many demo accounts have been made on this device (shown as the account total when there is no server). */
+export const demoAccountCount = () => Object.keys(demoAccounts()).length;
+
 const putDemo = (a: DemoAccount) => {
   try {
     localStorage.setItem(DEMO_KEY, JSON.stringify({ ...demoAccounts(), [a.email]: a }));

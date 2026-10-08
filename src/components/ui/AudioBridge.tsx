@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { audio } from "@/lib/audio";
 import { startThemeSong } from "@/lib/themeSong";
+import { startClubMusic } from "@/lib/clubMusic";
 import { useGame } from "@/lib/store";
 import { useSound } from "@/lib/soundStore";
 
@@ -19,21 +20,20 @@ const stopBuzz = () => {
   navigator.vibrate?.(0);
 };
 
-/** Starts audio on the first tap, starts the intro song, and rings (and buzzes) for incoming calls. No other game sounds. */
+/** Starts audio on the first tap and starts the intro song and the music in clubs. Incoming calls buzz the phone and notify, but make no sound. */
 export default function AudioBridge() {
   useEffect(() => {
     useSound.getState().sync();
     // the theme song starts from the landing page (or as soon as the browser allows sound)
     startThemeSong();
+    // songs play inside clubs (artists' tracks first, the house band otherwise); the theme keeps out of them
+    const stopClub = startClubMusic();
     const start = () => audio.start();
     window.addEventListener("pointerdown", start);
     window.addEventListener("keydown", start);
 
     let prev = useGame.getState();
     const unsub = useGame.subscribe((s) => {
-      const ringing = !!s.incoming || s.call.phase === "calling";
-      if (ringing && !(prev.incoming || prev.call.phase === "calling")) audio.startRing();
-      if (!ringing && (prev.incoming || prev.call.phase === "calling")) audio.stopRing();
       // being called: buzz the phone, and if the app is in the background, show a system notification
       if (s.incoming && !prev.incoming) {
         startBuzz();
@@ -52,7 +52,7 @@ export default function AudioBridge() {
       window.removeEventListener("pointerdown", start);
       window.removeEventListener("keydown", start);
       unsub();
-      audio.stopRing();
+      stopClub();
       stopBuzz();
     };
   }, []);

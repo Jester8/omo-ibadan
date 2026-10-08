@@ -1,10 +1,10 @@
 /**
  * The game's sound engine, reduced to what is still played:
  *  - the Web Audio context the intro (theme) song is routed through, so it can fade in and out (see themeSong.ts)
- *  - the incoming-call ring
+ *  - the same context carries the clubs' house mix (clubGroove.ts), the fallback when no artist tracks are available
  *
- * The generated Afrobeat groove, street ambience, generator noise and all in-game sound effects were removed:
- * the intro song is the only sound the city plays by itself.
+ * The generated street ambience, generator noise, the incoming-call ring and all other sound effects were removed: the intro
+ * song and the music in clubs (artists' tracks first, the house mix otherwise) are all the city plays by itself.
  */
 
 export type SoundSettings = {
@@ -35,8 +35,6 @@ const load = (): SoundSettings => {
 class Engine {
   ctx: AudioContext | null = null;
   settings: SoundSettings = { ...DEFAULTS };
-  private ringBus: GainNode | null = null;
-  private ringTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
     if (typeof window !== "undefined") this.settings = load();
@@ -45,15 +43,13 @@ class Engine {
   /** Must be called from a user gesture (browsers block audio until then). */
   start() {
     if (this.ctx) {
-      if (this.ctx.state === "suspended") void this.ctx.resume();
+      // also wakes a context a phone call or the lock screen interrupted (iOS), and never throws
+      if (this.ctx.state !== "running" && this.ctx.state !== "closed") this.ctx.resume().catch(() => {});
       return;
     }
     const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     if (!Ctor) return;
     this.ctx = new Ctor();
-    this.ringBus = this.ctx.createGain();
-    this.ringBus.gain.value = 0.7;
-    this.ringBus.connect(this.ctx.destination);
   }
 
   setSettings(s: Partial<SoundSettings>) {
@@ -63,42 +59,6 @@ class Engine {
     } catch {
       /* private mode */
     }
-  }
-
-  private blip(freq: number, at: number, dur: number, vol: number) {
-    const ctx = this.ctx;
-    if (!ctx || !this.ringBus) return;
-    const o = ctx.createOscillator();
-    o.type = "sine";
-    o.frequency.setValueAtTime(freq, at);
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, at);
-    g.gain.exponentialRampToValueAtTime(vol, at + 0.008);
-    g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
-    o.connect(g).connect(this.ringBus);
-    o.start(at);
-    o.stop(at + dur + 0.05);
-  }
-
-  private ringOnce() {
-    if (!this.ctx || this.settings.muted) return;
-    const t = this.ctx.currentTime;
-    for (let i = 0; i < 2; i++) {
-      this.blip(880, t + i * 0.22, 0.12, 0.25);
-      this.blip(1100, t + i * 0.22, 0.12, 0.18);
-    }
-  }
-
-  /** Someone is calling: ring until the call is answered or dropped. */
-  startRing() {
-    this.stopRing();
-    this.ringOnce();
-    this.ringTimer = setInterval(() => this.ringOnce(), 1800);
-  }
-
-  stopRing() {
-    if (this.ringTimer) clearInterval(this.ringTimer);
-    this.ringTimer = null;
   }
 }
 
