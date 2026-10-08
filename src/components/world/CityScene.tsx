@@ -13,6 +13,7 @@ import PlotsLayer from "./PlotsLayer";
 import Player from "./Player";
 import { RemotePlayers } from "./People";
 import AdBoards from "./AdBoards";
+import Billboards from "./Billboards";
 import { anchors } from "@/lib/overlay";
 import { cam, me } from "@/lib/playerState";
 import { useGame } from "@/lib/store";
@@ -160,6 +161,7 @@ function WorldContent() {
       <Gates />
       <Estates />
       <AdBoards />
+      {!placesOnly && <Billboards />}
       <CabRanks />
       {!placesOnly && <PlotsLayer />}
       {/* invisible ground: click anywhere to walk */}

@@ -3,7 +3,7 @@
 import Skyline from "./Skyline";
 import Roofscape from "./Roofscape";
 import TrafficLights from "./TrafficLights";
-import { BLOCKS, ESTATES, ROAD_LINES, WORLD_HALF, inLake } from "@/lib/world";
+import { BLOCKS, ESTATES, HILLS, ROAD_LINES, WORLD_HALF, inLake } from "@/lib/world";
 import { me, remoteMotion, traffic } from "@/lib/playerState";
 import { junctionNear, lightAt } from "@/lib/traffic";
 import { useGame } from "@/lib/store";
@@ -176,18 +176,9 @@ function Lamps() {
 /* ------------------------------ hills and lake ------------------------------ */
 
 function Surroundings() {
-  const hills = useMemo(() => {
-    const out: { x: number; z: number; r: number; h: number; c: string }[] = [];
-    for (let i = 0; i < 44; i++) {
-      const a = (i / 44) * Math.PI * 2;
-      const rad = 94 + ((i * 7) % 5) * 2.4;
-      out.push({ x: Math.cos(a) * rad, z: Math.sin(a) * rad, r: 8 + ((i * 3) % 4) * 1.8, h: 2.6 + ((i * 5) % 3) * 1.1, c: ["#b8d6a4", "#a9cd98", "#c3dcae"][i % 3] });
-    }
-    return out;
-  }, []);
   return (
     <>
-      {hills.map((h, i) => (
+      {HILLS.map((h, i) => (
         <mesh key={i} position={[h.x, 0, h.z]} scale={[h.r, h.h, h.r]} material={mat(h.c, 1)} raycast={noRaycast}>
           <sphereGeometry args={[1, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2]} />
         </mesh>

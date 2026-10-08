@@ -8,6 +8,13 @@ export const BLOCKS: { c: [number, number]; tint: string }[] = BLOCK_CENTERS.fla
   BLOCK_CENTERS.map((cx, i) => ({ c: [cx, cz] as [number, number], tint: TINTS[(i * 5 + j * 3) % TINTS.length] })),
 );
 
+/** The ring of low hills round the city. Terrain draws them; the far billboards stand on some of them. */
+export const HILLS: { x: number; z: number; r: number; h: number; c: string }[] = Array.from({ length: 44 }, (_, i) => {
+  const a = (i / 44) * Math.PI * 2;
+  const rad = 94 + ((i * 7) % 5) * 2.4;
+  return { x: Math.cos(a) * rad, z: Math.sin(a) * rad, r: 8 + ((i * 3) % 4) * 1.8, h: 2.6 + ((i * 5) % 3) * 1.1, c: ["#b8d6a4", "#a9cd98", "#c3dcae"][i % 3] };
+});
+
 /* ----------------------------- gated estates and the campus ----------------------------- */
 
 export type Gate = { x: number; z: number; across: "x" | "z" };
