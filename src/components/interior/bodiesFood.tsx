@@ -6,7 +6,7 @@ import * as THREE from "three";
 import type { FurnKind } from "@/lib/furniture";
 import { mat } from "@/components/world/materials";
 import type { BodyRenderer } from "./extras";
-import { Bx, Cy, DARK, Legs, METAL, Sp, WOOD, artMat, glass, litMat, type BodyProps, type V3 } from "./prims";
+import { Bx, Cy, DARK, Legs, METAL, Sp, WOOD, artMat, litMat, type BodyProps, type V3 } from "./prims";
 
 /**
  * Food service furniture: hot cases, order counters, bakery cabinets, buka pots, the suya grill,
@@ -44,10 +44,13 @@ const chunkGeo = new THREE.BoxGeometry(0.06, 0.05, 0.055);
 
 /* --------------------------------- small helpers --------------------------------- */
 
+/** clearer than the shared glass: two or three panes stacked in the view would otherwise wash the food out */
+const pane = new THREE.MeshStandardMaterial({ color: "#cfe6f2", roughness: 0.08, metalness: 0.1, transparent: true, opacity: 0.13, depthWrite: false });
+
 /** a glass pane (bottom-based like Bx) that does not cast a shadow onto the food behind it */
 function Pane({ p, s }: { p: V3; s: V3 }) {
   return (
-    <mesh position={[p[0], p[1] + s[1] / 2, p[2]]} material={glass}>
+    <mesh position={[p[0], p[1] + s[1] / 2, p[2]]} material={pane}>
       <boxGeometry args={s} />
     </mesh>
   );
@@ -208,9 +211,9 @@ function JollofPan({ p, w, d }: PanProps) {
   return (
     <>
       <Pan p={p} w={w} d={d} fill={F.jollofDk} />
-      <Blob p={[p[0], t, p[2]]} rx={w / 2 - 0.05} ry={0.05} rz={d / 2 - 0.04} c={F.jollof} />
+      <Blob p={[p[0], t, p[2]]} rx={w / 2 - 0.05} ry={0.07} rz={d / 2 - 0.04} c={F.jollof} />
       {[[-0.12, 0.03], [0.05, -0.04], [0.14, 0.04]].map(([x, z], i) => (
-        <Sp key={i} p={[p[0] + x, t + 0.036, p[2] + z]} r={0.02} c={F.jollofDk} sc={[1.4, 0.8, 1]} />
+        <Sp key={i} p={[p[0] + x, t + 0.05, p[2] + z]} r={0.022} c={F.jollofDk} sc={[1.4, 0.8, 1]} />
       ))}
     </>
   );
@@ -221,9 +224,9 @@ function FriedRicePan({ p, w, d }: PanProps) {
   return (
     <>
       <Pan p={p} w={w} d={d} fill={F.friedDk} />
-      <Blob p={[p[0], t, p[2]]} rx={w / 2 - 0.05} ry={0.05} rz={d / 2 - 0.04} c={F.fried} />
+      <Blob p={[p[0], t, p[2]]} rx={w / 2 - 0.05} ry={0.065} rz={d / 2 - 0.04} c={F.fried} />
       {[[-0.13, 0.02, F.pea], [0.04, -0.05, F.carrot], [0.12, 0.04, F.pea], [-0.03, 0.05, F.carrot]].map(([x, z, col], i) => (
-        <Sp key={i} p={[p[0] + (x as number), t + 0.04, p[2] + (z as number)]} r={0.016} c={col as string} />
+        <Sp key={i} p={[p[0] + (x as number), t + 0.055, p[2] + (z as number)]} r={0.018} c={col as string} />
       ))}
     </>
   );
@@ -279,14 +282,14 @@ function SaladPan({ p, w, d }: PanProps) {
   return (
     <>
       <Pan p={p} w={w} d={d} fill="#3d8a33" />
-      <Blob p={[p[0], t, p[2]]} rx={w / 2 - 0.06} ry={0.05} rz={d / 2 - 0.04} c={F.lettuce} />
+      <Blob p={[p[0], t, p[2]]} rx={w / 2 - 0.06} ry={0.065} rz={d / 2 - 0.04} c={F.lettuce} />
       {[[-0.12, 0.02], [0.0, -0.04], [0.12, 0.03]].map(([x, z], i) => (
-        <Sp key={i} p={[p[0] + x, t + 0.042, p[2] + z]} r={0.028} c={F.tomato} sc={[1, 0.45, 1]} />
+        <Sp key={i} p={[p[0] + x, t + 0.055, p[2] + z]} r={0.03} c={F.tomato} sc={[1, 0.5, 1]} />
       ))}
       {[[-0.05, 0.05], [0.07, -0.01]].map(([x, z], i) => (
-        <Cy key={i} p={[p[0] + x, t + 0.04, p[2] + z]} r={0.03} h={0.012} c={F.cucumber} seg={12} />
+        <Cy key={i} p={[p[0] + x, t + 0.052, p[2] + z]} r={0.03} h={0.012} c={F.cucumber} seg={12} />
       ))}
-      <Blob p={[p[0] - 0.03, t + 0.046, p[2] - 0.02]} rx={0.025} ry={0.012} rz={0.015} c={F.carrot} />
+      <Blob p={[p[0] - 0.03, t + 0.058, p[2] - 0.02]} rx={0.025} ry={0.012} rz={0.015} c={F.carrot} />
     </>
   );
 }
@@ -310,14 +313,15 @@ function HotCase({ W, D, c, c2 }: BodyProps) {
       <Pane p={[0, 0.6, D / 2 - 0.02]} s={[W - 0.06, 0.5, 0.01]} />
       <Pane p={[-(W / 2 - 0.025), 0.6, 0]} s={[0.01, 0.5, D - 0.06]} />
       <Pane p={[W / 2 - 0.025, 0.6, 0]} s={[0.01, 0.5, D - 0.06]} />
-      <Pane p={[0, 1.09, 0.13]} s={[W - 0.06, 0.01, 0.4]} />
+      <Pane p={[0, 1.09, 0.1]} s={[W - 0.06, 0.01, 0.46]} />
       {[-1, 1].map((s) => <Cy key={s} p={[s * (W / 2 - 0.025), 0.6, D / 2 - 0.025]} r={0.013} h={0.5} c={STEEL_D} seg={8} />)}
       {/* warm canopy with the light strip and menu swatches */}
-      <Bx p={[0, 1.1, -0.175 - 0.035]} s={[W + 0.02, 0.15, 0.28]} c={c2} r={0.5} />
-      <Bx p={[0, 1.086, -0.06]} s={[W - 0.2, 0.014, 0.05]} m={litMat("#ffb347", 1.5, "#c98a3a")} />
-      <Bx p={[-W * 0.1, 1.15, -0.065]} s={[W * 0.6, 0.08, 0.012]} m={litMat("#ffd27a", 1, "#d8b46a")} />
+      <Bx p={[0, 1.1, -0.24]} s={[W + 0.02, 0.15, 0.22]} c={STEEL} r={0.35} />
+      <Bx p={[0, 1.1, -0.13]} s={[W + 0.02, 0.15, 0.012]} c={c2} r={0.5} />
+      <Bx p={[0, 1.086, -0.14]} s={[W - 0.2, 0.014, 0.05]} m={litMat("#ffb347", 1.5, "#c98a3a")} />
+      <Bx p={[-W * 0.1, 1.15, -0.123]} s={[W * 0.6, 0.08, 0.012]} m={litMat("#ffd27a", 1, "#d8b46a")} />
       {[F.jollof, F.dodo, F.pea].map((col, i) => (
-        <Bx key={col} p={[-W * 0.1 + (i - 1) * 0.3, 1.17, -0.058]} s={[0.08, 0.05, 0.012]} c={col} r={0.5} />
+        <Bx key={col} p={[-W * 0.1 + (i - 1) * 0.3, 1.165, -0.116]} s={[0.08, 0.05, 0.012]} c={col} r={0.5} />
       ))}
       {/* front row, then the raised back row */}
       <JollofPan p={[xs[0], front[1], front[2]]} w={pw} d={pd} />
@@ -340,12 +344,13 @@ function FoodCounter({ W, D, c, c2 }: BodyProps) {
   return (
     <>
       <Bx s={[W, 0.08, D]} c={BLACK} />
-      <Bx p={[0, 0.08, -0.03]} s={[W - 0.04, 0.9, D - 0.08]} c="#3a3d44" r={0.6} />
+      <Bx p={[0, 0.08, -0.01]} s={[W - 0.04, 0.9, D - 0.1]} c="#3a3d44" r={0.6} />
       {/* accent front with trim lines */}
-      <Bx p={[0, 0.16, D / 2 - 0.04]} s={[W - 0.16, 0.7, 0.03]} c={c} r={0.45} />
-      <Bx p={[0, 0.16, D / 2 - 0.022]} s={[W - 0.16, 0.025, 0.012]} c={c2} />
-      <Bx p={[0, 0.83, D / 2 - 0.022]} s={[W - 0.16, 0.025, 0.012]} c={c2} />
+      <Bx p={[0, 0.16, D / 2 - 0.045]} s={[W - 0.16, 0.7, 0.03]} c={c} r={0.45} />
+      <Bx p={[0, 0.16, D / 2 - 0.024]} s={[W - 0.16, 0.025, 0.012]} c={c2} />
+      <Bx p={[0, 0.83, D / 2 - 0.024]} s={[W - 0.16, 0.025, 0.012]} c={c2} />
       <Bx p={[0, 0.98, 0]} s={[W + 0.04, 0.06, D + 0.04]} c="#d9d4c6" r={0.3} />
+      <Bx p={[0, 0.965, D / 2 + 0.012]} s={[W - 0.3, 0.012, 0.02]} m={litMat("#ffd27a", 1.4, "#d8b46a")} />
       {/* two tills, each behind a glass shield */}
       {[-W * 0.3, W * 0.3].map((x) => (
         <group key={x} position={[x, top, 0]}>
@@ -359,13 +364,17 @@ function FoodCounter({ W, D, c, c2 }: BodyProps) {
       ))}
       {/* tray stack, bell, napkins */}
       {["#d93220", "#e8b020", "#d93220"].map((col, i) => (
-        <Bx key={i} p={[-0.27, top + i * 0.022, 0.02]} s={[0.4, 0.02, 0.3]} c={col} r={0.5} rot={[0, i * 0.12 - 0.1, 0]} />
+        <Bx key={i} p={[-0.27, top + i * 0.022, 0.02]} s={[0.34, 0.02, 0.25]} c={col} r={0.5} rot={[0, i * 0.12 - 0.1, 0]} />
       ))}
       <Cy p={[0.18, top, 0.2]} r={0.05} h={0.012} c={STEEL_D} seg={14} />
       <Cy p={[0.18, top + 0.012, 0.2]} r={0.045} r2={0.018} h={0.04} c="#d9ac2e" seg={14} rough={0.3} />
       <Sp p={[0.18, top + 0.06, 0.2]} r={0.012} c="#d93220" />
       <Bx p={[0, top, 0.2]} s={[0.13, 0.12, 0.09]} c={STEEL} r={0.3} />
       <Bx p={[0, top + 0.12, 0.2]} s={[0.1, 0.025, 0.06]} c="#fbfaf5" rot={[0, 0, 0.15]} />
+      {/* burger boxes by the shield, ready to go */}
+      <Bx p={[0.6, top, 0.26]} s={[0.15, 0.06, 0.13]} c="#d93220" r={0.6} rot={[0, 0.1, 0]} />
+      <Bx p={[0.78, top, 0.27]} s={[0.15, 0.06, 0.13]} c="#f2b51c" r={0.6} rot={[0, -0.1, 0]} />
+      <Bx p={[0.69, top + 0.06, 0.26]} s={[0.15, 0.06, 0.13]} c="#fbf3d2" r={0.6} />
       {/* takeaway bags, cups, the "now serving" light */}
       <Bx p={[0.34, top, -0.2]} s={[0.13, 0.2, 0.07]} c="#c8a06a" rot={[0, 0.2, 0]} />
       <Bx p={[0.2, top, -0.22]} s={[0.13, 0.16, 0.07]} c="#d8b47c" rot={[0, -0.15, 0]} />
@@ -394,71 +403,80 @@ function FoodCounter({ W, D, c, c2 }: BodyProps) {
 
 /* ================================ PASTRY CASE ================================ */
 
+/* shelves step back as they rise, so the camera looking down can see every tier */
+const TIERS = [
+  { y: 0.46, z0: -0.25, z1: 0.31 },
+  { y: 0.74, z0: -0.29, z1: 0.15 },
+  { y: 1.0, z0: -0.29, z1: 0.0 },
+];
+
 function PastryCase({ W, D, c, c2 }: BodyProps) {
   const k = (W - 0.2) / 1.4; // goods are laid out for the catalogue width
   const sx = (x: number) => x * k;
-  const shelf = [0.46, 0.74, 1.0];
-  const [yA, yB, yC] = shelf.map((y) => y + 0.015);
-  const donut = ["#f08cb0", "#5a2f1a", "#f6efe0", "#f2c14e", "#f08cb0"];
+  const [yA, yB, yC] = TIERS.map((t) => t.y + 0.015);
+  const donut = ["#f06292", "#6d3a22", "#fff3e0", "#f9c22e", "#f06292"];
   return (
     <>
       <Bx s={[W, 0.4, D]} c={c2} r={0.6} />
       <Bx p={[0, 0.1, D / 2 + 0.003]} s={[W - 0.12, 0.14, 0.01]} c={c} r={0.5} />
       <Bx p={[0, 0.4, 0]} s={[W + 0.04, 0.04, D + 0.04]} c="#efe6d2" r={0.3} />
-      {/* glass cabinet: back panel, posts, panes and a roof of glass so the shelves show from above */}
-      <Bx p={[0, 0.44, -D / 2 + 0.03]} s={[W - 0.06, 0.76, 0.012]} c="#f6f1e4" r={0.5} />
+      {/* glass cabinet: warm lit back, posts, panes and a glass roof so the tiers show from above */}
+      <Bx p={[0, 0.44, -D / 2 + 0.03]} s={[W - 0.06, 0.76, 0.012]} m={litMat("#ffe7b0", 0.55, "#e6cf9f")} />
       {[-1, 1].flatMap((sxn) => [-1, 1].map((sz) => <Cy key={`${sxn}${sz}`} p={[sxn * (W / 2 - 0.025), 0.44, sz * (D / 2 - 0.025)]} r={0.013} h={0.76} c={STEEL_D} seg={8} />))}
       <Pane p={[0, 0.44, D / 2 - 0.02]} s={[W - 0.06, 0.76, 0.01]} />
       <Pane p={[-(W / 2 - 0.025), 0.44, 0]} s={[0.01, 0.76, D - 0.06]} />
       <Pane p={[W / 2 - 0.025, 0.44, 0]} s={[0.01, 0.76, D - 0.06]} />
       <Pane p={[0, 1.2, 0]} s={[W - 0.06, 0.01, D - 0.06]} />
       <Bx p={[0, 1.2, D / 2 - 0.025]} s={[W + 0.02, 0.03, 0.03]} c={c} r={0.5} />
-      {shelf.map((y) => (
-        <Bx key={y} p={[0, y, -0.01]} s={[W - 0.1, 0.015, D - 0.12]} m={litMat("#fff2cf", 0.9, "#e9dfc4")} />
+      {TIERS.map((t) => (
+        <group key={t.y}>
+          <Bx p={[0, t.y, (t.z0 + t.z1) / 2]} s={[W - 0.1, 0.015, t.z1 - t.z0]} c="#ece0c0" r={0.6} />
+          <Bx p={[0, t.y + 0.015, t.z1 - 0.02]} s={[W - 0.14, 0.012, 0.025]} m={litMat("#fff0b8", 1.5, "#e8dcb0")} />
+        </group>
       ))}
-      <Bx p={[0, 1.17, 0.18]} s={[W - 0.2, 0.012, 0.05]} m={litMat("#fff6dc", 1.4, "#e8dfc6")} />
+      <Bx p={[0, 1.17, -0.27]} s={[W - 0.2, 0.012, 0.05]} m={litMat("#fff6dc", 1.4, "#e8dfc6")} />
 
-      {/* bottom shelf: bread, puff-puff, rolls */}
-      {[[-0.52, 0.1, 0], [-0.2, 0.1, 1], [-0.52, -0.12, 1], [-0.2, -0.12, 0]].map(([x, z, alt], i) => (
+      {/* bottom tier: bread, puff-puff, rolls */}
+      {[[-0.55, 0.17, 0], [-0.22, 0.17, 1], [-0.55, -0.04, 1], [-0.22, -0.04, 0]].map(([x, z, alt], i) => (
         <Blob key={i} p={[sx(x), yA + 0.012, z]} rx={0.13} ry={0.06} rz={0.065} c={alt ? F.breadLt : F.bread} />
       ))}
-      <Cy p={[sx(0.12), yA, 0]} r={0.09} r2={0.11} h={0.06} c="#f1e4c6" seg={16} />
-      {[[0.09, 0.0], [0.15, 0.02], [0.12, -0.04], [0.1, 0.04]].map(([x, z], i) => (
+      <Cy p={[sx(0.12), yA, 0.12]} r={0.09} r2={0.11} h={0.06} c="#f1e4c6" seg={16} />
+      {[[0.09, 0.12], [0.15, 0.14], [0.12, 0.08], [0.1, 0.16]].map(([x, z], i) => (
         <Sp key={i} p={[sx(x), yA + 0.075, z]} r={0.037} c={F.puff} />
       ))}
-      <Sp p={[sx(0.12), yA + 0.11, 0]} r={0.037} c={F.puff} />
-      <Bx p={[sx(0.5), yA, 0]} s={[0.3, 0.012, 0.2]} c={STEEL} r={0.3} />
-      {[[0.43, -0.05], [0.43, 0.05], [0.57, -0.05], [0.57, 0.05]].map(([x, z], i) => (
+      <Sp p={[sx(0.12), yA + 0.11, 0.12]} r={0.037} c={F.puff} />
+      <Bx p={[sx(0.5), yA, 0.1]} s={[0.3, 0.012, 0.2]} c={STEEL} r={0.3} />
+      {[[0.43, 0.05], [0.43, 0.15], [0.57, 0.05], [0.57, 0.15]].map(([x, z], i) => (
         <Sp key={i} p={[sx(x), yA + 0.052, z]} r={0.048} sc={[1, 0.7, 1]} c="#cf8e47" />
       ))}
 
-      {/* middle shelf: meat pies and sausage rolls */}
+      {/* middle tier: meat pies and sausage rolls */}
       {[-0.6, -0.4, -0.2, 0, 0.2, 0.4].map((x, i) => (
-        <Blob key={i} p={[sx(x), yB + 0.012, 0.1]} rx={0.065} ry={0.03} rz={0.045} c={i % 2 ? F.pieLt : F.pie} />
+        <Blob key={i} p={[sx(x), yB + 0.012, 0.03]} rx={0.065} ry={0.03} rz={0.045} c={i % 2 ? F.pieLt : F.pie} />
       ))}
       {[-0.5, -0.35, -0.2, -0.05].map((x, i) => (
-        <Rod key={i} a={[sx(x) - 0.06, yB + 0.028, -0.12]} b={[sx(x) + 0.06, yB + 0.028, -0.12]} r={0.026} c={i % 2 ? "#cf8f43" : "#c07a35"} seg={8} />
+        <Rod key={i} a={[sx(x) - 0.06, yB + 0.028, -0.18]} b={[sx(x) + 0.06, yB + 0.028, -0.18]} r={0.026} c={i % 2 ? "#cf8f43" : "#c07a35"} seg={8} />
       ))}
       {[0.15, 0.35, 0.55].map((x, i) => (
-        <Blob key={i} p={[sx(x), yB + 0.012, -0.12]} rx={0.065} ry={0.03} rz={0.045} c={i % 2 ? F.pie : F.pieLt} />
+        <Blob key={i} p={[sx(x), yB + 0.012, -0.18]} rx={0.065} ry={0.03} rz={0.045} c={i % 2 ? F.pie : F.pieLt} />
       ))}
 
-      {/* top shelf: doughnuts and small cakes */}
-      {donut.map((col, i) => <mesh key={i} position={[sx(-0.62 + i * 0.19), yC, 0.1]} geometry={donutGeo} material={mat(col, 0.5)} castShadow />)}
-      {donut.slice(0, 4).map((col, i) => <mesh key={`b${i}`} position={[sx(-0.52 + i * 0.19), yC, -0.12]} geometry={donutGeo} material={mat(donut[(i + 2) % 5] ?? col, 0.5)} castShadow />)}
+      {/* top tier: doughnuts and small cakes */}
+      {donut.map((col, i) => <mesh key={i} position={[sx(-0.62 + i * 0.19), yC, -0.08]} geometry={donutGeo} material={mat(col, 0.5)} castShadow />)}
+      {donut.slice(0, 4).map((col, i) => <mesh key={`b${i}`} position={[sx(-0.52 + i * 0.19), yC, -0.22]} geometry={donutGeo} material={mat(donut[(i + 2) % 5] ?? col, 0.5)} castShadow />)}
       {[0.42, 0.62].map((x, i) => (
-        <group key={x} position={[sx(x), yC, 0.04]}>
+        <group key={x} position={[sx(x), yC, -0.12]}>
           <Cy r={0.06} h={0.07} c="#f3e0b0" seg={14} />
-          <Cy p={[0, 0.07, 0]} r={0.062} h={0.014} c={i ? "#5a2f1a" : "#f08cb0"} seg={14} />
+          <Cy p={[0, 0.07, 0]} r={0.062} h={0.014} c={i ? "#6d3a22" : "#f06292"} seg={14} />
           <Sp p={[0, 0.095, 0]} r={0.014} c="#d93220" />
         </group>
       ))}
 
-      {/* a few boxes on top, at the back */}
-      <Bx p={[sx(-0.45), 1.23, -0.08]} s={[0.3, 0.1, 0.22]} c="#f6a8c4" r={0.7} />
-      <Bx p={[sx(-0.45), 1.33, -0.08]} s={[0.22, 0.08, 0.18]} c="#c8a06a" r={0.8} rot={[0, 0.3, 0]} />
-      <Bx p={[sx(0.45), 1.23, -0.08]} s={[0.28, 0.12, 0.22]} c="#f8f4ea" r={0.7} />
-      <Bx p={[sx(0.45), 1.23, -0.08]} s={[0.04, 0.124, 0.224]} c="#d93220" r={0.6} />
+      {/* a few boxes on top, tucked at the back corners */}
+      <Bx p={[sx(-0.55), 1.21, -0.22]} s={[0.26, 0.1, 0.18]} c="#f6a8c4" r={0.7} />
+      <Bx p={[sx(-0.55), 1.31, -0.22]} s={[0.2, 0.08, 0.15]} c="#c8a06a" r={0.8} rot={[0, 0.3, 0]} />
+      <Bx p={[sx(0.58), 1.21, -0.22]} s={[0.24, 0.12, 0.18]} c="#f8f4ea" r={0.7} />
+      <Bx p={[sx(0.58), 1.21, -0.22]} s={[0.04, 0.124, 0.184]} c="#d93220" r={0.6} />
     </>
   );
 }
@@ -482,17 +500,17 @@ function BukaPot({ p, r, h, spec }: { p: V3; r: number; h: number; spec: PotSpec
   return (
     <group position={p}>
       <Cy r={r * 0.82} r2={r} h={h} c={spec.body} rough={0.4} seg={20} />
-      <Cy p={[0, h - 0.035, 0]} r={r * 0.92} h={0.012} c={spec.fill} rough={0.3} seg={20} />
+      <Cy p={[0, h, 0]} r={r * 0.88} h={0.008} c={spec.fill} rough={0.3} seg={20} />
       {/* lid propped against the back of the pot */}
       <mesh position={[0, R * Math.cos(lean), z0 + R * Math.sin(lean)]} rotation-x={Math.PI / 2 + lean} material={mat(spec.lid, 0.35)} castShadow>
         <cylinderGeometry args={[R, R, 0.012, 20]} />
       </mesh>
-      {spec.extra === "amala" && <Blob p={[0, h - 0.02, 0]} rx={0.085} ry={0.065} rz={0.085} c={spec.fill} rough={0.4} />}
-      {spec.extra === "meat" && [[-0.04, 0.02], [0.045, -0.03]].map(([x, z], i) => <Sp key={i} p={[x, h - 0.02, z]} r={0.024} c="#7a3a1a" />)}
-      {spec.extra === "ponmo" && [[-0.045, 0.0], [0.03, 0.04], [0.04, -0.04]].map(([x, z], i) => <Sp key={i} p={[x, h - 0.02, z]} r={0.022} sc={[1.4, 0.8, 1]} c="#c58a52" />)}
-      {spec.extra === "pepper" && [[-0.04, 0.03, "#4fa23a"], [0.05, -0.02, "#f2c14e"]].map(([x, z, col], i) => <Sp key={i} p={[x as number, h - 0.026, z as number]} r={0.013} c={col as string} />)}
+      {spec.extra === "amala" && <Blob p={[0, h, 0]} rx={0.085} ry={0.065} rz={0.085} c={spec.fill} rough={0.4} />}
+      {spec.extra === "meat" && [[-0.04, 0.02], [0.045, -0.03]].map(([x, z], i) => <Sp key={i} p={[x, h + 0.012, z]} r={0.026} c="#7a3a1a" />)}
+      {spec.extra === "ponmo" && [[-0.045, 0.0], [0.03, 0.04], [0.04, -0.04]].map(([x, z], i) => <Sp key={i} p={[x, h + 0.01, z]} r={0.024} sc={[1.4, 0.8, 1]} c="#c58a52" />)}
+      {spec.extra === "pepper" && [[-0.04, 0.03, "#4fa23a"], [0.05, -0.02, "#f2c14e"]].map(([x, z, col], i) => <Sp key={i} p={[x as number, h + 0.006, z as number]} r={0.014} c={col as string} />)}
       {/* a ladle resting in every pot */}
-      <group position={[0.0, h - 0.045, 0.03]} rotation={[0.5, 0, -0.35]}>
+      <group position={[0.0, h - 0.01, 0.03]} rotation={[0.5, 0, -0.35]}>
         <Cy r={0.007} h={0.27} c={METAL} seg={6} />
         <Sp p={[0, 0, 0]} r={0.03} sc={[1, 0.55, 1]} c={METAL} rough={0.35} />
       </group>
@@ -611,14 +629,14 @@ const POP = [
   { body: "#5f3b1f", cap: "#d4a72c" }, // malt
 ];
 const TINS = ["#d93a2f", "#c9ced4", "#2f73d6", "#43a64f", "#f28c1c", "#2b2d31", "#f4c20d"];
-const SHELF_TOP = [0.2, 0.6, 1.0, 1.4];
+const SHELF_TOP = [0.2, 0.56, 0.92, 1.28];
 
 function fridgeSlots(W: number, D: number, seed: number) {
   const bottles: Slot[] = [];
   const caps: Slot[] = [];
   const cans: Slot[] = [];
-  const n = Math.max(5, Math.floor((W - 0.2) / 0.1) + 1);
-  const step = (W - 0.2) / (n - 1);
+  const n = Math.max(4, Math.floor((W - 0.28) / 0.1) + 1);
+  const step = (W - 0.28) / (n - 1);
   const zf = D / 2 - 0.2;
   const zb = -D / 2 + 0.22;
   SHELF_TOP.forEach((y, k) => {
@@ -642,7 +660,7 @@ function DrinkFridge({ item, W, D, H }: BodyProps) {
   const seed = Math.abs(Math.round(item.x * 3 + item.z * 5));
   const hdr = ["#e53935", "#1e88e5", "#43a047", "#fb8c00"][seed % 4];
   const { bottles, caps, cans } = useMemo(() => fridgeSlots(W, D, seed), [W, D, seed]);
-  const hh = H - 0.2; // header sits on top of the cabinet
+  const hh = H - 0.38; // the lit header sits on top of the cabinet
   return (
     <>
       <Bx s={[W, 0.14, D]} c={BLACK} />
@@ -659,9 +677,10 @@ function DrinkFridge({ item, W, D, H }: BodyProps) {
       <Inst geo={capGeo} slots={caps} rough={0.4} />
       <Inst geo={canGeo} slots={cans} rough={0.3} />
       {/* brand-less lit header */}
-      <Bx p={[0, hh, 0]} s={[W, 0.2, D]} c="#2f333a" r={0.5} />
-      <Bx p={[0, hh + 0.025, D / 2 + 0.004]} s={[W - 0.08, 0.15, 0.012]} m={litMat(hdr, 1.1, hdr)} />
-      <Bx p={[0, hh + 0.08, D / 2 + 0.012]} s={[W - 0.2, 0.03, 0.012]} c="#ffffff" r={0.5} rot={[0, 0, 0.06]} />
+      <Bx p={[0, hh, 0]} s={[W, 0.38, D]} c="#2f333a" r={0.5} />
+      <Bx p={[0, hh + 0.04, D / 2 + 0.004]} s={[W - 0.08, 0.3, 0.012]} m={litMat(hdr, 1.1, hdr)} />
+      <Bx p={[0, hh + 0.19, D / 2 + 0.012]} s={[W - 0.2, 0.04, 0.012]} c="#ffffff" r={0.5} rot={[0, 0, 0.06]} />
+      <Bx p={[0, hh + 0.1, D / 2 + 0.012]} s={[W - 0.3, 0.025, 0.012]} c="#ffffff" r={0.5} rot={[0, 0, 0.06]} />
     </>
   );
 }
@@ -720,12 +739,10 @@ function PrepCounter({ W, D }: BodyProps) {
         <Bx p={[-0.15, 0.03, 0.115]} s={[0.09, 0.02, 0.03]} c={BLACK} rot={[0, 0.25, 0]} />
       </group>
 
-      {/* heat lamp strip over the pass */}
-      {[-1, 1].map((s) => <Cy key={s} p={[s * (W / 2 - 0.12), top, 0.16]} r={0.015} h={0.5} c={STEEL_D} seg={8} />)}
-      <Bx p={[0, top + 0.5, 0.16]} s={[W - 0.3, 0.05, 0.1]} c={STEEL_D} r={0.35} />
-      <Bx p={[0, top + 0.485, 0.16]} s={[W - 0.4, 0.015, 0.07]} m={litMat("#ff8a3a", 1.6, "#b8602c")} />
-
-      {/* extractor hood with a lit underside and a duct to the roof */}
+      {/* extractor hood with a heat lamp rail under its lip, a lit underside and a duct to the roof */}
+      <Bx p={[0, 1.64, 0.05]} s={[W - 0.3, 0.04, 0.1]} c={STEEL_D} r={0.35} />
+      <Bx p={[0, 1.65, 0.104]} s={[W - 0.4, 0.025, 0.008]} m={litMat("#ff8a3a", 1.7, "#b8602c")} />
+      <Bx p={[0, 1.628, 0.05]} s={[W - 0.4, 0.012, 0.06]} m={litMat("#ff8a3a", 1.7, "#b8602c")} />
       <Bx p={[0, 1.68, -0.15]} s={[W - 0.1, 0.16, 0.5]} c={STEEL} r={0.3} />
       <Bx p={[0, 1.84, -0.15]} s={[W - 0.5, 0.2, 0.3]} c={STEEL_L} r={0.3} />
       <Bx p={[0, 2.04, -0.15]} s={[0.32, 0.66, 0.32]} c={STEEL_D} r={0.35} />
@@ -806,7 +823,9 @@ function PieTray({ y0 }: { y0: number }) {
         <Blob p={[0, 0.014, 0]} rx={0.05} ry={0.015} rz={0.03} c={F.pieLt} />
         <Sp p={[0.045, 0.01, 0.04]} r={0.014} c="#6b3a1e" sc={[1.4, 0.8, 1]} />
       </group>
-      <Bx p={[0.0, y0, 0.08]} s={[0.1, 0.003, 0.1]} c="#fdfdfb" r={0.9} rot={[0, 0.5, 0]} />
+      <Bx p={[-0.02, y0, -0.1]} s={[0.12, 0.005, 0.09]} c="#f7f3e6" r={0.9} rot={[0, -0.2, 0]} />
+      <Blob p={[-0.02, y0 + 0.012, -0.1]} rx={0.06} ry={0.026} rz={0.04} c={F.pieLt} />
+      <Bx p={[0.0, y0, 0.09]} s={[0.1, 0.003, 0.1]} c="#fdfdfb" r={0.9} rot={[0, 0.5, 0]} />
       <Bottle p={[0.17, y0, -0.04]} body="#ff8f1f" cap="#ff8f1f" />
     </>
   );
@@ -837,6 +856,9 @@ function BoothSeat({ W, D, c, c2 }: BodyProps) {
       <Bx p={[0, 0.28, 0.09]} s={[W - 0.08, 0.17, D - 0.22]} c={c} r={0.55} />
       <Bx p={[0, 0.28, D / 2 - 0.03]} s={[W - 0.08, 0.012, 0.012]} c={c2} r={0.4} />
       <Bx p={[0, 0.438, D / 2 - 0.03]} s={[W - 0.08, 0.012, 0.012]} c={c2} r={0.4} />
+      {Array.from({ length: Math.max(1, Math.round(W / 0.6) - 1) }).map((_, i, a) => (
+        <Bx key={i} p={[-W / 2 + 0.04 + ((i + 1) * (W - 0.08)) / (a.length + 1), 0.448, 0.09]} s={[0.012, 0.006, D - 0.22]} c={c2} r={0.4} />
+      ))}
       {/* high padded back, channel-stitched, with a rolled top */}
       <Bx p={[0, 0.45, zb]} s={[W - 0.04, 0.52, 0.16]} c={c} r={0.55} />
       {Array.from({ length: n }).map((_, i) => (
