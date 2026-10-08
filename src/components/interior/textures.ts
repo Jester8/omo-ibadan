@@ -177,3 +177,143 @@ export function louvreTexture(): THREE.CanvasTexture {
     }
   });
 }
+
+/* ---------------------------------- lit signs ---------------------------------- */
+/* The text of a neon sign or shop board is drawn once per label, colour and shape, then shared. Client only. */
+
+const signCache = new Map<string, THREE.CanvasTexture>();
+const SIGN_FONT = '"Arial Rounded MT Bold", "Trebuchet MS", "Segoe UI", Arial, sans-serif';
+
+const mix = (hex: string, to: string, t: number) => new THREE.Color(hex).lerp(new THREE.Color(to), t).getStyle();
+
+type Line = { text: string; start: number };
+
+/** One line, or two when a long name has a space near its middle. `start` is where the line begins in the label. */
+function splitLabel(label: string): Line[] {
+  const mid = label.length / 2;
+  let cut = -1;
+  if (label.length > 11) for (let i = 0; i < label.length; i++) if (label[i] === " " && (cut < 0 || Math.abs(i - mid) < Math.abs(cut - mid))) cut = i;
+  if (cut <= 0) return [{ text: label, start: 0 }];
+  return [{ text: label.slice(0, cut), start: 0 }, { text: label.slice(cut + 1), start: cut + 1 }];
+}
+
+/** Which letter of a neon sign flickers (-1 when the name is too short to spare one). Stable per label. */
+export function flickerLetter(label: string): number {
+  const letters: number[] = [];
+  for (let i = 0; i < label.length; i++) if (label[i] !== " ") letters.push(i);
+  if (letters.length < 3) return -1;
+  let h = 0;
+  for (let i = 0; i < label.length; i++) h = (h * 31 + label.charCodeAt(i)) >>> 0;
+  return letters[1 + (h % (letters.length - 1))];
+}
+
+/** Font size that fits the label inside `limit` pixels across and `rows` lines high. */
+function fitText(g: CanvasRenderingContext2D, lines: Line[], limit: number, maxSize: number): number {
+  g.font = `800 100px ${SIGN_FONT}`;
+  let widest = 1;
+  for (const l of lines) widest = Math.max(widest, g.measureText(l.text).width);
+  return Math.min(maxSize, (100 * limit) / widest);
+}
+
+function roundedRect(g: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+  g.beginPath();
+  g.moveTo(x + r, y);
+  g.arcTo(x + w, y, x + w, y + h, r);
+  g.arcTo(x + w, y + h, x, y + h, r);
+  g.arcTo(x, y + h, x, y, r);
+  g.arcTo(x, y, x + w, y, r);
+  g.closePath();
+}
+
+function drawNeon(g: CanvasRenderingContext2D, cw: number, ch: number, label: string, color: string, layer: number) {
+  const lines = splitLabel(label);
+  const fs = fitText(g, lines, cw * 0.8, ch * (lines.length > 1 ? 0.3 : 0.46));
+  const flick = flickerLetter(label);
+  const core = mix(color, "#ffffff", 0.72);
+  const passes: [number, number, string][] = [
+    [fs * 0.2, fs * 0.5, color],
+    [fs * 0.1, 0, color],
+    [fs * 0.04, 0, core],
+  ];
+  g.clearRect(0, 0, cw, ch);
+  g.lineJoin = "round";
+  g.textBaseline = "middle";
+  g.textAlign = "left";
+  g.font = `800 ${fs}px ${SIGN_FONT}`;
+  const lineH = fs * 1.2;
+  for (const [lw, blur, style] of passes) {
+    g.shadowColor = color;
+    g.shadowBlur = blur;
+    g.strokeStyle = style;
+    g.lineWidth = lw;
+    lines.forEach((l, row) => {
+      const y = ch / 2 + (row - (lines.length - 1) / 2) * lineH;
+      const x0 = (cw - g.measureText(l.text).width) / 2;
+      for (let k = 0; k < l.text.length; k++) {
+        if ((l.start + k === flick) !== (layer === 1)) continue;
+        g.strokeText(l.text[k], x0 + g.measureText(l.text.slice(0, k)).width, y);
+      }
+    });
+    // the tube frame round the edge, on the steady layer only
+    if (layer === 0) {
+      roundedRect(g, ch * 0.07, ch * 0.07, cw - ch * 0.14, ch * 0.86, ch * 0.16);
+      g.stroke();
+    }
+  }
+  g.shadowBlur = 0;
+}
+
+function drawBoard(g: CanvasRenderingContext2D, cw: number, ch: number, label: string, color: string) {
+  const grad = g.createLinearGradient(0, 0, 0, ch);
+  grad.addColorStop(0, mix(color, "#ffffff", 0.16));
+  grad.addColorStop(1, mix(color, "#000000", 0.25));
+  g.fillStyle = grad;
+  g.fillRect(0, 0, cw, ch);
+  // keyline and an adire-style row of dots at both ends
+  g.strokeStyle = "rgba(255,255,255,0.5)";
+  g.lineWidth = ch * 0.025;
+  g.strokeRect(ch * 0.07, ch * 0.07, cw - ch * 0.14, ch * 0.86);
+  g.fillStyle = "rgba(255,255,255,0.65)";
+  for (const side of [0, 1]) for (let k = 0; k < 3; k++) {
+    g.beginPath();
+    g.arc(side ? cw - ch * 0.2 : ch * 0.2, ch * (0.3 + k * 0.2), ch * 0.028, 0, Math.PI * 2);
+    g.fill();
+  }
+  const lines = splitLabel(label);
+  const fs = fitText(g, lines, cw * 0.74, ch * (lines.length > 1 ? 0.3 : 0.44));
+  g.font = `800 ${fs}px ${SIGN_FONT}`;
+  g.textAlign = "center";
+  g.textBaseline = "middle";
+  g.fillStyle = "#ffffff";
+  g.shadowColor = "rgba(0,0,0,0.5)";
+  g.shadowBlur = fs * 0.08;
+  g.shadowOffsetY = fs * 0.05;
+  lines.forEach((l, row) => g.fillText(l.text, cw / 2, ch / 2 + (row - (lines.length - 1) / 2) * fs * 1.2));
+  g.shadowBlur = 0;
+  g.shadowOffsetY = 0;
+}
+
+/**
+ * The picture on a lit sign. "neon" is glowing outline lettering on a clear ground (layer 1 holds only the flickering letter),
+ * "board" is white lettering on a coloured board. `aspect` is the sign's width over its height. Null on the server.
+ */
+export function signTexture(kind: "neon" | "board", label: string, color: string, aspect: number, layer = 0): THREE.CanvasTexture | null {
+  if (typeof document === "undefined") return null;
+  const a = Math.round(Math.max(1.2, Math.min(6, aspect)) * 20) / 20;
+  const key = `sign|${kind}|${layer}|${a}|${color}|${label}`;
+  const hit = signCache.get(key);
+  if (hit) return hit;
+  const cw = 768;
+  const ch = Math.round(cw / a);
+  const c = document.createElement("canvas");
+  c.width = cw;
+  c.height = ch;
+  const g = c.getContext("2d")!;
+  if (kind === "neon") drawNeon(g, cw, ch, label, color, layer);
+  else drawBoard(g, cw, ch, label, color);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 4;
+  signCache.set(key, t);
+  return t;
+}
