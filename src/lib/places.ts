@@ -301,7 +301,7 @@ export const PLACES: Place[] = [
     size: [1.2, 4.4, 1.2],
     color: "#b9855a",
     style: "lookout",
-    actions: [{ id: "climb", label: "Climb to the top", secs: 5, cost: 300, gain: { fun: 30, energy: -10 } }],
+    actions: [{ id: "climb", label: "Climb to the top", secs: 5, cost: 300, gain: { fun: 30, energy: -4 } }],
   },
   {
     id: "mosque",
