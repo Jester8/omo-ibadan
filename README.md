@@ -13,8 +13,8 @@ npm run dev:all        # web on :3000 + realtime server on :8787
 ```
 
 Or in two terminals: `npm run dev` and `npm run server`.
-Without the server the game still runs solo (NPC citizens, local save); with it you get other
-players, chat, shared land, voice rooms and phone calls.
+Without the server the game still runs solo (local save, nobody else around); with it you get other
+players, chat, shared land, voice rooms and phone calls. Only real players are ever shown in the world.
 
 Useful URL flags: `/play?hour=21` fixes the game clock (0 to 24) for testing day/night; `/play?enter=home` (or a place id such as `amala-skye`, or `flat`) walks straight inside.
 
@@ -28,7 +28,7 @@ Env (optional): `NEXT_PUBLIC_WS_URL=wss://your-server` points the client at a de
 | `src/lib/moderation.ts` | Chat filter shared by client and server |
 | `src/lib/furniture.ts`, `interiors.ts`, `layouts.ts` | Interior system: furniture catalogue, rooms, 24 layouts (places and homes) |
 | `src/lib/interiorRuntime.ts` | Entering and leaving buildings, using furniture, generator power |
-| `src/components/interior/` | Interior rendering: floors, cutaway walls, windows, furniture, residents |
+| `src/components/interior/` | Interior rendering: floors, cutaway walls, windows, furniture |
 | `src/lib/store.ts` | Game state (zustand, persisted to localStorage) |
 | `src/lib/pathing.ts`, `movement.ts` | A* click-to-move around buildings |
 | `src/lib/net.ts`, `voice.ts`, `protocol.ts` | Realtime client, WebRTC voice, message types |

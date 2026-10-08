@@ -1,5 +1,5 @@
 import type { ActionDef } from "./places";
-import type { FurnKind, Pose } from "./furniture";
+import type { FurnKind } from "./furniture";
 import { FURN, S } from "./furniture";
 import { Grid } from "./pathing";
 
@@ -25,23 +25,6 @@ export type Item = {
 /** Axis-aligned partition wall. `door` is how far along the wall (0..1) the doorway sits. */
 export type Wall = { x1: number; z1: number; x2: number; z2: number; door?: number; doorW?: number };
 
-/** People on the dance floor: nameless, always dancing. */
-export type Dancer = { x: number; z: number; seed: string; woman?: boolean; ry?: number };
-
-export type Resident = {
-  name: string;
-  x: number;
-  z: number;
-  ry?: number;
-  pose?: Pose;
-  seatH?: number;
-  /** look seed (stable per resident) */
-  seed?: string;
-  lines?: string[];
-  /** a market woman or aunty: dressed in wrapper and gele */
-  woman?: boolean;
-};
-
 export type Zone = { x: number; z: number; w: number; d: number; floor: FloorKind; color?: string };
 
 export type Layout = {
@@ -61,10 +44,6 @@ export type Layout = {
   items: Item[];
   /** the exit mat sits on the front wall (z = +d/2) at this x */
   exitX: number;
-  residents?: Resident[];
-  /** a crowd dancing to the music (clubs) */
-  dancers?: Dancer[];
-  lines?: string[];
 };
 
 export type InteriorRef = { kind: "place" | "home"; id: string };

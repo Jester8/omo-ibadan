@@ -1,6 +1,6 @@
 "use client";
 
-import Match from "./Match";
+import Pitch from "./Pitch";
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
@@ -272,7 +272,7 @@ function Stadium({ size: [w, h], color }: SP) {
       <mesh position={[0, 0.1 + h * 0.6, 0]} rotation-x={-Math.PI / 2} material={mat("#3b4a52")}>
         <ringGeometry args={[r - 0.8, r, 48]} />
       </mesh>
-      <Match />
+      <Pitch />
       {[0, 1, 2, 3].map((i) => {
         const a = (i / 4) * Math.PI * 2 + Math.PI / 4;
         const x = Math.cos(a) * (r + 0.15);

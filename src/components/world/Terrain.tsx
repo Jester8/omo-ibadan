@@ -4,13 +4,8 @@ import Skyline from "./Skyline";
 import Roofscape from "./Roofscape";
 import TrafficLights from "./TrafficLights";
 import { BLOCKS, ESTATES, ROAD_LINES, WORLD_HALF, inLake } from "@/lib/world";
-import CarModel from "./CarModel";
-import Avatar from "@/components/avatar/Avatar";
-import { AVATAR_SCALE } from "./Player";
-import { seededLook } from "@/lib/look";
 import { me, remoteMotion, traffic } from "@/lib/playerState";
 import { junctionNear, lightAt } from "@/lib/traffic";
-import { NPCS } from "./People";
 import { useGame } from "@/lib/store";
 import { useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
@@ -207,7 +202,7 @@ function Surroundings() {
 
 /* --------------------------------- traffic --------------------------------- */
 
-type Car = { hx: number; hz: number; speed: number; offset: number; color: string; danfo: boolean; ccw: boolean; bike?: boolean };
+type Car = { hx: number; hz: number; speed: number; offset: number; color: string; danfo: boolean; ccw: boolean };
 
 const CARS: Car[] = [
   { hx: 10, hz: 10, speed: 2.4, offset: 0, color: "#f2b632", danfo: true, ccw: false },
@@ -222,12 +217,7 @@ const CARS: Car[] = [
   { hx: 30, hz: 30, speed: 3.0, offset: 90, color: "#4a90e2", danfo: false, ccw: true },
   { hx: 40, hz: 40, speed: 3.6, offset: 20, color: "#f4f4f2", danfo: false, ccw: false },
   { hx: 40, hz: 40, speed: 3.4, offset: 150, color: "#e85d4a", danfo: true, ccw: true },
-  { hx: 30, hz: 20, speed: 3.0, offset: 10, color: "#3aa57a", danfo: false, ccw: false, bike: false },
-  { hx: 40, hz: 30, speed: 4.0, offset: 40, color: "#2f9e6b", danfo: false, ccw: false, bike: true },
-  { hx: 10, hz: 30, speed: 3.8, offset: 70, color: "#e85d4a", danfo: false, ccw: true, bike: true },
-  { hx: 10, hz: 10, speed: 3.4, offset: 60, color: "#2f9e6b", danfo: false, ccw: true, bike: true },
-  { hx: 20, hz: 20, speed: 3.6, offset: 20, color: "#e85d4a", danfo: false, ccw: false, bike: true },
-  { hx: 0, hz: 10, speed: 3.2, offset: 25, color: "#4a90e2", danfo: false, ccw: true, bike: true },
+  { hx: 30, hz: 20, speed: 3.0, offset: 10, color: "#3aa57a", danfo: false, ccw: false },
 ];
 
 /** Traffic crawls through the streets at about half the old speed. */
@@ -237,7 +227,6 @@ const TRAFFIC_PACE = 0.8;
 function personWithin(px: number, pz: number, r: number): boolean {
   const st = useGame.getState();
   if (!st.interior && !st.deck && Math.hypot(me.x - px, me.z - pz) < r) return true;
-  for (const n of NPCS) if (Math.hypot(n.st.x - px, n.st.z - pz) < r) return true;
   for (const q of remoteMotion.values()) if (Math.hypot(q.x - px, q.z - pz) < r) return true;
   return false;
 }
@@ -247,14 +236,12 @@ function personAhead(px: number, pz: number, x: number, z: number): boolean {
   const near = (qx: number, qz: number) => Math.hypot(qx - px, qz - pz) < 0.95 || Math.hypot(qx - x, qz - z) < 0.6;
   const st = useGame.getState();
   if (!st.interior && !st.deck && near(me.x, me.z)) return true;
-  for (const n of NPCS) if (near(n.st.x, n.st.z)) return true;
   for (const r of remoteMotion.values()) if (near(r.x, r.z)) return true;
   return false;
 }
 
 function Vehicle({ car, index }: { car: Car; index: number }) {
   const g = useRef<THREE.Group>(null);
-  const rider = useRef({ speed: car.speed * TRAFFIC_PACE, pose: "sit" as const });
   const lane = 0.42;
   // how far round its loop the vehicle has travelled, and how fast it is rolling right now (0 = stopped)
   const prog = useRef(car.offset);
@@ -345,23 +332,12 @@ function Vehicle({ car, index }: { car: Car; index: number }) {
       g.current.rotation.y = ry;
     }
     // share the position (following distance)
-    const t = (traffic[index] ??= { x, z, ry, speed: car.speed, bike: !!car.bike });
+    const t = (traffic[index] ??= { x, z, ry, speed: car.speed });
     t.x = x;
     t.z = z;
     t.ry = ry;
     t.speed = car.speed * roll.current;
   });
-  if (car.bike) {
-    return (
-      <group ref={g}>
-        <CarModel kind="okada" color={car.color} trafficIndex={index} />
-        {/* the okada man, sitting on his bike */}
-        <group position-y={-0.18}>
-          <Avatar look={{ ...seededLook(`okada-${index}`), frame: "m", top: "tee", accessory: index % 2 ? "cap" : "none" }} motion={rider} scale={AVATAR_SCALE} />
-        </group>
-      </group>
-    );
-  }
   const len = car.danfo ? 0.95 : 0.8;
   return (
     <group ref={g}>

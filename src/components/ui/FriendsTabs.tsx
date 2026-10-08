@@ -365,7 +365,7 @@ function NearbyPanel() {
 
 type Tab = "chats" | "friends" | "nearby";
 
-/** The Friends tab: chats, friends and requests, people nearby, and the people of Ibadan you've met. */
+/** The Friends tab: chats, friends and requests, and the players nearby. */
 export default function FriendsTabs() {
   const [tab, setTab] = useState<Tab>("chats");
   const unread = useGame((s) => s.threads.reduce((n, t) => n + t.unread, 0));

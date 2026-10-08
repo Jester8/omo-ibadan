@@ -22,14 +22,14 @@ export const rt = {
 
 const plotInfo = (id: string) => {
   const p = useGame.getState().plots[id];
-  return p ? { tier: p.tier, ownerId: p.ownerId, ownerName: p.ownerName } : undefined;
+  return p ? { tier: p.tier, ownerId: p.ownerId, ownerName: p.ownerName, biz: p.biz } : undefined;
 };
 
-/** The player's own home: their best built house, or the rented flat everyone starts with. */
+/** The player's own home: their best built house (a business is not a home), or the rented flat everyone starts with. */
 export function homeRef(): InteriorRef {
   const s = useGame.getState();
   const mine = Object.entries(s.plots)
-    .filter(([, p]) => p.ownerId === s.profile?.id && p.tier >= 1)
+    .filter(([, p]) => p.ownerId === s.profile?.id && p.tier >= 1 && !p.biz)
     .sort((a, b) => b[1].tier - a[1].tier);
   return mine.length ? { kind: "home", id: mine[0][0] } : { kind: "home", id: FLAT.id };
 }
@@ -37,7 +37,8 @@ export function homeRef(): InteriorRef {
 /** The layout for a room, with the viewer's own decor added to homes they own. */
 export function loadLayout(ref: InteriorRef): Layout | null {
   const base = layoutFor(ref, plotInfo);
-  if (!base || ref.kind !== "home") return base;
+  // a shop, gym or salon keeps its fittings: home decor only goes into houses
+  if (!base || ref.kind !== "home" || useGame.getState().plots[ref.id]?.biz) return base;
   const s = useGame.getState();
   // houses show whatever the owner placed, to every visitor; the flat is yours alone
   const ids = ref.id === FLAT.id ? s.decor[ref.id] : s.plots[ref.id]?.decor ?? (s.plots[ref.id]?.ownerId === s.profile?.id ? s.decor[ref.id] : undefined);

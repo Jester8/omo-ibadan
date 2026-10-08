@@ -91,7 +91,7 @@ export default function InteriorPanel() {
     <>
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="grid size-12 place-items-center rounded-2xl bg-amber-100 text-2xl">{place?.emoji ?? "🏠"}</div>
+          <div className="grid size-12 place-items-center rounded-2xl bg-amber-100 text-2xl">{place?.emoji ?? biz?.emoji ?? "🏠"}</div>
           <div>
             <h2 className="text-lg font-semibold leading-tight text-stone-900">{layout.name}</h2>
             <p className="text-xs font-semibold text-amber-700 first-letter:uppercase">{subtitle}</p>
@@ -108,11 +108,6 @@ export default function InteriorPanel() {
       </div>
 
       <HereNow />
-      {interior.kind === "home" && (
-        <div className="mt-3">
-          <VoiceRoomCard room={`home:${interior.id}`} label={biz ? "Chat with customers" : "Talk together"} />
-        </div>
-      )}
       {place?.kind === "shop" && <ShopPanel />}
 
       <div className={`mt-4 flex items-center justify-between gap-3 rounded-2xl px-4 py-3 ring-1 ${power ? "bg-emerald-50 ring-emerald-100" : "bg-amber-50 ring-amber-200"}`}>
@@ -140,7 +135,11 @@ export default function InteriorPanel() {
       )}
 
       <p className="mt-3 hidden text-sm text-stone-600 sm:block">
-        Tap furniture to use it: sofas and chairs to sit (friends in the room see you settle in), beds to sleep, the stove to cook, the TV for a show.
+        {biz
+          ? mineBiz
+            ? `Your ${biz.name.toLowerCase()} is open. Set prices, watch sales and hire staff below.`
+            : biz.tip
+          : "Tap furniture to use it: sofas and chairs to sit (friends in the room see you settle in), beds to sleep, the stove to cook, the TV for a show."}
       </p>
 
       {place && (
@@ -295,7 +294,7 @@ export default function InteriorPanel() {
       )}
 
       <div className="mt-3">
-        <VoiceRoomCard room={place ? `place:${place.id}` : `home:${interior.id}`} label={place ? `${place.name} voice` : "House party voice"} />
+        <VoiceRoomCard room={place ? `place:${place.id}` : `home:${interior.id}`} label={place ? `${place.name} voice` : biz ? (mineBiz ? "Chat with customers" : `${biz.name} voice`) : "Talk together"} />
       </div>
     </>
   );

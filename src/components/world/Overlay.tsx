@@ -10,7 +10,7 @@ import { PLOTS, naira } from "@/lib/plots";
 import { me, remoteMotion } from "@/lib/playerState";
 import { useGame } from "@/lib/store";
 import { colorFor } from "@/lib/look";
-import { NPCS, sameSpace } from "./People";
+import { sameSpace } from "./People";
 import { S } from "@/lib/furniture";
 import { interiorKey } from "@/lib/interiors";
 import { rt, walkToExit } from "@/lib/interiorRuntime";
@@ -53,7 +53,7 @@ function PlaceLabels() {
   const atPlace = useGame((s) => s.atPlace);
   const hour = useHour();
   const campus = useGame((s) => s.campus);
-  // on a phone, place names are smaller and only the ones near you show, so the screen stays readable
+  // place names are only shown near you (closer still on a phone), so the screen stays readable; the one you picked or stand in always shows
   const [phone] = useState(() => typeof window !== "undefined" && window.innerWidth < 640);
   return (
     <>
@@ -62,7 +62,7 @@ function PlaceLabels() {
         const sel = selected?.type === "place" && selected.id === p.id;
         const here = atPlace === p.id;
         return (
-          <Anchored key={p.id} id={`place:${p.id}`} get={(o) => o.set(p.pos[0], p.size[1] + 0.9, p.pos[1])} maxCam={phone ? 38 : 46} maxDist={phone ? 26 : undefined}>
+          <Anchored key={p.id} id={`place:${p.id}`} get={(o) => o.set(p.pos[0], p.size[1] + 0.9, p.pos[1])} maxCam={phone ? 38 : 46} maxDist={sel || here ? undefined : phone ? 26 : 38}>
             <button
               onClick={() => useGame.getState().select({ type: "place", id: p.id })}
               className={`pointer-events-auto flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] font-semibold max-sm:gap-1 max-sm:px-2 max-sm:py-1 max-sm:text-[10.5px] shadow-lg ring-1 backdrop-blur transition-all duration-300 hover:scale-105 ${
@@ -94,8 +94,9 @@ function PlotLabels() {
         const state = plots[p.id];
         const mine = state?.ownerId === myId;
         const sel = selected?.type === "plot" && selected.id === p.id;
+        // land for sale only announces itself when you are close; homes and businesses keep their tag
         return (
-          <Anchored key={p.id} id={`plot:${p.id}`} get={(o) => o.set(p.pos[0], state && state.tier > 0 ? 2.1 : 1.15, p.pos[1])} maxCam={28}>
+          <Anchored key={p.id} id={`plot:${p.id}`} get={(o) => o.set(p.pos[0], state && state.tier > 0 ? 2.1 : 1.15, p.pos[1])} maxCam={28} maxDist={state || sel ? undefined : 14}>
             <button
               onClick={() => useGame.getState().select({ type: "plot", id: p.id })}
               className={`${sel ? "" : "max-sm:hidden"} pointer-events-auto whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-bold shadow-md ring-1 transition hover:scale-105 ${
@@ -134,13 +135,13 @@ function Bubble({ id }: { id: string }) {
   );
 }
 
-function NameTag({ name, bubbleId, speaking, tone = "me", dim = false }: { name: string; bubbleId: string; speaking?: boolean; tone?: "me" | "other"; dim?: boolean }) {
+function NameTag({ name, bubbleId, speaking, tone = "me" }: { name: string; bubbleId: string; speaking?: boolean; tone?: "me" | "other" }) {
   return (
     <div className="relative flex flex-col items-center">
       <Bubble id={bubbleId} />
       <span
         className={`flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold shadow ring-1 ${
-          tone === "me" ? "bg-emerald-700 text-white ring-emerald-800" : dim ? "bg-white/70 text-stone-600 ring-black/5" : "bg-white text-stone-800 ring-black/5"
+          tone === "me" ? "bg-emerald-700 text-white ring-emerald-800" : "bg-white text-stone-800 ring-black/5"
         } ${speaking ? "outline outline-2 outline-offset-2 outline-emerald-400" : ""}`}
       >
         {speaking && <Mic className="size-3 text-emerald-400" />}
@@ -154,7 +155,6 @@ function PeopleTags() {
   const profile = useGame((s) => s.profile);
   const remotes = useGame((s) => s.remotes);
   const speaking = useGame((s) => s.voice.speaking);
-  const inside = useGame((s) => !!s.interior);
   const mine = useGame((s) => (s.interior ? interiorKey(s.interior) : null));
   return (
     <>
@@ -177,17 +177,11 @@ function PeopleTags() {
           <NameTag name={r.name} bubbleId={r.id} speaking={speaking[r.id]} tone="other" />
         </Anchored>
       ))}
-      {!inside &&
-        NPCS.map((n) => (
-          <Anchored key={n.id} id={n.id} get={(o) => o.set(n.st.x, TAG_Y, n.st.z)} maxDist={11}>
-            <NameTag name={n.name} bubbleId={n.id} tone="other" dim />
-          </Anchored>
-        ))}
     </>
   );
 }
 
-/** Exit sign, "what can I do here" prompts on usable furniture, and resident name tags. */
+/** The exit sign. */
 function InteriorLabels() {
   const interior = useGame((s) => s.interior);
   const layout = interior ? rt.layout : null;
@@ -202,11 +196,6 @@ function InteriorLabels() {
           ↩ Exit
         </button>
       </Anchored>
-      {(layout.residents ?? []).map((r) => (
-        <Anchored key={`r${r.name}`} id={`res:${r.name}`} get={(o) => o.set(r.x * S, TAG_Y, r.z * S)} maxDist={9}>
-          <NameTag name={r.name} bubbleId={`res:${r.name}`} tone="other" dim />
-        </Anchored>
-      ))}
     </>
   );
 }
