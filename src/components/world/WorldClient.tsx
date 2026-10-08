@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence } from "motion/react";
 import Hud from "@/components/ui/Hud";
 import SidePanel from "@/components/ui/PlacePanel";
 import BottomBar from "@/components/ui/BottomBar";
@@ -232,11 +232,8 @@ export default function WorldClient() {
           <Hint />
         </>
       )}
-      <AnimatePresence>
-        {mounted && fade && (
-          <motion.div key="fade" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }} className="pointer-events-none absolute inset-0 z-[70] bg-stone-950" />
-        )}
-      </AnimatePresence>
+      {/* the dark curtain between the city and a room: a CSS transition (smooth even while a room is being built) */}
+      {mounted && <div aria-hidden className={`pointer-events-none absolute inset-0 z-[70] bg-stone-950 transition-opacity will-change-[opacity] ${fade ? "opacity-100 duration-150 ease-out" : "opacity-0 duration-250 ease-in"}`} />}
       {mounted && <Toasts />}
       {mounted && <IncomingCall />}
       {mounted && <Knocks />}

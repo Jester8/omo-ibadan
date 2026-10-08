@@ -58,12 +58,27 @@ export function refreshInterior() {
 
 const sameRef = (a: InteriorRef | null, b: InteriorRef) => !!a && a.kind === b.kind && a.id === b.id;
 
+/**
+ * The dark curtain between the city and a room. It drops in about 150 ms (a CSS transition, so it stays smooth even while
+ * the page is busy), the swap happens under it, and it only lifts once the new room has drawn its first frame, so the
+ * work of building the room never shows as stutter. About half a second end to end.
+ */
+export const FADE_DOWN_MS = 150;
 function fadeThen(fn: () => void) {
   useGame.setState({ fade: true });
   setTimeout(() => {
     fn();
-    setTimeout(() => useGame.setState({ fade: false }), 140);
-  }, 260);
+    let lifted = false;
+    const lift = () => {
+      if (lifted) return;
+      lifted = true;
+      useGame.setState({ fade: false });
+    };
+    // two frames: the first renders the new scene (and compiles its shaders), the second shows it
+    if (typeof requestAnimationFrame === "function") requestAnimationFrame(() => requestAnimationFrame(lift));
+    // a hidden tab never runs animation frames, so do not stay black forever
+    setTimeout(lift, 500);
+  }, FADE_DOWN_MS);
 }
 
 export const powerOn = () => !nepaOut(Date.now()) || useGame.getState().generatorUntil > Date.now();
@@ -220,7 +235,7 @@ export function climbTower() {
     s.toast(err, "bad");
     return;
   }
-  setTimeout(goUpDeck, a.secs * 1000 + 200);
+  setTimeout(goUpDeck, a.secs * 1000 + 100);
 }
 
 export function leaveDeck() {
