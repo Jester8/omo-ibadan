@@ -59,7 +59,7 @@ const VENTURA = lay({
     I("plant", -10.5, -2.4), I("plant", -4.9, 6.9), I("plant", -4.9, 3.0), I("plant", 3.1, 6.9),
     I("dressedmannequin", -2.6, 5.2, 0, { variant: "agbada" }), I("dressedmannequin", 2.6, 5.2, 0, { variant: "dress" }),
     I("displaytable", 5.4, -0.7, 0, { variant: "perfume" }), I("displaytable", 7.4, -0.7, 0, { variant: "bags" }), I("dressedmannequin", 6.4, -0.7, 0, { variant: "ankara" }),
-    I("liftdoor", 10.9, -1.6, -H), I("clawmachine", 10.45, 0.1, -H), I("arcade", 10.45, 1.0, -H),
+    I("liftdoor", 10.9, -1.6, -H), sign("CINEMA, LEVEL 2", 10.93, -1.6, -H, "#be123c", 1.8), I("clawmachine", 10.45, 0.1, -H), I("arcade", 10.45, 1.0, -H),
     neon("SALE", -10.97, -1.8, H, "#ff2d95"), neon("ARCADE", 10.97, 0.55, -H, "#22d3ee", 1.4, 2.0),
     pendant(-8.8, -1.8, "#7c3aed"), pendant(-4.4, -1.8, "#e85d9a"), pendant(0, -1.8, "#d9a22b"), pendant(4.4, -1.8, "#0ea5e9"), pendant(8.8, -1.8, "#a855f7"),
     pendant(-3.5, 4.4, "#f97316"), pendant(3.5, 4.4, "#f97316"),
@@ -146,16 +146,17 @@ const MOKOLA = lay({
     { x: -6, z: 3.64, w: 3.9, d: 3.7, floor: "tile", color: "#f3e3ee" },
     { x: 0.9, z: -4.4, w: 9.4, d: 2.2, floor: "tile", color: "#cdd8de" },
     { x: 6.85, z: -2.25, w: 2.3, d: 6.5, floor: "carpet", color: "#7f1d1d" },
-    { x: 4.4, z: 3.8, w: 7.4, d: 3.4, floor: "wood", color: "#d9b78a" },
+    { x: 4.35, z: 3.8, w: 7.3, d: 3.4, floor: "wood", color: "#d9b78a" },
   ],
   items: [
-    /* ---- the plaza ---- */
-    I("rug", -1.4, 0.4, 0, { w: 3.2, d: 2.2, c: "#2f3b82" }),
-    I("bench", -1.4, -0.9, R), I("bench", -1.4, 1.7, 0),
-    I("stall", 0.8, 0.3), I("stall", 3.4, 0.3), I("umbrella", 2.1, 0.3),
-    I("plant", -3.6, -1.4), I("plant", 0.6, -1.4), I("plant", -3.6, 2.4), I("calabash", 0.3, 1.6), I("ibeji", -2.9, 0.6, -H),
-    neon("CHOP LIFE", 7.97, 4.0, -H, "#a3e635"),
-    pendant(-1.4, 0.4, "#f97316"), pendant(-1.4, -2.4, "#22d3ee"),
+    /* ---- the plaza: an arcade island in the middle, airtime stalls under umbrellas ---- */
+    I("rug", -1.0, 0.3, 0, { w: 4.8, d: 2.6, c: "#2f3b82" }),
+    I("clawmachine", -2.8, -0.1, R), ...[-1.9, -1.1, -0.3].map((x) => I("arcade", x, -0.1, R)), I("clawmachine", 0.6, -0.1, R),
+    ...[-2.3, -1.5, -0.7, 0.1].map((x) => I("arcade", x, 0.7, 0)),
+    I("bench", -1.0, 2.3, R), I("stall", 2.4, 0.3), I("stall", 4.6, 0.3), I("umbrella", 3.5, 0.3),
+    I("plant", -3.6, -1.4), I("plant", 1.6, -1.4), I("plant", -3.6, 2.4), I("calabash", 1.0, 1.7),
+    neon("CHOP LIFE", 7.97, 3.0, -H, "#a3e635", 1.2),
+    pendant(-1.0, 0.3, "#a855f7"), pendant(-1.0, -2.4, "#22d3ee"), pendant(3.5, -1.6, "#f97316"),
 
     /* ---- boutique 1: KEMI'S, women's wear ---- */
     sign("KEMI'S BOUTIQUE", -7.93, -3.6, H, "#e85d9a", 2.8),
@@ -192,13 +193,12 @@ const MOKOLA = lay({
     ...["#ef4444", "#f59e0b", "#22c55e", "#a855f7"].map((c, k) => I("wallart", 7.95, -3.4 + k * 1.15, -H, { y: 1.45, w: 1.0, c })),
     I("liftdoor", 7.9, 1.4, -H, { w: 1.6 }), sign("SCREEN 1", 7.93, 1.4, -H, "#7f1d1d", 1.6),
     I("bench", 6.3, -2.9, H), I("bench", 6.3, -0.9, H),
-    neon("NOW SHOWING", 5.95, -5.47, 0, "#f43f5e"),
+    neon("FILMS", 6.2, -5.47, 0, "#f43f5e", 0.9),
 
     /* ---- small food court ---- */
     ...diner(2.3, 2.9, "burger"), ...diner(4.7, 2.9, "rice"), ...diner(7.0, 2.9, "pie"),
     I("grillstand", 2.6, 5.12, R), I("drinkfridge", 3.85, 5.12, R), I("drinkfridge", 4.85, 5.12, R), I("pastrycase", 6.4, 5.12, R),
-    I("menulight", 5.4, 5.43, R),
-    sign("MOKOLA EATS", 1.6, 5.43, R, "#f97316", 2.0),
+    I("menulight", 7.93, 4.6, -H),
     pendant(2.3, 2.9, "#f97316"), pendant(4.7, 2.9, "#f97316"), pendant(7.0, 2.9, "#f97316"),
   ],
 });
@@ -281,8 +281,8 @@ const BODIJA = lay({
     sign("TOMATO LANE", -11.0, -10.93, 0, "#dc2626", 3.0), sign("FRUIT & VEG", -6.2, -10.93, 0, "#16a34a", 2.8),
     ...[-13.4, -11.8, -10.2, -8.6, -7.0, -5.4].map((x, k) => I("produce", x, -10.58, 0, { variant: k % 3 === 2 ? "fruit" : "veg" })),
     I("umbrella", -12.6, -9.6), I("umbrella", -9.4, -9.6), I("umbrella", -6.2, -9.6),
-    ...[-12.0, -10.4, -8.8].flatMap((x, k) => [I("produce", x, -7.8, R, { variant: k === 1 ? "fruit" : "veg" }), I("produce", x, -7.0, 0, { variant: k === 1 ? "veg" : "fruit" })]),
-    I("crates", -13.9, -7.4, H, { c: "#dc2626" }), I("sacks", -6.8, -7.4), I("sacks", -6.0, -7.4),
+    ...[-12.0, -10.0].flatMap((x, k) => [I("produce", x, -7.8, R, { variant: k === 1 ? "fruit" : "veg" }), I("produce", x, -7.0, 0, { variant: k === 1 ? "veg" : "fruit" })]),
+    I("crates", -13.9, -7.4, H, { c: "#dc2626" }), I("crates", -8.4, -7.4, H, { c: "#16a34a" }), I("sacks", -7.4, -7.4), I("sacks", -6.6, -7.4), I("umbrella", -11.0, -7.4),
     ...[-11.6, -8.8, -6.0].map((x) => I("stall", x, -4.4, 0)), I("umbrella", -10.2, -4.4), I("umbrella", -7.4, -4.4),
     I("provisions", -14.8, -6.2, H), I("provisions", -14.8, -4.8, H),
 
@@ -310,7 +310,7 @@ const BODIJA = lay({
     sign("PROVISIONS", 14.93, 5.9, -H, "#16a34a", 2.8), sign("HOUSEHOLD & POTS", 14.93, 9.3, -H, "#ea580c", 3.0),
     ...[3.8, 5.2, 6.6, 8.0].map((z) => I("provisions", 14.8, z, -H)),
     ...["snacks", "cans", "cereal", "drinks"].map((v, k) => I("gondola", 4.4 + k * 2.2, 4.0, 0, { variant: v })),
-    ...["cans", "drinks", "snacks", "cereal"].map((v, k) => I("gondola", 4.4 + k * 2.2, 6.6, 0, { variant: v })),
+    ...["cans", "drinks", "snacks"].map((v, k) => I("gondola", 4.4 + k * 2.2, 6.6, 0, { variant: v })), I("crates", 11.0, 6.6, 0, { c: "#e2a233" }), I("sacks", 12.0, 6.6),
     ...row("mortar", 4.6, 9.0, 4, 1.4, 0), I("calabash", 10.2, 9.0), I("calabash", 11.4, 9.0), I("umbrella", 6.4, 9.0),
     ...row("cooler", 4.5, 10.78, 4, 1.0, R), ...row("crates", 10.4, 10.65, 3, 1.1, R, { c: "#e2a233" }),
     I("gascooker", 13.5, 10.6, R), I("gascooker", 14.3, 10.6, R), I("standingfan", 12.9, 9.4), I("standingfan", 13.8, 9.4),
@@ -356,8 +356,9 @@ const SANGO = lay({
   items: [
     /* ---- the produce hall at the north end ---- */
     sign("FRESH PRODUCE", -11.0, -10.93, 0, "#16a34a", 4.2), sign("ATA, TATASE & TOMATO", -6.0, -10.93, 0, "#dc2626", 3.6), sign("YAM & PLANTAIN", 5.2, -10.93, 0, "#a16207", 3.4),
-    ...[-13.6, -12.0, -10.4, -8.8, -7.2, -5.6, -4.0, -2.4].map((x, k) => I("produce", x, -10.58, 0, { variant: k % 3 === 1 ? "fruit" : "veg" })),
-    ...[-12.0, -9.6, -7.2].flatMap((x, k) => [I("produce", x, -8.3, R, { variant: k === 1 ? "veg" : "fruit" }), I("produce", x, -7.5, 0, { variant: k === 1 ? "fruit" : "veg" })]),
+    ...[-13.6, -12.0, -10.4, -8.8, -7.2, -5.6, -4.0].map((x, k) => I("produce", x, -10.58, 0, { variant: k % 3 === 1 ? "fruit" : "veg" })),
+    ...[-11.4, -8.4].flatMap((x, k) => [I("produce", x, -8.3, R, { variant: k === 1 ? "veg" : "fruit" }), I("produce", x, -7.5, 0, { variant: k === 1 ? "fruit" : "veg" })]),
+    I("sacks", -5.4, -7.9), I("sacks", -4.5, -7.9), I("sacks", -3.6, -7.9),
     ...grid("sacks", 1.8, -10.4, 5, 2, 0.95, 0.7), ...row("crates", 7.4, -10.6, 4, 1.1, 0, { c: "#a3b83c" }),
     I("stall", 3.2, -7.8, 0), I("stall", 6.2, -7.8, 0), I("stall", 9.2, -7.8, 0), I("umbrella", 4.7, -7.8), I("umbrella", 7.7, -7.8),
     ...row("mortar", 2.0, -6.0, 3, 1.0, 0),
@@ -395,6 +396,7 @@ const SANGO = lay({
     I("displaytable", 0, 2.4, 0, { variant: "phones" }), I("cooler", 0, 4.2, 0), I("cooler", 0.8, 4.2, 0), I("displaytable", 0, 6.0, 0, { variant: "bags" }),
     pendant(0, -4.3, "#0ea5e9"), pendant(0, -0.7, "#f59e0b"), pendant(0, 2.4, "#0ea5e9"), pendant(0, 6.0, "#e85d9a"),
     neon("FRESH DAILY", 0.1, -10.97, 0, "#a3e635"),
+    I("bukapots", 13.9, 10.55, R), I("grillstand", 12.0, 10.6, R),
   ],
 });
 
