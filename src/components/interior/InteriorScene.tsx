@@ -12,9 +12,10 @@ import { daylight, gameMinutes } from "@/lib/time";
 import { mat } from "@/components/world/materials";
 import { walkTo } from "@/lib/movement";
 import FurnitureItem, { glow } from "./Furniture";
+import { FixtureGlow, updateGlowSheets } from "./bodiesLights";
 import { litMats } from "./prims";
 import { floorMaterial, louvreTexture } from "./textures";
-import { interiorState } from "./power";
+import { beat, beatPulse, interiorState } from "./power";
 
 const WALL_H = 2.7;
 const T = 0.18;
@@ -24,17 +25,39 @@ const windowMat = new THREE.MeshStandardMaterial({ roughness: 0.4, emissive: new
 
 /* ---------------------------------- lights ---------------------------------- */
 
+/** Real point lights are what makes a room slow: about this many per room, however big it is. */
+const MAX_BULBS = 12;
+/** a club keeps fewer, dimmer room lights and leans on its coloured ones */
+const CLUB_BULBS = 6;
+const PARTY_LIGHTS = 3;
+
 function Lights({ layout }: { layout: Layout }) {
+  const club = layout.vibe === "club";
   const amb = useRef<THREE.AmbientLight>(null);
+  const hemi = useRef<THREE.HemisphereLight>(null);
   const sun = useRef<THREE.DirectionalLight>(null);
   const torch = useRef<THREE.PointLight>(null);
   const bulbs = useRef<(THREE.PointLight | null)[]>([]);
-  const spots = useMemo(() => {
-    const nx = Math.max(1, Math.round(layout.w / 5));
-    const nz = Math.max(1, Math.round(layout.d / 5));
+  const party = useRef<(THREE.PointLight | null)[]>([]);
+  const { spots, boost } = useMemo(() => {
+    // a point light for about every 5 m, widened until the room fits the cap
+    let nx = Math.max(1, Math.round(layout.w / 5));
+    let nz = Math.max(1, Math.round(layout.d / 5));
+    const wanted = nx * nz;
+    const cap = club ? CLUB_BULBS : MAX_BULBS;
+    while (nx * nz > cap) {
+      if (nx > 1 && (nz === 1 || nx / layout.w >= nz / layout.d)) nx--;
+      else nz--;
+    }
     const out: [number, number][] = [];
     for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) out.push([((i + 0.5) / nx - 0.5) * layout.w * S, ((j + 0.5) / nz - 0.5) * layout.d * S]);
-    return out;
+    // fewer lights, each stronger and reaching further, so the room stays as bright as it was
+    return { spots: out, boost: club ? 1 : Math.max(1, wanted / (nx * nz)) };
+  }, [layout, club]);
+  // the dance floor the coloured lights circle: the first zone, else the middle of the room
+  const dance = useMemo(() => {
+    const z = layout.zones?.[0];
+    return { x: (z?.x ?? 0) * S, z: (z?.z ?? 0) * S, r: Math.min(z?.w ?? layout.w * 0.5, z?.d ?? layout.d * 0.5) * 0.3 * S };
   }, [layout]);
   const tint = layout.light === "cool" ? "#cfd8ff" : layout.light === "bright" ? "#fff8ec" : "#ffdca8";
 
@@ -49,10 +72,25 @@ function Lights({ layout }: { layout: Layout }) {
     scene.background = scene.background instanceof THREE.Color ? scene.background.set("#1d1713") : new THREE.Color("#1d1713");
     scene.fog = null;
 
-    if (amb.current) amb.current.intensity = 0.32 + day * 0.5 + (power ? 0.18 : 0);
-    if (sun.current) sun.current.intensity = 0.25 + day * 0.9;
-    const bulb = power ? 0.8 + (1 - day) * 0.9 : 0;
+    // a club is moody: little ambient, little sun, the colour comes from its own lights
+    if (amb.current) amb.current.intensity = club ? 0.18 + day * 0.14 + (power ? 0.08 : 0) : 0.32 + day * 0.5 + (power ? 0.18 : 0);
+    if (hemi.current) hemi.current.intensity = club ? (power ? 0.2 : 0.12) : 0.35;
+    if (sun.current) sun.current.intensity = club ? 0.1 + day * 0.25 : 0.25 + day * 0.9;
+    const bulb = power ? (club ? 0.5 + (1 - day) * 0.4 : (0.8 + (1 - day) * 0.9) * boost) : 0;
     for (const l of bulbs.current) if (l) l.intensity = bulb;
+    if (club) {
+      // three coloured lights drift over the dance floor, cycling hue and flaring on the beat
+      const b = beat();
+      const kick = power ? beatPulse() : 0;
+      for (let i = 0; i < PARTY_LIGHTS; i++) {
+        const l = party.current[i];
+        if (!l) continue;
+        const a = b * 0.25 + (i / PARTY_LIGHTS) * Math.PI * 2;
+        l.position.set(dance.x + Math.cos(a) * dance.r, 1.15, dance.z + Math.sin(a * 1.3) * dance.r);
+        l.color.setHSL((b * 0.035 + i / PARTY_LIGHTS) % 1, 0.95, 0.55);
+        l.intensity = power ? 1.2 + 2.4 * kick : 0;
+      }
+    }
     if (torch.current) {
       torch.current.position.set(me.x, 1.2, me.z);
       torch.current.intensity = power ? 0 : 0.5 + (1 - day) * 1.6;
@@ -62,6 +100,8 @@ function Lights({ layout }: { layout: Layout }) {
     glow.neon.emissiveIntensity = power ? 1.6 : 0;
     glow.lantern.emissiveIntensity = power ? 0.25 : 1.4;
     for (const m of litMats) m.emissiveIntensity = power ? (m.userData.on as number) : 0;
+    // light pools and cones follow the power too
+    updateGlowSheets(power, 1 - day);
     windowMat.emissiveIntensity = 0.1 + day * 0.9;
   });
 
@@ -70,7 +110,7 @@ function Lights({ layout }: { layout: Layout }) {
   return (
     <>
       <ambientLight ref={amb} color={tint} intensity={0.7} />
-      <hemisphereLight args={["#fff2dc", "#6b4a2f", 0.35]} />
+      <hemisphereLight ref={hemi} args={["#fff2dc", "#6b4a2f", 0.35]} />
       <directionalLight
         ref={sun}
         position={[-W * 0.4, 7, -D * 0.2]}
@@ -94,11 +134,25 @@ function Lights({ layout }: { layout: Layout }) {
           }}
           position={[x, 1.25, z]}
           color={tint}
-          distance={9}
+          distance={9 * Math.sqrt(boost)}
           decay={1.4}
           intensity={1}
         />
       ))}
+      {club &&
+        Array.from({ length: PARTY_LIGHTS }, (_, i) => (
+          <pointLight
+            key={`party${i}`}
+            ref={(el) => {
+              party.current[i] = el;
+            }}
+            position={[dance.x, 1.15, dance.z]}
+            color="#ff3df2"
+            distance={7}
+            decay={1.6}
+            intensity={0}
+          />
+        ))}
       <pointLight ref={torch} color="#fff3d0" distance={5} decay={1.4} intensity={0} />
     </>
   );
@@ -206,7 +260,7 @@ function windowSpots(layout: Layout, side: "back" | "left"): number[] {
     const pos = ((i + 0.5) / n - 0.5) * len;
     const blocked = layout.items.some((it) => {
       const def = FURN[it.kind];
-      const tall = def.h > 0.8 || it.kind === "wallart" || it.kind === "clock" || it.kind === "blackboard";
+      const tall = def.h > 0.8 || it.kind === "wallart" || it.kind === "clock" || it.kind === "blackboard" || it.kind === "neonsign" || it.kind === "signboard" || it.kind === "wallsconce";
       if (!tall) return false;
       const near = side === "back" ? it.z < -layout.d / 2 + 1.1 && Math.abs(it.x - pos) < 1.2 : it.x < -layout.w / 2 + 1.1 && Math.abs(it.z - pos) < 1.2;
       return near;
@@ -339,6 +393,7 @@ function Room({ layout }: { layout: Layout }) {
         {layout.items.map((it, i) => (
           <FurnitureItem key={i} item={it} accent={layout.accent} trim={layout.trim} onUse={() => walkToFurn(i)} />
         ))}
+        <FixtureGlow items={layout.items} />
         <ExitMat layout={layout} />
       </group>
       {/* click the floor to walk */}
