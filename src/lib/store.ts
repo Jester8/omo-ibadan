@@ -7,7 +7,7 @@ import { bizById } from "./business";
 import type { InteriorRef } from "./interiors";
 import type { Rel } from "./romance";
 import { carById, type RideId } from "./cars";
-import { PASS_MS } from "./estates";
+import { PASS_MS, PASS_WAIT_MS } from "./estates";
 import type { DmMsg, Person, Thread } from "./social";
 import { destById, FLIGHT_SECS } from "./flights";
 import { ESTATE_BY_ID } from "./world";
@@ -154,6 +154,8 @@ type State = {
   bookTicket: (destId: string) => string | null;
   boardFlight: () => string | null;
   passes: Record<string, number>;
+  /** when each paid-for pass opens its gate (the guard takes a minute to write the visitor in) */
+  passOpens: Record<string, number>;
   campus: boolean;
   buyPass: (estateId: string) => string | null;
   pantry: number;
@@ -337,6 +339,7 @@ export const useGame = create<State>()(
         set({ flight: { ...s.flight, returning: true } });
       },
       passes: {},
+      passOpens: {},
       campus: false,
       buyPass: (estateId) => {
         const s = get();
@@ -344,7 +347,11 @@ export const useGame = create<State>()(
         if (!e) return "No such estate.";
         if (s.money < e.price) return `A pass costs ${naira(e.price)}.`;
         const now = Date.now();
-        set({ money: s.money - e.price, passes: { ...s.passes, [e.id]: Math.max(now, s.passes[e.id] ?? 0) + PASS_MS } });
+        // a new pass opens after the guard's minute, then lasts 30 minutes; paying again extends the one you have
+        const live = (s.passes[e.id] ?? 0) > now;
+        const opens = live ? (s.passOpens[e.id] ?? 0) : now + PASS_WAIT_MS;
+        const ends = (live ? s.passes[e.id] : opens) + PASS_MS;
+        set({ money: s.money - e.price, passes: { ...s.passes, [e.id]: ends }, passOpens: { ...s.passOpens, [e.id]: opens } });
         return null;
       },
       pantry: 0,
@@ -649,6 +656,7 @@ export const useGame = create<State>()(
         plates: s.plates,
         dishes: s.dishes,
         passes: s.passes,
+        passOpens: s.passOpens,
         ticket: s.ticket,
         decor: s.decor,
         romance: s.romance,

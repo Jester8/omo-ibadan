@@ -37,7 +37,7 @@ function Boom({ estate, x, z, across }: { estate: Estate; x: number; z: number; 
   const arm = useRef<THREE.Group>(null);
   useFrame((_, dt) => {
     const s = useGame.getState();
-    const open = hasAccess(estate, { plots: s.plots, profileId: s.profile?.id, passes: s.passes }, Date.now());
+    const open = hasAccess(estate, { plots: s.plots, profileId: s.profile?.id, passes: s.passes, opens: s.passOpens }, Date.now());
     if (arm.current) arm.current.rotation.z = THREE.MathUtils.damp(arm.current.rotation.z, open ? Math.PI / 2.2 : 0, 6, dt);
   });
   const rot = across === "z" ? Math.PI / 2 : 0;

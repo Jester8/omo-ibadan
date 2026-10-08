@@ -35,7 +35,7 @@ import { enterInterior, goUpDeck, homeRef, rt, startUse, walkToFurn } from "@/li
 import { cam, me } from "@/lib/playerState";
 import { setOpenEstates } from "@/lib/pathing";
 import { openEstateIds } from "@/lib/estates";
-import { inCampus } from "@/lib/world";
+import { ESTATE_BY_ID, inCampus } from "@/lib/world";
 
 // big panels that are rarely open load on demand, so the game itself starts sooner
 const Sheets = dynamic(() => import("@/components/ui/Sheets"), { ssr: false });
@@ -136,9 +136,14 @@ function Runtime() {
 
   // boom gates follow who may enter; the campus buildings appear once you are through the gate
   useEffect(() => {
+    let wasOpen: string[] | null = null;
     const tick = () => {
       const s = useGame.getState();
-      setOpenEstates(openEstateIds({ plots: s.plots, profileId: s.profile?.id, passes: s.passes }, Date.now()));
+      const open = openEstateIds({ plots: s.plots, profileId: s.profile?.id, passes: s.passes, opens: s.passOpens }, Date.now());
+      setOpenEstates(open);
+      // a visitor pass paid for a minute ago: the guard has raised the boom
+      if (wasOpen) for (const id of open) if (!wasOpen.includes(id) && Date.now() - (s.passOpens[id] ?? 0) < 5000) s.toast(`The guard at ${ESTATE_BY_ID[id]?.name ?? "the estate"} has raised the boom. You can walk in.`, "good");
+      wasOpen = open;
       const inside = inCampus(me.x, me.z);
       if (inside !== s.campus) useGame.setState({ campus: inside });
     };
