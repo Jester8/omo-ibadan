@@ -32,6 +32,129 @@ export const signMat = new THREE.MeshStandardMaterial({
   roughness: 0.5,
 });
 
+/* ---- night lights for the shopping, eating and nightlife places: shared materials that Lighting.tsx drives once per frame ---- */
+
+/** A stable 0..2π offset from a name, so neighbouring neon signs do not breathe in step. */
+function phaseOf(key: string) {
+  let h = 0;
+  for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) | 0;
+  return (Math.abs(h) % 628) / 100;
+}
+
+export type Neon = { m: THREE.MeshStandardMaterial; day: number; pulse: boolean; phase: number };
+/** Every coloured sign / neon material in use (never removed: there is one per colour). */
+export const neons: Neon[] = [];
+const neonCache = new Map<string, THREE.MeshStandardMaterial>();
+
+/**
+ * Shared glowing paint per colour. `day` is the glow it keeps in daylight (0.4 is what the old sign bands had, 0 is plain paint);
+ * at night it brightens, NEPA takes most of it away, and `pulse` makes it breathe slowly (clubs).
+ */
+export function neonMat(color: string, pulse = false, day = 0.4): THREE.MeshStandardMaterial {
+  const key = `${color}|${pulse ? 1 : 0}|${day}`;
+  let m = neonCache.get(key);
+  if (!m) {
+    m = new THREE.MeshStandardMaterial({ color, emissive: new THREE.Color(color), emissiveIntensity: day });
+    neonCache.set(key, m);
+    neons.push({ m, day, pulse, phase: phaseOf(key) });
+  }
+  return m;
+}
+
+/** Warm lit shop-front glass: pale glass by day, a glowing window at night (NEPA turns it off). */
+export const shopGlow = new THREE.MeshStandardMaterial({
+  color: "#9cc0d2",
+  emissive: new THREE.Color("#ffd08a"),
+  emissiveIntensity: 0,
+  roughness: 0.25,
+});
+
+/** The rooftop mirror ball of the clubs: faceted, and it sparkles on the beat once it is dark. */
+export const discoMat = new THREE.MeshStandardMaterial({
+  color: "#d9d9e6",
+  emissive: new THREE.Color("#b58cff"),
+  emissiveIntensity: 0,
+  roughness: 0.15,
+  metalness: 0.02,
+  flatShading: true, // the facets are what sparkle
+});
+
+export type Spill = { m: THREE.MeshBasicMaterial; max: number; pulse: boolean; phase: number };
+/** Light pools on the pavement and club searchlight beams: additive, fade in at dusk (the world has no real point lights). */
+export const spills: Spill[] = [];
+const spillCache = new Map<string, THREE.MeshBasicMaterial>();
+
+let poolTex: THREE.DataTexture | null = null;
+/** A soft round falloff (built from numbers, no canvas, so it also works before the page exists). */
+function poolTexture() {
+  if (poolTex) return poolTex;
+  const N = 64;
+  const data = new Uint8Array(N * N * 4);
+  for (let y = 0; y < N; y++) {
+    for (let x = 0; x < N; x++) {
+      const r = Math.min(1, Math.hypot((x + 0.5) / N - 0.5, (y + 0.5) / N - 0.5) * 2);
+      const a = (1 - r) * (1 - r) * (1 - r * 0.4);
+      const i = (y * N + x) * 4;
+      data[i] = data[i + 1] = data[i + 2] = 255;
+      data[i + 3] = Math.round(a * 255);
+    }
+  }
+  poolTex = new THREE.DataTexture(data, N, N, THREE.RGBAFormat);
+  poolTex.magFilter = poolTex.minFilter = THREE.LinearFilter;
+  poolTex.needsUpdate = true;
+  return poolTex;
+}
+
+/** A pool of coloured light on the ground (flat, additive). `max` is its opacity at full dark. */
+export function poolMat(color: string, pulse = false, max = 0.5): THREE.MeshBasicMaterial {
+  const key = `pool|${color}|${pulse ? 1 : 0}|${max}`;
+  let m = spillCache.get(key);
+  if (!m) {
+    m = new THREE.MeshBasicMaterial({
+      color,
+      map: poolTexture(),
+      transparent: true,
+      opacity: 0,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      polygonOffset: true,
+      polygonOffsetFactor: -2,
+      polygonOffsetUnits: -2,
+    });
+    m.visible = false;
+    spillCache.set(key, m);
+    spills.push({ m, max, pulse, phase: phaseOf(key) });
+  }
+  return m;
+}
+
+/** A searchlight beam: the vertex colours fade it out towards the far end. Opacity is driven like the pools. */
+export function beamMat(color: string, max = 0.4): THREE.MeshBasicMaterial {
+  const key = `beam|${color}|${max}`;
+  let m = spillCache.get(key);
+  if (!m) {
+    m = new THREE.MeshBasicMaterial({
+      color,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending,
+    });
+    m.visible = false;
+    spillCache.set(key, m);
+    spills.push({ m, max, pulse: true, phase: phaseOf(key) });
+  }
+  return m;
+}
+
+/** Painted sign boards (a name on a coloured ground): full bright when lit, dimmed by NEPA. Boards register themselves while mounted. */
+export const boardMats = new Set<THREE.MeshBasicMaterial>();
+export function boardMat(map: THREE.Texture): THREE.MeshBasicMaterial {
+  return new THREE.MeshBasicMaterial({ map, toneMapped: false });
+}
+
 let tiles: { base: THREE.CanvasTexture; lit: THREE.CanvasTexture } | null = null;
 
 function makeTiles() {

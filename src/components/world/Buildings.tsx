@@ -1,13 +1,14 @@
 "use client";
 
 import Pitch from "./Pitch";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { PLACES, type Place } from "@/lib/places";
 import { CAMPUS_PLACES } from "@/lib/world";
 import { useGame } from "@/lib/store";
-import { facadeMaterials, lampMat, mat, signMat, windowMats } from "./materials";
+import { beamMat, boardMat, boardMats, discoMat, facadeMaterials, lampMat, mat, neonMat, poolMat, shopGlow, signMat, windowMats } from "./materials";
 
 type V3 = [number, number, number];
 
@@ -51,11 +52,20 @@ function Facade({ p = [0, 0, 0], w, h, d, tint }: { p?: V3; w: number; h: number
   );
 }
 
-function Glow({ p, s, c }: { p: V3; s: V3; c?: string }) {
+/** A glowing sign band (centre position). Shared per-colour material, so it brightens at night and fades with NEPA; `pulse` makes it breathe (clubs). */
+function Glow({ p, s, c, pulse = false }: { p: V3; s: V3; c?: string; pulse?: boolean }) {
   return (
-    <mesh position={p} material={signMat} castShadow>
+    <mesh position={p} material={c ? neonMat(c, pulse) : signMat} castShadow>
       <boxGeometry args={s} />
-      {c && <meshStandardMaterial attach="material" color={c} emissive={c} emissiveIntensity={0.4} />}
+    </mesh>
+  );
+}
+
+/** A flat lit panel (doorway, shop window, light strip) in one of the shared glowing materials. Centre position. */
+function Lit({ p, s, m = lampMat }: { p: V3; s: V3; m?: THREE.Material }) {
+  return (
+    <mesh position={p} material={m}>
+      <boxGeometry args={s} />
     </mesh>
   );
 }
@@ -76,6 +86,116 @@ function Awning({ p, w, colors }: { p: V3; w: number; colors: [string, string] }
 
 function Column({ p, h = 0.9, r = 0.07 }: { p: V3; h?: number; r?: number }) {
   return <Cyl p={p} r={r} h={h} c="#f6f3ec" seg={14} />;
+}
+
+/* ---------------------------- night lighting ---------------------------- */
+/* Shops, eateries and clubs carry their lights on shared materials (see materials.ts), so Lighting.tsx
+   switches them all with the hour and NEPA. No real point lights: those would cost far too much. */
+
+const noRaycast = () => null;
+const WHITE = new THREE.Color("#ffffff");
+
+/** `c` mixed towards white by k (0..1), as a hex string. */
+const lighten = (c: string, k: number) => "#" + new THREE.Color(c).lerp(WHITE, k).getHexString();
+
+/** x, z, half-width, half-depth of a pool of light, in the place's own space. */
+type Spot = [number, number, number, number];
+
+/** Soft pools of light on the pavement (flat and additive). All the spots of one colour merge into one mesh. */
+function Pools({ spots, color = "#ffc27a", pulse = false }: { spots: Spot[]; color?: string; pulse?: boolean }) {
+  const geo = useMemo(() => {
+    const parts = spots.map(([x, z, rx, rz]) => new THREE.PlaneGeometry(rx * 2, rz * 2).rotateX(-Math.PI / 2).translate(x, 0.115, z));
+    const merged = mergeGeometries(parts);
+    parts.forEach((g) => g.dispose());
+    return merged;
+  }, [spots]);
+  useEffect(() => () => geo?.dispose(), [geo]);
+  if (!geo) return null;
+  return <mesh geometry={geo} material={poolMat(color, pulse)} raycast={noRaycast} />;
+}
+
+const BULB = new THREE.SphereGeometry(0.035, 6, 4);
+const WIRE = mat("#2b2724");
+const NO_LAMPS: V3[] = [];
+
+/** a and b are the ends of a sagging cable, with n bulbs strung along it. */
+type Str = { a: V3; b: V3; sag: number; n: number };
+
+/** Festival bulbs over markets and eateries (plus loose stall lamps): one instanced mesh of bulbs and one merged wire. */
+function StringLights({ strings, lamps = NO_LAMPS }: { strings: Str[]; lamps?: V3[] }) {
+  const ref = useRef<THREE.InstancedMesh>(null);
+  const built = useMemo(() => {
+    const bulbs: V3[] = [...lamps];
+    const tubes: THREE.BufferGeometry[] = [];
+    for (const { a, b, sag, n } of strings) {
+      for (let i = 0; i < n; i++) {
+        const t = (i + 0.5) / n;
+        bulbs.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t - sag * 4 * t * (1 - t) - 0.03, a[2] + (b[2] - a[2]) * t]);
+      }
+      // a quadratic curve whose middle control point sits 2 x sag low passes sag below the chord at the middle
+      const mid = new THREE.Vector3((a[0] + b[0]) / 2, (a[1] + b[1]) / 2 - sag * 2, (a[2] + b[2]) / 2);
+      tubes.push(new THREE.TubeGeometry(new THREE.QuadraticBezierCurve3(new THREE.Vector3(...a), mid, new THREE.Vector3(...b)), 10, 0.008, 3));
+    }
+    const wire = tubes.length ? mergeGeometries(tubes) : null;
+    tubes.forEach((g) => g.dispose());
+    return { bulbs, wire };
+  }, [strings, lamps]);
+  useLayoutEffect(() => {
+    const mesh = ref.current;
+    if (!mesh) return;
+    const m = new THREE.Matrix4();
+    built.bulbs.forEach(([x, y, z], i) => mesh.setMatrixAt(i, m.makeTranslation(x, y, z)));
+    mesh.instanceMatrix.needsUpdate = true;
+    mesh.computeBoundingSphere();
+  }, [built]);
+  useEffect(() => () => built.wire?.dispose(), [built]);
+  return (
+    <>
+      <instancedMesh ref={ref} args={[BULB, lampMat, built.bulbs.length]} raycast={noRaycast} />
+      {built.wire && <mesh geometry={built.wire} material={WIRE} raycast={noRaycast} />}
+    </>
+  );
+}
+
+const BEAM_LEN = 3;
+/** A shaft of light that widens upwards and fades out at the top (vertex colours, since it is additive). */
+const BEAM = (() => {
+  const g = new THREE.CylinderGeometry(0.3, 0.02, BEAM_LEN, 10, 1, true).translate(0, BEAM_LEN / 2, 0);
+  const pos = g.attributes.position;
+  const col = new Float32Array(pos.count * 3);
+  for (let i = 0; i < pos.count; i++) {
+    const k = 1 - pos.getY(i) / BEAM_LEN;
+    col[i * 3] = col[i * 3 + 1] = col[i * 3 + 2] = k * k;
+  }
+  g.setAttribute("color", new THREE.BufferAttribute(col, 3));
+  return g;
+})();
+
+/** Two searchlights sweeping slowly over a club roof. */
+function Beams({ p, colors }: { p: V3; colors: [string, string] }) {
+  const a = useRef<THREE.Group>(null);
+  const b = useRef<THREE.Group>(null);
+  useFrame(({ clock }) => {
+    const t = clock.elapsedTime;
+    if (a.current) {
+      a.current.rotation.x = 0.3 * Math.cos(t * 0.45);
+      a.current.rotation.z = 0.5 * Math.sin(t * 0.6);
+    }
+    if (b.current) {
+      b.current.rotation.x = -0.3 * Math.cos(t * 0.4 + 2);
+      b.current.rotation.z = -0.5 * Math.sin(t * 0.5 + 1);
+    }
+  });
+  return (
+    <group position={p}>
+      <group ref={a} position={[-0.35, 0, 0]}>
+        <mesh geometry={BEAM} material={beamMat(colors[0])} raycast={noRaycast} />
+      </group>
+      <group ref={b} position={[0.35, 0, 0]}>
+        <mesh geometry={BEAM} material={beamMat(colors[1])} raycast={noRaycast} />
+      </group>
+    </group>
+  );
 }
 
 /* -------------------------------- styles -------------------------------- */
@@ -114,9 +234,20 @@ function Hall({ size: [w, h, d], color }: SP) {
   );
 }
 
-function Market({ size: [w, h, d], color }: SP) {
+function Market({ size: [w, h, d], color, name = "Market" }: SP) {
   const n = Math.max(3, Math.round(w / 0.85));
   const stripes = [color, "#f6efe2"] as [string, string];
+  const sign = useBoard(name, "#3a2616", "#ffd98a");
+  // festival bulbs: along the front awnings, a lamp under each, and across the yard of the big markets
+  const { strings, lamps } = useMemo(() => {
+    const awn = 0.1 + h * 0.85;
+    const strings: Str[] = [{ a: [-w / 2 + 0.1, awn - 0.1, d / 2 - 0.3], b: [w / 2 - 0.1, awn - 0.1, d / 2 - 0.3], sag: 0.1, n: Math.round(w / 0.3) }];
+    if (d > 4) {
+      for (const k of [-0.25, 0, 0.25]) strings.push({ a: [w * k, awn - 0.12, d / 2 - 0.3], b: [w * k, 0.1 + h * 0.8, -d / 2 + 1.4], sag: 0.3, n: Math.round((d - 1.7) / 0.3) });
+    }
+    const lamps: V3[] = Array.from({ length: n }, (_, i): V3 => [-w / 2 + (w / n) * (i + 0.5), awn - 0.07, d / 2 - 0.62]);
+    return { strings, lamps };
+  }, [w, h, d, n]);
   return (
     <>
       <Box s={[w + 0.3, 0.1, d + 0.3]} c="#cdbfa9" />
@@ -141,6 +272,14 @@ function Market({ size: [w, h, d], color }: SP) {
           </group>
         );
       })}
+      {/* the lit gateway over the entrance, with the market's name */}
+      {[-0.74, 0.74].map((x) => (
+        <Box key={x} p={[x, 0.1, d / 2 + 0.3]} s={[0.06, h * 1.15 + 0.2, 0.06]} c="#5a3a24" />
+      ))}
+      <mesh position={[0, 0.1 + h * 1.15 + 0.02, d / 2 + 0.3]} material={sign} castShadow>
+        <boxGeometry args={[1.48, 0.37, 0.05]} />
+      </mesh>
+      <StringLights strings={strings} lamps={lamps} />
     </>
   );
 }
@@ -323,16 +462,47 @@ function Park({ size: [w, , d] }: SP) {
   );
 }
 
-function Mall({ size: [w, h, d], color }: SP) {
+function Mall({ size: [w, h, d], color, name = "Mall" }: SP) {
+  const sign = useBoard(name, "#b02a6c", "#ffffff");
+  const front = d / 2;
+  const top = 0.1 + h;
+  const trim = neonMat("#fff1c4", false, 0);
   return (
     <>
       <Box s={[w + 0.4, 0.1, d + 0.4]} c="#d9d6d2" />
       <Facade p={[0, 0.1, 0]} w={w} h={h} d={d} tint={color} />
-      <Box p={[0, 0.1 + h, 0]} s={[w + 0.1, 0.1, d + 0.1]} c="#f4eef2" />
-      <Glow p={[0, 0.1 + h + 0.38, d / 2 - 0.1]} s={[w * 0.6, 0.4, 0.1]} c="#ff6fb1" />
+      <Box p={[0, top, 0]} s={[w + 0.1, 0.1, d + 0.1]} c="#f4eef2" />
+      <Glow p={[0, top + 0.38, d / 2 - 0.1]} s={[w * 0.6, 0.4, 0.1]} c="#ff6fb1" />
+      {/* the mall's name, lit, set into the pink sign */}
+      <mesh position={[0, top + 0.38, d / 2 - 0.039]} material={sign}>
+        <boxGeometry args={[w * 0.56, 0.32, 0.02]} />
+      </mesh>
       <Box p={[0, 0.1, d / 2 + 0.3]} s={[1.5, 0.08, 0.6]} c="#2a2f3a" />
       <Box p={[-w * 0.35, 0.1, d / 2 + 0.22]} s={[0.1, 0.9, 0.1]} c="#2a2f3a" />
       <Box p={[w * 0.35, 0.1, d / 2 + 0.22]} s={[0.1, 0.9, 0.1]} c="#2a2f3a" />
+      {/* the entrance canopy on those posts: light under it, a coloured edge on it */}
+      <Box p={[0, 1.0, front + 0.25]} s={[w * 0.7 + 0.2, 0.06, 0.5]} c="#2a2f3a" />
+      <Lit p={[0, 0.992, front + 0.25]} s={[w * 0.7, 0.015, 0.4]} />
+      <mesh position={[0, 1.03, front + 0.515]} material={neonMat(color, false, 0)}>
+        <boxGeometry args={[w * 0.7 + 0.2, 0.04, 0.03]} />
+      </mesh>
+      {/* a lit doorway and glowing shop windows either side of it */}
+      <Lit p={[0, 0.2 + h * 0.17, front + 0.011]} s={[w * 0.14, h * 0.34, 0.02]} />
+      {[-1, 1].map((k) => (
+        <Lit key={k} p={[k * w * 0.28, 0.2 + h * 0.17, front + 0.011]} s={[w * 0.3, h * 0.34, 0.02]} m={shopGlow} />
+      ))}
+      {/* LED strips round the roof edge */}
+      <mesh position={[0, top + 0.05, front + 0.06]} material={trim}>
+        <boxGeometry args={[w + 0.1, 0.035, 0.02]} />
+      </mesh>
+      <mesh position={[0, top + 0.05, -front - 0.06]} material={trim}>
+        <boxGeometry args={[w + 0.1, 0.035, 0.02]} />
+      </mesh>
+      {[-1, 1].map((k) => (
+        <mesh key={k} position={[k * (w / 2 + 0.06), top + 0.05, 0]} material={trim}>
+          <boxGeometry args={[0.02, 0.035, d + 0.1]} />
+        </mesh>
+      ))}
     </>
   );
 }
@@ -365,6 +535,19 @@ function useSign(name: string, bg: string, fg: string) {
   }, [name, bg, fg]);
 }
 
+/** The same sign as a lit board: full bright, dimmed when NEPA takes the light. Registers with the night controller while mounted. */
+function useBoard(name: string, bg: string, fg: string) {
+  const tex = useSign(name, bg, fg);
+  const m = useMemo(() => boardMat(tex), [tex]);
+  useEffect(() => {
+    boardMats.add(m);
+    return () => {
+      boardMats.delete(m);
+    };
+  }, [m]);
+  return m;
+}
+
 /** Restaurant brand colours: sign background, sign text, awning stripe. */
 const BRANDS: Record<string, { bg: string; fg: string; stripe: string }> = {
   item7: { bg: "#e8532a", fg: "#ffffff", stripe: "#ffffff" },
@@ -377,8 +560,9 @@ const BRANDS: Record<string, { bg: string; fg: string; stripe: string }> = {
 /** A modern fast-food restaurant: glass front, brand colours, a lit sign, an awning, a paved forecourt and parking. */
 function Restaurant({ size: [w, h, d], color, name = "Restaurant", id = "" }: SP) {
   const brand = BRANDS[id] ?? { bg: color, fg: "#ffffff", stripe: "#ffffff" };
-  const sign = useSign(name, brand.bg, brand.fg);
+  const sign = useBoard(name, brand.bg, brand.fg);
   const front = d / 2;
+  const lit = neonMat(brand.bg, false, 0); // the brand colour as light: fascia band and menu board
   return (
     <>
       {/* forecourt and parking */}
@@ -389,32 +573,39 @@ function Restaurant({ size: [w, h, d], color, name = "Restaurant", id = "" }: SP
       {/* the building */}
       <Facade p={[0, 0.06, 0]} w={w} h={h} d={d} tint="#f7f4ee" />
       <Box p={[0, 0.06 + h, 0]} s={[w + 0.16, 0.1, d + 0.16]} c="#3a3f48" />
-      {/* brand band under the roof */}
-      <Box p={[0, 0.06 + h - 0.34, front + 0.01]} s={[w + 0.02, 0.34, 0.03]} c={brand.bg} />
+      {/* brand band under the roof: a lit fascia at night */}
+      <mesh position={[0, 0.06 + h - 0.17, front + 0.01]} material={lit}>
+        <boxGeometry args={[w + 0.02, 0.34, 0.03]} />
+      </mesh>
       {/* big glass front, lit at night */}
       <Box p={[-w * 0.12, 0.06 + 0.12, front + 0.02]} s={[w * 0.62, h * 0.55, 0.04]} c="#8fc3de" rough={0.15} />
       <mesh position={[-w * 0.12, 0.06 + 0.12 + h * 0.28, front + 0.05]} material={lampMat}>
         <boxGeometry args={[w * 0.56, h * 0.42, 0.01]} />
       </mesh>
-      {/* door */}
+      {/* door, with its glass glowing */}
       <Box p={[w * 0.3, 0.06, front + 0.02]} s={[0.4, h * 0.52, 0.05]} c="#2b3038" />
+      <Lit p={[w * 0.3, 0.06 + h * 0.25, front + 0.055]} s={[0.28, h * 0.44, 0.01]} />
       {/* the sign: a lit board on the roof edge, facing the street */}
-      <mesh position={[0, 0.06 + h + 0.5, front - 0.1]} castShadow>
+      <mesh position={[0, 0.06 + h + 0.5, front - 0.1]} material={sign} castShadow>
         <boxGeometry args={[Math.min(w * 0.9, 2.6), 0.62, 0.08]} />
-        <meshBasicMaterial map={sign} toneMapped={false} />
       </mesh>
       <Box p={[-0.5, 0.06 + h + 0.1, front - 0.1]} s={[0.05, 0.4, 0.05]} c="#3a3f48" />
       <Box p={[0.5, 0.06 + h + 0.1, front - 0.1]} s={[0.05, 0.4, 0.05]} c="#3a3f48" />
       <Awning p={[w * 0.3, 0.06 + h * 0.62, front + 0.28]} w={0.9} colors={[brand.bg, brand.stripe]} />
-      {/* a menu stand and a small car in the car park */}
-      <Box p={[w * 0.46, 0.06, front + 0.7]} s={[0.3, 0.55, 0.06]} c={brand.bg} />
+      <Lit p={[w * 0.3, 0.06 + h * 0.62 - 0.06, front + 0.2]} s={[0.8, 0.015, 0.2]} />
+      {/* a lit menu stand and a small car in the car park */}
+      <mesh position={[w * 0.46, 0.06 + 0.275, front + 0.7]} material={lit}>
+        <boxGeometry args={[0.3, 0.55, 0.06]} />
+      </mesh>
       <Box p={[-w * 0.2, 0.06, front + 1.2]} s={[0.55, 0.2, 0.95]} c="#4a90e2" />
       <Box p={[-w * 0.2, 0.26, front + 1.2]} s={[0.5, 0.14, 0.5]} c="#dfe9f2" />
     </>
   );
 }
 
-function Hotel({ size: [w, h, d], color }: SP) {
+function Hotel({ size: [w, h, d], color, name = "Hotel" }: SP) {
+  const sign = useBoard(name, "#2f3e4f", "#ffd27a");
+  const crown = neonMat("#7cc4e8", false, 0);
   return (
     <>
       <Box s={[w + 0.4, 0.1, d + 0.4]} c="#d6dde4" />
@@ -423,6 +614,25 @@ function Hotel({ size: [w, h, d], color }: SP) {
       <Box p={[0, 0.1 + h, d * 0.2]} s={[w * 0.7, 0.08, d * 0.3]} c="#7cc4e8" />
       <Awning p={[0, 0.85, d / 2 + 0.28]} w={1.6} colors={["#2f3e4f", "#f1e7cf"]} />
       <Glow p={[0, h * 0.8, d / 2 + 0.03]} s={[1.3, 0.2, 0.04]} c="#ffd27a" />
+      {/* the hotel's name under the gold band */}
+      <mesh position={[0, h * 0.8 - 0.28, d / 2 + 0.03]} material={sign}>
+        <boxGeometry args={[1.3, 0.3, 0.03]} />
+      </mesh>
+      {/* lit lobby: a glowing doorway under the awning and a window either side */}
+      <Lit p={[0, 0.1 + 0.35, d / 2 + 0.012]} s={[0.6, 0.7, 0.02]} />
+      {[-1, 1].map((k) => (
+        <Lit key={k} p={[k * 0.85, 0.1 + 0.45, d / 2 + 0.012]} s={[0.55, 0.6, 0.02]} m={shopGlow} />
+      ))}
+      <Lit p={[0, 0.83, d / 2 + 0.2]} s={[1.4, 0.015, 0.3]} />
+      {/* a blue light line under the roof edge */}
+      <mesh position={[0, 0.1 + h - 0.04, d / 2 + 0.012]} material={crown}>
+        <boxGeometry args={[w + 0.02, 0.04, 0.02]} />
+      </mesh>
+      {[-1, 1].map((k) => (
+        <mesh key={k} position={[k * (w / 2 + 0.012), 0.1 + h - 0.04, 0]} material={crown}>
+          <boxGeometry args={[0.02, 0.04, d]} />
+        </mesh>
+      ))}
     </>
   );
 }
@@ -451,7 +661,15 @@ function Lookout({ size: [w, h], color }: SP) {
   );
 }
 
-function Eatery({ size: [w, h, d], color }: SP) {
+function Eatery({ size: [w, h, d], color, name = "Eatery" }: SP) {
+  const sign = useBoard(name, color, "#ffffff");
+  const front = -0.2 + d * 0.35; // front face of the building
+  // a string of bulbs along the awning's edge
+  const strings = useMemo(() => {
+    const half = (w - 0.2) / 2 - 0.05;
+    const y = h * 0.8 - 0.12;
+    return [{ a: [-half, y, d / 2 + 0.04], b: [half, y, d / 2 + 0.04], sag: 0.07, n: Math.round((w - 0.2) / 0.25) }] as Str[];
+  }, [w, h, d]);
   return (
     <>
       <Box s={[w + 0.6, 0.08, d + 0.9]} c="#e8dcc4" />
@@ -459,6 +677,14 @@ function Eatery({ size: [w, h, d], color }: SP) {
       <Box p={[0, 0.08 + h, -0.2]} s={[w + 0.15, 0.1, d * 0.7 + 0.15]} c={color} />
       <Awning p={[0, h * 0.8, d / 2 - 0.2]} w={w - 0.2} colors={[color, "#f8f3e8"]} />
       <Glow p={[0, h * 0.5, d / 2 - 0.25]} s={[w * 0.5, 0.2, 0.04]} c="#ffb347" />
+      {/* the name on a lit board standing on the roof, a glowing door and warm windows either side of it */}
+      <mesh position={[0, 0.08 + h + 0.1 + 0.2, front - 0.02]} material={sign} castShadow>
+        <boxGeometry args={[1.6, 0.4, 0.05]} />
+      </mesh>
+      <Lit p={[0, 0.08 + h * 0.21, front + 0.011]} s={[0.3, h * 0.42, 0.02]} />
+      {[-1, 1].map((k) => (
+        <Lit key={k} p={[k * w * 0.3, 0.08 + h * 0.36, front + 0.011]} s={[w * 0.28, h * 0.36, 0.02]} m={shopGlow} />
+      ))}
       {[-0.9, 0.9].map((x) => (
         <group key={x} position={[x, 0.08, d / 2 + 0.55]}>
           <Cyl r={0.02} h={0.85} c="#8a7a64" seg={6} />
@@ -466,6 +692,7 @@ function Eatery({ size: [w, h, d], color }: SP) {
           <Cyl p={[0, 0, 0]} r={0.22} h={0.03} c="#f2ebd9" seg={14} />
         </group>
       ))}
+      <StringLights strings={strings} />
     </>
   );
 }
@@ -671,26 +898,52 @@ function Airport({ size: [w, h, d], color }: SP) {
   );
 }
 
-function Club({ size: [w, h, d], color }: SP) {
+function Club({ size: [w, h, d], color, name = "Club" }: SP) {
+  const sign = useBoard(name, "#12091c", "#ffffff");
+  const cyan = "#22d3ee";
+  const glowPools = useMemo<Spot[]>(() => [[0, d / 2 + 1.0, w * 0.5, 1.0]], [w, d]);
+  const doorH = Math.min(0.62, h * 0.4);
+  const boardW = Math.min(w * 0.5 - 0.2, 1.2);
+  const th = 0.07;
   return (
     <>
       <Box s={[w + 0.5, 0.08, d + 0.8]} c="#2a2330" />
       <Box p={[0, 0.08, 0]} s={[w, h, d]} c="#241c2e" />
       <Box p={[0, 0.08 + h, 0]} s={[w + 0.15, 0.1, d + 0.15]} c="#15101c" />
-      {/* neon bands and a sign */}
-      <Glow p={[0, 0.08 + h * 0.82, d / 2 + 0.03]} s={[w * 0.9, 0.12, 0.04]} c={color} />
-      <Glow p={[0, 0.08 + h * 0.18, d / 2 + 0.03]} s={[w * 0.9, 0.08, 0.04]} c="#22d3ee" />
-      <Glow p={[0, 0.08 + h * 0.5, d / 2 + 0.03]} s={[w * 0.5, 0.3, 0.04]} c={color} />
+      {/* neon bands and a sign, breathing slowly once it is dark */}
+      <Glow p={[0, 0.08 + h * 0.82, d / 2 + 0.03]} s={[w * 0.9, 0.12, 0.04]} c={color} pulse />
+      <Glow p={[0, 0.08 + h * 0.18, d / 2 + 0.03]} s={[w * 0.9, 0.08, 0.04]} c={cyan} pulse />
+      <Glow p={[0, 0.08 + h * 0.5, d / 2 + 0.03]} s={[w * 0.5, 0.3, 0.04]} c={color} pulse />
+      <mesh position={[0, 0.08 + h * 0.5, d / 2 + 0.06]} material={sign}>
+        <boxGeometry args={[boardW, boardW / 4, 0.02]} />
+      </mesh>
       <Awning p={[0, h * 0.62, d / 2 + 0.3]} w={1.4} colors={[color, "#15101c"]} />
-      {/* rooftop disco ball and speakers */}
-      <mesh position={[0, 0.08 + h + 0.34, 0]} material={mat("#d9d9e6", 0.15)} castShadow>
-        <sphereGeometry args={[0.24, 16, 12]} />
+      {/* the doorway: a coloured light inside a cyan frame */}
+      <Glow p={[0, 0.08 + doorH / 2, d / 2 + 0.065]} s={[0.5, doorH, 0.02]} c={color} pulse />
+      {[-0.27, 0.27].map((x) => (
+        <Glow key={x} p={[x, 0.08 + doorH / 2 + 0.02, d / 2 + 0.065]} s={[0.04, doorH + 0.04, 0.03]} c={cyan} pulse />
+      ))}
+      <Glow p={[0, 0.08 + doorH + 0.02, d / 2 + 0.065]} s={[0.58, 0.04, 0.03]} c={cyan} pulse />
+      {/* light bands wrap round the sides and the back too, so the club glows from every angle */}
+      {[-1, 1].map((k) => (
+        <group key={k}>
+          <Glow p={[k * (w / 2 + 0.012), 0.08 + h * 0.82, 0]} s={[0.024, th, d * 0.92]} c={color} pulse />
+          <Glow p={[k * (w / 2 + 0.012), 0.08 + h * 0.18, 0]} s={[0.024, th, d * 0.92]} c={cyan} pulse />
+        </group>
+      ))}
+      <Glow p={[0, 0.08 + h * 0.82, -d / 2 - 0.012]} s={[w * 0.92, th, 0.024]} c={color} pulse />
+      <Glow p={[0, 0.08 + h * 0.18, -d / 2 - 0.012]} s={[w * 0.92, th, 0.024]} c={cyan} pulse />
+      {/* rooftop mirror ball (it sparkles on the beat) and speakers */}
+      <mesh position={[0, 0.08 + h + 0.34, 0]} material={discoMat} castShadow>
+        <icosahedronGeometry args={[0.24, 1]} />
       </mesh>
       <Cyl p={[0, 0.08 + h, 0]} r={0.02} h={0.12} c="#6b6b7a" seg={6} />
       <Box p={[-w / 2 - 0.12, 0.08, d / 2 - 0.2]} s={[0.22, 0.5, 0.22]} c="#0f0b14" />
       <Box p={[w / 2 + 0.12, 0.08, d / 2 - 0.2]} s={[0.22, 0.5, 0.22]} c="#0f0b14" />
-      <Glow p={[-w / 2 - 0.12, 0.38, d / 2 - 0.08]} s={[0.12, 0.12, 0.02]} c="#22d3ee" />
-      <Glow p={[w / 2 + 0.12, 0.38, d / 2 - 0.08]} s={[0.12, 0.12, 0.02]} c="#22d3ee" />
+      <Glow p={[-w / 2 - 0.12, 0.38, d / 2 - 0.08]} s={[0.12, 0.12, 0.02]} c={cyan} pulse />
+      <Glow p={[w / 2 + 0.12, 0.38, d / 2 - 0.08]} s={[0.12, 0.12, 0.02]} c={cyan} pulse />
+      <Beams p={[0, 0.08 + h + 0.1, -d * 0.1]} colors={[lighten(color, 0.4), cyan]} />
+      <Pools spots={glowPools} color={lighten(color, 0.35)} pulse />
     </>
   );
 }
@@ -727,8 +980,32 @@ function Extras({ place }: { place: Place }) {
   const [w, , d] = place.size;
   const front = d / 2 + 0.55;
   const food = place.style === "eatery" || place.style === "market" || place.style === "restaurant";
+  // light on the pavement at the places people go to shop, eat and party: under the lamp posts, and in front of the door or yard
+  const lively = place.kind === "shop" || place.kind === "food" || place.kind === "night";
+  const pools = useMemo(() => {
+    const out: Spot[] = lively ? [-1, 1].map((k): Spot => [k * (w / 2 + 0.2), d / 2 + 0.55, 0.9, 0.9]) : [];
+    switch (place.style) {
+      case "market":
+        out.push([0, d / 2 + 0.8, w * 0.52, 1.1], [0, 0.1, w * 0.45, Math.max(0.6, (d - 1.8) / 2)]);
+        break;
+      case "mall":
+        out.push([0, d / 2 + 0.95, w * 0.45, 1.0]);
+        break;
+      case "restaurant":
+        out.push([0, d / 2 + 1.0, w * 0.55, 1.1]);
+        break;
+      case "eatery":
+        out.push([0, d / 2 + 0.75, w * 0.55, 0.85]);
+        break;
+      case "hotel":
+        out.push([0, d / 2 + 0.9, 1.4, 0.9]);
+        break;
+    }
+    return out;
+  }, [lively, place.style, w, d]);
   return (
     <>
+      {pools.length > 0 && <Pools spots={pools} />}
       {[-1, 1].map((k) => (
         <group key={k} position={[k * (w / 2 + 0.2), 0, front]}>
           <mesh position={[0, 0.45, 0]} material={mat("#444b55")}>
