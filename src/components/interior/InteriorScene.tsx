@@ -3,10 +3,8 @@
 import { useEffect, useMemo, useRef, type ReactNode } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import Avatar from "@/components/avatar/Avatar";
 import { FURN, S } from "@/lib/furniture";
-import { interiorKey, type Dancer, type Layout, type Resident } from "@/lib/interiors";
-import { seededLook, womanLook } from "@/lib/look";
+import { interiorKey, type Layout } from "@/lib/interiors";
 import { cam, me } from "@/lib/playerState";
 import { rt, powerOn, walkToExit, walkToFurn } from "@/lib/interiorRuntime";
 import { useGame } from "@/lib/store";
@@ -321,52 +319,6 @@ function ExitMat({ layout }: { layout: Layout }) {
   );
 }
 
-/* ---------------------------------- residents ---------------------------------- */
-
-const CHATTER = ["How far?", "E kaaro!", "Abeg, make yourself comfortable.", "Wetin dey happen?"];
-
-function ResidentActor({ r, layout }: { r: Resident; layout: Layout }) {
-  const look = useMemo(() => (r.woman ? womanLook(r.seed ?? r.name) : seededLook(r.seed ?? r.name)), [r.seed, r.name, r.woman]);
-  const motion = useRef({ speed: 0, pose: r.pose ?? null });
-  const next = useRef(0);
-  const ry = r.ry ?? Math.atan2(-r.x, -r.z);
-  const lines = r.lines ?? layout.lines ?? CHATTER;
-
-  useFrame(() => {
-    const now = Date.now();
-    if (next.current === 0) next.current = now + 12000 + Math.random() * 20000;
-    if (now < next.current) return;
-    next.current = now + 22000 + Math.random() * 25000;
-    const s = useGame.getState();
-    if (!s.interior) return;
-    s.addChat({ room: interiorKey(s.interior), from: r.name, text: lines[Math.floor(Math.random() * lines.length)], at: now, npc: true }, `res:${r.name}`);
-  });
-
-  const lying = r.pose === "lie";
-  const sitting = r.pose === "sit";
-  const seatH = r.seatH ?? 0.45;
-  const y = lying ? (seatH + 0.12) * S : sitting ? (seatH + 0.04 - 0.865) * S : 0;
-  const ox = lying ? Math.sin(ry) * 0.85 * S : 0;
-  const oz = lying ? Math.cos(ry) * 0.85 * S : 0;
-  return (
-    <group position={[r.x * S + ox, y, r.z * S + oz]} rotation={lying ? new THREE.Euler(-Math.PI / 2, ry, 0, "YXZ") : [0, ry, 0]}>
-      <Avatar look={look} motion={motion} scale={S} />
-    </group>
-  );
-}
-
-/** One of the crowd on the dance floor: nameless and always dancing, each a little out of step with the next. */
-function DancerActor({ d }: { d: Dancer }) {
-  const look = useMemo(() => (d.woman ? womanLook(d.seed) : seededLook(d.seed)), [d.seed, d.woman]);
-  const motion = useRef({ speed: 0, pose: null as null, emote: "dance" as const, phase: [...d.seed].reduce((n, c) => n + c.charCodeAt(0), 0) % 7 });
-  const ry = d.ry ?? Math.PI + (d.x > 0 ? 0.35 : -0.35) * 0.4;
-  return (
-    <group position={[d.x * S, 0, d.z * S]} rotation={[0, ry, 0]}>
-      <Avatar look={look} motion={motion} scale={S} />
-    </group>
-  );
-}
-
 /* ----------------------------------- scene ----------------------------------- */
 
 function Room({ layout }: { layout: Layout }) {
@@ -387,12 +339,6 @@ function Room({ layout }: { layout: Layout }) {
         ))}
         <ExitMat layout={layout} />
       </group>
-      {(layout.residents ?? []).map((r) => (
-        <ResidentActor key={r.name} r={r} layout={layout} />
-      ))}
-      {(layout.dancers ?? []).map((d) => (
-        <DancerActor key={d.seed} d={d} />
-      ))}
       {/* click the floor to walk */}
       <mesh
         position={[0, 0.006, 0]}

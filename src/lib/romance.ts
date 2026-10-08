@@ -8,7 +8,7 @@ export const NEW_REL: Rel = { affection: 0, status: "stranger", dates: 0, lastTa
 
 export type Girl = { id: string; name: string; bio: string; likes: string };
 
-/** The women of Ibadan you can get to know. Looks are built from the name in People.tsx. */
+/** Dormant: profiles for the NPC citizens, who are no longer in the game (only real players are shown), so nothing reaches this yet. */
 export const GIRLS: Girl[] = [
   { id: "npc-0", name: "Bisi", bio: "Fashion designer in Dugbe. Sews day and night.", likes: "Gentlemen who dress well" },
   { id: "npc-1", name: "Kemi", bio: "Final-year student at UI. Always hungry.", likes: "Suya and good conversation" },

@@ -16,7 +16,6 @@ import AvatarCreator from "@/components/avatar/AvatarCreator";
 import AuthScreen from "@/components/ui/AuthScreen";
 import Onboarding from "@/components/ui/Onboarding";
 import Overlay from "./Overlay";
-import { NPCS } from "./People";
 import { forceExit } from "@/lib/interiorRuntime";
 import { interiorKey } from "@/lib/interiors";
 import { ownedBy, pendingRent, SIGNUP_MONEY, useGame } from "@/lib/store";
@@ -69,7 +68,7 @@ function Runtime() {
 
   useEffect(() => {
     const id = setInterval(() => useGame.getState().tick(1), 1000);
-    if (process.env.NODE_ENV !== "production") (window as unknown as { __omo: unknown }).__omo = { useGame, me, cam, startUse, walkToFurn, rt, NPCS, goUpDeck };
+    if (process.env.NODE_ENV !== "production") (window as unknown as { __omo: unknown }).__omo = { useGame, me, cam, startUse, walkToFurn, rt, goUpDeck };
     const hour = new URLSearchParams(location.search).get("hour");
     if (hour !== null && !Number.isNaN(Number(hour))) useGame.getState().patch({ clockOverride: Number(hour) });
     return () => clearInterval(id);

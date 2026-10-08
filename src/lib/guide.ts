@@ -41,7 +41,7 @@ export const TOPICS: Topic[] = [
     "Cab parks have parked cabs: tap one, search where you are going, pay the fare and ride.",
     "Tap any place, house or business and choose how to get there: walk, drive yourself, or pay for an okada, a keke or a micra.",
     "Buy your own car in Buy, then Cars. Tap Me, then Drive your car, to hop in. Press H to honk.",
-    "Traffic is polite: cars and okadas stop for people on foot and wait at red lights, and they may honk as they slow down.",
+    "Traffic is polite: cars and danfos stop for people on foot and wait at red lights, and they may honk as they slow down.",
   ] },
   { id: "people", emoji: "💬", title: "People", lines: [
     "Tap Chat to talk to everyone nearby, and Talk to speak by voice with the people around you.",

@@ -1,10 +1,13 @@
-import { ALL_PLACE_LAYOUT_IDS, homeLayout, placeLayout } from "../src/lib/layouts";
+import { ALL_PLACE_LAYOUT_IDS, bizLayout, homeLayout, placeLayout } from "../src/lib/layouts";
+import { BUSINESSES } from "../src/lib/business";
 import { buildInteriorGrid, footprint, spawnOf, type Layout } from "../src/lib/interiors";
 import { DECOR, withDecor } from "../src/lib/decor";
 import { FURN, S } from "../src/lib/furniture";
 
 const layouts: Layout[] = [
   ...ALL_PLACE_LAYOUT_IDS.map((id) => placeLayout(id)!),
+  // players' businesses: a gym with gym kit, a salon with chairs and mirrors...
+  ...BUSINESSES.map((b) => ({ ...bizLayout(b.id, "Test"), id: `biz-${b.id}` })),
   homeLayout("flat", "x"),
   homeLayout(1, "a", "Mama Bisi"),
   homeLayout(2, "b", "Alhaji"),
@@ -47,9 +50,6 @@ for (const l of layouts) {
       const oz = Math.min(A.z + fa.d / 2, B.z + fb.d / 2) - Math.max(A.z - fa.d / 2, B.z - fb.d / 2);
       if (ox > 0.12 && oz > 0.12 && ox * oz > 0.1) problems.push(`overlap: ${A.kind}@${A.x.toFixed(1)},${A.z.toFixed(1)} with ${B.kind}@${B.x.toFixed(1)},${B.z.toFixed(1)}`);
     }
-  }
-  for (const r of l.residents ?? []) {
-    if (r.pose !== "sit" && r.pose !== "lie" && g.isBlockedAt(r.x * S, r.z * S)) problems.push(`resident ${r.name} stands in a blocked cell at ${r.x},${r.z}`);
   }
   console.log(`${problems.length ? "✗" : "✓"} ${l.id.padEnd(14)} ${l.w}x${l.d}  items:${l.items.length} walls:${l.walls.length}${problems.length ? "\n    " + problems.join("\n    ") : ""}`);
   bad += problems.length;

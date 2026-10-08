@@ -65,7 +65,7 @@ export default function ChatDock({ open, onClose }: { open: boolean; onClose: ()
             <div className="flex-1 space-y-1.5 overflow-y-auto px-4 py-2.5 text-[13px]">
               {msgs.length === 0 && <p className="pt-6 text-center text-xs text-stone-400">No one has said anything yet. Say hello 👋</p>}
               {msgs.map((m) => {
-                const canModerate = !m.self && !m.npc && !!m.fromId;
+                const canModerate = !m.self && !!m.fromId;
                 return (
                   <div key={m.id}>
                     <p className="leading-snug">

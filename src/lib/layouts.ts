@@ -1,5 +1,5 @@
 import type { FurnKind } from "./furniture";
-import type { FloorKind, InteriorRef, Item, Layout, Resident, Wall } from "./interiors";
+import type { FloorKind, InteriorRef, Item, Layout, Wall } from "./interiors";
 import { bizById } from "./business";
 
 /* ------------------------------------------------------------------------------------------------
@@ -91,7 +91,6 @@ function flat(p: Palette): Layout {
       I("sink", 3.95, 3.6, R),
       I("fridge", 4.65, 2.4, -H), I("mortar", 4.7, 3.5), I("radio", -2.7, -0.9, 0, { y: 0.42 }), I("meterbox", 4.88, -0.7, -H, { y: 1.3 }), I("calendar", -4.93, 0.6, H, { y: 1.4, c: p.accent }), I("carvedstool", -1.1, -3.3),
     ],
-    lines: ["NEPA don take light again o.", "This flat na small but e be mine."],
   });
 }
 
@@ -133,7 +132,6 @@ function bungalow(p: Palette, owner?: string): Layout {
       I("diningtable", 3.9, 1.0), ...around("chair", 3.9, 1.0, 0.95, 4, 0.8),
       I("mortar", 1.7, 3.4), I("calendar", -5.93, 0.9, H, { y: 1.4, c: p.accent }), I("meterbox", -2.0, -0.72, R, { y: 1.3 }), I("radio", -3.0, 1.7, 0, { y: 0.42 }), I("carvedstool", -0.6, 0.5),
     ],
-    lines: ["Ile mi, ile yin.", "Welcome, make yourself at home."],
   });
 }
 
@@ -186,7 +184,6 @@ function duplex(p: Palette, owner?: string): Layout {
       I("counter", 6.2, 5.05, R, { w: 1.6 }), I("waterdispenser", 7.4, 1.4, -H),
       I("sewingmachine", 7.0, -5.0, 0), I("mortar", 4.7, 4.9), I("radio", -5.0, 2.1, 0, { y: 0.42 }), I("calendar", 0.2, -5.43, 0, { y: 1.5, c: p.accent }), I("carvedstool", -3.0, 0.3),
     ],
-    lines: ["Make yourself at home, abeg.", "The generator is behind the sofa."],
   });
 }
 
@@ -253,7 +250,6 @@ function mansion(p: Palette, owner?: string): Layout {
       I("coffeetable", 8.3, 4.3), I("plant", 5.6, 6.6),
       I("agbadastand", 0.9, -6.4), I("calabash", 3.1, 6.6, R, { y: 0.95 }), I("ibeji", 3.8, 6.6, R, { y: 0.95 }), I("radio", -6.0, 3.0, 0, { y: 0.42 }), I("gascooker", 9.1, -1.2, -H), I("meterbox", -10.93, 1.4, H, { y: 1.3 }),
     ],
-    lines: ["Welcome, welcome. Sit down, let me bring you a drink.", "Chief is not around but make yourself comfortable."],
   });
 }
 
@@ -276,8 +272,6 @@ export const FLAT = FLAT_LAYOUT;
  * Public places
  * -------------------------------------------------------------------------------------------- */
 
-const res = (name: string, x: number, z: number, o: Partial<Resident> = {}): Resident => ({ name, x, z, ...o });
-
 const PLACE_LAYOUTS: Record<string, Layout> = {
   ui: lay({
     id: "ui", name: "Faculty Lecture Hall & Library", w: 18, d: 12, floor: "tile", wall: SAND, trim: COCOA, accent: INDIGO, light: "bright", exitX: -4,
@@ -291,7 +285,6 @@ const PLACE_LAYOUTS: Record<string, Layout> = {
       I("diningtable", 5.8, 0.4, 0, { w: 2.2 }), ...around("chair", 5.8, 0.4, 1.2, 6, 0.4), I("lamp", 4.1, 4.8),
       I("wallart", 6.4, -5.9, 0, { y: 1.9, c: INDIGO, w: 1.2 }),
     ],
-    residents: [res("Prof. Adebayo", -3, -3.6, { seed: "prof", lines: ["Today we discuss the political economy of cocoa.", "Silence, please."] }), res("Dami", -5, -0.2, { pose: "sit", seatH: 0.45, seed: "dami" })],
   }),
 
   zoo: lay({
@@ -303,7 +296,6 @@ const PLACE_LAYOUTS: Record<string, Layout> = {
       I("counter", 5.2, 3.8, R, { w: 2.2 }), I("rack", 3.6, 3.6, R), I("displaycase", -5.4, 3.2, H, { w: 1.6 }), I("ceilingfan", 0, 0),
       I("wallart", -6.9, 0, H, { y: 1.8, c: TEAL }),
     ],
-    residents: [res("Guide Emeka", 4.0, 2.4, { seed: "emeka", lines: ["Our tortoise is older than Nigeria, you know."] })],
   }),
 
   "bodija-market": lay({
@@ -317,21 +309,6 @@ const PLACE_LAYOUTS: Record<string, Layout> = {
       I("mortar", -5, 7.2), I("mortar", 5, 7.2), I("calabash", -2.5, 7.4), I("calabash", 2.5, 7.4), I("provisions", 14.3, 6.2, -H), I("provisions", -14.3, 6.2, H),
       I("ceilingfan", -6, 5), I("ceilingfan", 6, 5), I("ceilingfan", -6, -2.5), I("ceilingfan", 6, -2.5), I("plant", -14.2, 9.6), I("plant", 14.2, 9.6),
     ],
-    residents: [
-      res("Mama Ngozi", -11.2, -9.2, { seed: "ngozi", woman: true, lines: ["Come buy tomato, fresh from farm!", "Oga, last price!", "Madam, see good pepper!"] }),
-      res("Iya Sidikat", -8, -9.2, { seed: "sidikat", woman: true, lines: ["Ata rodo! Ata rodo!", "Come, taste am first."] }),
-      res("Mama Chinelo", -4.8, -9.2, { seed: "chinelo", woman: true, lines: ["Fresh fish o! Just came from the lake!", "Customer, what you dey find?"] }),
-      res("Iya Bose", -1.6, -9.2, { seed: "bose", woman: true, lines: ["Ewedu, efo, gbegiri, everything dey!", "Aunty, I go give you discount."] }),
-      res("Mama Tunde", 1.6, -9.2, { seed: "mamatunde", woman: true, lines: ["Yam! Big big yam!", "Sir, make you buy for your wife."] }),
-      res("Iya Alaso", 4.8, -9.2, { seed: "alaso", woman: true, lines: ["Aso oke and ankara, original!", "Madam, try am, e fit you."] }),
-      res("Mama Kemi", 8, -9.2, { seed: "mamakemi", woman: true, lines: ["Palm oil, pure and fresh!", "Come, come, no be today."] }),
-      res("Iya Moji", 11.2, -9.2, { seed: "moji", woman: true, lines: ["Iru and ogiri! Local seasoning!", "Oya, buy something."] }),
-      res("Mama Amaka", -9.6, -5.6, { seed: "amaka", woman: true, lines: ["Onions! Cheap cheap onions!", "Customer, how many?"] }),
-      res("Iya Dupe", -3.2, -5.6, { seed: "dupe", woman: true, lines: ["Egusi, ground and ready!", "My price is final, abeg."] }),
-      res("Mama Ify", 3.2, -5.6, { seed: "ify", woman: true, lines: ["Crayfish and stockfish here!", "God bless you as you buy."] }),
-      res("Iya Risi", 9.6, -5.6, { seed: "risi", woman: true, lines: ["Gari, beans, rice! Come and see!", "Oga, na wholesale or retail?"] }),
-      res("Alhaji Musa", 0, 0.8, { seed: "musa", lines: ["Pepper! Pepper!", "Customer, this market na for everybody."] }),
-    ],
   }),
 
   "amala-skye": lay({
@@ -343,7 +320,6 @@ const PLACE_LAYOUTS: Record<string, Layout> = {
       ...[[-3.6, 0.8], [0, 1.0], [3.6, 0.8], [-3.0, 3.4], [3.0, 3.4]].flatMap(([x, z]) => [I("roundtable", x, z), ...around("plasticchair", x, z, 0.85, 3, 0.6)]),
       I("tv", 5.75, 1.0, -H), I("cooler", 5.5, 3.3, -H), I("mortar", 3.8, -4.2), I("provisions", -5.2, -4.2, 0), I("ceilingfan", -2, 2), I("ceilingfan", 3, 2), I("plant", -5.4, 3.8), I("wallart", -5.9, 1.0, H, { y: 1.7, c: OCHRE }),
     ],
-    residents: [res("Mama Amala", 0, -2.8, { seed: "mamaamala", lines: ["Gbegiri and ewedu, hot and fresh!", "Abula for you?"] }), res("Tolu", -3.6, 1.7, { pose: "sit", seatH: 0.45, seed: "tolu" })],
   }),
 
   uch: lay({
@@ -356,7 +332,6 @@ const PLACE_LAYOUTS: Record<string, Layout> = {
       I("counter", -5.5, 2.9, R, { w: 3 }), I("pcdesk", -6.0, 4.1, R), I("chair", -6.0, 4.75, R), ...row("bench", 0.3, 4.2, 3, 1.9, R), ...row("bench", 0.3, 2.0, 3, 1.9, R),
       I("waterdispenser", 6.9, 4.6), I("plant", 7.2, 2.0), I("plant", -7.4, 1.0), I("clock", -0.2, -5.4, 0, { y: 2 }), I("wallart", 5.0, 5.4, R, { y: 1.8, c: "#d85a5a" }),
     ],
-    residents: [res("Nurse Funke", -4.5, 3.8, { seed: "funke", lines: ["Please take a seat, the doctor will see you."]}), res("Dr. Ibrahim", -6.3, -3.2, { seed: "ibrahim" }), res("Patient", 4.8, -4.3, { pose: "lie", seatH: 0.65, seed: "patient" })],
   }),
 
   agodi: lay({
@@ -368,7 +343,6 @@ const PLACE_LAYOUTS: Record<string, Layout> = {
       I("diningtable", 4.3, 2.6), I("bench", 4.3, 1.8, 0, { w: 1.4 }), I("bench", 4.3, 3.4, R, { w: 1.4 }),
       I("plant", -5.4, -3.8), I("plant", 5.4, -3.8), I("plant", -5.4, 0), I("plant", 5.4, 0), I("plant", 0, -3.9), I("plant", -2.6, -3.6), I("plant", 2.6, -3.6),
     ],
-    residents: [res("Jogger Kunle", 3.0, -2.2, { seed: "kunle" })],
   }),
 
   amusement: lay({
@@ -380,7 +354,6 @@ const PLACE_LAYOUTS: Record<string, Layout> = {
       I("clawmachine", 5.6, 1.6, -H), I("clawmachine", 5.6, 3.2, -H), I("counter", -5.4, 3.4, R, { w: 2.4 }), I("rack", -2.6, 3.9, R), I("bench", 2.6, 3.8, R), I("plant", 6.4, -4.6), I("plant", -6.4, 4.2),
       I("rug", 0, 2, 0, { w: 4, d: 2, c: "#e85d9a" }),
     ],
-    residents: [res("Attendant Bolu", -5.4, 2.4, { seed: "bolu", lines: ["Tokens for the arcade, ₦200 each."] })],
   }),
 
   "mapo-hall": lay({
@@ -392,7 +365,6 @@ const PLACE_LAYOUTS: Record<string, Layout> = {
       I("wallart", -8.9, -2, H, { y: 1.8, c: "#8a2f3c" }), I("wallart", 8.9, -2, -H, { y: 1.8, c: "#8a2f3c" }), I("plant", -8.2, -5.2), I("plant", 8.2, -5.2), I("plant", -8.2, 5.0), I("plant", 8.2, 5.0),
       I("rug", 0, -3.0, 0, { w: 3, d: 6, c: "#8a2f3c" }),
     ],
-    residents: [res("Baale Ogundele", 0, -4.0, { seed: "baale", lines: ["Order! Order in the hall.", "We shall hear the next petition."] })],
   }),
 
   dugbe: lay({
@@ -404,7 +376,6 @@ const PLACE_LAYOUTS: Record<string, Layout> = {
       I("rug", 0, 4.2, 0, { w: 4, d: 1.4, c: INDIGO }),
       I("sewingmachine", -5.5, 4.7, R), I("sewingmachine", -3.5, 4.7, R), I("mannequin", 2.5, 4.6), I("mannequin", 4.2, 4.6), I("agbadastand", 5.8, 4.6),
     ],
-    residents: [res("Iya Alaso", -5, 0.0, { seed: "alaso", woman: true, lines: ["Adire, aso-oke, ankara! Come and see!"] }), res("Mama Shola", 4.4, -3.2, { seed: "shola", woman: true, lines: ["Madam, see fine lace!", "Buy two, I go add one."] }), res("Customer", 1.5, 3.6, { seed: "cust" })],
   }),
 
   ventura: lay({
@@ -417,7 +388,6 @@ const PLACE_LAYOUTS: Record<string, Layout> = {
       I("liftdoor", 8.9, -3, -H), I("plant", -8.4, 5.2), I("plant", 8.4, 5.2), I("plant", -3.4, -2), I("plant", 3.4, -2), I("chandelier", -4, 0), I("chandelier", 4, 0),
       I("clawmachine", 8.3, 0.6, -H), I("arcade", 8.3, 1.8, -H),
     ],
-    residents: [res("Shopper Bimpe", -6.6, -1.2, { seed: "bimpe", lines: ["Ah, this sale is serious!"] }), res("Cashier Uche", -7, -2.0, { seed: "uche" })],
   }),
 
   premier: lay({
@@ -429,7 +399,6 @@ const PLACE_LAYOUTS: Record<string, Layout> = {
       I("bar", 4.6, 1.4, -H, { w: 3.4 }), ...col("barstool", 3.5, -0.3, 4, 0.8, -H), I("liftdoor", 6.9, -3, -H), I("chandelier", 0, 0), I("chandelier", -3.5, 0.6), I("tv", 6.7, 3.4, -H),
       I("plant", -6.4, -4.5), I("plant", 6.2, -4.5), I("plant", -6.4, 4.2), I("plant", 3.0, 4.2),
     ],
-    residents: [res("Receptionist Ayo", 0.8, -4.35, { seed: "ayo", lines: ["Welcome to Premier. Do you have a reservation?"] }), res("Guest", -3.5, 1.4, { pose: "sit", seatH: 0.45, seed: "guest" })],
   }),
 
   cultural: lay({
@@ -443,7 +412,6 @@ const PLACE_LAYOUTS: Record<string, Layout> = {
       I("carvedstool", -0.7, 1.7), I("carvedstool", 0.7, 1.7), I("ibeji", -3.0, -4.4, 0, { y: 0.3 }), I("ibeji", 3.0, -4.4, 0, { y: 0.3 }), I("calabash", -6.0, 4.4, 0), I("calabash", 6.0, 4.4, 0), I("wallart", -3.5, -5.4, 0, { y: 2, c: INDIGO, w: 1.4 }), I("wallart", 3.5, -5.4, 0, { y: 2, c: RUST, w: 1.4 }),
       I("plant", -6.4, -4.8), I("plant", 6.4, -4.8), I("ceilingfan", -3, 0), I("ceilingfan", 3, 0),
     ],
-    residents: [res("Baba Alagbe", 0, -3.4, { seed: "alagbe", lines: ["Gangan speaks. Listen with your heart.", "My grandfather played for the Olubadan."] })],
   }),
 
   "cocoa-house": lay({
@@ -456,14 +424,12 @@ const PLACE_LAYOUTS: Record<string, Layout> = {
       I("counter", -5.8, 4.2, R, { w: 3 }), I("pcdesk", -6.8, 5.0, R), ...row("bench", -1, 4.6, 2, 2.4, R), I("waterdispenser", 3.4, 4.8), I("plant", 7.2, 4.6), I("plant", -7.4, -1.0), I("plant", 3.6, -5.0),
       I("bookshelf", 3.9, -4.5, -H), I("ceilingfan", -3.5, -1.2), I("ceilingfan", 2, 1), I("wallart", 0, -5.4, 0, { y: 1.9, c: "#d9a22b", w: 1.6 }), I("clock", 7.4, -5.4, 0, { y: 2 }),
     ],
-    residents: [res("Mr. Adewale", -6.5, -3.4, { pose: "sit", seatH: 0.45, seed: "adewale", lines: ["Another deadline, another day."] }), res("Receptionist", -5.8, 5.0, { seed: "recep", lines: ["Good morning, whom are you here to see?"] })],
   }),
 
   bowers: lay({
     id: "bowers", name: "Bower's Tower Gallery", w: 7, d: 7, floor: "wood", wall: "#c97a52", trim: "#5a3a24", accent: OCHRE, exitX: 0,
     walls: [],
     items: [I("stairs", -2.4, -1.6, H, { w: 3.0, d: 1.1 }), I("displaycase", 2.2, -2.2, 0, { w: 1.4 }), I("bench", 2.2, 0.8, -H, { w: 1.4 }), I("plant", 2.8, -2.9), I("rug", 0, 1, 0, { w: 2.4, d: 1.4, c: OCHRE }), I("wallart", 0, -3.43, 0, { y: 1.7, c: RUST })],
-    residents: [res("Curator", -0.5, 0.2, { seed: "curator", lines: ["From the top you can see all of Ibadan's brown roofs."] })],
   }),
 
   mosque: lay({
@@ -475,7 +441,6 @@ const PLACE_LAYOUTS: Record<string, Layout> = {
       ...row("basin", -6, 5.4, 4, 1.1, R), I("bench", -4.6, 4.3, 0, { w: 2 }), I("wallart", -6.9, -1, H, { y: 1.9, c: "#2f6f4f", w: 1.2 }), I("wallart", 6.9, -1, -H, { y: 1.9, c: "#2f6f4f", w: 1.2 }),
       I("plant", -6.4, -5.2), I("plant", 6.4, 4.8), I("ceilingfan", -2.2, 0), I("ceilingfan", 2.2, 0),
     ],
-    residents: [res("Imam Abdulsalam", 4, -4.2, { seed: "imam", lines: ["Ṣalāh is the pillar of faith.", "Peace be upon you."] })],
   }),
 
   cathedral: lay({
@@ -487,7 +452,6 @@ const PLACE_LAYOUTS: Record<string, Layout> = {
       I("chandelier", 0, -2), I("chandelier", 0, 3), I("plant", -6.2, -7.2), I("plant", 6.2, -7.2), I("wallart", -6.9, -1.5, H, { y: 1.9, c: "#7a1f2e" }), I("wallart", 6.9, -1.5, -H, { y: 1.9, c: "#7a1f2e" }),
       I("wallart", -6.9, 3.5, H, { y: 1.9, c: "#2f3b82" }), I("wallart", 6.9, 3.5, -H, { y: 1.9, c: "#2f3b82" }), I("ceilingfan", -3, 6), I("ceilingfan", 3, 6),
     ],
-    residents: [res("Rev. Oyewole", 0, -5.8, { seed: "oyewole", lines: ["The Lord is my shepherd.", "Go in peace, my child."] })],
   }),
 
   stadium: lay({
@@ -499,7 +463,6 @@ const PLACE_LAYOUTS: Record<string, Layout> = {
       I("ticketbooth", -6, 3.6, R), I("ticketbooth", 6, 3.6, R), ...row("stall", -3.6, 4.6, 3, 3.6, R), ...row("rack", -2.4, 1.2, 2, 4.8, R), ...row("bench", -7.5, -0.6, 2, 15, 0, { w: 2 }),
       I("flag", -8.4, 0.5), I("flag", 8.4, 0.5), I("flag", 0, 0.5, 0, { c: "#16a34a" }), I("wallart", -8.9, 3, H, { y: 1.9, c: "#16a34a" }), I("wallart", 8.9, 3, -H, { y: 1.9, c: "#16a34a" }),
     ],
-    residents: [res("Ultra Femi", -2, 0.4, { seed: "femi", lines: ["Shooting Stars go win today!"] }), res("Steward Ade", 6, 2.4, { seed: "steward" })],
   }),
 
   "ring-road": lay({
@@ -509,7 +472,6 @@ const PLACE_LAYOUTS: Record<string, Layout> = {
       I("counter", -2.5, -3.7, 0, { w: 3 }), I("pcdesk", -5.4, -4.0, 0), I("counter", 3, -3.7, 0, { w: 3 }), I("wallart", 0, -4.45, 0, { y: 1.7, c: "#2a2f3a", w: 2.4 }), I("clock", 6, -4.45, 0, { y: 2 }),
       ...row("bench", -4.5, 0.2, 3, 3.2, 0, { w: 2.4 }), ...row("bench", -4.5, 2.4, 3, 3.2, 0, { w: 2.4 }), I("stall", 5.2, 3.6, R), I("waterdispenser", 6.5, 0), I("ceilingfan", -3, 1), I("ceilingfan", 3, 1), I("plant", -6.4, 3.8),
     ],
-    residents: [res("Conductor Wale", -2.5, -2.6, { seed: "wale", lines: ["Challenge, Dugbe, Mokola! Enter, enter!"] }), res("Passenger", -2, 2.8, { pose: "sit", seatH: 0.45, seed: "passenger" })],
   }),
 
   golf: lay({
@@ -520,7 +482,6 @@ const PLACE_LAYOUTS: Record<string, Layout> = {
       I("rug", -3.5, 1.0, 0, { w: 3.6, d: 2.6, c: "#2f6f4f" }), I("sofa", -3.5, 2.4, R), I("armchair", -5.4, 0.8, H), I("armchair", -1.6, 0.8, -H), I("coffeetable", -3.5, 0.9),
       I("diningtable", 3.8, 1.8, 0, { w: 1.6 }), ...around("chair", 3.8, 1.8, 1.0, 4, 0.8), I("plant", -6.4, -4.2), I("plant", 6.4, 4.2), I("ceilingfan", -3.5, 1), I("ceilingfan", 3.8, 1.8), I("wallart", -6.9, 2.4, H, { y: 1.8, c: "#2f6f4f" }),
     ],
-    residents: [res("Barman Segun", 0, -4.7, { seed: "segun", lines: ["Cold Chapman for you, sir?"] }), res("Chief Balogun", -3.5, 1.3, { pose: "sit", seatH: 0.45, seed: "balogun", lines: ["Eighteen holes and still I did not win."] })],
   }),
 
   "govt-house": lay({
@@ -532,7 +493,6 @@ const PLACE_LAYOUTS: Record<string, Layout> = {
       I("counter", -5.2, 4.4, R, { w: 3 }), ...row("bench", 2.0, 4.6, 2, 2.4, R, { w: 1.8 }), ...col("bookshelf", -7.7, -4.8, 3, 1.15, H), ...col("bookshelf", 7.7, -4.8, 3, 1.15, -H),
       I("wallart", -5, -5.9, 0, { y: 1.9, c: "#1f7a46", w: 1.2 }), I("wallart", 5, -5.9, 0, { y: 1.9, c: "#1f7a46", w: 1.2 }), I("chandelier", 0, -1.4), I("chandelier", 0, 3), I("plant", -7.2, 5.0), I("plant", 7.2, 5.0), I("clock", 0, -5.9, 0, { y: 2.4 }),
     ],
-    residents: [res("Secretary Hauwa", -5.2, 5.1, { seed: "hauwa", lines: ["His Excellency will see you shortly."] }), res("Governor's aide", 0.2, -3.2, { seed: "aide" })],
   }),
 };
 
@@ -558,15 +518,6 @@ PLACE_LAYOUTS["club"] = lay({
     ...col("loveseat", -7.9, -2.6, 3, 2.6, H, { c: "#7a1fa2" }), ...col("coffeetable", -6.7, -2.6, 3, 2.6),
     I("chandelier", 0, -0.5), I("chandelier", -4, 1.5), I("chandelier", 4, 1.5), I("lantern", -8.4, 5.2), I("lantern", 8.4, 5.2),
     I("plant", -8.4, -5.6), I("plant", 8.4, -5.6), I("wallart", -4, -6.42, 0, { y: 1.9, c: "#c026d3" }), I("wallart", 4, -6.42, 0, { y: 1.9, c: "#22d3ee" }),
-  ],
-  residents: [
-    res("DJ Kollington", 0, -5.2, { seed: "dj-kollington", lines: ["Make some noise for Ibadan!", "This one na for the ladies!", "Who wan hear Amapiano?"] }),
-    res("Bartender Gbenga", 8.25, 0, { seed: "gbenga", lines: ["What are you drinking?", "Cold Chapman coming up."] }),
-  ],
-  // the crowd on the dance floor, facing the DJ
-  dancers: [
-    { x: -3.4, z: -2.4, seed: "dn1", woman: true }, { x: -1.2, z: -3, seed: "dn2" }, { x: 1.4, z: -2.6, seed: "dn3", woman: true }, { x: 3.6, z: -2.2, seed: "dn4" },
-    { x: -2.6, z: 0, seed: "dn5" }, { x: -0.4, z: -0.6, seed: "dn6", woman: true }, { x: 2.0, z: 0.2, seed: "dn7", woman: true }, { x: 4.0, z: -0.2, seed: "dn8" },
   ],
 });
 reuse("club", "club-afrobeat", "Afrobeat Lounge", { accent: "#c026d3" });
@@ -620,7 +571,7 @@ export function bizLayout(bizId: string, ownerName?: string): Layout {
           ...row("exercisebike", -3.4, 1.3, 3, 1.0, R),
           I("yogamat", 0.4, 0.9, 0, { c: "#7c3aed" }), I("yogamat", 1.3, 0.9, 0, { c: "#0ea5e9" }),
           I("counter", -4.7, 3.7, 0, { w: 2.0 }), I("waterdispenser", -3.2, 3.9), I("cooler", 5.2, 3.6),
-          I("tv", 5.95, -0.2, -H), I("standingfan", 5.0, 1.0), I("standingfan", -5.2, 2.4),
+          I("tv", 5.8, -0.2, -H), I("standingfan", 5.0, 1.0), I("standingfan", -5.2, 2.4),
           I("ceilingfan", -2.5, 0), I("ceilingfan", 2.5, 0),
         ],
       });
@@ -633,7 +584,7 @@ export function bizLayout(bizId: string, ownerName?: string): Layout {
           ...col("dryer", 4.3, -2.6, 2, 1.2, 0),
           I("sink", 4.3, -0.2, -H), I("armchair", 3.4, 0.4, H),
           I("counter", -3.2, 3.0, 0, { w: 2.2 }), I("loveseat", 3.4, 3.1, R), I("coffeetable", 2.0, 3.0),
-          I("tv", 4.95, 1.6, -H), I("plant", -4.6, -3.5), ...fans.slice(0, 2),
+          I("tv", 4.8, 1.6, -H), I("plant", -4.6, -3.5), ...fans.slice(0, 2),
         ],
       });
     case "cafe":
@@ -642,9 +593,9 @@ export function bizLayout(bizId: string, ownerName?: string): Layout {
         items: [
           I("menuboard", 0, -3.95, 0, { y: 1.15 }), I("espresso", -2.7, -3.4, 0), I("fridge", -4.3, -3.5, 0),
           I("bar", 0.9, -2.5, 0, { w: 4.0 }), ...row("barstool", -0.6, -1.6, 4, 1.1, 0),
-          I("displaycase", 3.9, -3.4, 0), I("stove", 4.6, -3.4, 0),
+          I("displaycase", 3.3, -3.4, 0), I("stove", 4.55, -3.4, 0),
           ...[[-3.4, 1.2], [0, 0.4], [3.4, 1.2]].flatMap(([x, z]) => [I("roundtable", x, z), ...around("chair", x, z, 0.8, 3, 0.5)]),
-          I("tv", 4.95, 0.2, -H), I("coffeetable", -4.2, 2.4), I("armchair", -4.4, 3.1, 0.6), ...fans.slice(0, 2),
+          I("tv", 4.8, 0.2, -H), I("coffeetable", -4.2, 2.4), I("armchair", -4.4, 3.1, 0.6), ...fans.slice(0, 2),
         ],
       });
     case "pharmacy":
@@ -654,7 +605,7 @@ export function bizLayout(bizId: string, ownerName?: string): Layout {
           ...row("medshelf", -3.4, -3.6, 3, 1.75, 0),
           I("counter", 0, -1.4, 0, { w: 3.6 }), I("scale", 3.6, 2.4), I("scale", 4.2, 2.4),
           ...row("displaycase", -3.4, 0.4, 2, 2.0, 0), I("fridge", 4.4, -3.6, 0),
-          ...row("bench", -3, 2.7, 2, 6.0, 0), I("waterdispenser", 4.6, 0.6), I("wallart", 0, -3.97, 0, { y: 2.0, w: 1.2, d: 0.7, c: "#16a34a" }),
+          ...row("bench", -3, 2.7, 2, 6.0, 0), I("waterdispenser", 4.6, 0.6), I("wallart", 0, -3.97, 0, { y: 2.0, w: 1.2, c: "#16a34a" }),
           ...fans.slice(0, 2),
         ],
       });

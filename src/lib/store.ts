@@ -32,7 +32,6 @@ export type ChatMsg = {
   text: string;
   at: number;
   self?: boolean;
-  npc?: boolean;
   /** sender connection id and persistent id, for mute/report */
   fromId?: string;
   fromPid?: string;

@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { me, remoteMotion, traffic } from "@/lib/playerState";
+import { me, remoteMotion } from "@/lib/playerState";
 import type { CarKind } from "@/lib/cars";
 
 const dark = new THREE.MeshStandardMaterial({ color: "#1b1e24", roughness: 0.8 });
@@ -12,10 +12,10 @@ const head = new THREE.MeshStandardMaterial({ color: "#fff6cf", emissive: "#fff2
 const tail = new THREE.MeshStandardMaterial({ color: "#d63a3a", emissive: "#ff2b2b", emissiveIntensity: 0.9 });
 const chrome = new THREE.MeshStandardMaterial({ color: "#cfd6dc", roughness: 0.25, metalness: 0.7 });
 
-function Wheel({ x, y, z, r, remoteId, fixed, trafficIndex }: { x: number; y: number; z: number; r: number; remoteId?: string; fixed?: number; trafficIndex?: number }) {
+function Wheel({ x, y, z, r, remoteId, fixed }: { x: number; y: number; z: number; r: number; remoteId?: string; fixed?: number }) {
   const g = useRef<THREE.Group>(null);
   useFrame((_, dt) => {
-    const sp = trafficIndex !== undefined ? (traffic[trafficIndex]?.speed ?? 0) * 0.5 : fixed !== undefined ? fixed : remoteId ? remoteMotion.get(remoteId)?.speed ?? 0 : me.speed;
+    const sp = fixed !== undefined ? fixed : remoteId ? remoteMotion.get(remoteId)?.speed ?? 0 : me.speed;
     if (g.current) g.current.rotation.x += (sp / r) * Math.min(dt, 0.05);
   });
   return (
@@ -33,7 +33,7 @@ function Wheel({ x, y, z, r, remoteId, fixed, trafficIndex }: { x: number; y: nu
 }
 
 /** Procedural cars in the same toy style as the traffic. +z is forward. */
-export default function CarModel({ kind, color, remoteId, fixed, trafficIndex }: { kind: CarKind; color: string; remoteId?: string; fixed?: number; trafficIndex?: number }) {
+export default function CarModel({ kind, color, remoteId, fixed }: { kind: CarKind; color: string; remoteId?: string; fixed?: number }) {
   const paintEl = <meshStandardMaterial color={color} roughness={0.35} metalness={0.25} />;
 
   if (kind === "keke") {
@@ -57,9 +57,9 @@ export default function CarModel({ kind, color, remoteId, fixed, trafficIndex }:
         <mesh position={[0, 0.23, 0.41]} material={head}>
           <boxGeometry args={[0.1, 0.06, 0.02]} />
         </mesh>
-        <Wheel remoteId={remoteId} fixed={fixed} trafficIndex={trafficIndex} x={0} y={0.08} z={0.36} r={0.08} />
-        <Wheel remoteId={remoteId} fixed={fixed} trafficIndex={trafficIndex} x={-0.21} y={0.08} z={-0.28} r={0.08} />
-        <Wheel remoteId={remoteId} fixed={fixed} trafficIndex={trafficIndex} x={0.21} y={0.08} z={-0.28} r={0.08} />
+        <Wheel remoteId={remoteId} fixed={fixed} x={0} y={0.08} z={0.36} r={0.08} />
+        <Wheel remoteId={remoteId} fixed={fixed} x={-0.21} y={0.08} z={-0.28} r={0.08} />
+        <Wheel remoteId={remoteId} fixed={fixed} x={0.21} y={0.08} z={-0.28} r={0.08} />
       </group>
     );
   }
@@ -87,8 +87,8 @@ export default function CarModel({ kind, color, remoteId, fixed, trafficIndex }:
         <mesh position={[0, 0.34, 0.31]} material={head}>
           <boxGeometry args={[0.07, 0.07, 0.03]} />
         </mesh>
-        <Wheel remoteId={remoteId} fixed={fixed} trafficIndex={trafficIndex} x={0} y={0.09} z={0.34} r={0.09} />
-        <Wheel remoteId={remoteId} fixed={fixed} trafficIndex={trafficIndex} x={0} y={0.09} z={-0.3} r={0.09} />
+        <Wheel remoteId={remoteId} fixed={fixed} x={0} y={0.09} z={0.34} r={0.09} />
+        <Wheel remoteId={remoteId} fixed={fixed} x={0} y={0.09} z={-0.3} r={0.09} />
       </group>
     );
   }
@@ -121,7 +121,7 @@ export default function CarModel({ kind, color, remoteId, fixed, trafficIndex }:
       <mesh position={[0, 0.1 + H * 0.2, L / 2 + 0.005]} material={chrome}>
         <boxGeometry args={[W - 0.2, 0.025, 0.02]} />
       </mesh>
-      {[-1, 1].flatMap((sx) => [-1, 1].map((sz) => <Wheel remoteId={remoteId} fixed={fixed} trafficIndex={trafficIndex} key={`${sx}${sz}`} x={sx * (W / 2 + 0.005)} y={r} z={sz * L * 0.32} r={r} />))}
+      {[-1, 1].flatMap((sx) => [-1, 1].map((sz) => <Wheel remoteId={remoteId} fixed={fixed} key={`${sx}${sz}`} x={sx * (W / 2 + 0.005)} y={r} z={sz * L * 0.32} r={r} />))}
     </group>
   );
 }

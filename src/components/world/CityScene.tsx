@@ -9,10 +9,9 @@ import Buildings from "./Buildings";
 import Gates from "./Gates";
 import Estates from "./Estates";
 import CabRanks from "./CabRanks";
-import MarketWomen from "./MarketWomen";
 import PlotsLayer from "./PlotsLayer";
 import Player from "./Player";
-import { Npcs, RemotePlayers } from "./People";
+import { RemotePlayers } from "./People";
 import AdBoards from "./AdBoards";
 import { anchors } from "@/lib/overlay";
 import { cam, me } from "@/lib/playerState";
@@ -150,7 +149,7 @@ function LabelProjector() {
   return null;
 }
 
-/** Everything outside: streets, buildings, plots, citizens, click-to-walk ground. */
+/** Everything outside: streets, buildings, plots, click-to-walk ground. Other players are added by RemotePlayers. */
 function WorldContent() {
   const placesOnly = useGame((s) => s.placesOnly);
   return (
@@ -163,8 +162,6 @@ function WorldContent() {
       <AdBoards />
       <CabRanks />
       {!placesOnly && <PlotsLayer />}
-      {!placesOnly && <Npcs />}
-      {!placesOnly && <MarketWomen />}
       {/* invisible ground: click anywhere to walk */}
       <mesh
         rotation-x={-Math.PI / 2}

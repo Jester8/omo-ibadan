@@ -6,8 +6,6 @@ import * as THREE from "three";
 import { RIDES, type CarKind } from "@/lib/cars";
 import { useGame } from "@/lib/store";
 import { walkTo } from "@/lib/movement";
-import { seededLook } from "@/lib/look";
-import Avatar from "@/components/avatar/Avatar";
 import CarModel from "./CarModel";
 
 export const RANKS: { id: string; name: string; pos: [number, number] }[] = [
@@ -19,56 +17,11 @@ export const RANKS: { id: string; name: string; pos: [number, number] }[] = [
 // two bays of each kind, parked nose-to-the-road
 const BAYS = RIDES.flatMap((r, i) => [0, 1].map((k) => ({ ride: r, x: (i * 2 + k - 2.5) * 1.05, z: 0 })));
 
-/**
- * One cab that is loading up at the end of the rank: passengers wait, climb in, the driver hoots and pulls away down
- * the street; a few moments later another cab rolls in and a new group walks up. A loop of about 44 seconds.
- */
+/** One cab at the end of the rank pulls away down the street; a few moments later another rolls in. A loop of about 44 seconds. */
 const PERIOD = 44;
-const PAX = 3;
 const ease = (t: number) => t * t * (3 - 2 * t);
 
 const cycleTime = (offset: number) => (((Date.now() / 1000 + offset) % PERIOD) + PERIOD) % PERIOD;
-
-/** One of the people waiting for the cab: queues, walks to the door and climbs in, and a fresh face arrives for the next cab. */
-function Passenger({ i, seed, offset }: { i: number; seed: string; offset: number }) {
-  const g = useRef<THREE.Group>(null);
-  const motion = useRef({ speed: 0 });
-  const [look] = useState(() => seededLook(seed));
-  useFrame(() => {
-    const t = cycleTime(offset);
-    const wait = { x: -1.2 - i * 0.55, z: 0.2 + (i % 2) * 0.25 };
-    let x = wait.x;
-    let z = wait.z;
-    let show = true;
-    let walk = 0;
-    let face = -Math.PI / 2;
-    if (t >= 8 && t < 12) {
-      const k = Math.min(1, Math.max(0, (t - 8 - i * 0.7) / 2.2));
-      x = wait.x + (-0.3 - wait.x) * k;
-      z = wait.z + (0 - wait.z) * k;
-      walk = k > 0 && k < 1 ? 1.4 : 0;
-      show = k < 1;
-      face = Math.PI / 2;
-    } else if (t >= 12 && t < 30) {
-      show = false;
-    } else if (t >= 30 && t < 36) {
-      const k = Math.min(1, Math.max(0, (t - 30 - i * 0.6) / 3));
-      x = wait.x - (1 - k) * 4;
-      walk = k < 1 ? 1.4 : 0;
-      face = Math.PI / 2;
-    }
-    if (!g.current) return;
-    g.current.visible = show;
-    g.current.position.set(x, 0, z);
-    g.current.rotation.y = face;
-    motion.current.speed = walk;
-  });
-  return (
-    <group ref={g}>
-      <Avatar look={look} motion={motion} scale={0.9} />
-    </group>
-  );
-}
 
 function LoadingCab({ kind, color, offset }: { kind: CarKind; color: string; offset: number }) {
   const cab = useRef<THREE.Group>(null);
@@ -100,13 +53,8 @@ function LoadingCab({ kind, color, offset }: { kind: CarKind; color: string; off
   });
 
   return (
-    <group>
-      <group ref={cab}>
-        <CarModel kind={kind} color={color} fixed={rolling} />
-      </group>
-      {Array.from({ length: PAX }, (_, i) => (
-        <Passenger key={i} i={i} offset={offset} seed={`pax-${kind}-${offset}-${i}`} />
-      ))}
+    <group ref={cab}>
+      <CarModel kind={kind} color={color} fixed={rolling} />
     </group>
   );
 }
