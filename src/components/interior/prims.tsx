@@ -22,6 +22,25 @@ export const glow = {
   neon: new THREE.MeshStandardMaterial({ color: "#ffffff", emissive: new THREE.Color("#ff6fb1"), emissiveIntensity: 0, roughness: 0.4 }),
 };
 
+/**
+ * Self-lit materials that go dark when NEPA takes the light (the interior's Lights switches them every frame).
+ * Use litMat() for anything that glows: light boxes, fridge interiors, LED strips, neon, screens in colour.
+ */
+export const litMats = new Set<THREE.MeshStandardMaterial>();
+const litCache = new Map<string, THREE.MeshStandardMaterial>();
+/** A shared self-lit material: `color` is the glow colour, `on` its emissive intensity when there is power, `surface` the colour it shows when dark. */
+export function litMat(color: string, on = 1.2, surface?: string): THREE.MeshStandardMaterial {
+  const key = `${color}|${on}|${surface ?? ""}`;
+  let m = litCache.get(key);
+  if (!m) {
+    m = new THREE.MeshStandardMaterial({ color: surface ?? color, emissive: new THREE.Color(color), emissiveIntensity: on, roughness: 0.4 });
+    m.userData.on = on;
+    litCache.set(key, m);
+    litMats.add(m);
+  }
+  return m;
+}
+
 export const glass = new THREE.MeshStandardMaterial({ color: "#bfe0f2", roughness: 0.1, metalness: 0.1, transparent: true, opacity: 0.28 });
 export const water = new THREE.MeshStandardMaterial({ color: "#5fb8e6", roughness: 0.15, metalness: 0.1, transparent: true, opacity: 0.85 });
 
