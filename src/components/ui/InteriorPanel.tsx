@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "motion/react";
-import { DoorOpen, Lightbulb, X, ZapOff } from "lucide-react";
+import { DoorOpen, Lightbulb, Music2, Play, Volume2, VolumeX, X, ZapOff } from "lucide-react";
 import { PLACES } from "@/lib/places";
 import { useGame } from "@/lib/store";
 import { useClock } from "@/lib/hooks";
@@ -22,6 +22,41 @@ import type { ActionDef } from "@/lib/places";
 import { interiorKey } from "@/lib/interiors";
 import { net } from "@/lib/net";
 import { refreshInterior } from "@/lib/interiorRuntime";
+import { playClubMusic } from "@/lib/clubMusic";
+import { useMusic } from "@/lib/music";
+import { useClub, useSound } from "@/lib/soundStore";
+
+/** What the club is playing, and a switch for the sound (the same mute as everywhere else). */
+function ClubLine() {
+  const track = useMusic((s) => s.current);
+  const playing = useMusic((s) => s.playing);
+  const blocked = useMusic((s) => s.blocked);
+  const yielded = useClub((s) => s.yielded);
+  const muted = useSound((s) => s.muted);
+  const off = yielded && !track;
+  const title = off ? "Club music is off" : blocked ? "Tap anywhere to start the music" : track ? `${track.title} · ${track.artist}` : "Getting the music on…";
+  const sub = off ? "The house band is on standby" : muted ? "Sound is muted" : track ? `© ${track.rightsHolder}. All rights reserved.` : "";
+  return (
+    <div data-music-card className="mt-3 flex items-center justify-between gap-3 rounded-2xl bg-violet-50 px-4 py-2.5 ring-1 ring-violet-100">
+      <div className="flex min-w-0 items-center gap-2.5">
+        <Music2 className={`size-4 shrink-0 ${playing && !muted ? "animate-pulse text-violet-600" : "text-stone-400"}`} />
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-violet-950">{title}</p>
+          {sub && <p className="truncate text-xs text-stone-500">{sub}</p>}
+        </div>
+      </div>
+      {off ? (
+        <button onClick={playClubMusic} aria-label="Play the club music" className="grid size-8 shrink-0 place-items-center rounded-full bg-violet-600 text-white transition hover:bg-violet-700 active:scale-90">
+          <Play className="size-4" />
+        </button>
+      ) : (
+        <button onClick={() => useSound.getState().set({ muted: !muted })} aria-label={muted ? "Unmute" : "Mute"} className="grid size-8 shrink-0 place-items-center rounded-full bg-white text-violet-700 ring-1 ring-violet-200 transition hover:bg-violet-100 active:scale-90">
+          {muted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
+        </button>
+      )}
+    </div>
+  );
+}
 
 export default function InteriorPanel() {
   const interior = useGame((s) => s.interior);
@@ -124,6 +159,8 @@ export default function InteriorPanel() {
           </button>
         )}
       </div>
+
+      {layout.vibe === "club" && <ClubLine />}
 
       {busy && (
         <div className="mt-3 overflow-hidden rounded-2xl bg-emerald-50 p-3 ring-1 ring-emerald-100">

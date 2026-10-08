@@ -18,6 +18,8 @@ const menu = (x: number, z: number, rot: number, c: string, w = 1.8, y = 1.5): I
 const pendant = (x: number, z: number, c: string): Item => I("pendant", x, z, 0, { c });
 /** a food tray on a table top (variant: burger, rice, chicken, pie) */
 const tray = (x: number, z: number, variant: string, rot = 0, c?: string, y = 0.75): Item => I("tray", x, z, rot, { y, variant, ...(c ? { c } : {}) });
+/** a tray on a rectangular table, which has a runner cloth a hair above the top */
+const onTable = (x: number, z: number, variant: string, rot = 0, c?: string): Item => tray(x, z, variant, rot, c, 0.765);
 /** what a counter, case or fridge sells here: the dish, its price and what it does for you */
 const sells = (id: string, label: string, cost: number, hunger: number, fun: number, verb: string, secs = 4): Partial<Item> => ({
   action: { id, label, secs, cost, gain: { hunger, fun } },
@@ -39,7 +41,7 @@ function dine(x: number, z: number, variant: string, angles: number[], o: { clot
 function table4(x: number, z: number, v1: string, v2: string, c1: string, c2: string): Item[] {
   return [
     I("diningtable", x, z),
-    tray(x - 0.4, z, v1), tray(x + 0.4, z, v2),
+    onTable(x - 0.4, z, v1), onTable(x + 0.4, z, v2),
     ...[-0.4, 0.4].flatMap((dx) => [I("plasticchair", x + dx, z - 0.75, 0, { c: c1 }), I("plasticchair", x + dx, z + 0.75, R, { c: c2 })]),
   ];
 }
@@ -80,7 +82,7 @@ const AMALA = lay({
     ...dine(1.6, 1.0, "chicken", THREE, { chair: "#c8372d" }),
     ...dine(-4.4, 3.4, "rice", THREE, { trays: 2, chair: "#e8e4da" }),
     ...dine(-1.6, 3.4, "chicken", THREE, { chair: "#c8372d" }),
-    I("diningtable", 5.2, 1.3, H, { w: 1.6 }), tray(5.2, 0.95, "rice", H), tray(5.2, 1.65, "rice", H),
+    I("diningtable", 5.2, 1.3, H, { w: 1.6 }), onTable(5.2, 0.95, "rice", H), onTable(5.2, 1.65, "rice", H),
     I("plasticchair", 4.4, 0.9, H, { c: "#c8372d" }), I("plasticchair", 4.4, 1.7, H, { c: "#c8372d" }),
     I("tv", 5.75, 3.0, -H),
     I("cooler", 5.6, 4.0, -H),
@@ -102,7 +104,7 @@ function communal(x: number, z: number, len: number, variants: string[]): Item[]
   const n = Math.round(len / 1.8);
   const trays = Array.from({ length: n * 2 }, (_, k) => {
     const dz = (Math.floor(k / 2) - (n - 1) / 2) * 1.5;
-    return tray(x + (k % 2 ? 0.2 : -0.2), z + dz, variants[k % variants.length], H);
+    return onTable(x + (k % 2 ? 0.2 : -0.2), z + dz, variants[k % variants.length], H);
   });
   return [
     I("diningtable", x, z, H, { w: len }),
@@ -154,6 +156,7 @@ const MAMA = lay({
     /* ---- the front, lit by lanterns and one bulb over each table ---- */
     I("wallart", -5.93, 2.6, H, { y: 1.9, w: 1.0, c: "#e0663a" }), I("wallart", 5.93, 1.5, -H, { y: 1.9, w: 1.0, c: "#d89b3c" }),
     I("plant", -5.6, 4.05), I("plant", 5.6, 4.05),
+    I("bench", -4.3, 4.2, R, { w: 1.8 }), I("carvedstool", 3.3, 3.9), I("carvedstool", 4.1, 4.1), I("crates", 5.0, 3.2, 0, { c: "#e2a233" }), I("lantern", -4.3, 4.2, 0, { y: 0.45 }), I("lantern", 3.7, 4.0, 0, { y: 0 }),
     I("ceilingfan", -2.0, 1.6), I("ceilingfan", 2.0, 1.6),
     pendant(-3.9, 0.6, "#a85a2a"), pendant(0, 0.6, "#a85a2a"), pendant(3.9, 0.6, "#a85a2a"),
   ],
@@ -167,7 +170,7 @@ function booth(wallX: number, z: number, wallSide: 1 | -1, v1: string, v2: strin
   return [
     I("boothseat", wallX + f * 0.375, z, face, { c, c2 }),
     I("diningtable", wallX + f * 1.32, z, H, { w: 1.6 }),
-    tray(wallX + f * 1.32, z - 0.38, v1, H), tray(wallX + f * 1.32, z + 0.38, v2, H),
+    onTable(wallX + f * 1.32, z - 0.38, v1, H), onTable(wallX + f * 1.32, z + 0.38, v2, H),
     I("boothseat", wallX + f * 2.265, z, -face, { c, c2 }),
   ];
 }
@@ -203,7 +206,7 @@ const ITEM7 = lay({
     I("foodcounter", 1.0, -2.3, 0, { c: "#e8532a", c2: "#ffd23f", ...sells("poundedegusi", "Pounded yam and egusi", 4900, 78, 6, "Order a plate", 5) }),
     I("drinkfridge", 2.8, -2.45, 0, sells("chapman", "Chilled Chapman", 500, 3, 8, "Take a cold Chapman", 2)),
     I("grillstand", 6.55, -3.0, -H, sells("suyaplatter", "Suya platter", 3400, 44, 12, "Buy suya", 4)),
-    neon("DRIVE-IN", 6.96, -1.0, -H, "#ff3b2f", 1.4, 1.9),
+    neon("DRIVE-IN", 6.96, -1.0, -H, "#ff3b2f", 1.8, 1.9),
 
     /* ---- booths along the left wall ---- */
     ...booth(-7, -0.2, -1, "burger", "chicken", "#e8532a", "#ffd23f"), ...booth(-7, 2.4, -1, "chicken", "burger", "#c63a1d", "#ffd23f"),
@@ -219,6 +222,7 @@ const ITEM7 = lay({
     I("rug", 5.2, 3.5, 0, { w: 3, d: 2.4, c: "#e8532a" }),
     I("coffeetable", 5.2, 3.5), tray(5.2, 3.5, "pie", 0, "#e8532a", 0.43),
     ...[[4.4, 3.0, "#e8532a"], [6.0, 3.0, "#2f8f83"], [4.4, 4.0, "#ffd23f"], [6.0, 4.0, "#2f3b82"]].map(([x, z, c]) => I("stool", x as number, z as number, 0, { c: c as string })),
+    I("plasticchair", 5.2, 2.9, 0, { w: 0.36, d: 0.36, c: "#2f8f83" }), I("plasticchair", 5.2, 4.1, R, { w: 0.36, d: 0.36, c: "#e8532a" }),
     I("tv", 6.8, 1.4, -H), I("drinkfridge", 6.5, -0.1, -H, sells("chapman2", "Chilled Chapman", 500, 3, 8, "Take a cold Chapman", 2)),
     I("plant", -6.55, 4.55), I("plant", 6.55, 4.55), I("wallart", -6.93, 4.0, H, { y: 2.0, w: 0.9, c: "#e8532a" }),
     I("wallart", 6.93, 2.3, -H, { y: 2.0, w: 0.9, c: "#ffd23f" }),
@@ -253,7 +257,7 @@ const BIGGS = lay({
 
     /* ---- the long pie counter, then the hot food and the drinks ---- */
     I("pastrycase", -4.6, -2.0, 0, { c: "#d62f39", c2: "#f3e6c8", ...sells("meatpie", "Meat pie and a cold Fanta", 1800, 32, 4, "Buy a meat pie", 4) }),
-    I("pastrycase", -3.0, -2.0, 0, { c: "#d62f39", c2: "#f3e6c8", ...sells("chickenpie", "Chicken pie and a Coke", 1900, 33, 4, "Buy a chicken pie", 4) }),
+    I("pastrycase", -3.0, -2.0, 0, { c: "#d62f39", c2: "#f3e6c8", ...sells("beefpie", "Beef pie and a Coke", 1900, 33, 4, "Buy a beef pie", 4) }),
     I("pastrycase", -1.4, -2.0, 0, { c: "#d62f39", c2: "#f3e6c8", ...sells("sausageroll", "Sausage roll and a doughnut", 1300, 24, 5, "Buy a sausage roll", 3) }),
     I("foodcounter", 0.9, -2.0, 0, { c: "#d62f39", c2: "#ffe14d", ...sells("burgerchips", "Chicken burger and chips", 3400, 54, 8, "Order a burger", 4) }),
     I("hotcase", 3.0, -2.0, 0, { c: "#8a1c24", c2: "#ffe14d", ...sells("friedrice", "Fried rice and chicken", 3900, 68, 6, "Order a plate", 5) }),
@@ -268,17 +272,18 @@ const BIGGS = lay({
     ...booth(6.5, 0.6, 1, "pie", "chicken", "#d62f39", "#f3e6c8"), ...booth(6.5, 3.2, 1, "burger", "pie", "#8a1c24", "#f3e6c8"),
 
     /* ---- the floor ---- */
-    ...dine(-3.0, 0.6, "pie", FOUR, { trays: 2, variant2: "chicken", chair: "#d62f39", cloth: "#f3e6c8" }),
-    ...dine(0.2, 0.6, "burger", FOUR, { trays: 2, variant2: "pie", chair: "#f3e6c8", cloth: "#f3e6c8" }),
-    ...dine(-3.0, 3.1, "chicken", THREE, { chair: "#f3e6c8", cloth: "#f3e6c8" }),
-    ...dine(1.9, 3.1, "pie", THREE, { chair: "#d62f39", cloth: "#f3e6c8" }),
+    ...dine(-3.4, 0.6, "pie", FOUR, { trays: 2, variant2: "chicken", chair: "#d62f39", cloth: "#f3e6c8" }),
+    ...dine(-0.6, 0.6, "burger", FOUR, { trays: 2, variant2: "pie", chair: "#f3e6c8", cloth: "#f3e6c8" }),
+    ...dine(2.2, 0.6, "chicken", FOUR, { trays: 2, variant2: "burger", chair: "#d62f39", cloth: "#f3e6c8" }),
+    ...dine(-3.4, 3.1, "chicken", THREE, { chair: "#f3e6c8", cloth: "#f3e6c8" }),
+    ...dine(2.4, 3.1, "pie", THREE, { chair: "#d62f39", cloth: "#f3e6c8" }),
 
-    neon("HOT PIES", 6.47, -0.9, -H, "#ff3b2f", 1.3, 1.9),
+    neon("HOT PIES", 6.47, -0.9, -H, "#ff3b2f", 1.6, 1.9),
     I("wallart", 6.47, 1.9, -H, { y: 2.1, w: 0.9, c: "#d62f39" }),
     I("wallart", -6.47, -1.0, H, { y: 2.1, w: 0.9, c: "#d62f39" }),
     I("plant", -6.1, 4.28), I("plant", 6.1, 4.28),
     I("rug", 0, 3.3, 0, { w: 2.2, d: 1.2, c: "#d62f39" }),
-    pendant(-3.0, 0.6, "#d62f39"), pendant(0.2, 0.6, "#d62f39"), pendant(-3.0, 3.1, "#f3e6c8"), pendant(1.9, 3.1, "#f3e6c8"),
+    pendant(-3.4, 0.6, "#d62f39"), pendant(-0.6, 0.6, "#f3e6c8"), pendant(2.2, 0.6, "#d62f39"), pendant(-3.4, 3.1, "#f3e6c8"), pendant(2.4, 3.1, "#d62f39"),
   ],
 });
 
@@ -293,8 +298,8 @@ const CHICKEN = lay({
   accent: "#c8202f",
   light: "bright",
   exitX: 0,
-  // a waist-high queue rail in front of the counters, open at both ends
-  walls: [W(-2.2, -1.3, 4.2, -1.3)],
+  // a waist-high queue rail in front of the counters: closed at the left end, so the line starts at the right
+  walls: [W(-2.2, -1.3, 4.2, -1.3), W(-2.2, -2.4, -2.2, -1.3)],
   zones: [
     { x: 0, z: -3.9, w: 14, d: 2.2, floor: "concrete", color: "#c9ccd0" },
     { x: 0, z: 2.2, w: 14, d: 5.6, floor: "wood", color: "#d7b588" },
@@ -320,7 +325,7 @@ const CHICKEN = lay({
 
     /* ---- the family table, with two small stools at the ends ---- */
     I("diningtable", -4.6, 1.0, 0, { w: 3.0 }),
-    tray(-5.35, 0.8, "chicken"), tray(-3.85, 0.8, "burger"), tray(-5.35, 1.2, "rice"), tray(-3.85, 1.2, "chicken"),
+    onTable(-5.35, 0.8, "chicken"), onTable(-3.85, 0.8, "burger"), onTable(-5.35, 1.2, "rice"), onTable(-3.85, 1.2, "chicken"),
     ...[-5.4, -4.6, -3.8].flatMap((x) => [I("plasticchair", x, 0.25, 0, { c: x < -5 ? "#ffd23f" : "#c8202f" }), I("plasticchair", x, 1.75, R, { c: x > -4 ? "#ffd23f" : "#c8202f" })]),
     I("stool", -6.45, 1.0, 0, { c: "#ffd23f" }), I("stool", -2.75, 1.0, 0, { c: "#c8202f" }),
 
@@ -361,7 +366,7 @@ const SWEET = lay({
     neon("COFFEE", -4.4, -3.95, 0, "#ff7ab6", 1.1, 2.0),
     I("espresso", -4.4, -3.7, 0), I("bar", -4.4, -2.55, 0, { c: "#f2a07b", c2: "#8c6a7a" }),
     ...[-5.1, -4.4, -3.7].map((x) => I("barstool", x, -1.7)),
-    I("drinkfridge", -2.6, -3.65, 0, sells("yoghurt", "Cold Chapman", 500, 3, 8, "Take a cold Chapman", 2)),
+    I("drinkfridge", -2.6, -3.65, 0, sells("chapman", "Cold Chapman", 500, 3, 8, "Take a cold Chapman", 2)),
 
     /* ---- the pastry wall: pies, cakes and a hot case ---- */
     menu(-0.9, -3.95, 0, "#f2a07b"),
@@ -419,10 +424,10 @@ const KILI = lay({
     I("wallsconce", 1.7, -4.95, 0), I("wallsconce", -6.5, -4.95, 0),
 
     /* ---- the drinks: fridges and a bar with tall stools ---- */
-    I("drinkfridge", -6.65, -2.1, H, sells("chapman", "Chilled Chapman", 500, 3, 8, "Take a cold Chapman", 2)),
-    I("drinkfridge", -6.65, -1.0, H, sells("zobo", "Chilled zobo", 400, 4, 7, "Take a cold zobo", 2)),
-    I("bar", -6.15, 1.2, H, { c: "#c9a24a", c2: "#2f6f4e" }),
-    ...[0.6, 1.2, 1.8].map((z) => I("barstool", -5.45, z)),
+    I("drinkfridge", -6.65, -2.6, H, sells("chapman", "Chilled Chapman", 500, 3, 8, "Take a cold Chapman", 2)),
+    I("drinkfridge", -6.65, -1.6, H, sells("zobo", "Chilled zobo", 400, 4, 7, "Take a cold zobo", 2)),
+    I("bar", -6.15, 0.3, H, { c: "#c9a24a", c2: "#2f6f4e" }),
+    ...[-0.3, 0.3, 0.9].map((z) => I("barstool", -5.45, z)),
 
     /* ---- the kitchen and the waiters' station ---- */
     I("stove", 3.4, -4.7, 0), I("stove", 4.1, -4.7, 0), I("sink", 4.9, -4.7, 0), I("prepcounter", 6.1, -4.625, 0, { w: 1.7 }), I("freezer", 6.6, -3.1, -H),

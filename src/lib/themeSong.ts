@@ -1,6 +1,6 @@
 import { audio } from "./audio";
 import { useMusic } from "./music";
-import { useSound } from "./soundStore";
+import { useClub, useSound } from "./soundStore";
 import { useSpotify } from "./spotify";
 
 /**
@@ -9,7 +9,8 @@ import { useSpotify } from "./spotify";
  * has touched the page, so it then starts on the first tap, click or key press anywhere.
  * It follows the one Sound switch (remembered in localStorage by the audio engine), fades in and out
  * (through a Web Audio gain once the engine is running, as iOS ignores element volume), pauses while the
- * tab is hidden or an artist's track is playing.
+ * tab is hidden or an artist's track is playing. It also keeps out of a club for the whole visit (the club has its own
+ * music, see clubMusic.ts) and comes back, fading in, when the player walks out.
  */
 export const THEME_SONG = { title: "Ise Oluwa Ko Si Eni To Ye", artist: "Haruna Ishola", src: "/bg/ise-oluwa-v1.mp3" };
 
@@ -26,8 +27,9 @@ let blocked = false;
 let fadeTimer: ReturnType<typeof setTimeout> | null = null;
 let rampTimer: ReturnType<typeof setInterval> | null = null;
 
-// it also steps aside while the player is playing their own Spotify playlist
-const wanted = () => started && !audio.settings.muted && audio.settings.theme && !document.hidden && !useMusic.getState().playing && !useSpotify.getState().playing;
+// it also steps aside while the player is playing their own Spotify playlist, and inside a club
+const wanted = () =>
+  started && !audio.settings.muted && audio.settings.theme && !document.hidden && !useMusic.getState().playing && !useSpotify.getState().playing && !useClub.getState().inClub;
 
 let routed = false;
 
@@ -173,9 +175,28 @@ if (typeof window !== "undefined") {
     music = s.music;
   });
   let artist = useMusic.getState().playing;
+  let credited = "";
   useMusic.subscribe((s) => {
+    // the lock screen and car displays credit what is really playing, not always the theme song
+    const id = s.current?.id ?? "";
+    if (id !== credited && el && "mediaSession" in navigator) {
+      credited = id;
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: s.current?.title ?? THEME_SONG.title,
+        artist: s.current?.artist ?? THEME_SONG.artist,
+        album: "Omo'badan",
+        artwork: [{ src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" }],
+      });
+    }
     if (s.playing !== artist) {
       artist = s.playing;
+      sync();
+    }
+  });
+  let club = useClub.getState().inClub;
+  useClub.subscribe((s) => {
+    if (s.inClub !== club) {
+      club = s.inClub;
       sync();
     }
   });

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Phone, PhoneOff, Users } from "lucide-react";
+import { Headphones, Phone, PhoneOff, Users } from "lucide-react";
 import { useGame } from "@/lib/store";
 import { net } from "@/lib/net";
 import { voice } from "@/lib/voice";
@@ -11,6 +11,8 @@ import { MuteButton } from "./parts";
 import { levelOf } from "@/lib/bonds";
 import { answerBond, answerFamily } from "@/lib/social";
 import { roleOf } from "@/lib/family";
+import { respond, useListen } from "@/lib/listenTogether";
+import { parseSpotifyLink, spotifyWord } from "@/lib/spotify";
 
 function roomLabel(room: string): string {
   if (room.startsWith("place:")) return PLACES.find((p) => p.id === room.slice(6))?.name ?? "Voice room";
@@ -262,6 +264,41 @@ export function Knocks() {
           </button>
           <button onClick={() => net.knockReply(k.from, k.plotId, true)} className="rounded-full bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white transition active:scale-95">
             Let in
+          </button>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+/** A friend asks you to listen to their Spotify together. Say yes from here; the song then shows in your Music app. */
+export function ListenAsks() {
+  const ask = useListen((s) => s.ask);
+  const knocked = useGame((s) => s.knocks.length > 0);
+  const kind = ask ? parseSpotifyLink(ask.uri) : null;
+  return (
+    <AnimatePresence>
+      {ask && (
+        <motion.div
+          key={ask.from}
+          initial={{ opacity: 0, y: -30, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -30 }}
+          transition={{ type: "spring", stiffness: 300, damping: 24 }}
+          className={`absolute left-1/2 z-50 flex w-[min(24rem,calc(100vw-1.5rem))] -translate-x-1/2 items-center gap-3 rounded-3xl bg-white p-3 pr-3.5 text-black shadow-2xl ring-1 ring-black/10 ${knocked ? "top-[calc(env(safe-area-inset-top)+9.4rem)] sm:top-[11rem]" : "top-[calc(env(safe-area-inset-top)+4.6rem)] sm:top-24"}`}
+        >
+          <span className="grid size-11 shrink-0 place-items-center rounded-full bg-[#1db954] text-black">
+            <Headphones className="size-5" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-bold">{ask.name}</p>
+            <p className="text-xs leading-snug text-stone-500">wants to listen to their {kind ? spotifyWord(kind) : "music"} with you, in sync</p>
+          </div>
+          <button onClick={() => respond(false)} className="rounded-full bg-stone-100 px-3 py-1.5 text-xs font-bold text-stone-700 transition active:scale-95">
+            No
+          </button>
+          <button onClick={() => respond(true)} className="rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white transition active:scale-95">
+            Listen
           </button>
         </motion.div>
       )}

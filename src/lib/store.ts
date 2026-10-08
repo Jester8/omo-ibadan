@@ -32,6 +32,8 @@ export type ChatMsg = {
   text: string;
   at: number;
   self?: boolean;
+  /** a small picture (JPEG data URL, about 10 KB) instead of words */
+  img?: string;
   /** sender connection id and persistent id, for mute/report */
   fromId?: string;
   fromPid?: string;
@@ -168,6 +170,8 @@ type State = {
   net: "offline" | "connecting" | "online";
   connId: string | null;
   online: number;
+  /** accounts created in all, as the server last told us */
+  accounts: number;
   remotes: Record<string, PeerInfo>;
   chat: ChatMsg[];
   bubbles: Record<string, { text: string; until: number }>;
@@ -356,6 +360,7 @@ export const useGame = create<State>()(
       net: "offline",
       connId: null,
       online: 0,
+      accounts: 0,
       remotes: {},
       chat: [],
       bubbles: {},

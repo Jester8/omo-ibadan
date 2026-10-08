@@ -1,9 +1,10 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Droplets, Toilet, X, EyeOff, Eye, HelpCircle, Drumstick, Moon, PartyPopper, Sun, Target, UserRound, Users, Zap, ZapOff, Wifi, WifiOff } from "lucide-react";
+import { Droplets, Toilet, X, EyeOff, Eye, HelpCircle, Drumstick, Moon, PartyPopper, Sun, Target, UserRound, Users, Zap, ZapOff } from "lucide-react";
 import { useGame } from "@/lib/store";
 import { useClock } from "@/lib/hooks";
+import { DEMO_AUTH, demoAccountCount } from "@/lib/api";
 import { formatClock } from "@/lib/time";
 import { naira } from "@/lib/plots";
 import { eventsAt } from "@/lib/events";
@@ -27,6 +28,7 @@ export default function Hud() {
   const profile = useGame((s) => s.profile);
   const net = useGame((s) => s.net);
   const online = useGame((s) => s.online);
+  const accounts = useGame((s) => s.accounts);
   const questsDone = useGame((s) => s.questsDone);
   const inside = useGame((s) => !!s.interior);
   const setSheet = useGame((s) => s.setSheet);
@@ -95,8 +97,19 @@ export default function Hud() {
               <div>
                 <div className="text-[10px] font-semibold uppercase tracking-wide text-stone-400">Online</div>
                 <div className="flex items-center gap-1 text-base font-extrabold tabular-nums leading-tight text-black">
-                  {net === "online" ? <Wifi className="size-3.5 text-emerald-500" /> : <WifiOff className="size-3.5 text-stone-300" />}
+                  {/* a person, with a green dot while you are connected */}
+                  <span className={`relative grid size-[1.1rem] place-items-center rounded-full ${net === "online" ? "bg-emerald-100 text-emerald-700" : "bg-stone-100 text-stone-400"}`}>
+                    <UserRound className="size-3" />
+                    {net === "online" && <span className="absolute -right-0.5 -top-0.5 size-1.5 rounded-full bg-emerald-500 ring-1 ring-white" />}
+                  </span>
                   {net === "online" ? online : net === "connecting" ? "..." : 0}
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] font-semibold uppercase tracking-wide text-stone-400">Accounts</div>
+                <div className="flex items-center gap-1 text-base font-extrabold tabular-nums leading-tight text-black">
+                  <Users className="size-3.5 text-stone-400" />
+                  {(DEMO_AUTH ? demoAccountCount() : accounts).toLocaleString("en-NG")}
                 </div>
               </div>
             </div>

@@ -126,7 +126,7 @@ export function enterInterior(ref: InteriorRef): boolean {
     const aspect = typeof window !== "undefined" ? Math.min(1.7, window.innerWidth / Math.max(1, window.innerHeight)) : 1.6;
     // the room fills the screen
     const fit = (Math.max(layout.w, layout.d) * S) / (0.536 * aspect) * 0.6;
-    cam.dist = Math.min(28, Math.max(6, fit));
+    cam.dist = Math.min(28, Math.max(10, fit));
     useGame.setState({ driving: false, interior: ref, selected: null, atPlace: ref.kind === "place" ? ref.id : null });
     useGame.getState().recordStat("entered");
   });
@@ -246,7 +246,7 @@ export function leaveDeck() {
     me.x = t.pos[0];
     me.z = t.pos[1] + t.size[2] / 2 + 0.9;
     me.ry = 0;
-    cam.dist = 14;
+    cam.dist = 18;
     cam.el = 0.85;
     cam.focus = null;
     cam.spin = false;

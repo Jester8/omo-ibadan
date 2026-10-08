@@ -6,7 +6,7 @@ import * as THREE from "three";
 import { daylight, gameMinutes, nepaOut } from "@/lib/time";
 import { useGame } from "@/lib/store";
 import { me } from "@/lib/playerState";
-import { lampMat, signMat, windowMats } from "./materials";
+import { boardMats, discoMat, lampMat, neons, shopGlow, signMat, spills, windowMats } from "./materials";
 
 const SKY: [number, string][] = [
   [0, "#10162b"],
@@ -31,12 +31,15 @@ function skyAt(h: number, out: THREE.Color) {
   return out.set(SKY[0][1]);
 }
 
+/** The clubs' house beat (112 bpm) in beats per second, for the mirror ball. */
+const BEAT_HZ = 112 / 60;
+
 const SHADOW_RES: [number, number] = typeof window !== "undefined" && window.innerWidth < 640 ? [1024, 1024] : [2048, 2048];
 
 export default function Lighting() {
   const sun = useRef<THREE.DirectionalLight>(null);
   const amb = useRef<THREE.AmbientLight>(null);
-  useFrame(({ scene }) => {
+  useFrame(({ scene, clock }) => {
     const now = Date.now();
     const h = gameMinutes(now, useGame.getState().clockOverride) / 60;
     const day = daylight(h);
@@ -69,6 +72,24 @@ export default function Lighting() {
     windowMats.forEach((m) => (m.emissiveIntensity = glow));
     lampMat.emissiveIntensity = dark * 2.4 * (nepa ? 0.1 : 1);
     signMat.emissiveIntensity = dark * 1.4 * (nepa ? 0.35 : 1) + 0.03;
+
+    // shops, eateries and clubs: neon, lit shop glass, light pools, searchlights and painted signs all follow the dark and NEPA
+    const t = clock.elapsedTime;
+    const sk = nepa ? 0.35 : 1;
+    for (const n of neons) {
+      const breathe = n.pulse ? 0.65 + 0.35 * Math.sin(t * 1.9 + n.phase) : 1;
+      n.m.emissiveIntensity = n.day + dark * 1.5 * sk * breathe;
+    }
+    shopGlow.emissiveIntensity = dark * 1.1 * (nepa ? 0.1 : 1);
+    discoMat.emissiveIntensity = dark * sk * (0.35 + 1.1 * Math.exp(-((t * BEAT_HZ) % 1) * 4.5));
+    const spill = dark * (nepa ? 0.25 : 1);
+    for (const s of spills) {
+      const o = s.max * spill * (s.pulse ? 0.7 + 0.3 * Math.sin(t * 1.4 + s.phase) : 1);
+      s.m.opacity = o;
+      s.m.visible = o > 0.01; // nothing to draw by day
+    }
+    const board = 1 - dark * (nepa ? 0.55 : 0);
+    for (const m of boardMats) m.color.setScalar(board);
   });
 
   return (

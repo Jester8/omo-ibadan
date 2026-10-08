@@ -137,7 +137,7 @@ function DistrictLabels() {
   return (
     <>
       {DISTRICTS.map((d) => (
-        <Anchored key={d.name} id={`district:${d.name}`} get={(o) => o.set(d.pos[0], 0.1, d.pos[1])} minCam={15}>
+        <Anchored key={`${d.name}@${d.pos[0]},${d.pos[1]}`} id={`district:${d.name}@${d.pos[0]},${d.pos[1]}`} get={(o) => o.set(d.pos[0], 0.1, d.pos[1])} minCam={15}>
           <span className="whitespace-nowrap text-[10px] font-bold uppercase tracking-[0.25em] text-stone-900/35 max-sm:hidden">{d.name}</span>
         </Anchored>
       ))}

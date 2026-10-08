@@ -9,6 +9,7 @@ import { roleOf } from "./family";
 import { currentToken, ensureToken, pullState, pushState, signOut } from "./api";
 import type { Policy } from "./protocol";
 import { voice } from "./voice";
+import * as listen from "./listenTogether";
 import { cleanChat } from "./moderation";
 import { interiorKey, type InteriorRef } from "./interiors";
 import { usePhotos } from "./photos";
@@ -34,6 +35,7 @@ function send(m: C2S) {
 }
 
 voice.init(send);
+listen.init(send);
 hooks.plotSet = (plotId, plot) => send({ t: "plotSet", plotId, plot });
 
 export const roomOf = (atPlace: string | null, interior?: InteriorRef | null) => (interior ? interiorKey(interior) : (atPlace ?? "streets"));
@@ -111,6 +113,15 @@ function handle(m: S2C) {
       s.addChat({ room: m.room, from: m.name, text: m.text, at: m.at, self, fromId: m.id, fromPid: pid }, self ? "me" : m.id);
       break;
     }
+    case "chatimg": {
+      const self = m.id === s.connId;
+      const pid = s.remotes[m.id]?.pid;
+      if (!self && pid && s.muted.includes(pid)) break;
+      // a picture too big for the chat (a modified client) is dropped, not shown
+      if (m.data.length > 14_000 || !m.data.startsWith("data:image/jpeg;base64,")) break;
+      s.addChat({ room: m.room, from: m.name, text: "📷 photo", img: m.data, at: m.at, self, fromId: m.id, fromPid: pid }, self ? "me" : m.id);
+      break;
+    }
     case "history": {
       // recent chat from before you arrived, shown once per room
       if (s.chat.some((c) => c.room === m.room)) break;
@@ -153,7 +164,11 @@ function handle(m: S2C) {
       if (m.kind === "request") s.toast(`${m.name} sent you a friend request`, "info");
       if (m.kind === "accepted") s.toast(`${m.name} is now your friend`, "good");
       break;
+    case "listen":
+      listen.onMessage(m);
+      break;
     case "presence":
+      if (!m.online) listen.onPeerOffline(m.pid);
       useGame.setState((st) => ({ friends: st.friends.map((f) => (f.pid === m.pid ? { ...f, online: m.online } : f)), threads: st.threads.map((t) => (t.pid === m.pid ? { ...t, online: m.online } : t)) }));
       break;
     case "plots":
@@ -165,7 +180,7 @@ function handle(m: S2C) {
     case "reject":
       break; // the server follows up with the authoritative `plots` snapshot
     case "online":
-      useGame.setState({ online: m.n });
+      useGame.setState(m.accounts === undefined ? { online: m.n } : { online: m.n, accounts: m.accounts });
       break;
     case "election":
       useGame.setState({ election: m.e, myVote: m.myVote });
@@ -427,6 +442,7 @@ function openSocket() {
     if (pingTimer) clearInterval(pingTimer);
     pingTimer = null;
     remoteMotion.clear();
+    listen.onDisconnect();
     if (useGame.getState().call.phase !== "idle") endCallLocal();
     else voice.leave();
     useGame.setState({ net: "offline", connId: null, remotes: {}, online: 0, incoming: null });
@@ -556,6 +572,14 @@ export const net = {
     const room = roomOf(s.atPlace, s.interior);
     if (s.net === "online") send({ t: "chat", text: clean });
     else s.addChat({ room, from: s.profile?.name ?? "me", text: clean, at: Date.now(), self: true }, "me");
+  },
+  /** Send a small picture (already shrunk to about 10 KB) to everyone in the room you are in. */
+  chatImage(data: string) {
+    const s = useGame.getState();
+    s.recordStat("chats");
+    const room = roomOf(s.atPlace, s.interior);
+    if (s.net === "online") send({ t: "chatimg", data });
+    else s.addChat({ room, from: s.profile?.name ?? "me", text: "📷 photo", img: data, at: Date.now(), self: true }, "me");
   },
   call(to: string, name: string) {
     const s = useGame.getState();

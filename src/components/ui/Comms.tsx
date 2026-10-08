@@ -16,7 +16,8 @@ const round = "relative grid size-12 place-items-center rounded-full shadow-xl r
  * Stacked rather than side by side, so it stays out of the way on a laptop and on a phone.
  */
 export default function Comms() {
-  const [open, setOpen] = useState(() => typeof window !== "undefined" && window.innerWidth >= 640);
+  // the chat box stays closed when the game loads; the button opens it
+  const [open, setOpen] = useState(false);
   const v = useGame((s) => s.voice);
   const net = useGame((s) => s.net);
   const live = !!v.room && !v.room.startsWith("call:");
