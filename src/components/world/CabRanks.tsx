@@ -6,8 +6,6 @@ import * as THREE from "three";
 import { RIDES, type CarKind } from "@/lib/cars";
 import { useGame } from "@/lib/store";
 import { walkTo } from "@/lib/movement";
-import { audio } from "@/lib/audio";
-import { me } from "@/lib/playerState";
 import { seededLook } from "@/lib/look";
 import Avatar from "@/components/avatar/Avatar";
 import CarModel from "./CarModel";
@@ -75,7 +73,7 @@ function Passenger({ i, seed, offset }: { i: number; seed: string; offset: numbe
 function LoadingCab({ kind, color, offset }: { kind: CarKind; color: string; offset: number }) {
   const cab = useRef<THREE.Group>(null);
   const [rolling, setRolling] = useState(0);
-  const last = useRef({ rolling: 0, honked: -1 });
+  const last = useRef({ rolling: 0 });
 
   useFrame(() => {
     const t = cycleTime(offset);
@@ -98,14 +96,6 @@ function LoadingCab({ kind, color, offset }: { kind: CarKind; color: string; off
     if (moving !== last.current.rolling) {
       last.current.rolling = moving;
       setRolling(moving);
-    }
-    // the driver hoots once as it leaves, if you are anywhere near
-    const cycle = Math.floor((Date.now() / 1000 + offset) / PERIOD);
-    if (c && t >= 12.5 && t < 13.5 && last.current.honked !== cycle) {
-      last.current.honked = cycle;
-      const w = new THREE.Vector3();
-      c.getWorldPosition(w);
-      if (Math.hypot(w.x - me.x, w.z - me.z) < 18) audio.horn();
     }
   });
 

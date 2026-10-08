@@ -4,7 +4,6 @@ import { useEffect, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { DECK_Y } from "@/lib/interiorRuntime";
-import { audio } from "@/lib/audio";
 import { carById, rideById } from "@/lib/cars";
 import CarModel from "./CarModel";
 import Avatar from "@/components/avatar/Avatar";
@@ -58,10 +57,6 @@ export default function Player() {
       return el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement;
     };
     const down = (e: KeyboardEvent) => {
-      if (!typing() && (e.key === "h" || e.key === "H")) {
-        const st = useGame.getState();
-        if (st.driving || st.ride) audio.horn(st.ride === "okada");
-      }
       if (!typing() && (e.key === "z" || e.key === "Z")) net.emote("wave");
       if (!typing() && (e.key === "x" || e.key === "X")) net.emote("dance");
       const k = KEY_MAP[e.key.toLowerCase()];
@@ -224,7 +219,6 @@ export default function Player() {
 
     // network
     const now = performance.now();
-    audio.setMotion(me.speed);
     const o = sent.current;
     const changed = Math.abs(o.x - me.x) > 0.01 || Math.abs(o.z - me.z) > 0.01 || Math.abs(o.s - me.speed) > 0.3;
     if (s.net === "online" && now - o.t > 100 && changed) {

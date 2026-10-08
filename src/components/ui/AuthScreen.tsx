@@ -33,7 +33,7 @@ export default function AuthScreen({ onSignup, onLoggedIn }: { onSignup: () => v
   const [busy, setBusy] = useState(false);
 
   const enter = () => {
-    audio.start(); // the groove begins from the top on this first tap (the theme song is already under way)
+    audio.start(); // unlocks audio on this first tap (the theme song is already under way)
     setStep("choose");
   };
 

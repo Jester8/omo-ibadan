@@ -8,7 +8,7 @@ import { useSound } from "./soundStore";
  * has touched the page, so it then starts on the first tap, click or key press anywhere.
  * It follows the one Sound switch (remembered in localStorage by the audio engine), fades in and out
  * (through a Web Audio gain once the engine is running, as iOS ignores element volume), pauses while the
- * tab is hidden or an artist's track is playing, and tucks the built-in groove down while it plays.
+ * tab is hidden or an artist's track is playing.
  */
 export const THEME_SONG = { title: "Ise Oluwa Ko Si Eni To Ye", artist: "Haruna Ishola", src: "/bg/ise-oluwa-v1.mp3" };
 
@@ -110,18 +110,15 @@ function sync() {
         () => {
           blocked = true; // no sound allowed yet: wait for the first touch, silent until then
           fadeTo(0, 0);
-          if (!useMusic.getState().playing) audio.setDuck(false);
         },
       );
     }
     fadeTo(level(), FADE_IN);
-    audio.setDuck(true);
     if (!a.paused) disarm();
     return;
   }
   if (!el || el.paused) return;
   const a = el;
-  if (!useMusic.getState().playing) audio.setDuck(false); // an artist's track keeps the groove ducked itself
   if (document.hidden) {
     fadeTo(0, 0);
     a.pause(); // timers are throttled in hidden tabs, so no fade

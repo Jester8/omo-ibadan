@@ -7,7 +7,6 @@ import { cam, me } from "./playerState";
 import { naira } from "./plots";
 import { useGame } from "./store";
 import { nepaOut } from "./time";
-import { audio } from "./audio";
 import { PLACES } from "./places";
 import { isOpen, opensAt } from "./events";
 import { gameMinutes } from "./time";
@@ -299,7 +298,6 @@ export function startUse(index: number) {
     me.use = { pose: def.pose, x: it.x * S, z: it.z * S, ry: it.rot ?? 0, seatH: def.seatH ?? 0.45, standX: me.x, standZ: me.z };
     net.sit(me.use);
   }
-  if (action.id === "drum") audio.drum();
   s.recordStat("used");
   if (sleeping && action.id === "sleep") s.recordStat("slept");
 }

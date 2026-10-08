@@ -202,23 +202,15 @@ function QuestsSheet() {
 
 function SoundSliders() {
   const music = useSound((s) => s.music);
-  const sfx = useSound((s) => s.sfx);
   const theme = useSound((s) => s.theme);
   const set = useSound((s) => s.set);
   return (
     <div className="mt-5 rounded-2xl bg-stone-50 p-4 ring-1 ring-black/5">
       <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-stone-400">Sound</p>
-      {(
-        [
-          ["Music", music, (v: number) => set({ music: v })],
-          ["Effects and street", sfx, (v: number) => set({ sfx: v })],
-        ] as const
-      ).map(([label, value, onChange]) => (
-        <label key={label} className="mb-2 flex items-center gap-3 text-sm text-stone-600 last:mb-0">
-          <span className="w-32 shrink-0">{label}</span>
-          <input type="range" min={0} max={1} step={0.05} value={value} onChange={(e) => onChange(Number(e.target.value))} className="h-1.5 w-full accent-emerald-600" />
-        </label>
-      ))}
+      <label className="flex items-center gap-3 text-sm text-stone-600">
+        <span className="w-32 shrink-0">Volume</span>
+        <input type="range" min={0} max={1} step={0.05} value={music} onChange={(e) => set({ music: Number(e.target.value) })} className="h-1.5 w-full accent-emerald-600" />
+      </label>
       <label className="mt-3 flex items-center justify-between gap-3 rounded-xl bg-white px-3 py-2.5 text-sm font-semibold text-stone-800 ring-1 ring-black/5">
         <span>
           Intro song

@@ -6,7 +6,6 @@ type SoundState = SoundSettings & { set: (s: Partial<SoundSettings>) => void; sy
 /** UI-facing mirror of the audio engine's settings. */
 export const useSound = create<SoundState>((set) => ({
   music: 0.5,
-  sfx: 0.7,
   muted: false,
   theme: true,
   set: (s) => {

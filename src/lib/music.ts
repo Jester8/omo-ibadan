@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { audio } from "./audio";
 import { trackUrl, type Track } from "./tracks";
 import { useSound } from "./soundStore";
 
@@ -23,7 +22,6 @@ function ensure() {
   el.onended = () => stop();
   el.onerror = () => {
     useMusic.setState({ playing: false, error: "Could not play that track." });
-    audio.setDuck(false);
   };
   useSound.subscribe(() => {
     if (el) el.volume = level();
@@ -42,7 +40,6 @@ export async function play(track: PlayableTrack) {
   try {
     await a.play();
     useMusic.setState({ playing: true });
-    audio.setDuck(true);
   } catch {
     useMusic.setState({ playing: false, error: "Tap again to allow sound." });
   }
@@ -51,7 +48,6 @@ export async function play(track: PlayableTrack) {
 export function pause() {
   el?.pause();
   useMusic.setState({ playing: false });
-  audio.setDuck(false);
 }
 
 export function stop() {
@@ -60,5 +56,4 @@ export function stop() {
     el.removeAttribute("src");
   }
   useMusic.setState({ current: null, playing: false });
-  audio.setDuck(false);
 }

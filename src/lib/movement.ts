@@ -3,7 +3,6 @@ import { findPath } from "./pathing";
 import { me } from "./playerState";
 import { useGame } from "./store";
 import { rideById, rideFare, type RideId } from "./cars";
-import { audio } from "./audio";
 
 /** Click-to-move: A* path from where the player stands to (x, z). */
 export function walkTo(x: number, z: number): boolean {
@@ -76,7 +75,6 @@ export function rideToPlace(id: string, ride: RideId): boolean {
   me.ride = true;
   useGame.setState({ money: s.money - q.fare, ride, driving: false });
   s.toast(q.fare ? `${rideById(ride)!.name} on the way! −₦${q.fare}` : "Free keke, courtesy of the Governor!", "info");
-  audio.coin();
   return true;
 }
 
@@ -116,7 +114,6 @@ export function rideTo(x: number, z: number, ride: RideId): boolean {
   me.ride = true;
   useGame.setState({ money: s.money - q.fare, ride, driving: false });
   s.toast(q.fare ? `${rideById(ride)!.name} on the way! -₦${q.fare}` : "Free keke, courtesy of the Governor!", "info");
-  audio.coin();
   return true;
 }
 

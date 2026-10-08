@@ -48,7 +48,7 @@ export const cam = {
 };
 
 /** Live positions of the ambient traffic, written by the road scene and read for collisions and horns. */
-export const traffic: { x: number; z: number; ry: number; speed: number; bike: boolean; honkAt: number }[] = [];
+export const traffic: { x: number; z: number; ry: number; speed: number; bike: boolean }[] = [];
 
 /** Keke boost expiry (ms epoch). */
 export const boost = { until: 0 };

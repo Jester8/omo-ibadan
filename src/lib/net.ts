@@ -3,7 +3,6 @@ import { FULL_AT, hooks, useGame } from "./store";
 import { emotes, me, remoteMotion, remoteSits } from "./playerState";
 import { PLOTS, PLOT_SIZE, plotById } from "./plots";
 import { ESTATES } from "./world";
-import { audio } from "./audio";
 import { rideById } from "./cars";
 import { loadSocial, openThread } from "./social";
 import { currentToken, ensureToken, pullState, pushState, signOut } from "./api";
@@ -139,7 +138,6 @@ function handle(m: S2C) {
         else {
           if (!s.threads.some((t) => t.pid === other)) void loadSocial();
           s.toast(`${m.fromName}: ${m.text.slice(0, 60)}`, "info");
-          audio.pop();
         }
       }
       break;
@@ -175,7 +173,6 @@ function handle(m: S2C) {
       const pid = Object.values(s.remotes).find((r) => r.name === m.name)?.pid;
       if (pid && s.muted.includes(pid)) break;
       usePhotos.getState().add({ id: m.photoId, name: m.name, data: m.data, at: Date.now() });
-      audio.pop();
       break;
     }
     case "credit":
@@ -188,7 +185,6 @@ function handle(m: S2C) {
       // someone just paid at my business: shown the moment it happens
       useGame.setState((st) => ({ sales: [{ id: `${Date.now()}${Math.random()}`, plotId: m.plotId, name: m.from, item: m.item, amount: m.amount, at: Date.now() }, ...st.sales].slice(0, 40) }));
       s.toast(`${m.from} paid ₦${m.amount.toLocaleString("en-NG")} for ${m.item}`, "good");
-      audio.coin();
       break;
     case "hired":
       s.toast(`${m.owner} hired you at the ${m.business.toLowerCase()}: ₦${m.wage.toLocaleString("en-NG")} a shift`, "good");
@@ -211,7 +207,6 @@ function handle(m: S2C) {
       break;
     case "served":
       if (!s.serves.some((v) => v.from === m.from && v.dish === m.dish)) useGame.setState({ serves: [...s.serves, { from: m.from, name: m.name, dish: m.dish }] });
-      audio.pop();
       break;
     case "serveResult":
       if (m.accept) {
@@ -233,7 +228,6 @@ function handle(m: S2C) {
       break;
     case "relAsk":
       if (!s.relAsks.some((a) => a.from === m.from && a.level === m.level)) useGame.setState({ relAsks: [...s.relAsks, { from: m.from, name: m.name, level: m.level }] });
-      audio.pop();
       break;
     case "relChanged": {
       const l = levelOf(m.level);
@@ -258,7 +252,6 @@ function handle(m: S2C) {
     case "knock":
       // someone is at my door
       if (!s.knocks.some((k) => k.from === m.from && k.plotId === m.plotId)) useGame.setState({ knocks: [...s.knocks, { from: m.from, name: m.name, plotId: m.plotId }] });
-      audio.pop();
       break;
     case "knockResult":
       if (m.allow) {
@@ -595,7 +588,6 @@ export const net = {
   /** Wave or dance. Shown locally and to everyone in the same room. */
   emote(e: "wave" | "dance") {
     emotes.set("me", { e, until: Date.now() + (e === "wave" ? 2200 : 6000) });
-    if (e === "wave") audio.wave();
     send({ t: "emote", e });
   },
   /** Flag a player to the moderators (logged server-side). */

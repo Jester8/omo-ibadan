@@ -8,7 +8,6 @@ import CarModel from "./CarModel";
 import Avatar from "@/components/avatar/Avatar";
 import { AVATAR_SCALE } from "./Player";
 import { seededLook } from "@/lib/look";
-import { audio } from "@/lib/audio";
 import { me, remoteMotion, traffic } from "@/lib/playerState";
 import { junctionNear, lightAt } from "@/lib/traffic";
 import { NPCS } from "./People";
@@ -345,21 +344,12 @@ function Vehicle({ car, index }: { car: Car; index: number }) {
       g.current.position.set(x, 0.08, z);
       g.current.rotation.y = ry;
     }
-    // share the position (following distance, honks)
-    const t = (traffic[index] ??= { x, z, ry, speed: car.speed, bike: !!car.bike, honkAt: 0 });
+    // share the position (following distance)
+    const t = (traffic[index] ??= { x, z, ry, speed: car.speed, bike: !!car.bike });
     t.x = x;
     t.z = z;
     t.ry = ry;
     t.speed = car.speed * roll.current;
-    const dx = me.x - x;
-    const dz = me.z - z;
-    const d = Math.hypot(dx, dz);
-    const inFront = d > 0.01 && (dx * fx + dz * fz) / d > 0.6;
-    const now = performance.now();
-    if (d < 3.4 && inFront && now - t.honkAt > 4500 && !useGame.getState().interior) {
-      t.honkAt = now;
-      audio.horn(!!car.bike);
-    }
   });
   if (car.bike) {
     return (

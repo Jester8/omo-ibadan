@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { destById } from "@/lib/flights";
-import { audio } from "@/lib/audio";
 import { useGame } from "@/lib/store";
 
 const T = 4; // the whole flight, in seconds
@@ -224,10 +223,6 @@ export default function FlightScreen() {
   const returning = !!flight?.returning;
   const start = busy?.start ?? 0;
 
-  // the engines and the seat-belt chime, once per flight
-  useEffect(() => {
-    if (flying) audio.flight();
-  }, [flying, start]);
   // landing back in Ibadan ends the trip
   useEffect(() => {
     if (!flying && returning) {
