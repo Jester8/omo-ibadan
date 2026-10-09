@@ -20,7 +20,9 @@ export type FurnKind =
   // eateries and food counters (bodiesFood.tsx)
   | "hotcase" | "foodcounter" | "pastrycase" | "bukapots" | "grillstand" | "drinkfridge" | "prepcounter" | "tray" | "boothseat" | "menulight"
   // lights, signs and nightlife (bodiesLights.tsx)
-  | "tubelight" | "pendant" | "neonsign" | "signboard" | "lightstring" | "spotlight" | "discoball" | "ledfloor" | "speaker" | "djbooth" | "bottleshelf" | "vipbooth" | "wallsconce";
+  | "tubelight" | "pendant" | "neonsign" | "signboard" | "lightstring" | "spotlight" | "discoball" | "ledfloor" | "speaker" | "djbooth" | "bottleshelf" | "vipbooth" | "wallsconce"
+  // civic: counters that do business, cell bars, the fire engine, post-office boxes, boreholes and petrol (bodiesCivic.tsx)
+  | "servicedesk" | "cellbars" | "fireengine" | "pigeonholes" | "waterpoint" | "fuelpump" | "jerrycans";
 
 export type Pose = "sit" | "lie";
 
@@ -31,7 +33,8 @@ export type UseDef = {
   seatH?: number;
   needsPower?: boolean;
   action?: ActionDef;
-  special?: "generator" | "deck" | "computer" | "eat";
+  /** generator/deck/computer/eat are special-cased in interiorRuntime.startUse. "service" opens the desk panel (services.ts). "ward" is a hospital bed (hospital.ts). */
+  special?: "generator" | "deck" | "computer" | "eat" | "service" | "ward";
 };
 
 export type FurnDef = {
@@ -80,7 +83,7 @@ export const FURN: Record<FurnKind, FurnDef> = {
   singlebed: { w: 1.0, d: 2.0, h: 0.5, solid: true, use: { verb: "Sleep", pose: "lie", seatH: 0.55, action: sleep } },
   hospitalbed: {
     w: 1.0, d: 2.0, h: 0.6, solid: true,
-    use: { verb: "Rest", pose: "lie", seatH: 0.65, action: { id: "wardrest", label: "Rest in the ward", secs: 8, cost: 2000, gain: { energy: 40 } } },
+    use: { verb: "Rest", pose: "lie", seatH: 0.65, special: "ward", action: { id: "wardrest", label: "Rest in the ward", secs: 8, cost: 2000, gain: { energy: 40 } } },
   },
   wardrobe: { w: 1.2, d: 0.6, h: 2.0, solid: true },
   bookshelf: {
@@ -265,4 +268,16 @@ export const FURN: Record<FurnKind, FurnDef> = {
   bottleshelf: { w: 3.0, d: 0.35, h: 2.0, solid: true },
   vipbooth: { w: 2.2, d: 1.0, h: 0.95, solid: true, use: sit() },
   wallsconce: { w: 0.2, d: 0.15, h: 0, solid: false },
+
+  /* ---- civic ---- */
+  /** A counter that does business. `Item.service` (or the place's `service`) says which; `Item.w` widens it. Never draw a person behind it. */
+  servicedesk: { w: 2.4, d: 0.8, h: 1.1, solid: true, use: { verb: "Speak to the desk", special: "service" } },
+  /** An iron bar panel above a cell wall. Not solid: the cell walls (Layout.walls) do the blocking. */
+  cellbars: { w: 3.0, d: 0.1, h: 2.4, solid: false },
+  fireengine: { w: 2.3, d: 5.0, h: 2.3, solid: true },
+  pigeonholes: { w: 2.4, d: 0.4, h: 2.0, solid: true },
+  waterpoint: { w: 0.6, d: 0.6, h: 1.1, solid: true, use: { verb: "Pump water", action: { id: "drinkwater", label: "Pump and drink borehole water", secs: 3, gain: { hunger: 3, energy: 3 } } } },
+  /** Petrol. A layout overrides the amount with `Item.action` (5, 10 or 25 L). No `needsPower`: the station has its own supply. */
+  fuelpump: { w: 0.7, d: 0.5, h: 1.6, solid: true, use: { verb: "Pump petrol", action: { id: "pump5", label: "Buy 5 L of petrol", secs: 4, cost: 2250, fuel: 5 } } },
+  jerrycans: { w: 0.8, d: 0.5, h: 1.0, solid: true },
 };

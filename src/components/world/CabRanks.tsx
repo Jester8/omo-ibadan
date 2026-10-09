@@ -8,11 +8,9 @@ import { useGame } from "@/lib/store";
 import { walkTo } from "@/lib/movement";
 import CarModel from "./CarModel";
 
-export const RANKS: { id: string; name: string; pos: [number, number] }[] = [
-  { id: "ui", name: "UI Cab Park", pos: [-25, -14] },
-  { id: "iwo", name: "Iwo Road Cab Park", pos: [25, -6] },
-  { id: "dugbe", name: "Dugbe Cab Park", pos: [-2, 5.8] },
-];
+import { RANKS } from "@/lib/ranks";
+
+export { RANKS };
 
 // two bays of each kind, parked nose-to-the-road
 const BAYS = RIDES.flatMap((r, i) => [0, 1].map((k) => ({ ride: r, x: (i * 2 + k - 2.5) * 1.05, z: 0 })));

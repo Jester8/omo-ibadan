@@ -36,6 +36,7 @@ import { cam, me } from "@/lib/playerState";
 import { setOpenEstates } from "@/lib/pathing";
 import { openEstateIds } from "@/lib/estates";
 import { ESTATE_BY_ID, inCampus } from "@/lib/world";
+import SocialOverlays from "@/components/ui/SocialOverlays";
 
 // big panels that are rarely open load on demand, so the game itself starts sooner
 const Sheets = dynamic(() => import("@/components/ui/Sheets"), { ssr: false });
@@ -248,6 +249,7 @@ export default function WorldClient() {
       {mounted && <RelAsks />}
       {mounted && <FamilyAsks />}
       {mounted && <Serves />}
+      {mounted && <SocialOverlays />}
       {mounted && <NetBanner />}
       {mounted && <Runtime />}
       {mounted && <AudioBridge />}

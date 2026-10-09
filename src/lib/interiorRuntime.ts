@@ -1,5 +1,5 @@
 import { FURN, S } from "./furniture";
-import { buildInteriorGrid, interiorKey, spawnOf, type InteriorRef, type Layout } from "./interiors";
+import { buildInteriorGrid, footprint, interiorKey, spawnOf, type InteriorRef, type Item, type Layout } from "./interiors";
 import { net } from "./net";
 import { FLAT, layoutFor } from "./layouts";
 import { Grid, findPath, setActiveGrid } from "./pathing";
@@ -11,6 +11,13 @@ import { PLACES } from "./places";
 import { isOpen, opensAt } from "./events";
 import { gameMinutes } from "./time";
 import { withDecor } from "./decor";
+import { GEN_MS_PER_LITRE } from "./fuel";
+import { beginWardStay } from "./hospital";
+import { openService } from "./services";
+import { climbTower } from "./towerRuntime";
+
+// Bower's Tower lives in towerRuntime.ts now (the panels and Player.tsx still import these names from here)
+export { DECK_Y, climbTower, goUpDeck, leaveDeck } from "./towerRuntime";
 
 /** Everything about the interior the player is standing in (kept outside React). */
 export const rt = {
@@ -64,7 +71,7 @@ const sameRef = (a: InteriorRef | null, b: InteriorRef) => !!a && a.kind === b.k
  * work of building the room never shows as stutter. About half a second end to end.
  */
 export const FADE_DOWN_MS = 150;
-function fadeThen(fn: () => void) {
+export function fadeThen(fn: () => void) {
   useGame.setState({ fade: true });
   setTimeout(() => {
     fn();
@@ -83,18 +90,29 @@ function fadeThen(fn: () => void) {
 
 export const powerOn = () => !nepaOut(Date.now()) || useGame.getState().generatorUntil > Date.now();
 
-export function enterInterior(ref: InteriorRef): boolean {
+/** `force`: an arrest. Go in even while busy, on the deck or at closing time, and wait out a fade in progress. `spawn` is in layout metres. */
+export type EnterOpts = { force?: boolean; spawn?: [number, number]; returnTo?: { x: number; z: number } };
+
+export function enterInterior(ref: InteriorRef, opts: EnterOpts = {}): boolean {
   const s = useGame.getState();
+  if (s.profile && s.custody && !opts.force) {
+    s.toast("You are in custody.", "bad");
+    return false;
+  }
+  if (s.profile && opts.force && s.fade) {
+    setTimeout(() => enterInterior(ref, opts), 200);
+    return true;
+  }
   if (!s.profile || s.fade) return false;
-  if (s.busy) {
+  if (s.busy && !opts.force) {
     s.toast("Finish what you're doing first.", "info");
     return false;
   }
-  if (s.deck) {
+  if (s.deck && !opts.force) {
     s.toast("Climb down from the tower first.", "info");
     return false;
   }
-  if (ref.kind === "place" && !isOpen(ref.id, gameMinutes(Date.now(), s.clockOverride) / 60)) {
+  if (ref.kind === "place" && !opts.force && !isOpen(ref.id, gameMinutes(Date.now(), s.clockOverride) / 60)) {
     s.toast(`Closed for now. Opens at ${opensAt(ref.id)}.`, "info");
     return false;
   }
@@ -107,12 +125,13 @@ export function enterInterior(ref: InteriorRef): boolean {
   fadeThen(() => {
     const was = useGame.getState().interior;
     if (!was) me.worldReturn = { x: me.x, z: me.z };
+    if (opts.returnTo) me.worldReturn = opts.returnTo;
     rt.layout = layout;
     rt.grid = buildInteriorGrid(layout);
     rt.ref = ref;
     if (!was) rt.savedDist = cam.dist;
     setActiveGrid(rt.grid);
-    const [sx, sz] = spawnOf(layout);
+    const [sx, sz] = opts.spawn ?? spawnOf(layout);
     me.x = sx * S;
     me.z = sz * S;
     me.ry = Math.PI;
@@ -135,6 +154,10 @@ export function enterInterior(ref: InteriorRef): boolean {
 
 export function exitInterior() {
   const s = useGame.getState();
+  if (s.custody) {
+    s.toast("You are in custody.", "bad");
+    return;
+  }
   if (!s.interior || s.fade) return;
   if (s.busy) {
     s.toast("Finish what you're doing first.", "info");
@@ -164,6 +187,10 @@ export function walkToExit() {
   const l = rt.layout;
   if (!l) return;
   const s = useGame.getState();
+  if (s.custody) {
+    s.toast("You are in custody.", "bad");
+    return;
+  }
   if (s.busy) {
     s.toast("Finish what you're doing first.", "info");
     return;
@@ -175,6 +202,14 @@ export function walkToExit() {
   me.pendingUse = null;
 }
 
+/** Where the player is sent to use an item: the item itself, except service desks, which are approached from the front (the customer side), in room units. */
+function standPoint(it: Item): { x: number; z: number } {
+  if (it.kind !== "servicedesk") return { x: it.x * S, z: it.z * S };
+  const r = it.rot ?? 0;
+  const off = (it.d ?? FURN.servicedesk.d) / 2 + 0.5;
+  return { x: (it.x + Math.sin(r) * off) * S, z: (it.z + Math.cos(r) * off) * S };
+}
+
 export function walkToFurn(index: number): boolean {
   const l = rt.layout;
   const it = l?.items[index];
@@ -184,8 +219,16 @@ export function walkToFurn(index: number): boolean {
     s.toast("Finish what you're doing first.", "info");
     return false;
   }
-  const path = findPath(me.x, me.z, it.x * S, it.z * S);
+  const target = standPoint(it);
+  const path = findPath(me.x, me.z, target.x, target.z);
   if (!path) return false;
+  // the nearest reachable point can be on the far side of a wall or a row of bars: do not walk there and then "use" the item
+  const end = path.length ? path[path.length - 1] : { x: me.x, z: me.z };
+  const fp = footprint(it);
+  if (Math.hypot(end.x - it.x * S, end.z - it.z * S) / S > Math.max(fp.w, fp.d) / 2 + 1.4) {
+    s.toast("You can't reach that.", "info");
+    return false;
+  }
   me.path = path;
   me.pendingUse = index;
   me.pendingExit = false;
@@ -193,66 +236,6 @@ export function walkToFurn(index: number): boolean {
 }
 
 export const GENERATOR_FUEL = 800;
-
-/** Bower's Tower: the viewing deck sits at the top of the shaft. */
-export const DECK_Y = 3.72;
-const DECK_R = 1.05;
-const tower = () => PLACES.find((p) => p.id === "bowers")!;
-
-function arriveOnDeck() {
-  const t = tower();
-  me.x = t.pos[0];
-  me.z = t.pos[1] + DECK_R;
-  me.ry = 0;
-  me.path = [];
-  me.use = null;
-  me.pendingUse = null;
-  me.pendingExit = false;
-  me.goalPlace = null;
-  setActiveGrid(null);
-  rt.layout = null;
-  rt.grid = null;
-  rt.ref = null;
-  cam.dist = 30;
-  cam.el = 0.45;
-  cam.focus = null;
-  cam.spin = false;
-  useGame.setState({ interior: null, atPlace: null, deck: true, selected: null, driving: false });
-}
-
-export function goUpDeck() {
-  const s = useGame.getState();
-  if (s.fade || s.deck) return;
-  fadeThen(arriveOnDeck);
-}
-
-/** Pay the tower fee, spend a moment on the stairs, and arrive at the top. */
-export function climbTower() {
-  const s = useGame.getState();
-  const a = PLACES.find((p) => p.id === "bowers")!.actions[0];
-  const err = s.runAction(a);
-  if (err) {
-    s.toast(err, "bad");
-    return;
-  }
-  setTimeout(goUpDeck, a.secs * 1000 + 100);
-}
-
-export function leaveDeck() {
-  const s = useGame.getState();
-  if (s.fade || !s.deck) return;
-  fadeThen(() => {
-    const t = tower();
-    me.x = t.pos[0];
-    me.z = t.pos[1] + t.size[2] / 2 + 0.9;
-    me.ry = 0;
-    cam.dist = 18;
-    cam.el = 0.85;
-    cam.focus = null;
-    cam.spin = false;
-    useGame.setState({ deck: false });
-  });
-}
 
 /** Called when the player reaches the furniture they clicked. */
 export function startUse(index: number) {
@@ -283,7 +266,27 @@ export function startUse(index: number) {
     climbTower();
     return;
   }
+  if (def.special === "service") {
+    const place = rt.ref?.kind === "place" ? PLACES.find((p) => p.id === rt.ref!.id) : undefined;
+    const id = it.service ?? place?.service;
+    if (id) {
+      const err = openService(id, place?.id ?? rt.ref?.id ?? "", it.variant);
+      if (err) s.toast(err, "info");
+      return;
+    }
+    // a desk with an action and no service is a work counter (the food bank's packing desks): run its action below
+    if (!(it.action ?? def.action)) {
+      s.toast("This desk is not open.", "info");
+      return;
+    }
+  }
   if (def.special === "generator") {
+    // petrol from the filling station first (1 L = 5 minutes), the street price if there is none
+    if (s.fuel >= 1) {
+      useGame.setState({ fuel: s.fuel - 1, generatorUntil: Math.max(Date.now(), s.generatorUntil) + GEN_MS_PER_LITRE });
+      s.toast(`Generator running ${GEN_MS_PER_LITRE / 60000} more minutes · 1 L used (${Math.floor(s.fuel - 1)} L left)`, "good");
+      return;
+    }
     if (s.money < GENERATOR_FUEL) {
       s.toast(`Fuel costs ${naira(GENERATOR_FUEL)}.`, "bad");
       return;
@@ -301,11 +304,14 @@ export function startUse(index: number) {
     s.toast(rt.ref?.kind === "home" ? "You sat down. Stay as long as you like. Tap anywhere to stand up." : "You sat down. Tap anywhere to stand up.", "info");
     return;
   }
-  const action = it.action ?? def.action;
+  // a hospital bed asks the hospital whether you hold a ticket (treatment) or not (the plain ward rest)
+  const ward = def.special === "ward" ? beginWardStay(index) : null;
+  if (ward === "refuse") return;
+  const action = ward?.action ?? it.action ?? def.action;
   if (!action) return;
   const sleeping = def.pose === "lie";
-  const half = sleeping && nepaOut(Date.now()) && s.generatorUntil <= Date.now();
-  const err = s.runAction(action, { gainScale: half ? 0.5 : 1 });
+  const half = sleeping && !ward && nepaOut(Date.now()) && s.generatorUntil <= Date.now();
+  const err = s.runAction(action, { gainScale: ward?.scale ?? (half ? 0.5 : 1), onDone: ward?.onDone });
   if (err) {
     s.toast(err, "bad");
     return;

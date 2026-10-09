@@ -15,7 +15,13 @@ import { eventFor, isOpen, opensAt } from "./events";
 import { gameMinutes } from "./time";
 import { decorById, MAX_PER_KIND, withDecor } from "./decor";
 import { layoutFor } from "./layouts";
-import type { Election, PeerInfo, PlotState } from "./protocol";
+import type { CaseCard, CustodyView, Election, PeerInfo, LoanView, PlotState } from "./protocol";
+import type { ArrestFlash, BailAsk, HeldEntry } from "./custody";
+import { FUEL_CAP } from "./fuel";
+import { EMPTY_MEDICAL, type MedicalFile } from "./health";
+import { interiorKey } from "./interiors";
+import { payBonus } from "./knowledge";
+import type { ServiceCtx } from "./services";
 import { titleIndex, TITLES } from "./titles";
 import { boost } from "./playerState";
 import { rebuildGrid } from "./pathing";
@@ -55,7 +61,7 @@ export type CallState = {
   peerName: string;
   room: string | null;
 };
-export type Sheet = "phone" | "profile" | "quests" | "election" | "garage" | "buy" | "friends" | "music" | "flights" | "guide" | null;
+export type Sheet = "phone" | "profile" | "quests" | "election" | "garage" | "buy" | "friends" | "music" | "flights" | "guide" | "health" | "custody" | "bank" | null;
 
 const START_MONEY = 25000;
 /** at or above this hunger level you are full and cannot eat another meal */
@@ -104,8 +110,26 @@ type State = {
   background: Background | null;
   /** a brand-new account has not finished the sign-up questions yet */
   onboard: boolean;
+  /** litres of petrol in the jerrycans (fuel.ts). The home generator burns a litre per 5 minutes. */
+  fuel: number;
+  /** the hospital file: health card, illness, ticket, visits (health.ts) */
+  medical: MedicalFile;
+  /** set while held. The server's word, persisted so that a reload cannot be a way out (custody.ts) */
+  custody: CustodyView | null;
 
   // session
+  /** the open service desk panel (services.ts); null when none */
+  service: ServiceCtx | null;
+  /** serverNow - Date.now(), so custody countdowns are right on a wrong clock */
+  clockSkew: number;
+  cases: CaseCard[];
+  bailAsks: BailAsk[];
+  heldFriends: Record<string, HeldEntry>;
+  arrestFlash: ArrestFlash | null;
+  /** GET /api/custody/me said the police are on (CUSTODY=1 on the server) and this is not demo mode */
+  policeOpen: boolean;
+  /** ...and the money cases (EFCC) are on too */
+  efccOpen: boolean;
   awaySecs: number;
   interior: InteriorRef | null;
   /** black fade between city and interiors */
@@ -158,6 +182,10 @@ type State = {
   passOpens: Record<string, number>;
   campus: boolean;
   buyPass: (estateId: string) => string | null;
+  /** the bank loan. Saved on this device; with a server, the server's record replaces it (loans.ts) */
+  loan: LoanView | null;
+  /** stop the action that is running without paying it out (an arrest) */
+  cancelBusy: () => void;
   pantry: number;
   plates: number;
   /** how many plates of each dish you have cooked or ordered (see menu.ts) */
@@ -208,7 +236,7 @@ type State = {
   setAtPlace: (id: string | null) => void;
   toast: (text: string, tone?: Toast["tone"]) => void;
   tick: (dt: number) => void;
-  runAction: (a: ActionDef, opts?: { gainScale?: number }) => string | null;
+  runAction: (a: ActionDef, opts?: { gainScale?: number; onDone?: () => void }) => string | null;
   buyPlot: (id: string) => string | null;
   upgradePlot: (id: string) => string | null;
   collectRent: (id: string) => void;
@@ -249,6 +277,17 @@ export const useGame = create<State>()(
       savedAt: 0,
       background: null,
       onboard: false,
+      fuel: 0,
+      medical: EMPTY_MEDICAL,
+      custody: null,
+      service: null,
+      clockSkew: 0,
+      cases: [],
+      bailAsks: [],
+      heldFriends: {},
+      arrestFlash: null,
+      policeOpen: false,
+      efccOpen: false,
       awaySecs: 0,
       interior: null,
       fade: false,
@@ -341,6 +380,12 @@ export const useGame = create<State>()(
       passes: {},
       passOpens: {},
       campus: false,
+      loan: null,
+      cancelBusy: () => {
+        if (busyTimer) clearTimeout(busyTimer);
+        busyTimer = null;
+        set({ busy: null });
+      },
       buyPass: (estateId) => {
         const s = get();
         const e = ESTATE_BY_ID[estateId];
@@ -433,10 +478,14 @@ export const useGame = create<State>()(
         if (a.plates && a.plates < 0 && a.dish && (s.dishes[a.dish] ?? 0) < -a.plates) return "You have not got that dish. Cook it or order it first.";
         if (a.minRep && s.rep < a.minRep) return `Needs ${a.minRep} reputation (${TITLES[titleIndex(a.minRep)].name}).`;
         if (a.cost && s.money < a.cost) return `You need ${naira(a.cost)}.`;
+        if (a.fuel && a.fuel > 0 && s.fuel >= FUEL_CAP) return `Your jerrycans are full (${FUEL_CAP} L).`;
         if (a.gain?.energy && a.gain.energy < 0 && s.needs.energy + a.gain.energy < 0) return `Too tired (energy ${Math.round(s.needs.energy)}%). Eating will not fix it: sleep at home, rest in a ward or sit and relax first.`;
         if (s.atPlace && !isOpen(s.atPlace, gameMinutes(Date.now(), s.clockOverride) / 60)) return `Closed for now. Opens at ${opensAt(s.atPlace)}.`;
         const policy = s.election?.governor?.policy;
-        const price = (a.cost ?? 0) * (policy === "food" && (a.gain?.hunger ?? 0) > 0 ? 0.8 : 1);
+        // petrol: a partly empty set of jerrycans only buys (and pays for) what fits
+        const litres = a.fuel && a.fuel > 0 ? Math.min(a.fuel, FUEL_CAP - s.fuel) : 0;
+        const cheaper = (policy === "food" && (a.gain?.hunger ?? 0) > 0) || (policy === "transport" && litres > 0);
+        const price = (a.cost ?? 0) * (cheaper ? 0.8 : 1) * (litres && a.fuel ? litres / a.fuel : 1);
         if (price && s.money < price) return `You need ${naira(price)}.`;
         const scale = opts?.gainScale ?? 1;
         set({ busy: { label: a.label, start: Date.now(), secs: a.secs, food: foodFor(a), emote: a.emote }, money: s.money - Math.round(price) });
@@ -447,13 +496,16 @@ export const useGame = create<State>()(
           const parts: string[] = [];
           const ev = eventFor(cur.atPlace, gameMinutes(Date.now(), cur.clockOverride) / 60);
           if (ev) parts.push(`${ev.emoji} ${ev.title}`);
+          // team games: every OTHER real player in the same room adds a share to the good gains (at most 4 people)
+          const myRoom = cur.interior ? interiorKey(cur.interior) : (cur.atPlace ?? "streets");
+          const crew = 1 + (a.team ?? 0) * Math.min(4, Object.values(cur.remotes).filter((r) => r.room === myRoom).length);
           for (const k of Object.keys(a.gain ?? {}) as (keyof Needs)[]) {
-            const d = (a.gain![k] ?? 0) * (a.gain![k]! > 0 ? scale * (ev?.gainMul ?? 1) : 1);
+            const d = (a.gain![k] ?? 0) * (a.gain![k]! > 0 ? scale * (ev?.gainMul ?? 1) * crew : 1);
             needs[k] = clamp(needs[k] + d);
           }
           let money = cur.money;
           if (a.pay) {
-            const pay = Math.round(a.pay * (1 + 0.08 * titleIndex(cur.rep)) * (cur.election?.governor?.policy === "wages" ? 1.15 : 1) * (ev?.payMul ?? 1));
+            const pay = Math.round(a.pay * (1 + 0.08 * titleIndex(cur.rep)) * (cur.election?.governor?.policy === "wages" ? 1.15 : 1) * (ev?.payMul ?? 1) * payBonus(cur.stats.know));
             money += pay;
             parts.push(`+${naira(pay)}`);
           }
@@ -468,16 +520,23 @@ export const useGame = create<State>()(
             ...cur.stats,
             worked: cur.stats.worked + (a.pay ? 1 : 0),
             ate: cur.stats.ate + ((a.gain?.hunger ?? 0) >= 25 ? 1 : 0),
+            // study points are multiplied by an event such as the reading hour; other counters are not
+            ...(a.stat ? { [a.stat]: (cur.stats[a.stat] ?? 0) + Math.round((a.statN ?? 1) * (a.stat === "know" ? (ev?.gainMul ?? 1) : 1)) } : {}),
+            ...(litres ? { fuelL: (cur.stats.fuelL ?? 0) + litres } : {}),
           };
+          const fuel = Math.min(FUEL_CAP, cur.fuel + litres);
+          if (litres) parts.push(`+${litres} L petrol`);
+          if (crew > 1) parts.push(`team x${crew.toFixed(2)}`);
           const pantry = Math.max(0, cur.pantry + (a.pantry ?? 0));
           const plates = Math.max(0, cur.plates + (a.plates ?? 0));
           const dishes = a.dish && a.plates ? { ...cur.dishes, [a.dish]: Math.max(0, (cur.dishes[a.dish] ?? 0) + a.plates) } : cur.dishes;
           if (a.pantry && a.pantry > 0) parts.push(`+${a.pantry} foodstuff`);
           if (a.plates && a.plates > 0) parts.push("meal ready");
-          set({ busy: null, needs, money, rep, stats, pantry, plates, dishes });
+          set({ busy: null, needs, money, rep, stats, pantry, plates, dishes, fuel });
           get().toast(`${a.label}${parts.length ? ` · ${parts.join(" · ")}` : ""}`, "good");
           const afterTitle = titleIndex(rep);
           if (afterTitle > beforeTitle) get().toast(`New title: ${TITLES[afterTitle].name}!`, "good");
+          opts?.onDone?.();
         }, a.secs * 1000);
         return null;
       },
@@ -656,6 +715,7 @@ export const useGame = create<State>()(
         plates: s.plates,
         dishes: s.dishes,
         passes: s.passes,
+        loan: s.loan,
         passOpens: s.passOpens,
         ticket: s.ticket,
         decor: s.decor,
@@ -663,6 +723,9 @@ export const useGame = create<State>()(
         cars: s.cars,
         carColors: s.carColors,
         activeCar: s.activeCar,
+        fuel: s.fuel,
+        medical: s.medical,
+        custody: s.custody,
       }),
       // while you were away your needs keep dropping, at a gentler rate (capped at 20 minutes)
       merge: (persisted, current) => {
@@ -672,6 +735,9 @@ export const useGame = create<State>()(
         // saves from before the toilet and bath needs have no values for them: start those at a sensible level
         merged.needs = { ...current.needs, ...(p.needs ?? {}) };
         merged.plots = { ...NPC_PLOTS, ...(p.plots ?? {}) };
+        // older saves have no `medical` and fewer stats: fill the gaps
+        merged.medical = { ...current.medical, ...(p.medical ?? {}) };
+        merged.stats = { ...current.stats, ...(p.stats ?? {}) };
         const away = p.savedAt ? Math.min(1200, (Date.now() - p.savedAt) / 1000) : 0;
         if (away > 30 && p.needs) {
           const d = decayNeeds(p.needs, away * 0.4);

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { X, BatteryFull, Briefcase, ChevronLeft, DoorOpen, Landmark, HeartHandshake, HelpCircle, ListChecks, MapPin, MessageCircle, Music2, Newspaper, Phone, Plane, Search, ShoppingBag, Signal, Store, Wifi } from "lucide-react";
+import { ShieldAlert, X, BatteryFull, Briefcase, ChevronLeft, DoorOpen, Landmark, HeartHandshake, HelpCircle, ListChecks, MapPin, MessageCircle, Music2, Newspaper, Phone, Plane, Search, ShoppingBag, Signal, Store, Wifi } from "lucide-react";
 import { eventsAt } from "@/lib/events";
 import { useClock } from "@/lib/hooks";
 import { NEWS } from "@/lib/news";
@@ -20,8 +20,9 @@ import MusicSheet from "./MusicSheet";
 import { ChatsPanel } from "./FriendsTabs";
 import { MarketApp, SearchApp, VisitsApp } from "./PhoneExtras";
 import BankApp from "./BankApp";
+import { PoliceApp } from "./CustodyUI";
 
-export type AppId = "jobs" | "news" | "calls" | "messages" | "maps" | "goals" | "buy" | "flights" | "music" | "family" | "guide" | "market" | "visits" | "search" | "bank";
+export type AppId = "jobs" | "news" | "calls" | "messages" | "maps" | "goals" | "buy" | "flights" | "music" | "family" | "guide" | "market" | "visits" | "search" | "bank" | "police";
 
 const APPS: { id: AppId; label: string; icon: typeof Phone; tint: string }[] = [
   { id: "jobs", label: "Jobs", icon: Briefcase, tint: "from-emerald-400 to-teal-600" },
@@ -39,6 +40,7 @@ const APPS: { id: AppId; label: string; icon: typeof Phone; tint: string }[] = [
   { id: "visits", label: "Visits", icon: DoorOpen, tint: "from-yellow-400 to-amber-600" },
   { id: "search", label: "Search", icon: Search, tint: "from-slate-400 to-slate-600" },
   { id: "bank", label: "Bank", icon: Landmark, tint: "from-emerald-500 to-green-700" },
+  { id: "police", label: "Police", icon: ShieldAlert, tint: "from-blue-500 to-indigo-700" },
 ];
 const DOCK: AppId[] = ["calls", "messages", "jobs", "maps"];
 
@@ -324,6 +326,8 @@ export default function PhoneOS({ initial = null, render, fullscreen = false, on
         return <SearchApp />;
       case "bank":
         return <BankApp />;
+      case "police":
+        return <PoliceApp />;
       default:
         return null;
     }
