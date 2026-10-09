@@ -638,11 +638,19 @@ function Hotel({ size: [w, h, d], color, name = "Hotel" }: SP) {
   );
 }
 
-function Lookout({ size: [w, h], color }: SP) {
+function Lookout({ size: [w, h], color, name = "Bower's Tower" }: SP) {
+  const sign = useBoard(name, "#3a2616", "#ffd98a");
   return (
     <>
       <Cyl r={w * 0.95} h={0.16} c="#d9d1c0" seg={20} />
       <Cyl p={[0, 0.16, 0]} r={w * 0.5} r2={w * 0.34} h={h * 0.8} c={color} seg={20} />
+      {/* the door, on the east face where the path ends: a dark arch with a warm light, and the name above it */}
+      <Box p={[w * 0.46, 0.16, 0]} s={[0.1, 0.62, 0.36]} c="#2b2a28" />
+      <Box p={[w * 0.46, 0.76, 0]} s={[0.12, 0.06, 0.44]} c="#cdb48f" />
+      <Glow p={[w * 0.5 + 0.02, 0.47, 0]} s={[0.02, 0.5, 0.28]} c="#ffcf7a" />
+      <mesh position={[w * 0.44, 1.12, 0]} rotation={[0, Math.PI / 2, 0]} material={sign} castShadow>
+        <boxGeometry args={[0.78, 0.2, 0.05]} />
+      </mesh>
       {/* viewing deck: a wide balcony ring with a railing, where visitors stand */}
       <Cyl p={[0, 0.16 + h * 0.8 - 0.06, 0]} r={1.5} h={0.1} c="#cdb48f" seg={32} />
       <Cyl p={[0, 0.16 + h * 0.8 - 0.3, 0]} r={1.05} r2={1.45} h={0.24} c="#b9855a" seg={32} />

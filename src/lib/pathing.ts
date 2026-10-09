@@ -57,6 +57,12 @@ export class Grid {
     return null;
   }
 
+  /** The centre of the nearest free cell to a spot, or null when none is near (the tower's landing place). */
+  nearestFreePoint(x: number, z: number): { x: number; z: number } | null {
+    const c = this.nearestFree(this.ci(x), this.cj(z));
+    return c ? { x: this.cx(c[0]), z: this.cz(c[1]) } : null;
+  }
+
   /** Cells reachable from `start` (flood fill), so goals never land in a walled-off pocket. */
   private reachableFrom(start: number): Uint8Array {
     const { nx, nz, blocked } = this;
