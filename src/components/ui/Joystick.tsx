@@ -68,7 +68,7 @@ export default function Joystick() {
         type="button"
         aria-label="Show the walking stick"
         onClick={() => tuck(false)}
-        className="absolute bottom-[calc(env(safe-area-inset-bottom)+9rem)] left-0 z-[16] grid h-12 w-6 place-items-center rounded-r-full bg-black/10 ring-1 ring-white/40 backdrop-blur-sm sm:bottom-28"
+        className="absolute bottom-[calc(env(safe-area-inset-bottom)+14.5rem)] right-0 z-[16] grid h-12 w-6 place-items-center rounded-l-full bg-black/10 ring-1 ring-white/40 backdrop-blur-sm sm:bottom-[17.5rem]"
       >
         <span className="size-2 rounded-full bg-white/60" />
       </button>
@@ -97,7 +97,7 @@ export default function Joystick() {
       onLostPointerCapture={(e) => {
         if (e.pointerId === finger.current) rest();
       }}
-      className="absolute bottom-[calc(env(safe-area-inset-bottom)+9rem)] left-1.5 z-[16] grid size-[5.5rem] touch-none select-none place-items-center rounded-full bg-black/5 opacity-50 ring-1 ring-white/30 transition-opacity active:opacity-80 sm:bottom-28 sm:left-3"
+      className="absolute bottom-[calc(env(safe-area-inset-bottom)+14.5rem)] right-3 z-[16] grid size-[5.5rem] touch-none select-none place-items-center rounded-full bg-black/5 opacity-50 ring-1 ring-white/30 transition-opacity active:opacity-80 sm:bottom-[17.5rem] sm:right-5"
     >
       <div className="pointer-events-none absolute inset-2 rounded-full ring-1 ring-white/25" />
       <div ref={knob} className="pointer-events-none size-9 rounded-full bg-white/60 shadow ring-1 ring-black/5" />
@@ -107,7 +107,7 @@ export default function Joystick() {
         aria-label="Hide the walking stick"
         onPointerDown={(e) => e.stopPropagation()}
         onClick={() => tuck(true)}
-        className="absolute -right-1 -top-1 grid size-5 place-items-center rounded-full bg-black/30 text-[11px] font-bold leading-none text-white"
+        className="absolute -left-1 -top-1 grid size-5 place-items-center rounded-full bg-black/30 text-[11px] font-bold leading-none text-white"
       >
         ×
       </button>

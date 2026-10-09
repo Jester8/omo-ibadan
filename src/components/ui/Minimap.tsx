@@ -28,6 +28,12 @@ const rotation = () => -Math.PI / 2 - Math.atan2(-Math.cos(cam.az), -Math.sin(ca
 export default function Minimap() {
   const inside = useGame((s) => !!s.interior);
   const [shown, setShown] = useState(true);
+  const [tag, setTag] = useState<{ name: string; color: string; n: number } | null>(null);
+  useEffect(() => {
+    if (!tag) return;
+    const t = setTimeout(() => setTag(null), 3500);
+    return () => clearTimeout(t);
+  }, [tag]);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setShown(readShown());
@@ -45,7 +51,13 @@ export default function Minimap() {
     <div className="absolute bottom-[calc(5.4rem+env(safe-area-inset-bottom))] right-3 z-10 sm:bottom-24 sm:right-5">
       {shown ? (
         <div className="relative">
-          <MinimapCanvas />
+          {tag && (
+            <div className="pointer-events-none absolute right-full top-1/2 mr-2 flex max-w-[10rem] -translate-y-1/2 items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-stone-800 shadow-lg ring-1 ring-black/10">
+              <span className="size-2.5 shrink-0 rounded-full" style={{ background: tag.color }} />
+              <span className="truncate">{tag.name}</span>
+            </div>
+          )}
+          <MinimapCanvas onPick={(name, color) => setTag({ name, color, n: Date.now() })} />
           <button onClick={() => set(false)} aria-label="Hide map" className="absolute -left-1 -top-1 grid size-8 place-items-center rounded-full bg-white text-stone-600 shadow-lg ring-1 ring-black/10 transition active:scale-90">
             <X className="size-4" />
           </button>
@@ -59,7 +71,7 @@ export default function Minimap() {
   );
 }
 
-function MinimapCanvas() {
+function MinimapCanvas({ onPick }: { onPick: (name: string, color: string) => void }) {
   const ref = useRef<HTMLCanvasElement>(null);
   // a smaller map on phones
   const [SIZE] = useState(() => (typeof window !== "undefined" && window.innerWidth < 640 ? 116 : 148));
@@ -163,13 +175,32 @@ function MinimapCanvas() {
     const phi = rotation();
     const x = dx * Math.cos(phi) + dy * Math.sin(phi);
     const z = -dx * Math.sin(phi) + dy * Math.cos(phi);
-    useGame.getState().select(null);
-    walkTo(me.x + x / SCALE, me.z + z / SCALE);
+    const wx = me.x + x / SCALE;
+    const wz = me.z + z / SCALE;
+    const st = useGame.getState();
+    // a tap on a place's dot (a generous 14px) shows what it is and opens it; a tap on empty ground walks there
+    let best: (typeof PLACES)[number] | null = null;
+    let bestD = 14 / SCALE;
+    for (const p of PLACES) {
+      if (CAMPUS_PLACES.includes(p.id) && !st.campus) continue;
+      const d = Math.hypot(p.pos[0] - wx, p.pos[1] - wz);
+      if (d < bestD) {
+        best = p;
+        bestD = d;
+      }
+    }
+    if (best) {
+      onPick(best.name, KIND_COLORS[best.kind]);
+      st.select({ type: "place", id: best.id });
+      return;
+    }
+    st.select(null);
+    walkTo(wx, wz);
   };
 
   return (
     <div className="rounded-full bg-white/80 p-1 shadow-xl ring-1 ring-black/5 backdrop-blur-xl">
-      <canvas ref={ref} onClick={onClick} style={{ width: SIZE, height: SIZE }} className="cursor-pointer rounded-full" aria-label="Minimap, click to walk" />
+      <canvas ref={ref} onClick={onClick} style={{ width: SIZE, height: SIZE }} className="cursor-pointer rounded-full" aria-label="Minimap: tap a place to see it, tap the ground to walk" />
     </div>
   );
 }
