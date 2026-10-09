@@ -11,6 +11,7 @@ import NowPlaying from "@/components/ui/NowPlaying";
 import SpotifyEngine from "@/components/ui/SpotifyEngine";
 import Minimap from "@/components/ui/Minimap";
 import ViewControls from "@/components/ui/ViewControls";
+import Joystick from "@/components/ui/Joystick";
 import AudioBridge from "@/components/ui/AudioBridge";
 import { FamilyAsks, Hint, IncomingCall, Knocks, ListenAsks, NetBanner, RelAsks, Serves, Toasts, VoiceBar } from "@/components/ui/Floating";
 import AvatarCreator from "@/components/avatar/AvatarCreator";
@@ -238,6 +239,7 @@ export default function WorldClient() {
           <VoiceBar />
           {!hideIcons && <Minimap />}
           {!hideIcons && <ViewControls />}
+          <Joystick />
           <Hint />
         </>
       )}

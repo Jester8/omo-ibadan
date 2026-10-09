@@ -9,7 +9,10 @@ import CarModel from "./CarModel";
 import Avatar from "@/components/avatar/Avatar";
 import { useGame } from "@/lib/store";
 import { PLACES, doorOf } from "@/lib/places";
-import { boost, cam, emotes, me } from "@/lib/playerState";
+import { boost, cam, emotes, me, stick } from "@/lib/playerState";
+
+/** The stick must be pushed this far (0 to 1) before the player moves, so a resting thumb does nothing. */
+const STICK_DEAD = 0.12;
 import { isBlockedAt } from "@/lib/pathing";
 import { net } from "@/lib/net";
 import { S } from "@/lib/furniture";
@@ -92,7 +95,7 @@ export default function Player() {
     }
 
     // seated or sleeping on furniture: hold the pose until the action finishes
-    if (me.use && me.use.free && (me.path.length > 0 || keys.current.size > 0)) endUse(); // walked off: stand up
+    if (me.use && me.use.free && (me.path.length > 0 || keys.current.size > 0 || Math.hypot(stick.x, stick.y) > STICK_DEAD)) endUse(); // walked off: stand up
     if (me.use) {
       if (!s.busy && !me.use.free) {
         endUse();
@@ -131,8 +134,15 @@ export default function Player() {
     let tx = me.ry;
 
     const k = keys.current;
-    const kf = (k.has("f") ? 1 : 0) - (k.has("b") ? 1 : 0);
-    const kr = (k.has("r") ? 1 : 0) - (k.has("l") ? 1 : 0);
+    let kf = (k.has("f") ? 1 : 0) - (k.has("b") ? 1 : 0);
+    let kr = (k.has("r") ? 1 : 0) - (k.has("l") ? 1 : 0);
+    // the on-screen stick: up is away from the camera, and a gentle push walks slowly, like in a game
+    const push = Math.min(1, Math.hypot(stick.x, stick.y));
+    const analog = push > STICK_DEAD;
+    if (analog) {
+      kf = -stick.y;
+      kr = stick.x;
+    }
     if (s.busy) {
       me.path = [];
     } else if (kf || kr) {
@@ -145,7 +155,7 @@ export default function Player() {
       const len = Math.hypot(dx, dz) || 1;
       dx /= len;
       dz /= len;
-      const step = base * dt;
+      const step = base * dt * (analog ? 0.35 + 0.65 * push : 1);
       const nx = me.x + dx * step;
       const nz = me.z + dz * step;
       if (!isBlockedAt(nx, me.z)) me.x = nx;
