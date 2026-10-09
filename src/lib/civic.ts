@@ -16,6 +16,7 @@ export function runPlaceAction(placeId: string, a: ActionDef): void {
   const why = actionBlocked();
   if (why) return void s.toast(why, "bad");
   if (a.svc) {
+    if (s.interior?.kind !== "place" || s.interior.id !== placeId) return void s.toast("Step inside to reach the counter.", "info");
     const err = openService(a.svc, placeId);
     if (err) s.toast(err, "info");
     return;

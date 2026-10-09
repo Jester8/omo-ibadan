@@ -1,6 +1,7 @@
 "use client";
 
-import { climbTower } from "@/lib/interiorRuntime";
+import { runPlaceAction } from "@/lib/civic";
+import HospitalCard from "./HospitalCard";
 import { closesAt, eventFor, isOpen, opensAt } from "@/lib/events";
 import GatePanel from "./GatePanel";
 import PlayerPanel from "./PlayerPanel";
@@ -164,18 +165,15 @@ function PlaceBody({ id }: { id: string }) {
         </div>
       )}
 
+      {place.service === "hospital" && <HospitalCard placeId={id} inside={false} />}
+
       <ul className="mt-4 space-y-2">
-        {place.actions.map((a, i) => (
+        {place.actions.filter((a) => !(place.service === "hospital" && a.id === "checkup")).map((a, i) => (
           <motion.li key={a.id} initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.06 + i * 0.05 }}>
             <ActionRow
               a={a}
               enabled={at && !busy && open}
-              onRun={() => {
-                if (a.id === "climb") return climbTower();
-                if (id === "airport" && (a.id === "book" || a.id === "board")) return useGame.getState().setSheet("flights");
-                const err = useGame.getState().runAction(a);
-                if (err) useGame.getState().toast(err, "bad");
-              }}
+              onRun={() => runPlaceAction(id, a)}
             />
           </motion.li>
         ))}

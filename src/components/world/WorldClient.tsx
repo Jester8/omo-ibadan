@@ -33,6 +33,7 @@ import { streetRoom } from "@/lib/voiceRoom";
 import Comms from "@/components/ui/Comms";
 import PhotoDrop from "@/components/ui/PhotoDrop";
 import { enterInterior, goUpDeck, homeRef, rt, startUse, walkToFurn } from "@/lib/interiorRuntime";
+import { devHospital, tickHealth } from "@/lib/hospital";
 import { cam, me } from "@/lib/playerState";
 import { setOpenEstates } from "@/lib/pathing";
 import { openEstateIds } from "@/lib/estates";
@@ -71,8 +72,11 @@ function Runtime() {
   const net_ = useGame((s) => s.net);
 
   useEffect(() => {
-    const id = setInterval(() => useGame.getState().tick(1), 1000);
-    if (process.env.NODE_ENV !== "production") (window as unknown as { __omo: unknown }).__omo = { useGame, me, cam, startUse, walkToFurn, rt, goUpDeck, enterInterior };
+    const id = setInterval(() => {
+      useGame.getState().tick(1);
+      tickHealth(1);
+    }, 1000);
+    if (process.env.NODE_ENV !== "production") (window as unknown as { __omo: unknown }).__omo = { useGame, me, cam, startUse, walkToFurn, rt, goUpDeck, enterInterior, hospital: devHospital };
     const hour = new URLSearchParams(location.search).get("hour");
     if (hour !== null && !Number.isNaN(Number(hour))) useGame.getState().patch({ clockOverride: Number(hour) });
     return () => clearInterval(id);

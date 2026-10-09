@@ -15,7 +15,7 @@ export default function BottomBar() {
   const setSheet = useGame((s) => s.setSheet);
 
   const toggle = (id: Exclude<Sheet, null>) => setSheet(sheet === id ? null : id);
-  const phoneSheets: Sheet[] = ["phone", "calls", "quests", "buy", "garage", "flights", "music", "guide"];
+  const phoneSheets: Sheet[] = ["phone", "calls", "quests", "buy", "garage", "flights", "music", "guide", "health"];
 
   const items: { id: string; label: string; icon: typeof House; active: boolean; badge?: number | boolean; onClick: () => void }[] = [
     {

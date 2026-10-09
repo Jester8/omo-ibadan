@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
+import HealthPill from "./HealthPill";
 import { Droplets, Toilet, X, EyeOff, Eye, HelpCircle, Drumstick, Moon, PartyPopper, Sun, Target, UserRound, Users, Zap, ZapOff } from "lucide-react";
 import { useGame } from "@/lib/store";
 import { useClock } from "@/lib/hooks";
@@ -44,6 +45,7 @@ export default function Hud() {
 
   return (
     <>
+      <HealthPill />
       {hideCard && (
         <button
           onClick={() => patch({ hideCard: false })}
