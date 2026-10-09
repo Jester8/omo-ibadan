@@ -28,6 +28,11 @@
 - **Emotes:** wave (Z) and dance (X), shown to everyone in the room.
 - **More furniture:** mortar and pestle, sewing machine, gas cooker, radio, Ibeji statues, calabashes, carved stool, agbada stand, mannequins, prepaid meter, wall calendar, provisions shelf, cooler, water tank.
 
+- **Civic pack:** 19 new places (EFCC office, custodial centre, high court, fire station, post office, filling station, health centre, school, library, food bank, three boreholes, the Olodo community) with their own buildings and interiors; poke, hit, police report, custody and bail (behind server switches); loans and selling land.
+- **Hospitals:** you can fall ill (cold, malaria, typhoid, food poisoning, exhaustion, injury). At UCH or Adeoyo you register once, describe how you feel, pay, take a ticket and lie on a free ward bed to be cured; the emergency desk skips the queue for a bigger fee. Health app in the phone, a pill in the HUD, `npm run check:health`.
+- **Food bank and post office:** donate for reputation (capped per hour), a free meal when broke and hungry, letters to friends for N200; Education and Fuel tiles in the Me sheet.
+- **Bower's Tower:** a reachable door, a telescope with 14 landmarks, a safer climb and descent.
+
 ## Not verified yet
 - **Sound by ear.** The browser pane can't play audio, so levels and the groove still need a listen.
 - **Interiors on a phone:** only checked on a desktop-size window plus one narrow view.
