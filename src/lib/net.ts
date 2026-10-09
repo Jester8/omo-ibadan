@@ -45,9 +45,26 @@ export const callRoom = (a: string, b: string) => `call:${[a, b].sort().join(":"
 function upsert(p: PeerInfo) {
   const s = useGame.getState();
   if (p.id === s.connId) return;
+  const before = s.remotes[p.id];
   useGame.setState({ remotes: { ...s.remotes, [p.id]: p } });
-  if (!remoteMotion.has(p.id)) remoteMotion.set(p.id, { x: p.x, z: p.z, ry: p.ry, speed: 0, tx: p.x, tz: p.z, tr: p.ry });
+  const motion = remoteMotion.get(p.id);
+  if (!motion) remoteMotion.set(p.id, { x: p.x, z: p.z, ry: p.ry, speed: 0, tx: p.x, tz: p.z, tr: p.ry });
+  else {
+    // someone already on screen: glide to where the news says they are, but jump when they changed room (the coordinates mean something else there)
+    motion.tx = p.x;
+    motion.tz = p.z;
+    motion.tr = p.ry;
+    if (!before || before.room !== p.room) {
+      motion.x = p.x;
+      motion.z = p.z;
+      motion.ry = p.ry;
+    }
+  }
 }
+
+/** While the connection is down the people already on screen stay where they were; if it is not back after this long they are cleared. */
+const STALE_MS = 90_000;
+let staleTimer: ReturnType<typeof setTimeout> | null = null;
 
 function handle(m: S2C) {
   const s = useGame.getState();
@@ -72,8 +89,16 @@ function handle(m: S2C) {
         }
         if (free.length) send({ t: "claimStarter", candidates: free.slice(0, 12) });
       }
-      remoteMotion.clear();
-      useGame.setState({ remotes: {} });
+      // the people who are still here stay on screen and move on from where they were; only those who left are removed
+      if (staleTimer) clearTimeout(staleTimer);
+      staleTimer = null;
+      const here = new Set(m.peers.map((p) => p.id));
+      for (const id of [...remoteMotion.keys()]) {
+        if (here.has(id)) continue;
+        remoteMotion.delete(id);
+        remoteSits.delete(id);
+      }
+      useGame.setState((st) => ({ remotes: Object.fromEntries(Object.entries(st.remotes).filter(([id]) => here.has(id))) }));
       m.peers.forEach(upsert);
       send({ t: "room", room: roomOf(useGame.getState().atPlace, useGame.getState().interior) });
       break;
@@ -448,11 +473,16 @@ function openSocket() {
     if (autosave) clearInterval(autosave);
     if (pingTimer) clearInterval(pingTimer);
     pingTimer = null;
-    remoteMotion.clear();
+    // a weak signal is not a reason to empty the city: everyone stays where they were while we reconnect
+    if (staleTimer) clearTimeout(staleTimer);
+    staleTimer = setTimeout(() => {
+      remoteMotion.clear();
+      useGame.setState({ remotes: {} });
+    }, STALE_MS);
     listen.onDisconnect();
     if (useGame.getState().call.phase !== "idle") endCallLocal();
     else voice.leave();
-    useGame.setState({ net: "offline", connId: null, remotes: {}, online: 0, incoming: null });
+    useGame.setState({ net: "offline", connId: null, online: 0, incoming: null });
     if (want) {
       timer = setTimeout(connect, Math.min(10000, 1000 * 2 ** retry++));
     }

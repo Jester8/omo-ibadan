@@ -1,6 +1,7 @@
 "use client";
 
-import { DoorOpen, Hammer, KeyRound, Landmark, X } from "lucide-react";
+import { useState } from "react";
+import { DoorOpen, Hammer, KeyRound, Landmark, Lock, X } from "lucide-react";
 import { enterInterior } from "@/lib/interiorRuntime";
 import { HOME_ACTIONS, PLOT_SIZE, TIERS, naira, plotById } from "@/lib/plots";
 import { pendingRent, useGame } from "@/lib/store";
@@ -13,6 +14,9 @@ import { ActionRow, VoiceRoomCard } from "./parts";
 import { net } from "@/lib/net";
 import TravelOptions from "./Travel";
 import { BUSINESSES, bizById } from "@/lib/business";
+import { loanNow, repayLoan } from "@/lib/loans";
+import { useSalesOn } from "@/lib/property";
+import SellSheet from "./SellSheet";
 
 export default function PlotPanelBody({ id }: { id: string }) {
   const plot = plotById(id)!;
@@ -33,6 +37,22 @@ export default function PlotPanelBody({ id }: { id: string }) {
   const act = (fn: () => string | null) => {
     const err = fn();
     if (err) useGame.getState().toast(err, "bad");
+  };
+  const salesOn = useSalesOn();
+  const loan = useGame((s) => s.loan);
+  const skew = useGame((s) => s.clockSkew);
+  const [selling, setSelling] = useState(false);
+  // the bank has a lien on this property (the server sets it and lifts it): no visitors, no customers, no building
+  const seized = !!state?.seized;
+  const owed = loan ? loanNow(loan, sec * 1000 + skew).owed : 0;
+  // the rent of a seized property goes straight to the loan
+  const payFromRent = () => {
+    const cur = useGame.getState().plots[id];
+    if (!cur) return;
+    const amount = pendingRent(cur, Date.now());
+    if (amount <= 0) return useGame.getState().toast("No rent to collect yet.", "info");
+    useGame.getState().collectRent(id);
+    if (useGame.getState().loan) void repayLoan(amount).then((r) => useGame.getState().toast(r.message, r.ok ? "good" : "bad"));
   };
 
   const enterHome = () => {
@@ -102,24 +122,39 @@ export default function PlotPanelBody({ id }: { id: string }) {
         </>
       )}
 
-      {state && mine && (
+      {state && mine && selling && <SellSheet plotId={id} onClose={() => setSelling(false)} />}
+
+      {state && mine && !selling && (
         <>
+          {seized && (
+            <div className="mt-4 rounded-2xl bg-rose-50 p-3 ring-1 ring-rose-200">
+              <p className="flex items-center gap-2 text-sm font-bold text-rose-800">
+                <Lock className="size-4 shrink-0" /> Seized by the bank until your loan is cleared
+              </p>
+              <p className="mt-1 text-xs leading-snug text-rose-700">
+                {biz ? "Customers and staff are turned away." : "Visitors are turned away."} {owed > 0 ? `You owe ${naira(owed)}. ` : ""}You can still use this property, and you can sell it.
+              </p>
+              <button onClick={() => useGame.getState().setSheet("bank")} className="mt-2 w-full rounded-xl bg-rose-600 py-2.5 text-xs font-bold text-white transition active:scale-95">
+                Repay the loan
+              </button>
+            </div>
+          )}
           <div className="mt-4 grid grid-cols-2 gap-2">
             <div className="rounded-2xl bg-stone-50 p-3 ring-1 ring-black/5">
               <p className="text-[11px] font-semibold uppercase tracking-wide text-stone-400">{biz ? "Business income" : "Rent income"}</p>
               <p className="text-sm font-bold text-stone-900">{naira(biz?.perMin ?? TIERS[tier].rentPerMin)}/min</p>
             </div>
             <button
-              onClick={() => useGame.getState().collectRent(id)}
+              onClick={() => (seized && loan ? payFromRent() : useGame.getState().collectRent(id))}
               disabled={rent <= 0}
               className="rounded-2xl bg-emerald-50 p-3 text-left ring-1 ring-emerald-100 transition hover:bg-emerald-100 active:scale-95 disabled:opacity-60"
             >
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-700">Collect</p>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-700">{seized && loan ? "Pay the loan from rent" : "Collect"}</p>
               <p className="text-sm font-bold text-emerald-900">{naira(rent)}</p>
             </button>
           </div>
 
-          {next && (
+          {next && !seized && (
             <button
               onClick={() => act(() => useGame.getState().upgradePlot(id))}
               className="mt-3 flex w-full items-center justify-between rounded-2xl bg-stone-900 px-4 py-3 text-left text-white transition hover:bg-stone-700 active:scale-[0.98]"
@@ -163,7 +198,7 @@ export default function PlotPanelBody({ id }: { id: string }) {
             </div>
           )}
 
-          {tier === 0 && !biz && (
+          {tier === 0 && !biz && !seized && (
             <div className="mt-3 rounded-2xl bg-white ring-1 ring-black/5">
               <p className="px-3.5 pt-3 text-[11px] font-bold uppercase tracking-wide text-stone-400">Or build a business</p>
               <ul className="divide-y divide-stone-100">
@@ -207,6 +242,11 @@ export default function PlotPanelBody({ id }: { id: string }) {
               )}
             </>
           )}
+          {salesOn && (
+            <button onClick={() => setSelling(true)} className="mt-4 w-full rounded-xl py-2 text-xs font-semibold text-stone-400 underline-offset-2 transition hover:text-stone-600 hover:underline active:scale-95">
+              Sell this land
+            </button>
+          )}
         </>
       )}
 
@@ -215,15 +255,15 @@ export default function PlotPanelBody({ id }: { id: string }) {
           <p className="flex items-center gap-2 font-semibold text-stone-800">
             <KeyRound className="size-4" /> Owned by {state.ownerName}
           </p>
-          <p className="mt-1">{biz ? `${biz.emoji} ${biz.name}: open to customers. It charges ${naira(state?.price ?? biz.price)} for ${biz.item}. Step inside to look around and buy.` : "Knock to be let in. You can only visit while they are home, and you are shown out when they leave."}</p>
-          {(tier >= 1 || biz) && !near && <TravelOptions x={door.x} z={door.z} label="Choose how to get there" />}
-          {(tier >= 1 || biz) && near && (
+          <p className="mt-1">{seized ? "Seized by the bank. Not open." : biz ? `${biz.emoji} ${biz.name}: open to customers. It charges ${naira(state?.price ?? biz.price)} for ${biz.item}. Step inside to look around and buy.` : "Knock to be let in. You can only visit while they are home, and you are shown out when they leave."}</p>
+          {!seized && (tier >= 1 || biz) && !near && <TravelOptions x={door.x} z={door.z} label="Choose how to get there" />}
+          {!seized && (tier >= 1 || biz) && near && (
             <>
               {bizButton}
               {enterButton}
             </>
           )}
-          {tier >= 1 && near && (
+          {!seized && tier >= 1 && near && (
             <div className="mt-3">
               <VoiceRoomCard room={`home:${id}`} label={`${state.ownerName}'s house voice`} />
             </div>
