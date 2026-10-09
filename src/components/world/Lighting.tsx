@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useEffect, useRef } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { daylight, gameMinutes, nepaOut } from "@/lib/time";
 import { useGame } from "@/lib/store";
 import { me } from "@/lib/playerState";
@@ -39,6 +40,19 @@ const SHADOW_RES: [number, number] = typeof window !== "undefined" && window.inn
 export default function Lighting() {
   const sun = useRef<THREE.DirectionalLight>(null);
   const amb = useRef<THREE.AmbientLight>(null);
+  const get = useThree((s) => s.get);
+  // a soft, built-in sky-and-bounce light for reflections on glass, skin, cloth and paint (nothing is downloaded)
+  useEffect(() => {
+    const { gl, scene } = get();
+    const pmrem = new THREE.PMREMGenerator(gl);
+    const env = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    scene.environment = env;
+    return () => {
+      if (scene.environment === env) scene.environment = null;
+      env.dispose();
+      pmrem.dispose();
+    };
+  }, [get]);
   useFrame(({ scene, clock }) => {
     const now = Date.now();
     const h = gameMinutes(now, useGame.getState().clockOverride) / 60;
@@ -65,6 +79,8 @@ export default function Lighting() {
       amb.current.intensity = 0.8 + day * 0.5;
       amb.current.color.set(day > 0.1 ? "#ffffff" : "#7c8cc7");
     }
+
+    scene.environmentIntensity = 0.12 + day * 0.5;
 
     const dark = 1 - day;
     const k = nepa ? 0.08 : 1;
