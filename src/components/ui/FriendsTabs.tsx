@@ -31,8 +31,8 @@ export function callPlayer(pid: string, name: string) {
   const s = useGame.getState();
   const peer = Object.values(s.remotes).find((r) => r.pid === pid);
   if (!peer) return s.toast(`${name} is not online right now.`, "info");
+  // the calling card at the top shows the call; tapping it opens the phone's Calls section
   net.call(peer.id, peer.name);
-  s.setSheet("phone");
 }
 
 function Thread_({ pid }: { pid: string }) {

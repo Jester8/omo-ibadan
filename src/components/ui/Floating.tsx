@@ -23,9 +23,11 @@ function roomLabel(room: string): string {
 export function VoiceBar() {
   const v = useGame((s) => s.voice);
   const call = useGame((s) => s.call);
+  // while a call is ringing or connecting the calling card is the one popup at the top
+  const ringing = call.phase === "calling" || call.phase === "connecting";
   return (
     <AnimatePresence>
-      {v.room && (
+      {v.room && !ringing && (
         <motion.div
           initial={{ opacity: 0, y: -24, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -36,7 +38,13 @@ export function VoiceBar() {
             <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex size-2.5 rounded-full bg-emerald-500" />
           </span>
-          <span className="text-sm font-semibold">{call.phase === "live" ? `On a call with ${call.peerName}` : call.phase === "connecting" ? `Connecting to ${call.peerName}...` : roomLabel(v.room)}</span>
+          {call.phase === "live" ? (
+            <button onClick={() => useGame.getState().setSheet("calls")} aria-label="Open the call in your phone" className="text-left text-sm font-semibold">
+              On a call with {call.peerName}
+            </button>
+          ) : (
+            <span className="text-sm font-semibold">{roomLabel(v.room)}</span>
+          )}
           <span className="flex items-center gap-1 text-xs text-stone-600">
             <Users className="size-3.5" /> {v.peers.length + 1}
           </span>
@@ -70,16 +78,18 @@ export function IncomingCall() {
           transition={{ type: "spring", stiffness: 300, damping: 24 }}
           className="absolute left-1/2 top-[calc(env(safe-area-inset-top)+1rem)] z-50 flex w-[min(24rem,calc(100vw-1.5rem))] -translate-x-1/2 items-center gap-3 rounded-3xl bg-white p-3 pr-3.5 text-black shadow-2xl ring-1 ring-black/10"
         >
-          <motion.span animate={{ scale: [1, 1.12, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="grid size-12 place-items-center rounded-full bg-emerald-500 text-lg font-bold text-white">
-            {call.peerName.slice(0, 1).toUpperCase()}
-          </motion.span>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-bold">{call.peerName}</p>
-            <p className="flex items-center gap-1.5 text-xs text-stone-500">
-              {connecting && <span className="size-3 animate-spin rounded-full border-2 border-stone-300 border-t-emerald-600" />}
-              {connecting ? "Connecting..." : "Ringing..."}
-            </p>
-          </div>
+          <button onClick={() => useGame.getState().setSheet("calls")} aria-label={`Open the call with ${call.peerName} in your phone`} className="flex min-w-0 flex-1 items-center gap-3 text-left">
+            <motion.span animate={{ scale: [1, 1.12, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="grid size-12 shrink-0 place-items-center rounded-full bg-emerald-500 text-lg font-bold text-white">
+              {call.peerName.slice(0, 1).toUpperCase()}
+            </motion.span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-bold">{call.peerName}</p>
+              <p className="flex items-center gap-1.5 text-xs text-stone-500">
+                {connecting && <span className="size-3 animate-spin rounded-full border-2 border-stone-300 border-t-emerald-600" />}
+                {connecting ? "Connecting..." : "Ringing..."} <span className="text-stone-400">Tap to open</span>
+              </p>
+            </div>
+          </button>
           <button onClick={() => net.hangup()} className="grid size-11 place-items-center rounded-full bg-rose-600 text-white transition active:scale-90" aria-label={connecting ? "End call" : "Cancel call"}>
             <PhoneOff className="size-5" />
           </button>

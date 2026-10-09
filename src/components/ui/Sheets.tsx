@@ -688,7 +688,7 @@ export default function Sheets() {
   const sheet = useGame((s) => s.sheet);
   const setSheet = useGame((s) => s.setSheet);
   // every phone-related sheet opens the phone, on the right app
-  const PHONE_APPS: Record<string, AppId | null> = { phone: null, quests: "goals", buy: "buy", garage: "buy", flights: "flights", music: "music", guide: "guide", bank: "bank", custody: "police" };
+  const PHONE_APPS: Record<string, AppId | null> = { phone: null, calls: "calls", quests: "goals", buy: "buy", garage: "buy", flights: "flights", music: "music", guide: "guide", bank: "bank", custody: "police" };
   const phoneApp = sheet && sheet in PHONE_APPS ? PHONE_APPS[sheet] : undefined;
   const onPhone = useIsPhone();
   return (
