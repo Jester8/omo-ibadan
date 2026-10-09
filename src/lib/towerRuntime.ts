@@ -10,9 +10,10 @@ import { useGame } from "./store";
  * interiorRuntime.ts re-exports DECK_Y, climbTower, goUpDeck and leaveDeck, so existing imports keep working.
  */
 /** Bower's Tower: the viewing deck sits at the top of the shaft. */
-export const DECK_Y = 3.72;
-const DECK_R = 1.05;
 const tower = () => PLACES.find((p) => p.id === "bowers")!;
+/** The shaft is 80% of the tower's height, on a 0.16 base, and the deck floor is 0.04 above it (see Lookout in Buildings.tsx). */
+export const DECK_Y = 0.2 + tower().size[1] * 0.8;
+const DECK_R = 1.05;
 
 /** The camera before the climb, so coming down puts it back where it was. */
 let before: { dist: number; el: number } | null = null;

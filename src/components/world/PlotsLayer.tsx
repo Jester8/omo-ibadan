@@ -30,7 +30,7 @@ export function Wall({ tint, w, h, d, p }: { tint: string; w: number; h: number;
  * dozen separate meshes each, so 200+ plots cost almost nothing to render.
  * ------------------------------------------------------------------------------------------------ */
 
-const RUST_ROOF = "#a0512f";
+const RUST_ROOF = "#6e4126"; // brown corrugated iron
 
 type Opts = { rx?: number; ry?: number; rz?: number; s?: V3 };
 
@@ -58,7 +58,7 @@ const veranda = (x: number, z: number, w = 1.3): THREE.BufferGeometry[] => [
   box(w, 0.03, 0.5, "#e6dfd0", [x, B + 0.015, z]),
   box(0.06, 0.55, 0.06, "#fbf9f4", [x - w / 2 + 0.05, B + 0.3, z + 0.2]),
   box(0.06, 0.55, 0.06, "#fbf9f4", [x + w / 2 - 0.05, B + 0.3, z + 0.2]),
-  box(w + 0.1, 0.05, 0.58, "#a0512f", [x, B + 0.6, z]),
+  box(w + 0.1, 0.05, 0.58, RUST_ROOF, [x, B + 0.6, z]),
 ];
 
 /** A paved car park with bay lines and a parked car. */

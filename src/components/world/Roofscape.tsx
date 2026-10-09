@@ -1,49 +1,9 @@
 "use client";
 
-import { useLayoutEffect, useMemo, useRef } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import { PLACES } from "@/lib/places";
-import { PLOTS, PLOT_SIZE } from "@/lib/plots";
-import { AD_PLAZA, BLOCKS, CAMPUS, ESTATES, inLake, inRect } from "@/lib/world";
-import { RANKS } from "./CabRanks";
-
-/** Ibadan's famous sea of brown corrugated roofs: small gabled houses filling the free lots. */
-const RUST = ["#9c4f2f", "#a85a3c", "#8f4a2b", "#b0623f", "#7f4128", "#a24f2e", "#b56a45"];
-const WALLS = ["#efe3cc", "#e8d9bd", "#f4ead7", "#d9c8a8", "#e6d3b3"];
-
-type House = { x: number; z: number; w: number; d: number; h: number; ry: number; roof: string; wall: string };
-
-function build(): House[] {
-  let seed = 11;
-  const rnd = () => {
-    seed = (seed * 16807) % 2147483647;
-    return seed / 2147483647;
-  };
-  const taken = [
-    ...PLACES.map((p) => ({ x: p.pos[0], z: p.pos[1], hw: p.size[0] / 2 + 1.1, hd: p.size[2] / 2 + 1.7 })),
-    ...PLOTS.map((p) => ({ x: p.pos[0], z: p.pos[1], hw: PLOT_SIZE / 2 + 0.6, hd: PLOT_SIZE / 2 + 0.6 })),
-    ...RANKS.map((r) => ({ x: r.pos[0], z: r.pos[1], hw: 4.2, hd: 2 })),
-    // the Ad Plaza is paved: no houses on it
-    { x: AD_PLAZA.x, z: AD_PLAZA.z, hw: AD_PLAZA.half + 0.4, hd: AD_PLAZA.half + 0.4 },
-  ];
-  const out: House[] = [];
-  for (const b of BLOCKS) {
-    for (let i = -2; i <= 2; i++) {
-      for (let j = -2; j <= 2; j++) {
-        if (rnd() < 0.3) continue;
-        const x = b.c[0] + i * 1.75 + (rnd() - 0.5) * 0.35;
-        const z = b.c[1] + j * 1.75 + (rnd() - 0.5) * 0.35;
-        if (taken.some((t) => Math.abs(x - t.x) < t.hw && Math.abs(z - t.z) < t.hd)) continue;
-        // estates and the campus keep their own, more formal look
-        if (inRect(CAMPUS.rect, x, z, 0.5) || ESTATES.some((e) => inRect(e.rect, x, z, 0.5)) || inLake(x, z)) continue;
-        out.push({ x, z, w: 0.95 + rnd() * 0.5, d: 0.8 + rnd() * 0.4, h: 0.34 + rnd() * 0.18, ry: rnd() < 0.5 ? 0 : Math.PI / 2, roof: RUST[Math.floor(rnd() * RUST.length)], wall: WALLS[Math.floor(rnd() * WALLS.length)] });
-      }
-    }
-  }
-  return out;
-}
-
-const HOUSES = build();
+import { HOUSES } from "@/lib/houses";
+import { windowMats } from "./materials";
 
 /** Corrugated iron: fine ridges across the slope. */
 function corrugated() {
@@ -82,40 +42,93 @@ function gable() {
   return g;
 }
 
+const Y = new THREE.Vector3(0, 1, 0);
+const DOOR = { w: 0.15, h: 0.27 };
+const PANE = { w: 0.15, h: 0.12 };
+
 export default function Roofscape() {
   const walls = useRef<THREE.InstancedMesh>(null);
   const roofs = useRef<THREE.InstancedMesh>(null);
+  const doors = useRef<THREE.InstancedMesh>(null);
+  const frames = useRef<THREE.InstancedMesh>(null);
+  const panes = useRef<THREE.InstancedMesh>(null);
   const tex = useMemo(() => corrugated(), []);
   const geo = useMemo(() => gable(), []);
+  const glass = useMemo(() => new THREE.MeshStandardMaterial({ color: "#6f8fa8", roughness: 0.2, metalness: 0.3, emissive: new THREE.Color("#ffd27a"), emissiveIntensity: 0 }), []);
+
+  // the windows light up at night with the rest of the city
+  useEffect(() => {
+    windowMats.add(glass);
+    return () => {
+      windowMats.delete(glass);
+    };
+  }, [glass]);
 
   useLayoutEffect(() => {
     const m = new THREE.Matrix4();
     const q = new THREE.Quaternion();
+    const qf = new THREE.Quaternion();
     const col = new THREE.Color();
+    const v = new THREE.Vector3();
+    let nd = 0;
+    let np = 0;
+    /** Put a flat plate on a face of house `h`: local x along the face, y up from the ground, `out` away from the wall. */
+    const plate = (im: THREE.InstancedMesh, i: number, h: (typeof HOUSES)[number], face: 0 | 1 | 2, lx: number, y: number, w: number, ht: number, lift: number) => {
+      // face 0 = front (+z), 1 = east (+x), 2 = west (-x), all in the house's own frame
+      const yaw = h.ry + (face === 0 ? 0 : face === 1 ? Math.PI / 2 : -Math.PI / 2);
+      const out = face === 0 ? h.d / 2 : h.w / 2;
+      const lp = face === 0 ? v.set(lx, y, out + lift) : face === 1 ? v.set(out + lift, y, lx) : v.set(-out - lift, y, lx);
+      lp.applyAxisAngle(Y, h.ry);
+      qf.setFromAxisAngle(Y, yaw);
+      m.compose(new THREE.Vector3(h.x + lp.x, lp.y, h.z + lp.z), qf, new THREE.Vector3(w, ht, 1));
+      im.setMatrixAt(i, m);
+    };
     HOUSES.forEach((h, i) => {
-      q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), h.ry);
+      q.setFromAxisAngle(Y, h.ry);
       m.compose(new THREE.Vector3(h.x, 0.04 + h.h / 2, h.z), q, new THREE.Vector3(h.w, h.h, h.d));
       walls.current!.setMatrixAt(i, m);
       walls.current!.setColorAt(i, col.set(h.wall));
-      // the roof prism: width along the house's depth, ridge along its length
-      m.compose(new THREE.Vector3(h.x, 0.04 + h.h, h.z), q, new THREE.Vector3(h.d * 1.0, 1.15, h.w * 0.9));
+      // the roof prism: its slope runs across the house's depth and its ridge along the long side, with a little overhang
+      q.setFromAxisAngle(Y, h.ry + Math.PI / 2);
+      m.compose(new THREE.Vector3(h.x, 0.04 + h.h, h.z), q, new THREE.Vector3(h.d * 1.12, 1.15, h.w * 1.08));
       roofs.current!.setMatrixAt(i, m);
       roofs.current!.setColorAt(i, col.set(h.roof));
+      // a door on the front, two windows either side of it, and a window in each end wall
+      plate(doors.current!, nd++, h, 0, 0, 0.04 + DOOR.h / 2, DOOR.w, DOOR.h, 0.004);
+      const wy = 0.04 + h.h * 0.6;
+      const fx = h.w * 0.3;
+      for (const [face, lx] of [[0, -fx], [0, fx], [1, 0], [2, 0]] as const) {
+        plate(frames.current!, np, h, face, lx, wy, PANE.w + 0.03, PANE.h + 0.03, 0.002);
+        plate(panes.current!, np, h, face, lx, wy, PANE.w, PANE.h, 0.004);
+        np++;
+      }
     });
-    for (const im of [walls.current!, roofs.current!]) {
+    for (const im of [walls.current!, roofs.current!, doors.current!, frames.current!, panes.current!]) {
       im.instanceMatrix.needsUpdate = true;
       if (im.instanceColor) im.instanceColor.needsUpdate = true;
     }
   }, []);
 
+  const n = HOUSES.length;
   return (
     <>
-      <instancedMesh ref={walls} args={[undefined, undefined, HOUSES.length]} frustumCulled={false}>
+      <instancedMesh ref={walls} args={[undefined, undefined, n]} frustumCulled={false}>
         <boxGeometry args={[1, 1, 1]} />
         <meshStandardMaterial roughness={0.95} />
       </instancedMesh>
-      <instancedMesh ref={roofs} args={[geo, undefined, HOUSES.length]} frustumCulled={false} castShadow>
+      <instancedMesh ref={roofs} args={[geo, undefined, n]} frustumCulled={false} castShadow>
         <meshStandardMaterial map={tex} roughness={0.75} metalness={0.15} />
+      </instancedMesh>
+      <instancedMesh ref={doors} args={[undefined, undefined, n]} frustumCulled={false}>
+        <planeGeometry args={[1, 1]} />
+        <meshStandardMaterial color="#4a2f1c" roughness={0.8} />
+      </instancedMesh>
+      <instancedMesh ref={frames} args={[undefined, undefined, n * 4]} frustumCulled={false}>
+        <planeGeometry args={[1, 1]} />
+        <meshStandardMaterial color="#f4f0e6" roughness={0.8} />
+      </instancedMesh>
+      <instancedMesh ref={panes} args={[undefined, undefined, n * 4]} frustumCulled={false} material={glass}>
+        <planeGeometry args={[1, 1]} />
       </instancedMesh>
     </>
   );
