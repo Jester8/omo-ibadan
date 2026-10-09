@@ -1,7 +1,7 @@
 import { apiBase, ensureToken } from "./api";
 import { useGame } from "./store";
 
-export type BankItem = { id: number; dir: "in" | "out"; name: string; username: string; amount: number; note: string; at: number };
+export type BankItem = { id: number; dir: "in" | "out"; name: string; username: string; amount: number; note: string; at: number; /** the other side's player id and what kind of row it is (an older server sends neither) */ pid?: string; kind?: string };
 
 const call = async <T,>(method: string, path: string, body?: unknown): Promise<{ ok: boolean; data: T | null }> => {
   const token = await ensureToken();
@@ -32,7 +32,7 @@ export async function sendMoney(to: string, amount: number, note: string): Promi
 
 export async function bankHistory(): Promise<BankItem[]> {
   const r = await call<{ items: BankItem[] }>("GET", "/api/bank/history");
-  return r.data?.items ?? [];
+  return (r.data?.items ?? []).filter((i) => i.kind !== "parcel");
 }
 
 /** Take a credit into your balance. The bank hands it over only once, so a reload never pays you twice. */
@@ -41,7 +41,8 @@ export async function takeCredit(c: { id: number; from: string; amount: number; 
   if (!r.data?.ok) return;
   useGame.setState((st) => ({ money: st.money + r.data!.amount }));
   // a sale has its own live notice for the owner
-  if (!c.note.startsWith("Sale:")) useGame.getState().toast(`${c.from} sent you ₦${r.data.amount.toLocaleString("en-NG")}${c.note ? `: ${c.note}` : ""}`, "good");
+  // a loan or a land sale has its own notice too
+  if (!c.note.startsWith("Sale:") && !c.note.startsWith("Loan:") && !c.note.startsWith("Land sale:")) useGame.getState().toast(`${c.from} sent you ₦${r.data.amount.toLocaleString("en-NG")}${c.note ? `: ${c.note}` : ""}`, "good");
 }
 
 /** Money sent while you were away. */
