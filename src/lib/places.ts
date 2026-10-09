@@ -329,6 +329,8 @@ export const PLACES: Place[] = [
     blurb: "Climb it and see the whole city of brown roofs.",
     pos: [-2.5, 3.2],
     size: [1.2, 4.4, 1.2],
+    // the door is on the east face (towards the default camera), clear of the Dugbe cab park that used to cover it
+    door: [1.9, 0],
     color: "#b9855a",
     style: "lookout",
     actions: [{ id: "climb", label: "Climb to the top", secs: 1, cost: 300, gain: { fun: 30 } }],
