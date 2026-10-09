@@ -98,6 +98,9 @@ const HOURS: Record<string, [number, number]> = {
   "suya-lounge": [17, 27],
 };
 
+/** Every place id that keeps opening hours (scripts/check-civic.ts proves each is a real place). */
+export const HOURS_IDS = Object.keys(HOURS);
+
 export const isOpen = (placeId: string, hour: number) => {
   const h = HOURS[placeId];
   if (!h) return true;

@@ -18,6 +18,14 @@ const call = async <T,>(method: string, path: string, body?: unknown): Promise<{
   }
 };
 
+/** Send a direct message over REST (the post office writes letters this way). The server also pushes it to both people. */
+export async function sendDmRest(pid: string, text: string): Promise<{ ok: boolean; error?: string }> {
+  const r = await call<{ error?: string }>("POST", `/api/dm/${pid}`, { text });
+  if (r.status === 401) return { ok: false, error: "Sign in with a full account to post to friends." };
+  if (r.status === 0) return { ok: false, error: "No connection. Your letter was not sent and you were not charged." };
+  return r.ok ? { ok: true } : { ok: false, error: r.data?.error ?? "Could not send that." };
+}
+
 /** Reload friends, requests, blocks and conversations from the server. */
 export async function loadSocial() {
   const [f, t] = await Promise.all([

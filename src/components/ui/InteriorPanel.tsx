@@ -6,7 +6,10 @@ import { DoorOpen, Lightbulb, Music2, Play, Volume2, VolumeX, X, ZapOff } from "
 import { PLACES } from "@/lib/places";
 import { useGame } from "@/lib/store";
 import { useClock } from "@/lib/hooks";
-import { climbTower, exitInterior, GENERATOR_FUEL, powerOn, rt, walkToFurn } from "@/lib/interiorRuntime";
+import { exitInterior, GENERATOR_FUEL, powerOn, rt, walkToFurn } from "@/lib/interiorRuntime";
+import { runPlaceAction, walkToDesk } from "@/lib/civic";
+import { SERVICES } from "@/lib/services";
+import HospitalCard from "./HospitalCard";
 import { naira, plotById } from "@/lib/plots";
 import { ActionRow, VoiceRoomCard } from "./parts";
 import HereNow from "./HereNow";
@@ -179,20 +182,27 @@ export default function InteriorPanel() {
           : "Tap furniture to use it: sofas and chairs to sit (friends in the room see you settle in), beds to sleep, the stove to cook, the TV for a show."}
       </p>
 
+      {place?.service === "hospital" && <HospitalCard placeId={place.id} inside />}
+      {place?.service && place.service !== "hospital" && (
+        <button
+          onClick={() => {
+            if (!walkToDesk(place.service)) useGame.getState().toast("You can't reach the counter from here.", "info");
+          }}
+          style={{ backgroundColor: SERVICES[place.service].tint }}
+          className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold text-white shadow-lg shadow-black/10 transition active:scale-[0.98]"
+        >
+          <span>{SERVICES[place.service].emoji}</span> {SERVICES[place.service].verb}
+        </button>
+      )}
+
       {place && (
         <ul className="mt-4 space-y-2">
-          {place.actions.map((a) => (
+          {place.actions.filter((a) => !(place.service === "hospital" && a.id === "checkup")).map((a) => (
             <li key={a.id}>
               <ActionRow
                 a={a}
                 enabled={!busy}
-                onRun={() => {
-                  if (place.id === "airport" && (a.id === "book" || a.id === "board")) return useGame.getState().setSheet("flights");
-                  // the tower's stairs: pay, climb, and arrive on the viewing deck
-                  if (a.id === "climb") return climbTower();
-                  const err = useGame.getState().runAction(a);
-                  if (err) useGame.getState().toast(err, "bad");
-                }}
+                onRun={() => runPlaceAction(place.id, a)}
               />
             </li>
           ))}

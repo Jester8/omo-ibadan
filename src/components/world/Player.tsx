@@ -15,6 +15,7 @@ import { boost, cam, emotes, me, stick } from "@/lib/playerState";
 const STICK_DEAD = 0.12;
 import { isBlockedAt } from "@/lib/pathing";
 import { net } from "@/lib/net";
+import { slowdown } from "@/lib/health";
 import { S } from "@/lib/furniture";
 import { endUse, exitInterior, startUse } from "@/lib/interiorRuntime";
 
@@ -127,7 +128,7 @@ export default function Player() {
     motion.current.emote = s.busy?.emote ?? (em && em.until > Date.now() && !me.path.length ? em.e : null);
 
     const energy = s.needs.energy;
-    const tired = energy < 3 ? 0.4 : energy < 15 ? 0.65 : 1;
+    const tired = (energy < 3 ? 0.4 : energy < 15 ? 0.65 : 1) * slowdown(s.medical.illness);
     const ownCar = s.driving && !s.interior ? carById(s.activeCar) : undefined;
     const base = s.interior ? 2.2 * tired : ownCar ? ownCar.speed : me.ride ? rideById(s.ride)?.speed ?? 8.5 : Date.now() < boost.until ? 8 : 4.7 * tired;
     let moving = false;
