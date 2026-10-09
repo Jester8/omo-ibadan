@@ -4,10 +4,18 @@ import { me } from "./playerState";
 import { useGame } from "./store";
 import { rideById, rideFare, type RideId } from "./cars";
 
+/** True (with a toast) while the player is in custody: no walking about the city, no rides, no driving. */
+const held = (): boolean => {
+  const s = useGame.getState();
+  if (s.custody) s.toast("You are in custody.", "bad");
+  return !!s.custody;
+};
+
 /** Click-to-move: A* path from where the player stands to (x, z). */
 export function walkTo(x: number, z: number): boolean {
   const s = useGame.getState();
   if (!s.profile) return false;
+  if (s.custody && !s.interior) return false; // inside the prison they may still walk about
   if (s.deck) return false;
   if (s.busy) {
     s.toast("Finish what you're doing first.", "info");
@@ -22,6 +30,7 @@ export function walkTo(x: number, z: number): boolean {
 }
 
 export function walkToPlace(id: string): boolean {
+  if (held()) return false;
   const place = PLACES.find((p) => p.id === id);
   const s = useGame.getState();
   if (!place || !s.profile) return false;
@@ -63,6 +72,7 @@ export function quoteRide(id: string, ride: RideId): { fare: number; metres: num
 
 /** Pay the driver; the vehicle carries you along the same route, at its own speed. */
 export function rideToPlace(id: string, ride: RideId): boolean {
+  if (held()) return false;
   const s = useGame.getState();
   const q = quoteRide(id, ride);
   if (!q) return false;
@@ -80,6 +90,7 @@ export function rideToPlace(id: string, ride: RideId): boolean {
 
 /** Drive one of your own cars there: you take the wheel and follow the route at the car's speed. */
 export function driveToPlace(id: string, carId: string): boolean {
+  if (held()) return false;
   const s = useGame.getState();
   if (s.atPlace === id) return true;
   if (!(s.driving && s.activeCar === carId)) {
@@ -103,6 +114,7 @@ export function quoteRideTo(x: number, z: number, ride: RideId): { fare: number;
 
 /** Pay a driver to take you to a spot (a friend's door, a shop). */
 export function rideTo(x: number, z: number, ride: RideId): boolean {
+  if (held()) return false;
   const s = useGame.getState();
   const q = quoteRideTo(x, z, ride);
   if (!q) return false;
@@ -119,6 +131,7 @@ export function rideTo(x: number, z: number, ride: RideId): boolean {
 
 /** Take the wheel of one of your own cars and drive to a spot. */
 export function driveTo(x: number, z: number, carId: string): boolean {
+  if (held()) return false;
   const s = useGame.getState();
   if (!(s.driving && s.activeCar === carId)) {
     const err = s.toggleDrive(carId);

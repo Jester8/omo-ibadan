@@ -23,6 +23,8 @@ import FriendsTabs from "./FriendsTabs";
 import { useSound } from "@/lib/soundStore";
 import { decide, hobbyById, jobById, pathById } from "@/lib/background";
 import { THEME_SONG } from "@/lib/themeSong";
+import { roomLabel } from "@/lib/custody";
+import SocialProfileExtras from "./ProfileSocial";
 
 /**
  * A panel over the game. On a phone every panel fills the screen until you go back; on a laptop they are popups at the side.
@@ -131,7 +133,7 @@ function PhoneSheet() {
               <span className="grid size-10 place-items-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-700">{r.name.slice(0, 1).toUpperCase()}</span>
               <div>
                 <p className="text-sm font-semibold text-stone-900">{r.name}</p>
-                <p className="text-xs text-stone-400">{r.room === "streets" ? "Out and about" : r.room.replace(/-/g, " ")}</p>
+                <p className="text-xs text-stone-400">{roomLabel(r.room)}</p>
               </div>
             </div>
             <button onClick={() => net.call(r.id, r.name)} className="grid size-10 place-items-center rounded-full bg-emerald-600 text-white transition hover:bg-emerald-700 active:scale-90" aria-label={`Call ${r.name}`}>
@@ -462,6 +464,8 @@ function ProfileSheet() {
         </>
       )}
 
+      <SocialProfileExtras />
+
       {muted.length > 0 && (
         <div className="mt-5 flex items-center justify-between rounded-2xl bg-stone-50 px-4 py-3 text-sm ring-1 ring-black/5">
           <span className="text-stone-600">
@@ -684,7 +688,7 @@ export default function Sheets() {
   const sheet = useGame((s) => s.sheet);
   const setSheet = useGame((s) => s.setSheet);
   // every phone-related sheet opens the phone, on the right app
-  const PHONE_APPS: Record<string, AppId | null> = { phone: null, quests: "goals", buy: "buy", garage: "buy", flights: "flights", music: "music", guide: "guide" };
+  const PHONE_APPS: Record<string, AppId | null> = { phone: null, quests: "goals", buy: "buy", garage: "buy", flights: "flights", music: "music", guide: "guide", bank: "bank", custody: "police" };
   const phoneApp = sheet && sheet in PHONE_APPS ? PHONE_APPS[sheet] : undefined;
   const onPhone = useIsPhone();
   return (

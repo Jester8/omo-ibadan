@@ -8,6 +8,7 @@ import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js
 import { PLACES, type Place } from "@/lib/places";
 import { CAMPUS_PLACES } from "@/lib/world";
 import { useGame } from "@/lib/store";
+import { CIVIC_STYLES } from "./civicStyles";
 import { beamMat, boardMat, boardMats, discoMat, facadeMaterials, lampMat, mat, neonMat, poolMat, shopGlow, signMat, windowMats } from "./materials";
 
 type V3 = [number, number, number];
@@ -949,6 +950,7 @@ function Club({ size: [w, h, d], color, name = "Club" }: SP) {
 }
 
 const STYLES: Record<Place["style"], (p: SP) => React.ReactNode> = {
+  ...CIVIC_STYLES,
   airport: Airport,
   club: Club,
   tower: Tower,
@@ -1081,7 +1083,8 @@ function PlaceBuilding({ place }: { place: Place }) {
         }}
       >
         <Style size={place.size} color={place.color} name={place.name} id={place.id} />
-        <Extras place={place} />
+        {/* the civic styles bring their own lamps and flags */}
+        {!(place.style in CIVIC_STYLES) && <Extras place={place} />}
       </group>
       {(isSel || atPlace === place.id) && (
         <mesh position={[0, 0.05, 0]} rotation-x={-Math.PI / 2}>

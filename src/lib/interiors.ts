@@ -1,5 +1,6 @@
 import type { ActionDef } from "./places";
 import type { FurnKind } from "./furniture";
+import type { ServiceId } from "./services";
 import { FURN, S } from "./furniture";
 import { Grid } from "./pathing";
 
@@ -24,6 +25,8 @@ export type Item = {
   /** override what happens when the player uses this item */
   action?: ActionDef;
   verb?: string;
+  /** on a `servicedesk`: which business is done here (defaults to the place's `service`) */
+  service?: ServiceId;
 };
 
 /** Axis-aligned partition wall. `door` is how far along the wall (0..1) the doorway sits. */
@@ -50,6 +53,8 @@ export type Layout = {
   exitX: number;
   /** nightlife rooms get moving coloured lights and music */
   vibe?: "club";
+  /** where people held in custody are placed, one entry per cell (metres); visitors use spawnOf(l). Only the custodial centre has these. */
+  cells?: { spawn: [number, number] }[];
 };
 
 export type InteriorRef = { kind: "place" | "home"; id: string };
@@ -58,6 +63,12 @@ export const interiorKey = (ref: InteriorRef) => `in:${ref.kind}:${ref.id}`;
 
 /** Where the player appears when entering, in metres. */
 export const spawnOf = (l: Layout): [number, number] => [l.exitX, l.d / 2 - 1.3];
+
+/** Where the prisoner of cell number `cell` (any integer) stands; layouts without cells fall back to the normal spawn. */
+export const cellSpawnOf = (l: Layout, cell: number): [number, number] => {
+  const n = l.cells?.length ?? 0;
+  return n ? l.cells![((cell % n) + n) % n].spawn : spawnOf(l);
+};
 
 /** Footprint of an item after rotation, in metres. */
 export function footprint(it: Item): { w: number; d: number } {

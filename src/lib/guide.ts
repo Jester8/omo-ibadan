@@ -1,3 +1,5 @@
+import { SOCIAL_TOPICS } from "./guideSocial";
+
 export type Topic = { id: string; emoji: string; title: string; lines: string[] };
 
 /** The how-to-play reference, shown in the Guide sheet and (the first few) in the welcome tour. */
@@ -33,6 +35,30 @@ export const TOPICS: Topic[] = [
     "Work at places to earn naira and reputation. Open Phone, then Jobs, to search every job in the city with the pay.",
     "Reputation raises your title and unlocks better jobs. Events like market rush and match day pay extra at certain places.",
   ] },
+  { id: "services", emoji: "\u{1F3DB}\u{FE0F}", title: "Public services", lines: [
+    "Post office: at NIPOST you can buy stamps and, with a full account, post a letter to a friend. Fire station, library, school and the food bank all have shifts and classes.",
+    "Filling station: buy petrol by the litre. One litre runs your home generator for 5 minutes, and it is cheaper than the street price. Your jerrycans hold 30 litres.",
+    "Library and school: read, research and join classes to raise your education level. Each level adds a little to everything you earn.",
+    "Food bank: donate to gain standing. If you are broke and hungry you can collect a free meal.",
+    "Boreholes: pay for the toilet, wash up at the tap or take a bath. These are the only toilets outside homes.",
+    "Olodo, on the east edge of the city, has its own market, motor park, health centre, mosque and church.",
+  ] },
+  { id: "health", emoji: "\u{1FA7A}", title: "Health and hospitals", lines: [
+    "UCH and Adeoyo are open day and night. Walk up to the reception desk and tap it to check in, report a case or report an emergency.",
+    "If you feel unwell a pill appears at the top of the screen. Describe your symptoms at reception, pay, take a ticket and lie on any free ward bed when your number is called.",
+    "An emergency costs more but skips the queue. Your health card works at both hospitals.",
+  ] },
+  { id: "law", emoji: "\u{1F693}", title: "Police, EFCC and custody", lines: [
+    "Someone bothering you? Tap them, then Report to police. A small fee comes back if the case stands. Go to a police station and book it within 10 minutes.",
+    "If you are reported you can pay a fine at a police station before you are booked. If you are arrested you wait at the Agodi Custodial Centre until you pay bail or your time is up (never more than 20 minutes).",
+    "Ask friends to bail you out from the banner at the top: they get an alert with a Pay button. You can still use your phone, bank and messages in custody.",
+    "Lost money to a scam? Report it to the EFCC from the Bank app or the EFCC office. The other side gets a few minutes to pay you back before they can be booked.",
+    "Police work when you play online with other people. In the offline demo the stations are only buildings to look around.",
+  ] },
+  { id: "tower", emoji: "\u{1F5FC}", title: "Bower's Tower", lines: [
+    "Walk to Bower's Tower in Dugbe and tap Climb to the top. It costs 300 naira and is open day and night.",
+    "Up top, drag to look around, pinch to zoom, and use Telescope to look at a landmark.",
+  ] },
   { id: "home", emoji: "🏠", title: "Houses and land", lines: [
     "Buy land from the Buy tab, build it up from a bungalow to a mansion, collect rent and decorate the rooms.",
     "Gated estates need a pass: tap the gate, and the guard sells a 30-minute visitor pass. After you pay, he writes you into the visitors' book and the boom goes up a minute later. If you own a house inside, the gate opens for you.",
@@ -60,6 +86,7 @@ export const TOPICS: Topic[] = [
     "Tap a place on the minimap, or open Phone then Jobs to find somewhere to go.",
     "You can open this guide again at any time with the ? button at the top right, or in Me.",
   ] },
+  ...SOCIAL_TOPICS,
 ];
 
 export const SHORTCUTS: [string, string][] = [

@@ -1,6 +1,7 @@
 import type { InteriorRef, Layout, Wall } from "./interiors";
 import { bizById } from "./business";
 import { addCeilingLights } from "./ceilingLights";
+import { CIVIC_LAYOUTS } from "./layoutsCivic";
 import { FOOD_LAYOUTS } from "./layoutsFood";
 import { NIGHT_LAYOUTS } from "./layoutsNight";
 import { RETAIL_LAYOUTS } from "./layoutsRetail";
@@ -409,7 +410,7 @@ const PLACE_LAYOUTS: Record<string, Layout> = {
     zones: [{ x: 0, z: 0, w: 14, d: 12, floor: "carpet", color: "#2f6f4f" }, { x: -4.7, z: 4.8, w: 4.5, d: 2.3, floor: "tile", color: "#e6e2d6" }],
     items: [
       I("mimbar", 4, -5.3, 0), I("chandelier", 0, -1), I("chandelier", 0, 3.5), ...grid("prayermat", -4.5, -3.8, 5, 3, 2.2, 2.0, 0),
-      ...row("basin", -6, 5.4, 4, 1.1, R), I("bench", -4.6, 4.3, 0, { w: 2 }), I("wallart", -6.9, -1, H, { y: 1.9, c: "#2f6f4f", w: 1.2 }), I("wallart", 6.9, -1, -H, { y: 1.9, c: "#2f6f4f", w: 1.2 }),
+      ...row("basin", -6, 5.4, 4, 1.1, R), I("bench", -5.6, 2.6, 0, { w: 2 }), I("wallart", -6.9, -1, H, { y: 1.9, c: "#2f6f4f", w: 1.2 }), I("wallart", 6.9, -1, -H, { y: 1.9, c: "#2f6f4f", w: 1.2 }),
       I("plant", -6.4, -5.2), I("plant", 6.4, 4.8), I("ceilingfan", -2.2, 0), I("ceilingfan", 2.2, 0),
     ],
   }),
@@ -517,7 +518,14 @@ reuse("cocoa-house", "central-bank", "Central Bank Banking Hall", { accent: "#2b
 reuse("mosque", "oje-mosque", "Oje Central Mosque");
 
 /* The per-area files replace the generic layouts above (and add the ones that had none). */
-Object.assign(PLACE_LAYOUTS, RETAIL_LAYOUTS, FOOD_LAYOUTS, NIGHT_LAYOUTS);
+Object.assign(PLACE_LAYOUTS, RETAIL_LAYOUTS, FOOD_LAYOUTS, NIGHT_LAYOUTS, CIVIC_LAYOUTS);
+
+/* Olodo, a community on the edge of the city, reuses proven interiors under its own names (after the merge above, so it gets the finished per-area ones).
+   The health centre has its own layout in layoutsPublic.ts. */
+reuse("dugbe", "olodo-market", "Olodo Market", { accent: "#2f8f83" });
+reuse("ring-road", "olodo-motor-park", "Olodo Motor Park Office", { accent: "#2a2f3a" });
+reuse("cathedral", "olodo-church", "Olodo Community Church", { accent: "#7a3a1a", wall: "#efe9d8" });
+reuse("mosque", "olodo-mosque", "Olodo Community Mosque");
 
 const lit = new Map<string, Layout>();
 

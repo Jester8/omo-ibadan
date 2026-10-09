@@ -7,7 +7,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "check:interiors": "tsx scripts/check-interiors.ts"
+    "check:interiors": "tsx scripts/check-interiors.ts",
+    "check:money": "tsx scripts/check-money.ts",
+    "check:custody": "tsx scripts/check-custody.ts",
+    "test:rules": "tsx scripts/test-rules.ts",
+    "check:places": "tsx scripts/check-places.ts",
+    "check:civic": "tsx scripts/check-civic.ts",
+    "check:health": "tsx scripts/check-health.ts",
+    "check:tower": "tsx scripts/check-tower.ts"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",

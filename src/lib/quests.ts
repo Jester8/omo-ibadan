@@ -1,4 +1,5 @@
 import type { PlotState } from "./protocol";
+import { knowLevel } from "./knowledge";
 
 /** Counters the quests read. Persisted with the save. */
 export type Stats = {
@@ -13,6 +14,28 @@ export type Stats = {
   used: number;
   dates: number;
   flights: number;
+  // optional so older saves need no migration: always read with `?? 0`
+  /** study points from the library and the school (knowledge.ts) */
+  know?: number;
+  letters?: number;
+  /** naira given to the food bank in all, and the rolling hour the donation rep cap is counted in (start ms, rep credited) */
+  donated?: number;
+  donT?: number;
+  donR?: number;
+  /** when the last free meal from the food bank was taken (ms) */
+  mealAt?: number;
+  /** litres of petrol bought in all */
+  fuelL?: number;
+  /** team games played at the rec centre */
+  played?: number;
+  /** fires fought, and the slot of the last one (incidents.ts) */
+  fires?: number;
+  lastFire?: number;
+  /** climbs of Bower's Tower */
+  climbed?: number;
+  /** hospital: registrations and finished treatments */
+  checkins?: number;
+  treated?: number;
 };
 
 export const EMPTY_STATS: Stats = { visited: [], worked: 0, ate: 0, chats: 0, voiceJoins: 0, calls: 0, entered: 0, slept: 0, used: 0, dates: 0, flights: 0 };
@@ -31,6 +54,8 @@ export type Quest = {
 
 const mine = (s: QuestState) => Object.values(s.plots).filter((p) => p.ownerId === s.pid);
 const has = (s: QuestState, ids: string[]) => ids.every((id) => s.stats.visited.includes(id));
+const CIVIC_TRAIL = ["post-office", "public-library", "fire-station", "food-bank"];
+const POLICE = ["police-dugbe", "police-mokola"];
 
 /** Ordered: the first unfinished goal is the "next goal" shown in the HUD. */
 export const QUESTS: Quest[] = [
@@ -128,4 +153,20 @@ export const QUESTS: Quest[] = [
     done: (s) => mine(s).length >= 3,
     progress: (s) => ({ cur: Math.min(3, mine(s).length), max: 3 }),
   },
+  // the civic places (appended, so the HUD's "next goal" does not change for people already playing)
+  {
+    id: "civic",
+    title: "Know your city",
+    blurb: "Visit the post office, the public library, the fire station, the food bank and a police station.",
+    reward: { money: 10000, rep: 8 },
+    done: (s) => has(s, CIVIC_TRAIL) && POLICE.some((id) => s.stats.visited.includes(id)),
+    progress: (s) => ({ cur: CIVIC_TRAIL.filter((id) => s.stats.visited.includes(id)).length + (POLICE.some((id) => s.stats.visited.includes(id)) ? 1 : 0), max: 5 }),
+  },
+  { id: "stamps", title: "Write home", blurb: "Buy a book of stamps or post a letter at the NIPOST post office.", reward: { money: 3000, rep: 3 }, done: (s) => (s.stats.letters ?? 0) >= 1 },
+  { id: "fuelup", title: "Keep the lights on", blurb: "Buy 10 litres of petrol at the filling station.", reward: { money: 2000, rep: 2 }, done: (s) => (s.stats.fuelL ?? 0) >= 10, progress: (s) => ({ cur: Math.min(10, s.stats.fuelL ?? 0), max: 10 }) },
+  { id: "scholar", title: "Hit the books", blurb: "Reach Education level 3 (OND) at the library or the school.", reward: { money: 10000, rep: 6 }, done: (s) => knowLevel(s.stats.know) >= 3, progress: (s) => ({ cur: Math.min(3, knowLevel(s.stats.know)), max: 3 }) },
+  { id: "neighbour", title: "Good neighbour", blurb: "Give ₦25,000 to the food bank in total.", reward: { money: 5000, rep: 6 }, done: (s) => (s.stats.donated ?? 0) >= 25000, progress: (s) => ({ cur: Math.min(25000, s.stats.donated ?? 0), max: 25000 }) },
+  { id: "patient", title: "Register as a patient", blurb: "Check in at the reception desk of UCH or Adeoyo and get your health card.", reward: { money: 1500, rep: 2 }, done: (s) => (s.stats.checkins ?? 0) >= 1 },
+  { id: "wellness", title: "Doctor's orders", blurb: "Finish a treatment or a check-up at a hospital.", reward: { money: 3000, rep: 3 }, done: (s) => (s.stats.treated ?? 0) >= 1 },
+  { id: "topoftower", title: "Top of Ibadan", blurb: "Climb Bower's Tower and look at the city from the top.", reward: { money: 3000, rep: 3 }, done: (s) => (s.stats.climbed ?? 0) >= 1 },
 ];

@@ -1,6 +1,9 @@
+import type { ServiceId } from "./services";
+import { CIVIC_PLACES } from "./placesCivic";
+
 export type Needs = { hunger: number; energy: number; fun: number; social: number; bladder: number; hygiene: number };
 
-export type PlaceKind = "night" | "air" | "food" | "work" | "fun" | "culture" | "health" | "learn" | "shop" | "faith" | "gov" | "transport";
+export type PlaceKind = "night" | "air" | "food" | "work" | "fun" | "culture" | "health" | "learn" | "shop" | "faith" | "gov" | "transport" | "law" | "service";
 
 export type PlaceStyle =
   | "tower"
@@ -24,7 +27,20 @@ export type PlaceStyle =
   | "govt"
   | "cultural"
   | "airport"
-  | "club";
+  | "club"
+  // civic (drawn in civicStyles.tsx)
+  | "police"
+  | "office"
+  | "prison"
+  | "firestation"
+  | "postoffice"
+  | "court"
+  | "school"
+  | "filling"
+  | "clinic"
+  | "library"
+  | "borehole"
+  | "foodbank";
 
 export type ActionDef = {
   id: string;
@@ -46,6 +62,15 @@ export type ActionDef = {
   plates?: number;
   /** which dish the cooked meal is (see menu.ts), so the kitchen can show what you have */
   dish?: string;
+  /** do not run: open this service desk panel instead (see civic.ts runPlaceAction) */
+  svc?: ServiceId;
+  /** litres of petrol added to the jerrycans (see fuel.ts) */
+  fuel?: number;
+  /** a Stats counter to add `statN` (default 1) to when the action finishes */
+  stat?: "know" | "letters" | "donated" | "played" | "fires";
+  statN?: number;
+  /** each OTHER real player in the same room adds this fraction to the positive gains (at most 4 people) */
+  team?: number;
 };
 
 export type Place = {
@@ -63,6 +88,10 @@ export type Place = {
   style: PlaceStyle;
   /** has a shared voice room */
   voice?: boolean;
+  /** the business done at this place's service desk (the layout's `servicedesk` items); see services.ts */
+  service?: ServiceId;
+  /** where the player stands to use the place, as an offset from `pos` (default: just in front, see doorOf) */
+  door?: [number, number];
   actions: ActionDef[];
 };
 
@@ -147,6 +176,7 @@ export const PLACES: Place[] = [
     size: [4, 2.4, 2.8],
     color: "#dbe7ef",
     style: "hospital",
+    service: "hospital",
     actions: [
       { id: "ward", label: "Rest in the ward", secs: 8, cost: 2000, gain: { energy: 40 } },
       { id: "checkup", label: "Full check-up", secs: 6, cost: 3000, gain: { energy: 15, fun: 5, hunger: 10 } },
@@ -301,7 +331,7 @@ export const PLACES: Place[] = [
     size: [1.2, 4.4, 1.2],
     color: "#b9855a",
     style: "lookout",
-    actions: [{ id: "climb", label: "Climb to the top", secs: 1, cost: 300, gain: { fun: 30, energy: -4 } }],
+    actions: [{ id: "climb", label: "Climb to the top", secs: 1, cost: 300, gain: { fun: 30 } }],
   },
   {
     id: "mosque",
@@ -519,7 +549,12 @@ export const KIND_COLORS: Record<PlaceKind, string> = {
   transport: "#d98a1f",
   night: "#a21caf",
   air: "#0ea5e9",
+  law: "#1e3a8a",
+  service: "#b45309",
 };
+
+/** Friendlier words for the kinds whose raw name reads badly in a panel (everything else shows the kind itself). */
+export const KIND_LABEL: Partial<Record<PlaceKind, string>> = { law: "Law and order", service: "Public service" };
 
 /** Parks and greens are walkable; everything else is solid. */
 /* ------------------------- the wider city: campus, districts, more places ------------------------- */
@@ -537,7 +572,7 @@ PLACES.push(
     actions: [A("moot", "Moot court", 7, { gain: { energy: -20 }, rep: 4 }), A("clinic", "Legal aid clinic", 7, { gain: { energy: -18, social: 8 }, rep: 5 })] },
   { id: "ui-trenchard", name: "Trenchard Hall", emoji: "🏛️", kind: "culture", district: "UI Campus", blurb: "The Great Hall: convocations, concerts and debates.", pos: [-23, -23], size: [3.2, 2.2, 2.6], color: "#c4a86a", style: "hall", voice: true,
     actions: [A("convo", "Attend a convocation", 6, { gain: { fun: 15, social: 20 }, rep: 3 }), A("usher", "Usher at the Great Hall", 6, { gain: { energy: -15 }, pay: 3000, rep: 1 })] },
-  { id: "adeoyo", name: "Adeoyo Teaching Hospital", emoji: "🏥", kind: "health", district: "Yemetu", blurb: "Wards, clinics and the busiest corridor in town.", pos: [25, -26], size: [4, 2.4, 2.8], color: "#7aa8b8", style: "hospital", voice: true,
+  { id: "adeoyo", name: "Adeoyo Teaching Hospital", emoji: "🏥", kind: "health", district: "Yemetu", blurb: "Wards, clinics and the busiest corridor in town.", pos: [25, -26], size: [4, 2.4, 2.8], color: "#7aa8b8", style: "hospital", voice: true, service: "hospital",
     actions: [A("ward", "Rest in the ward", 8, { cost: 2000, gain: { energy: 40 } }), A("aide", "Nurse's aide shift", 7, { gain: { energy: -28 }, pay: 5000, rep: 3 }), A("blood", "Donate blood", 5, { gain: { energy: -8, social: 6 }, rep: 4 })] },
   { id: "sango-market", name: "Sango Market", emoji: "🧺", kind: "shop", district: "Sango", blurb: "Yams, cloth, pepper and every kind of bargain.", pos: [-35, -6], size: [4, 1.3, 3], color: "#d9a05a", style: "market", voice: true,
     actions: [A("buy", "Buy foodstuff (4 meals)", 4, { cost: 2200, pantry: 4 }), A("stall", "Run a stall", 6, { gain: { energy: -25 }, pay: 4200, rep: 1 })] },
@@ -592,7 +627,10 @@ PLACES.push(
     actions: [A("jollof", "Jollof rice & moin-moin", 5, { cost: 3600, gain: { hunger: 68, fun: 6 } }), A("rice", "Fried rice & plantain", 5, { cost: 3700, gain: { hunger: 70, fun: 6 } }), A("ofada", "Ofada rice & stew", 5, { cost: 4200, gain: { hunger: 74, fun: 8 } }), A("serve", "Serve the lunch crowd", 6, { gain: { energy: -22 }, pay: 4000, rep: 1 })] },
 );
 
-export const doorOf = (p: Place) => ({ x: p.pos[0], z: p.pos[1] + p.size[2] / 2 + 0.9 });
+/** The civic places (src/lib/placesCivic.ts). Always last: the order of PLACES decides door ties, label z-order and the seeded house/tree layout. */
+PLACES.push(...CIVIC_PLACES);
+
+export const doorOf = (p: Place) => (p.door ? { x: p.pos[0] + p.door[0], z: p.pos[1] + p.door[1] } : { x: p.pos[0], z: p.pos[1] + p.size[2] / 2 + 0.9 });
 
 export const DISTRICTS: { name: string; pos: [number, number] }[] = [
   { name: "UI", pos: [-15, -19.2] },
@@ -628,9 +666,10 @@ export const DISTRICTS: { name: string; pos: [number, number] }[] = [
   { name: "Iyaganku", pos: [20, 28] },
   { name: "Moniya", pos: [5, 36] },
   { name: "Iwo Road", pos: [30, -10] },
-  { name: "Ring Road", pos: [-5, 26] },
+  { name: "Ring Road", pos: [-10, 20.4] },
   { name: "Jericho Nights", pos: [35, -25] },
   { name: "Samonda", pos: [35, 31] },
   { name: "Bere", pos: [-35, 31] },
+  { name: "Olodo", pos: [50, 11] },
 ];
 

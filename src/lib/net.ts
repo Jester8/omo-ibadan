@@ -16,6 +16,7 @@ import { usePhotos } from "./photos";
 import { levelOf } from "./bonds";
 import { collectDebits, collectPending, takeCredit, takeDebit } from "./bank";
 import { enterInterior } from "./interiorRuntime";
+import { socialHandle, socialOnOpen } from "./socialNet";
 
 /** The owner said yes: step in. */
 function enterHomeAfterKnock(plotId: string) {
@@ -264,6 +265,7 @@ function handle(m: S2C) {
       s.toast(`${m.name} is not ready for that yet.`, "info");
       break;
     case "starterHome": {
+      if (useGame.getState().custody) break; // a prisoner must not be moved onto the street
       // your starter home is ready: land at its door
       const p = plotById(m.plotId);
       if (!p) break;
@@ -337,6 +339,10 @@ function handle(m: S2C) {
       }
       if (s.incoming?.from === m.from) useGame.setState({ incoming: null });
       break;
+    // custody, pokes, property sales and loans are routed in socialNet.ts
+    default:
+      socialHandle(m);
+      break;
   }
 }
 
@@ -407,6 +413,7 @@ function openSocket() {
     void loadFamily();
     void collectPending();
     void collectDebits();
+    socialOnOpen();
     // watch the link: a slow or missing answer means a weak network, and the player is told
     lastPong = Date.now();
     if (pingTimer) clearInterval(pingTimer);
@@ -482,6 +489,10 @@ let lastPong = 0;
 let pingTimer: ReturnType<typeof setInterval> | null = null;
 
 export const net = {
+  /** Send any client message. For the social features, which keep their own senders outside this file. */
+  raw(m: C2S) {
+    send(m);
+  },
   connect,
   disconnect() {
     want = false;
