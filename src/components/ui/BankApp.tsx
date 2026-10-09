@@ -5,6 +5,15 @@ import { ArrowDownLeft, ArrowUpRight, Check, Copy, Landmark } from "lucide-react
 import { useGame } from "@/lib/store";
 import { naira } from "@/lib/plots";
 import { bankHistory, lookupAccount, sendMoney, type BankItem } from "@/lib/bank";
+import { STATE_KINDS } from "@/lib/custodyRules";
+import { useSecond } from "@/lib/hooks";
+import { loanStageAt, useLoansOn } from "@/lib/loans";
+import { EfccReportButton } from "./CustodyUI";
+import { LoansPanel } from "./LoansUI";
+import { FEATURES } from "@/lib/features";
+
+/** is this statement row money moving to or from the state (the bank, the city, the police)? Older servers send no `kind`. */
+const fromState = (i: BankItem) => (STATE_KINDS as readonly string[]).includes((i as BankItem & { kind?: string }).kind ?? "");
 
 const QUICK = [1000, 5000, 10000, 50000];
 
@@ -22,6 +31,19 @@ export default function BankApp() {
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [items, setItems] = useState<BankItem[] | null>(null);
   const [copied, setCopied] = useState(false);
+  const loansOn = useLoansOn();
+  const loan = useGame((s) => s.loan);
+  const skew = useGame((s) => s.clockSkew);
+  const sec = useSecond();
+  // the Loans tab is there while loans are on, or while a loan is still owed (then it explains why the bank is shut)
+  const showLoans = loansOn || (!!loan && FEATURES.loans);
+  const late = !!loan && loansOn && loanStageAt(loan, sec * 1000 + skew) !== "active";
+  // a player in custody who opens the bank is most likely after money for bail; a player in trouble with a loan wants the loan
+  const [tab, setTab] = useState<"account" | "loans">(() => {
+    const st = useGame.getState();
+    return st.loan ? (st.loan.stage !== "active" ? "loans" : "account") : st.custody ? "loans" : "account";
+  });
+  const loans = showLoans && tab === "loans";
 
   const account = to.trim().replace(/^@/, "");
   const value = Math.floor(Number(amount));
@@ -92,6 +114,23 @@ export default function BankApp() {
         </div>
       </div>
 
+      {showLoans && (
+        <div role="tablist" className="mt-3 grid grid-cols-2 gap-1 rounded-xl bg-stone-200/70 p-1">
+          {([["account", "Account"], ["loans", "Loans"]] as const).map(([id, name]) => (
+            <button key={id} role="tab" aria-selected={tab === id} onClick={() => setTab(id)} className={`relative rounded-lg py-2 text-xs font-bold transition active:scale-95 ${tab === id ? "bg-white text-stone-900 shadow-sm" : "text-stone-500"}`}>
+              {name}
+              {id === "loans" && late && <span aria-label="Your loan is late" className="absolute right-3 top-2 size-2 rounded-full bg-rose-500" />}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {loans ? (
+        <div className="mt-3">
+          <LoansPanel />
+        </div>
+      ) : (
+        <>
       {/* send money */}
       <p className="mb-1.5 mt-4 text-[11px] font-bold uppercase tracking-wide text-stone-400">Send money</p>
       <div className="space-y-2 rounded-2xl bg-stone-100/70 p-3">
@@ -152,19 +191,30 @@ export default function BankApp() {
       ) : (
         <ul className="space-y-1.5">
           {items.map((i) => (
-            <li key={i.id} className="flex items-center gap-2.5 rounded-xl bg-white px-3 py-2 ring-1 ring-black/5">
-              <span className={`grid size-8 shrink-0 place-items-center rounded-full ${i.dir === "in" ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-600"}`}>{i.dir === "in" ? <ArrowDownLeft className="size-4" /> : <ArrowUpRight className="size-4" />}</span>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-[13px] font-semibold text-black">{i.dir === "in" ? `From ${i.name}` : `To ${i.name}`}</span>
-                <span className="block truncate text-[11px] text-stone-500">{i.username ? `@${i.username}` : ""}{i.note ? ` · ${i.note}` : ""}</span>
-              </span>
-              <span className={`shrink-0 text-[13px] font-extrabold tabular-nums ${i.dir === "in" ? "text-emerald-700" : "text-black"}`}>
-                {i.dir === "in" ? "+" : "-"}
-                {naira(i.amount)}
-              </span>
+            <li key={i.id} className="rounded-xl bg-white px-3 py-2 ring-1 ring-black/5">
+              <div className="flex items-center gap-2.5">
+                <span className={`grid size-8 shrink-0 place-items-center rounded-full ${i.dir === "in" ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-600"}`}>
+                  {fromState(i) ? <Landmark className="size-4" /> : i.dir === "in" ? <ArrowDownLeft className="size-4" /> : <ArrowUpRight className="size-4" />}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[13px] font-semibold text-black">{i.dir === "in" ? `From ${i.name}` : `To ${i.name}`}</span>
+                  <span className="block truncate text-[11px] text-stone-500">{i.username ? `@${i.username}` : ""}{i.note ? `${i.username ? " · " : ""}${i.note}` : ""}</span>
+                </span>
+                <span className={`shrink-0 text-[13px] font-extrabold tabular-nums ${i.dir === "in" ? "text-emerald-700" : "text-black"}`}>
+                  {i.dir === "in" ? "+" : "-"}
+                  {naira(i.amount)}
+                </span>
+              </div>
+              {i.dir === "out" && !fromState(i) && (
+                <div className="empty:hidden">
+                  <EfccReportButton item={i} />
+                </div>
+              )}
             </li>
           ))}
         </ul>
+      )}
+        </>
       )}
     </>
   );
