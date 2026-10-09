@@ -50,7 +50,7 @@ export default function GatePanel({ id }: { id: string }) {
         <>
           {left > 0 && wait > 0 && (
             <p className="mt-3 rounded-2xl bg-amber-50 px-3.5 py-2.5 text-sm font-semibold text-amber-800 ring-1 ring-amber-100">
-              Paid. The boom goes up in 0:{String(wait).padStart(2, "0")}. Your pass then lasts {Math.floor((left - wait) / 60)} minutes.
+              Security is checking your pass: the boom goes up in {Math.floor(wait / 60)}:{String(wait % 60).padStart(2, "0")}. Then it lasts {Math.floor((left - wait) / 60)} minutes.
             </p>
           )}
           {left > 0 && wait === 0 && (
@@ -59,7 +59,7 @@ export default function GatePanel({ id }: { id: string }) {
             </p>
           )}
           <button
-            disabled={money < e.price}
+            disabled={money < e.price || (left > 0 && wait > 0)}
             onClick={() => {
               const err = useGame.getState().buyPass(e.id);
               if (err) useGame.getState().toast(err, "bad");
@@ -67,7 +67,7 @@ export default function GatePanel({ id }: { id: string }) {
             }}
             className="mt-3 w-full rounded-2xl bg-stone-900 py-3 text-sm font-semibold text-white transition active:scale-[0.98] disabled:opacity-40"
           >
-            {left > 0 ? "Extend your pass" : "Buy a visitor pass"} · {naira(e.price)} · 30 min
+            {left > 0 && wait > 0 ? "Security is checking your pass" : `${left > 0 ? "Extend your pass" : "Buy a visitor pass"} · ${naira(e.price)} · 30 min`}
           </button>
           <p className="mt-2 text-xs text-stone-500">Buy a house in {e.name} to become a resident and walk in whenever you like.</p>
         </>

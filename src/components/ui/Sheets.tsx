@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { RotateCw, HelpCircle, LogOut, Car, Music2, Check, CheckCircle2, Circle, Copy, Eye, Footprints, Landmark, Moon, PencilLine, PhoneCall, PhoneOff, Sun, SunMoon, Volume2, VolumeX, X } from "lucide-react";
+import { RotateCw, HelpCircle, LogOut, Car, Music2, Check, CheckCircle2, Circle, Copy, Eye, Footprints, Gamepad2, Landmark, Moon, PencilLine, PhoneCall, PhoneOff, Sun, SunMoon, Volume2, VolumeX, X } from "lucide-react";
 import { useState, useSyncExternalStore } from "react";
 import { useGame, ownedBy } from "@/lib/store";
 import { net } from "@/lib/net";
@@ -25,6 +25,7 @@ import { decide, hobbyById, jobById, pathById } from "@/lib/background";
 import { THEME_SONG } from "@/lib/themeSong";
 import { roomLabel } from "@/lib/custody";
 import SocialProfileExtras from "./ProfileSocial";
+import { useStickMode } from "@/lib/walkStick";
 
 /**
  * A panel over the game. On a phone every panel fills the screen until you go back; on a laptop they are popups at the side.
@@ -234,6 +235,8 @@ function ViewSettings() {
   const timeMode = useGame((s) => s.timeMode);
   const placesOnly = useGame((s) => s.placesOnly);
   const autoRotate = useGame((s) => s.autoRotate);
+  const stickMode = useStickMode((s) => s.mode);
+  const stickSet = useStickMode((s) => s.set);
   const hasCar = useGame((s) => s.cars.length > 0);
   const driving = useGame((s) => s.driving);
   const soundMuted = useSound((s) => s.muted);
@@ -264,6 +267,12 @@ function ViewSettings() {
             <RotateCw className="size-4 text-stone-500" /> Auto rotate the camera
           </span>
           <span className={`rounded-full px-2.5 py-0.5 text-xs ${autoRotate ? "bg-emerald-600 text-white" : "bg-stone-200 text-stone-600"}`}>{autoRotate ? "On" : "Off"}</span>
+        </button>
+        <button onClick={() => stickSet(stickMode === "auto" ? "on" : stickMode === "on" ? "off" : "auto")} className={row}>
+          <span className="flex items-center gap-2.5">
+            <Gamepad2 className="size-4 text-stone-500" /> Walking stick
+          </span>
+          <span className={`rounded-full px-2.5 py-0.5 text-xs ${stickMode === "off" ? "bg-stone-200 text-stone-600" : "bg-emerald-600 text-white"}`}>{stickMode === "auto" ? "On phones" : stickMode === "on" ? "Always" : "Off"}</span>
         </button>
         <button onClick={() => patch({ placesOnly: !placesOnly })} className={row}>
           <span className="flex items-center gap-2.5">

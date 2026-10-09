@@ -29,6 +29,9 @@ export const me = {
   use: null as null | { pose: "sit" | "lie"; x: number; z: number; ry: number; seatH: number; standX: number; standZ: number; /** sitting just to be with people, no action running */ free?: boolean },
 };
 
+/** The on-screen walking stick (Joystick.tsx): x to the right and y down, as on the screen, each from -1 to 1. Zero when nobody touches it. */
+export const stick = { x: 0, y: 0 };
+
 export type RemoteMotion = { x: number; z: number; ry: number; speed: number; tx: number; tz: number; tr: number };
 
 export const remoteMotion = new Map<string, RemoteMotion>();

@@ -3,16 +3,21 @@
 import { useEffect, useState } from "react";
 import { Flag, Hand, House, MessageCircle, PhoneCall, ShieldOff, UserCheck, UserPlus, X } from "lucide-react";
 import { homeOf, visitHome } from "@/lib/visit";
+import { roomLabel } from "@/lib/custody";
 import { net } from "@/lib/net";
 import { blockPlayer, friendRequest, loadSocial, openThread, playerProfile, type Profile } from "@/lib/social";
 import { useGame } from "@/lib/store";
 import { Avatar } from "./FriendsTabs";
+import { ReportPicker } from "./CustodyUI";
+import { PokeButtons } from "./PokeUI";
 
 /** The card for another player you tapped in the city: say hi, add them as a friend, message, call, block or report. */
 export default function PlayerPanel({ id }: { id: string }) {
   const peer = useGame((s) => s.remotes[id]);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [busy, setBusy] = useState(false);
+  const [reporting, setReporting] = useState(false);
+  const policeOpen = useGame((s) => s.policeOpen);
   const pid = peer?.pid;
   const close = () => useGame.getState().select(null);
 
@@ -46,7 +51,7 @@ export default function PlayerPanel({ id }: { id: string }) {
           <Avatar name={peer.name} online />
           <div>
             <h2 className="text-lg font-semibold leading-tight text-stone-900">{peer.name}</h2>
-            <p className="text-xs font-semibold text-emerald-600">Online · {peer.room === "streets" ? "out and about" : peer.room.replace(/-/g, " ")}</p>
+            <p className="text-xs font-semibold text-emerald-600">Online · {roomLabel(peer.room).toLowerCase()}</p>
           </div>
         </div>
         <button onClick={close} aria-label="Close" className="rounded-full p-1.5 text-stone-400 transition hover:bg-stone-100 hover:text-stone-700">
@@ -105,11 +110,32 @@ export default function PlayerPanel({ id }: { id: string }) {
           </button>
         )}
       </div>
+      <PokeButtons peerId={id} />
       {friendship !== "friends" && <p className="mt-2 text-xs text-stone-500">You can message each other once you are friends.</p>}
+      {reporting && pid && (
+        <div className="mt-3">
+          <ReportPicker accused={pid} name={peer.name} onDone={() => setReporting(false)} />
+          <button
+            onClick={() => {
+              const why = prompt(`Flag ${peer.name} to the moderators. What is the problem? (rude, spam, other)`);
+              if (why) {
+                net.report(id, why);
+                useGame.getState().toast("Thanks, we'll take a look.", "good");
+              }
+              setReporting(false);
+            }}
+            className="mt-2 text-xs font-semibold text-stone-500 underline"
+          >
+            Flag to the moderators instead
+          </button>
+        </div>
+      )}
 
       <div className="mt-4 flex gap-2 border-t border-stone-100 pt-3">
         <button
           onClick={() => {
+            // with the police open the report goes to them; otherwise it is a flag to the moderators, as before
+            if (policeOpen) return setReporting((v) => !v);
             const why = prompt(`Why are you reporting ${peer.name}? (rude, spam, other)`);
             if (why) {
               net.report(id, why);
@@ -118,7 +144,7 @@ export default function PlayerPanel({ id }: { id: string }) {
           }}
           className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-stone-500 transition hover:bg-stone-100"
         >
-          <Flag className="size-3.5" /> Report
+          <Flag className="size-3.5" /> Report{policeOpen ? "…" : ""}
         </button>
         <button
           onClick={async () => {
