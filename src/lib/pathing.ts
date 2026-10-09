@@ -1,6 +1,7 @@
 import { CAMPUS, ESTATES, ESTATE_SOLIDS, WORLD_HALF, wallsFor } from "./world";
 import { PLACES, isSolid } from "./places";
 import { PLOTS } from "./plots";
+import { HOUSES } from "./houses";
 
 export type Pt = { x: number; z: number };
 
@@ -182,6 +183,8 @@ export class Grid {
 /* ------------------------------- city grid ------------------------------- */
 
 const MARGIN = 0.45;
+/** Houses only block up to this far from their block's centre (the blocks are 10 wide: the outer unit beside each street stays walkable). */
+const BLOCK_REACH = 3.85;
 let world = new Grid(-WORLD_HALF, -WORLD_HALF, WORLD_HALF * 2, WORLD_HALF * 2, 1);
 let active: Grid = world;
 
@@ -210,6 +213,17 @@ export function rebuildGrid(builtPlots: Iterable<string>) {
   const rects = baseRects();
   for (const p of PLOTS) if (built.has(p.id)) rects.push({ x: p.pos[0], z: p.pos[1], w: 1.9, d: 1.9 });
   for (const r of rects) grid.blockRect(r.x, r.z, r.w, r.d, MARGIN);
+  // the small houses in the blocks are solid, for people and cars alike (kept a cell off the streets so the roads stay clear)
+  for (const h of HOUSES) {
+    const quarter = Math.abs(Math.sin(h.ry)) > 0.5; // turned a quarter: its width runs along z
+    const hw = (quarter ? h.d : h.w) / 2;
+    const hd = (quarter ? h.w : h.d) / 2;
+    const x0 = Math.max(h.x - hw, h.bx - BLOCK_REACH);
+    const x1 = Math.min(h.x + hw, h.bx + BLOCK_REACH);
+    const z0 = Math.max(h.z - hd, h.bz - BLOCK_REACH);
+    const z1 = Math.min(h.z + hd, h.bz + BLOCK_REACH);
+    if (x1 > x0 && z1 > z0) grid.blockRect((x0 + x1) / 2, (z0 + z1) / 2, x1 - x0, z1 - z0, 0.1);
+  }
   for (const w of WALLS) grid.blockRect(w.x, w.z, w.w, w.d, 0.1);
   // closed boom gates are solid
   for (const e of ESTATES) {

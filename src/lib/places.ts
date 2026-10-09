@@ -310,7 +310,8 @@ export const PLACES: Place[] = [
     district: "Dugbe",
     blurb: "Ibadan's first skyscraper. Offices, deals and ambition.",
     pos: [-7, 7.2],
-    size: [2.4, 6, 2.4],
+    // one of the two tallest buildings in the city, with Bower's Tower
+    size: [2.6, 11.5, 2.6],
     color: "#c8a24a",
     style: "tower",
     voice: true,
@@ -328,7 +329,8 @@ export const PLACES: Place[] = [
     district: "Dugbe",
     blurb: "Climb it and see the whole city of brown roofs.",
     pos: [-2.5, 3.2],
-    size: [1.2, 4.4, 1.2],
+    // the tallest building in the city (the viewing deck sits at 80% of this height, see DECK_Y)
+    size: [1.4, 12, 1.4],
     // the door is on the east face (towards the default camera), clear of the Dugbe cab park that used to cover it
     door: [1.9, 0],
     color: "#b9855a",
