@@ -72,7 +72,7 @@ function Runtime() {
 
   useEffect(() => {
     const id = setInterval(() => useGame.getState().tick(1), 1000);
-    if (process.env.NODE_ENV !== "production") (window as unknown as { __omo: unknown }).__omo = { useGame, me, cam, startUse, walkToFurn, rt, goUpDeck };
+    if (process.env.NODE_ENV !== "production") (window as unknown as { __omo: unknown }).__omo = { useGame, me, cam, startUse, walkToFurn, rt, goUpDeck, enterInterior };
     const hour = new URLSearchParams(location.search).get("hour");
     if (hour !== null && !Number.isNaN(Number(hour))) useGame.getState().patch({ clockOverride: Number(hour) });
     return () => clearInterval(id);
