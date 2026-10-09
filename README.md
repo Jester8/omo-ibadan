@@ -24,9 +24,9 @@ Env (optional): `NEXT_PUBLIC_WS_URL=wss://your-server` points the client at a de
 
 | Path | What |
 |---|---|
-| `src/lib/places.ts`, `plots.ts`, `titles.ts`, `quests.ts` | Content: 20 places, 23 land plots, the chieftaincy ladder, starter goals |
+| `src/lib/places.ts`, `plots.ts`, `titles.ts`, `quests.ts` | Content: 73 places (19 of them the civic pack in `placesCivic.ts`), 215 land plots, the chieftaincy ladder, starter goals |
 | `src/lib/moderation.ts` | Chat filter shared by client and server |
-| `src/lib/furniture.ts`, `interiors.ts`, `layouts.ts` | Interior system: furniture catalogue, rooms, 24 layouts (places and homes) |
+| `src/lib/furniture.ts`, `interiors.ts`, `layouts.ts` | Interior system: furniture catalogue, rooms, 74 place layouts plus the homes |
 | `src/lib/interiorRuntime.ts` | Entering and leaving buildings, using furniture, generator power |
 | `src/components/interior/` | Interior rendering: floors, cutaway walls, windows, furniture |
 | `src/lib/store.ts` | Game state (zustand, persisted to localStorage) |
@@ -41,6 +41,22 @@ Env (optional): `NEXT_PUBLIC_WS_URL=wss://your-server` points the client at a de
 Avatar base bodies: Quaternius "Ultimate Modular Men/Women" packs (CC0), via Poly Pizza. They are
 recoloured and extended in code with Nigerian outfits (senator kaftan, buba, babariga, isi agu, agbada, Ankara iro and gown, aso-oke),
 gele, turban, hijab, fila, Hausa and Igbo caps and many hairstyles. See `public/models/avatars/CREDITS.txt`.
+
+## Checks
+
+Run these before shipping a change. Each exits non-zero on a real problem.
+
+| Command | What it proves |
+|---|---|
+| `npm run check:places` | Every place is on free ground, doors are reachable and far enough apart, ids and hours are real |
+| `npm run check:interiors` | Every room has a free spawn, every usable item is reachable, nothing overlaps |
+| `npm run check:money` | The shared money tables match the catalogues; loans and land sales behave |
+| `npm run check:custody` | Police, EFCC and prison data (stations, cells, door spacing) and the shared files match the server's copies |
+| `npm run check:civic` | Quests, stat counters, civic prices, the Education ladder, donation and letter limits |
+| `npm run check:health` | Illnesses, prices, queue times, triage and the health card |
+| `npm run check:tower` | Bower's Tower is always open, its door is reachable, the telescope points at real places |
+
+The files `protocol.ts`, `custodyRules.ts`, `socialRules.ts` and `moneyRules.ts` in `src/lib/` are shared with the server and must stay identical in both repos (`check:custody` compares them).
 
 See `docs/PLAN.md` for status and what is next.
 
