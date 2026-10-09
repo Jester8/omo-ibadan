@@ -9,7 +9,7 @@ export const DONATION_TIERS = [
   { amount: 500_000, rep: 40 },
 ] as const;
 
-/** At most this much reputation is credited in any one rolling hour; a gift beyond it is still accepted. */
+/** At most this much reputation is credited in each 60-minute window, which opens with the first gift after the last one closed; a gift beyond it is still accepted. */
 export const REP_CAP_PER_HOUR = 40;
 const HOUR_MS = 60 * 60_000;
 

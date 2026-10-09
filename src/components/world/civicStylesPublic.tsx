@@ -108,7 +108,7 @@ function Filling({ size: [w, h, d] }: StyleProps) {
         B(4.4, 0.1, 1.7, WHITE, [0, 1.12, cz]), B(4.4, 0.16, 0.04, RED, [0, 1.06, cz + 0.85]), B(4.4, 0.04, 0.045, "#1d4ed8", [0, 1.02, cz + 0.85]),
         ...cols, ...pumps,
         // the price pylon at the front left
-        B(0.05, 0.9, 0.05, "#4b5058", [-1.85, 0.04, hd - 0.2]), B(0.5, 0.62, 0.06, "#1f2937", [-1.85, 0.7, hd - 0.2]),
+        B(0.05, 0.9, 0.05, "#4b5058", [-1.85, 0.04, hd - 0.2]), B(0.66, 0.2, 0.06, "#1f2937", [-1.85, 0.88, hd - 0.2]),
       ],
       glow: [B(4.0, 0.012, 1.4, "#fff6d6", [0, 1.1, cz]), B(0.1, 0.07, 0.01, "#9be9a8", [-0.7, 0.34, cz + 0.34]), B(0.1, 0.07, 0.01, "#9be9a8", [0.7, 0.34, cz + 0.34]), B(1.6, 0.4, 0.015, "#fff1c8", [0.5, 0.18, -hd + 1.02])],
     };
@@ -118,7 +118,7 @@ function Filling({ size: [w, h, d] }: StyleProps) {
       <mesh geometry={g.body} material={bodyMat} castShadow receiveShadow dispose={null} />
       <mesh geometry={g.glow} material={civicGlow("#fff6d6")} dispose={null} />
       <Sign text="MONIYA" bg={RED} fg="#ffffff" w={1.4} h={0.2} p={[0, 1.07, cz + 0.88]} />
-      <Sign text="PETROL · DIESEL · GAS" bg="#111827" fg="#fde047" w={0.46} h={0.58} p={[-1.85, 0.7, hd - 0.2 + 0.035]} />
+      <Sign text="PETROL · DIESEL · GAS" bg="#111827" fg="#fde047" w={0.62} h={0.155} p={[-1.85, 0.98, hd - 0.2 + 0.035]} />
     </>
   );
 }
@@ -240,9 +240,10 @@ function School({ size: [w, h, d] }: StyleProps) {
         // playground: a slide and a swing frame, at the back right of the field
         B(0.05, 0.4, 0.05, "#d62828", [hw - 0.55, 0.03, 0.2]), part(new THREE.BoxGeometry(0.1, 0.03, 0.55), "#facc15", [hw - 0.55, 0.22, 0.52], { rx: -0.55 }),
         B(0.04, 0.45, 0.04, "#4b5058", [hw - 0.9, 0.03, 0.95]), B(0.04, 0.45, 0.04, "#4b5058", [hw - 0.3, 0.03, 0.95]), B(0.62, 0.03, 0.04, "#4b5058", [hw - 0.6, 0.45, 0.95]),
+        B(0.12, 0.9, 0.12, "#e8e2cf", [-0.6, 0.03, hd - 0.03]), B(0.12, 0.9, 0.12, "#e8e2cf", [0.6, 0.03, hd - 0.03]), B(1.32, 0.05, 0.1, "#2f6f4f", [0, 0.93, hd - 0.03]),
         ...flag(-hw + 0.5, hd - 0.6),
       ],
-      glow: [B(0.1, 0.1, 0.1, "#ffe9b0", [-0.6, 0.85, hd - 0.03]), B(0.1, 0.1, 0.1, "#ffe9b0", [0.6, 0.85, hd - 0.03])],
+      glow: [B(0.1, 0.1, 0.1, "#ffe9b0", [-0.6, 0.98, hd - 0.03]), B(0.1, 0.1, 0.1, "#ffe9b0", [0.6, 0.98, hd - 0.03])],
     };
   });
   return (
