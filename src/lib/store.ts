@@ -61,7 +61,7 @@ export type CallState = {
   peerName: string;
   room: string | null;
 };
-export type Sheet = "phone" | "profile" | "quests" | "election" | "garage" | "buy" | "friends" | "music" | "flights" | "guide" | "health" | "custody" | "bank" | null;
+export type Sheet = "phone" | "profile" | "quests" | "election" | "garage" | "buy" | "friends" | "music" | "flights" | "guide" | "calls" | "health" | "custody" | "bank" | null;
 
 const START_MONEY = 25000;
 /** at or above this hunger level you are full and cannot eat another meal */

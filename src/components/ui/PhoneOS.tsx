@@ -292,7 +292,7 @@ export default function PhoneOS({ initial = null, render, fullscreen = false, on
   const call = useGame((s) => s.call.phase);
   const unread = useGame((s) => s.threads.reduce((n, t) => n + t.unread, 0));
   const meta = APPS.find((a) => a.id === app);
-  const current = call !== "idle" && app !== "calls" ? "calls" : app;
+  const current = app;
 
   const body = () => {
     switch (current) {
