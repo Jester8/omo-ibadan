@@ -24,6 +24,7 @@ import { useSound } from "@/lib/soundStore";
 import { decide, hobbyById, jobById, pathById } from "@/lib/background";
 import { THEME_SONG } from "@/lib/themeSong";
 import { roomLabel } from "@/lib/custody";
+import ProfileCivic from "./ProfileCivic";
 import SocialProfileExtras from "./ProfileSocial";
 import { useStickMode } from "@/lib/walkStick";
 
@@ -473,6 +474,7 @@ function ProfileSheet() {
         </>
       )}
 
+      <ProfileCivic />
       <SocialProfileExtras />
 
       {muted.length > 0 && (
