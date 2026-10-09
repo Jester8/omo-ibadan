@@ -6,7 +6,7 @@ import { useGame } from "@/lib/store";
 import { useStickMode } from "@/lib/walkStick";
 
 /** Radius (px) the knob can travel from the middle. */
-const RADIUS = 46;
+const RADIUS = 30;
 
 const touchQuery = () => (typeof window === "undefined" ? null : window.matchMedia("(pointer: coarse)"));
 const subscribeTouch = (cb: () => void) => {
@@ -23,6 +23,8 @@ const isTouch = () => !!touchQuery()?.matches;
  */
 export default function Joystick() {
   const mode = useStickMode((s) => s.mode);
+  const tucked = useStickMode((s) => s.tucked);
+  const tuck = useStickMode((s) => s.tuck);
   const touch = useSyncExternalStore(subscribeTouch, isTouch, () => false);
   const profile = useGame((s) => !!s.profile);
   const covered = useGame((s) => !!s.sheet || !!s.deck || !!s.computer || !!s.service || s.hideIcons);
@@ -39,9 +41,9 @@ export default function Joystick() {
   };
   // hiding the stick (a sheet opened, the setting changed) lets go of it
   useEffect(() => {
-    if (!show) rest();
+    if (!show || tucked) rest();
     return rest;
-  }, [show]);
+  }, [show, tucked]);
 
   const push = (e: React.PointerEvent) => {
     const el = base.current;
@@ -60,6 +62,17 @@ export default function Joystick() {
   };
 
   if (!show) return null;
+  if (tucked)
+    return (
+      <button
+        type="button"
+        aria-label="Show the walking stick"
+        onClick={() => tuck(false)}
+        className="absolute bottom-[calc(env(safe-area-inset-bottom)+9rem)] left-0 z-[16] grid h-12 w-6 place-items-center rounded-r-full bg-black/10 ring-1 ring-white/40 backdrop-blur-sm sm:bottom-28"
+      >
+        <span className="size-2 rounded-full bg-white/60" />
+      </button>
+    );
   return (
     <div
       ref={base}
@@ -84,10 +97,20 @@ export default function Joystick() {
       onLostPointerCapture={(e) => {
         if (e.pointerId === finger.current) rest();
       }}
-      className="absolute bottom-[calc(env(safe-area-inset-bottom)+10.2rem)] left-3 z-[16] grid size-[8.5rem] touch-none select-none place-items-center rounded-full bg-black/10 ring-1 ring-white/50 backdrop-blur-sm sm:bottom-28 sm:left-6"
+      className="absolute bottom-[calc(env(safe-area-inset-bottom)+9rem)] left-1.5 z-[16] grid size-[5.5rem] touch-none select-none place-items-center rounded-full bg-black/5 opacity-50 ring-1 ring-white/30 transition-opacity active:opacity-80 sm:bottom-28 sm:left-3"
     >
-      <div className="pointer-events-none absolute inset-3 rounded-full ring-1 ring-white/40" />
-      <div ref={knob} className="pointer-events-none size-14 rounded-full bg-white/85 shadow-lg ring-1 ring-black/10" />
+      <div className="pointer-events-none absolute inset-2 rounded-full ring-1 ring-white/25" />
+      <div ref={knob} className="pointer-events-none size-9 rounded-full bg-white/60 shadow ring-1 ring-black/5" />
+      {/* tap the little x to tuck the stick away; a dot at the edge brings it back */}
+      <button
+        type="button"
+        aria-label="Hide the walking stick"
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={() => tuck(true)}
+        className="absolute -right-1 -top-1 grid size-5 place-items-center rounded-full bg-black/30 text-[11px] font-bold leading-none text-white"
+      >
+        ×
+      </button>
     </div>
   );
 }

@@ -273,17 +273,30 @@ export function dressAvatar(root: THREE.Object3D, look: Look, base: BaseId): Dre
     m.frustumCulled = false;
     m.castShadow = true;
     const orig = m.material as THREE.MeshStandardMaterial;
-    const mat = keep(orig.clone());
+    // physical paint: skin gets a soft sheen, cloth a fuzzy edge light, so people read as flesh and fabric rather than plastic
+    const mat = keep(new THREE.MeshPhysicalMaterial()) as THREE.MeshPhysicalMaterial;
+    THREE.MeshStandardMaterial.prototype.copy.call(mat, orig);
+    mat.name = orig.name;
+    mat.flatShading = false;
+    mat.envMapIntensity = 0.8;
     m.material = mat;
     const found = /_(Head|Body|Legs|Feet|Pants)/.exec(m.name)?.[1];
     const part = found === "Pants" ? "Legs" : found;
     const n = orig.name;
     if (n === "Skin") {
       mat.color.copy(skin);
-      mat.roughness = 0.55;
+      mat.roughness = 0.5;
+      mat.sheen = 0.5;
+      mat.sheenColor.set("#ffb89a");
+      mat.sheenRoughness = 0.55;
+      mat.clearcoat = 0.12;
+      mat.clearcoatRoughness = 0.6;
     } else if (n === "Skin_Darker") {
       mat.color.copy(skinDark);
-      mat.roughness = 0.55;
+      mat.roughness = 0.5;
+      mat.sheen = 0.5;
+      mat.sheenColor.set("#ffb89a");
+      mat.sheenRoughness = 0.55;
     } else if (part === "Head" && roles.hide?.includes(n)) {
       m.visible = false;
     } else if (part === "Head" && roles.hair.includes(n)) {
@@ -311,6 +324,9 @@ export function dressAvatar(root: THREE.Object3D, look: Look, base: BaseId): Dre
       if (mat.name !== "Skin" && mat.name !== "Skin_Darker") {
         mat.roughness = 0.86;
         mat.metalness = 0;
+        mat.sheen = 0.6;
+        mat.sheenColor.set("#ffffff");
+        mat.sheenRoughness = 0.45;
       }
     }
   });

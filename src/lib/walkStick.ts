@@ -13,8 +13,27 @@ const read = (): StickMode => {
   }
 };
 
-export const useStickMode = create<{ mode: StickMode; set: (m: StickMode) => void }>((set) => ({
+const HIDE_KEY = "omo-ibadan-stick-hidden";
+const readHidden = () => {
+  try {
+    return localStorage.getItem(HIDE_KEY) === "1";
+  } catch {
+    return false;
+  }
+};
+
+export const useStickMode = create<{ mode: StickMode; set: (m: StickMode) => void; tucked: boolean; tuck: (v: boolean) => void }>((set) => ({
   mode: typeof window === "undefined" ? "auto" : read(),
+  /** Tapped away for now: only a tiny dot stays at the edge to bring it back. */
+  tucked: typeof window === "undefined" ? false : readHidden(),
+  tuck: (tucked) => {
+    try {
+      localStorage.setItem(HIDE_KEY, tucked ? "1" : "0");
+    } catch {
+      /* private mode */
+    }
+    set({ tucked });
+  },
   set: (mode) => {
     try {
       localStorage.setItem(KEY, mode);
