@@ -29,6 +29,8 @@ function useBankNow(): number {
   return sec * 1000 + skew;
 }
 
+/** a confirm card that appears below the fold on a small screen scrolls itself into view */
+const intoView = (el: HTMLElement | null) => el?.scrollIntoView({ block: "nearest", behavior: "smooth" });
 const label = "text-[11px] font-bold uppercase tracking-wide text-stone-400";
 const Row = ({ k, v, strong }: { k: string; v: string; strong?: boolean }) => (
   <div className="flex items-baseline justify-between gap-3 py-1">
@@ -136,7 +138,7 @@ function Offer() {
         </div>
 
         {confirming && !o.blocked ? (
-          <div className="rounded-xl bg-white p-3 ring-1 ring-black/10">
+          <div ref={intoView} className="rounded-xl bg-white p-3 ring-1 ring-black/10">
             <p className="text-sm font-semibold text-black">
               Borrow {naira(amount)} for {termLabel(term)}? Pay back {naira(atDeadline)} by {clockAt(now + term * MIN)}.
             </p>
@@ -188,7 +190,7 @@ function ActiveLoan({ loan }: { loan: LoanView }) {
   const valid = shown >= 1 && !short;
   const clears = shown >= v.owed;
   const frac = Math.min(1, Math.max(0, (now - loan.takenAt) / Math.max(1, loan.dueAt - loan.takenAt)));
-  const chip = server && v.stage === "notice" && v.toLien !== null ? `Final notice · ${span(v.toLien)}` : v.stage === "notice" ? "Final notice" : v.stage === "seized" ? `Lien on ${loan.seizedPlot ? plotLabel(loan.seizedPlot) : "a property"}` : v.stage === "overdue" ? "Overdue" : "On time";
+  const chip = server && v.stage === "notice" && v.toLien !== null ? `Final notice · ${span(v.toLien)}` : v.stage === "notice" ? "Final notice" : v.stage === "seized" ? `Lien on ${loan.seizedPlot ? plotLabel(loan.seizedPlot, true) : "a property"}` : v.stage === "overdue" ? "Overdue" : "On time";
 
   const pay = async () => {
     setBusy(true);
@@ -264,7 +266,7 @@ function ActiveLoan({ loan }: { loan: LoanView }) {
           You have {naira(money)}.{v.saved > 0 ? ` Paying it all now saves you ${naira(v.saved)} compared with the deadline.` : ""}
         </p>
         {confirming && valid ? (
-          <div className="rounded-xl bg-white p-3 ring-1 ring-black/10">
+          <div ref={intoView} className="rounded-xl bg-white p-3 ring-1 ring-black/10">
             <p className="text-sm font-semibold text-black">{clears ? `Pay ${naira(v.owed)} and clear your loan?` : `Pay ${naira(charge)} to the bank? You will still owe about ${naira(v.owed - charge)}.`}</p>
             <div className="mt-2 flex gap-2">
               <button onClick={() => setConfirming(false)} className="flex-1 rounded-xl bg-stone-100 py-2.5 text-xs font-bold text-stone-700 transition active:scale-95">
@@ -340,7 +342,7 @@ export function LoanNotice() {
             <p className="mt-0.5 text-xs leading-snug text-stone-500">{body}</p>
           </div>
           <div className="flex shrink-0 flex-col items-end gap-1.5">
-            <button onClick={() => setClosed(key)} aria-label="Close" className="grid size-7 place-items-center rounded-full text-stone-400 transition hover:bg-stone-100 active:scale-90">
+            <button onClick={() => setClosed(key)} aria-label="Close" className="grid size-8 place-items-center rounded-full text-stone-400 transition hover:bg-stone-100 active:scale-90">
               <X className="size-4" />
             </button>
             <button onClick={() => useGame.getState().setSheet("bank")} className="rounded-full bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white transition active:scale-95">

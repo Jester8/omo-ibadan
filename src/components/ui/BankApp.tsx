@@ -117,7 +117,7 @@ export default function BankApp() {
       {showLoans && (
         <div role="tablist" className="mt-3 grid grid-cols-2 gap-1 rounded-xl bg-stone-200/70 p-1">
           {([["account", "Account"], ["loans", "Loans"]] as const).map(([id, name]) => (
-            <button key={id} role="tab" aria-selected={tab === id} onClick={() => setTab(id)} className={`relative rounded-lg py-2 text-xs font-bold transition active:scale-95 ${tab === id ? "bg-white text-stone-900 shadow-sm" : "text-stone-500"}`}>
+            <button key={id} role="tab" aria-selected={tab === id} onClick={() => { setTab(id); if (id === "account") refresh(); }} className={`relative rounded-lg py-2 text-xs font-bold transition active:scale-95 ${tab === id ? "bg-white text-stone-900 shadow-sm" : "text-stone-500"}`}>
               {name}
               {id === "loans" && late && <span aria-label="Your loan is late" className="absolute right-3 top-2 size-2 rounded-full bg-rose-500" />}
             </button>

@@ -5,6 +5,7 @@ import { useGame } from "@/lib/store";
 import { naira } from "@/lib/plots";
 import { useSecond } from "@/lib/hooks";
 import { bizById } from "@/lib/business";
+import { SALE } from "@/lib/moneyRules";
 import { plotLabel } from "@/lib/loans";
 import { loadSaleCheck, quoteSaleAt, sellPlot, useSaleCheck } from "@/lib/property";
 
@@ -44,6 +45,7 @@ export default function SellSheet({ plotId, onClose }: { plotId: string; onClose
   }, []);
 
   const q = quoteSaleAt(plotId, sec * 1000);
+  const off = q.parts.land + q.parts.built + q.parts.decor - q.gross;
   const biz = bizById(plot?.biz);
   const staff = plot?.staff?.length ?? 0;
   const decor = (plot?.decor ?? oldDecor)?.length ?? 0;
@@ -66,6 +68,7 @@ export default function SellSheet({ plotId, onClose }: { plotId: string; onClose
         {q.parts.built > 0 && <Row k={biz ? biz.name : "What you built"} v={naira(q.parts.built)} />}
         {q.parts.decor > 0 && <Row k="Decor" v={naira(q.parts.decor)} />}
         <div className="border-t border-stone-100">
+          {off > 0 && <Row k={q.gross >= SALE.max ? `The most the city pays for one plot` : `Rounded down to ${naira(SALE.round)}`} v={`-${naira(off)}`} />}
           <Row k="The city pays" v={naira(q.gross)} />
           {q.loanPaid > 0 && <Row k="To the bank, for your loan" v={`-${naira(q.loanPaid)}`} minus />}
         </div>
@@ -76,7 +79,7 @@ export default function SellSheet({ plotId, onClose }: { plotId: string; onClose
       </div>
 
       <ul className="mt-2.5 space-y-1 text-xs leading-snug text-stone-600">
-        <li>Reputation -{q.repBack}. It is the reputation this land earned you.</li>
+        <li>You lose {q.repBack} reputation: what this land earned you.</li>
         {biz && <li>The {biz.name.toLowerCase()} closes for good and everything in it is lost.</li>}
         {biz && staff > 0 && <li>{staff === 1 ? "1 member of staff is" : `${staff} staff are`} let go. Wages already owed stay owed.</li>}
         {!biz && q.parts.built > 0 && <li>Your house and everything in it goes with the land.</li>}

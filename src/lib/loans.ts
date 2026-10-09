@@ -52,11 +52,11 @@ export function loanNow(l: LoanView, now: number) {
   };
 }
 
-/** The plot under a lien in words: the district, and the business if there is one. */
-export function plotLabel(plotId: string): string {
+/** A plot in words: the district, and the business if there is one ("Supermarket, Dugbe"). `short` is the district alone. */
+export function plotLabel(plotId: string, short = false): string {
   const district = plotById(plotId)?.district ?? "your land";
   const biz = bizById(useGame.getState().plots[plotId]?.biz);
-  return biz ? `${biz.name}, ${district}` : district;
+  return biz && !short ? `${biz.name}, ${district}` : district;
 }
 
 /* ------------------------------------------------ the offer ------------------------------------------------ */

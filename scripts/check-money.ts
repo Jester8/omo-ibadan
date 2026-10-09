@@ -299,6 +299,19 @@ async function behaviour(phase: "demo" | "server") {
     routes.set("GET /api/loan/offer", () => offer());
     calls.length = 0;
 
+    /* a late loan before the server has told us its time: a wrong device clock must not cost reputation */
+    const late = (id: number, stage: LoanView["stage"] = "active") => loanView({ id, ...newLoan(50_000, 60, T - 61 * MIN), takenAt: T - 61 * MIN, stage });
+    fresh({ rep: 50, loan: late(1) });
+    loans.loanTick();
+    ok2(st().rep === 50 && st().loan?.repHit === undefined, "before the server's time is known the tick leaves reputation alone");
+    routes.set("GET /api/loan", () => ({ status: 200, json: { loan: st().loan, ...stamp() } }));
+    await loans.loadLoan();
+    ok2(st().rep === 45 && st().loan?.repHit === true, "once the server's time is known a late loan costs 5 reputation");
+    loans.loanTick();
+    loans.loanTick();
+    await loans.loadLoan();
+    ok2(st().rep === 45, "and only once");
+
     /* the connect: the server's loan replaces whatever was saved */
     fresh({ rep: 70, loan: loanView({ id: 3 }) });
     routes.set("GET /api/loan", () => ({ status: 200, json: { loan: null, ...stamp() } }));
@@ -321,7 +334,7 @@ async function behaviour(phase: "demo" | "server") {
     loans.useLoanOffer.setState({ server: null });
     routes.set("GET /api/loan/offer", () => offer({ limit: 35_000, titleBase: 50_000, collateral: 0, blocked: { code: "TOO_NEW", text: "Your account is too new to borrow." } }));
     await loans.loadOffer();
-    let ol = loans.loanOffer();
+    const ol = loans.loanOffer();
     ok2(ol.limit === 35_000 && ol.blocked === "Your account is too new to borrow.", `the server's limit and reason are shown (got ${JSON.stringify(ol)})`);
     routes.set("GET /api/loan/offer", () => offer({ blocked: { code: "LOAN_LOCKED", text: "You can borrow again later.", until: T + 5 * MIN } }));
     await loans.loadOffer();
@@ -409,14 +422,12 @@ async function behaviour(phase: "demo" | "server") {
     ok2(!lost.ok && /Can't reach/.test(lost.message) && st().loan?.id === 12 && st().money === 60_000, "no answer: nothing changes");
 
     /* what the server pushes: the toasts, once each, and the reputation hit */
-    fresh({ rep: 50, loan: loanView({ id: 20, ...newLoan(50_000, 60, T - 61 * MIN), takenAt: T - 61 * MIN, stage: "active" }) });
+    fresh({ rep: 50, loan: late(20) });
     ok2(loans.loanStageAt(st().loan!, T) === "overdue", "past the due time the stage reads overdue before the server has said so");
-    loans.loanTick();
-    ok2(st().rep === 50 || st().rep === 45, "(the reputation hit waits for the clock offset or applies once)");
-    useGame.setState({ rep: 50, loan: loanView({ id: 20, ...newLoan(50_000, 60, T - 61 * MIN), takenAt: T - 61 * MIN, stage: "overdue" }) });
-    loans.applyLoanView(st().loan, "overdue", T);
-    ok2(st().rep === 45 && st().loan?.repHit === true, "an overdue loan costs 5 reputation");
-    loans.applyLoanView({ ...loanView({ id: 20, ...newLoan(50_000, 60, T - 61 * MIN), takenAt: T - 61 * MIN }), stage: "notice", noticeAt: T }, "notice", T);
+    useGame.setState({ loan: late(20) });
+    loans.applyLoanView(late(20, "overdue"), "overdue", T);
+    ok2(st().rep === 45 && st().loan?.repHit === true && said(/overdue/i), "the server's 'overdue' costs 5 reputation and is announced");
+    loans.applyLoanView({ ...late(20), stage: "notice", noticeAt: T }, "notice", T);
     ok2(st().rep === 45 && st().loan?.repHit === true && st().loan?.stage === "notice", "the next server copy of the same loan keeps the flag: no second hit");
     ok2(said(/final notice/i), "the final notice is announced");
     const before = toasts.length;
