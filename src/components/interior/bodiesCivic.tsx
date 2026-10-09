@@ -79,17 +79,17 @@ function CellBars({ W, H, c2 }: BodyProps) {
 }
 
 /** A red fire appliance, nose to the front: rear body, cab, ladder on the roof, wheels, a white stripe and a lit light bar. ~20 meshes. */
-function FireEngine({ W, D, H }: BodyProps) {
+function FireEngine({ W, D }: BodyProps) {
   return (
     <>
-      <Bx p={[0, 0.3, -D * 0.19]} s={[W, 1.4, D * 0.62]} c="#d62828" r={0.5} />
+      <Bx p={[0, 0.3, -D * 0.15]} s={[W, 1.4, D * 0.7]} c="#d62828" r={0.5} />
       <Bx p={[0, 0.3, D * 0.35]} s={[W, 1.1, D * 0.3]} c="#d62828" r={0.5} />
       <Bx p={[0, 1.0, D * 0.495]} s={[W - 0.2, 0.35, 0.03]} c="#cfe6f2" r={0.1} />
       <Bx p={[0, 0.85, 0]} s={[W + 0.02, 0.08, D * 0.97]} c="#fafafa" />
-      {[-1, 1].map((s) => <Bx key={s} p={[s * 0.5, 1.7, -D * 0.19]} s={[0.05, 0.07, D * 0.58]} c="#cfd3d8" />)}
-      {[-0.7, 0, 0.7].map((z) => <Bx key={z} p={[0, 1.7, -D * 0.19 + z]} s={[1.0, 0.04, 0.04]} c="#cfd3d8" />)}
-      {[-1, 1].flatMap((s) => [-D * 0.3, D * 0.34].map((z) => <Cy key={`${s}${z}`} p={[s * (W / 2), 0.38, z]} r={0.38} h={0.28} c="#1b1e24" seg={14} rot={[0, 0, Math.PI / 2]} />))}
-      <mesh position={[0, H - 0.2, D * 0.36]} material={litMat("#ff3b30", 1.4, "#7f1d1d")}>
+      {[-1, 1].map((s) => <Bx key={s} p={[s * 0.5, 1.7, -D * 0.15]} s={[0.05, 0.07, D * 0.62]} c="#cfd3d8" />)}
+      {[-0.7, 0, 0.7].map((z) => <Bx key={z} p={[0, 1.7, -D * 0.15 + z]} s={[1.0, 0.04, 0.04]} c="#cfd3d8" />)}
+      {[-1, 1].flatMap((s) => [-D * 0.3, D * 0.34].map((z) => <Cy key={`${s}${z}`} p={[s * (W / 2), 0.24, z]} r={0.38} h={0.28} c="#1b1e24" seg={14} rot={[0, 0, Math.PI / 2]} />))}
+      <mesh position={[0, 1.45, D * 0.36]} material={litMat("#ff3b30", 1.4, "#7f1d1d")}>
         <boxGeometry args={[W - 0.5, 0.1, 0.16]} />
       </mesh>
     </>

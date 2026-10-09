@@ -90,15 +90,21 @@ export function runLab(place: string): string | null {
   return null;
 }
 
-/** The routine check-up for a healthy visitor: the old paid action, with a receipt. */
+/** What the routine check-up costs you right now: the check-up gives a little food, so a governor with the food policy makes it 20% cheaper (runAction applies that). */
+export const checkupPrice = (): number => (useGame.getState().election?.governor?.policy === "food" ? Math.round(FEES.checkup * 0.8) : FEES.checkup);
+
+/** The routine check-up for a healthy visitor: the old paid action, with a receipt of what was really paid. */
 export function routineCheckup(place: string): string | null {
   const a: ActionDef = { id: "checkup", label: "Routine check-up", secs: 6, cost: FEES.checkup, gain: { energy: 15, fun: 5, hunger: 10 } };
+  const before = useGame.getState().money;
   const err = useGame.getState().runAction(a, {
     onDone: () => {
-      addVisit({ at: Date.now(), place, kind: "checkup", illness: null, severity: null, lines: [{ label: "Routine check-up", amount: FEES.checkup }], total: FEES.checkup, note: "Nothing found." });
+      addVisit({ at: Date.now(), place, kind: "checkup", illness: null, severity: null, lines: [{ label: "Routine check-up", amount: paid }], total: paid, note: "Nothing found." });
       useGame.getState().recordStat("treated");
     },
   });
+  // runAction takes the money straight away, so the difference is the price actually charged
+  const paid = err ? 0 : before - useGame.getState().money;
   return err;
 }
 
@@ -157,6 +163,11 @@ export function beginWardStay(index: number): { action: ActionDef; scale: number
   }
   const adm = s.medical.admission;
   if (!adm) return null;
+  if (adm.kind === "case" && s.medical.illness?.id !== adm.illness) {
+    useGame.setState((st) => ({ medical: { ...st.medical, admission: null } }));
+    s.toast(`Ticket ${adm.ticket} is void: you are no longer ill with that. There is no refund.`, "info");
+    return "refuse";
+  }
   if (adm.place !== here) {
     s.toast(`Your ticket ${adm.ticket} is for ${HOSPITALS[adm.place]?.name ?? "another hospital"}.`, "info");
     return "refuse";
@@ -180,8 +191,10 @@ export function completeTreatment(adm: Admission): void {
   if (s.medical.admission?.id !== adm.id) return;
   const def = adm.illness ? ILLNESSES[adm.illness] : null;
   const now = Date.now();
+  // an emergency admission cures whatever you have; a case ticket only the illness it was bought for (never a different, dearer one)
+  const cures = adm.kind === "emergency" || s.medical.illness?.id === adm.illness;
   const visit: Visit = { id: adm.id, at: now, place: adm.place, kind: adm.kind, illness: adm.illness, severity: adm.severity, lines: adm.lines, total: adm.total, note: def ? `Cured of ${def.name}.` : "Treated." };
-  useGame.setState((st) => ({ medical: { ...st.medical, illness: null, admission: null, history: [visit, ...st.medical.history].slice(0, 30) } }));
+  useGame.setState((st) => ({ medical: { ...st.medical, illness: cures ? null : st.medical.illness, admission: null, history: [visit, ...st.medical.history].slice(0, 30) } }));
   clk.immune = adm.kind === "emergency" ? IMMUNE_SECS.emergency : IMMUNE_SECS.case;
   clk.illSec = 0;
   s.recordStat("treated");
@@ -294,7 +307,16 @@ export function tickHealth(dt: number): void {
     clk.risk += dt * (0.03 + (s.needs.hygiene < 15 ? 0.1 : 0) + (s.needs.hunger < 10 ? 0.08 : 0) + (s.needs.energy < 10 ? 0.05 : 0) + (night ? 0.03 : 0));
     if (clk.risk >= 100) onset(pickIllness(s.needs, night));
   }
-  const adm = s.medical.admission;
+  const adm = useGame.getState().medical.admission;
+  // a case ticket is for one illness: when that one is gone (it cleared by itself) or replaced by another, the ticket is void
+  if (adm && adm.kind === "case") {
+    const now = useGame.getState().medical.illness;
+    if (!now || now.id !== adm.illness) {
+      useGame.setState((st) => ({ medical: { ...st.medical, admission: null } }));
+      s.toast(`Ticket ${adm.ticket} is void: you are no longer ill with that. There is no refund.`, "info");
+      return;
+    }
+  }
   if (adm && Date.now() >= adm.calledAt && clk.called !== adm.id) {
     clk.called = adm.id;
     if (adm.kind === "case") s.toast(`${adm.ticket}, please come to a bed.`, "info");

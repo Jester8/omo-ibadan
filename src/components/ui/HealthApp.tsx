@@ -20,9 +20,13 @@ export default function HealthApp() {
   const history = all ? med.history : med.history.slice(0, 10);
 
   const go = (id: string) => {
-    useGame.getState().select({ type: "place", id });
-    walkToPlace(id);
-    setSheet(null);
+    const s = useGame.getState();
+    // from inside a room the city path would lead to a wall: leave the building first
+    if (s.interior) return void s.toast("Leave the building first, then head to the hospital.", "info");
+    s.select({ type: "place", id });
+    // a refused walk (busy, in custody, on the tower) has already said why
+    if (walkToPlace(id)) setSheet(null);
+    else if (s.busy) s.toast("Finish what you're doing first.", "info");
   };
 
   return (

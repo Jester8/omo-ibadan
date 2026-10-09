@@ -21,6 +21,9 @@ let ascent: ReturnType<typeof setTimeout> | null = null;
 let retry: ReturnType<typeof setTimeout> | null = null;
 
 function arriveOnDeck() {
+  // the fade takes a moment: an arrest or a sign-out during it must not put the player on the deck
+  const now = useGame.getState();
+  if (!now.profile || now.custody) return;
   const t = tower();
   me.x = t.pos[0];
   me.z = t.pos[1] + DECK_R;
@@ -45,7 +48,7 @@ function arriveOnDeck() {
 /** Go up to the deck. While a fade is running (a door was just used) it tries again a moment later instead of silently doing nothing. */
 export function goUpDeck(tries = 0) {
   const s = useGame.getState();
-  if (s.deck) return;
+  if (s.deck || !s.profile || s.custody) return;
   if (s.fade) {
     if (tries < 10) retry = setTimeout(() => goUpDeck(tries + 1), 120);
     return;

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { FEES, HOSPITALS, ILLNESSES, SYMPTOMS, SYMPTOM_IDS, triage, type SymptomId, type Visit } from "@/lib/health";
-import { admitEmergency, bookCase, cancelTicket, falseAlarmWaitSecs, quoteNow, registerPatient, routineCheckup, runLab } from "@/lib/hospital";
+import { admitEmergency, bookCase, cancelTicket, checkupPrice, falseAlarmWaitSecs, quoteNow, registerPatient, routineCheckup, runLab } from "@/lib/hospital";
 import { walkToFreeBed } from "@/lib/hospital";
 import { useSecond } from "@/lib/hooks";
 import { naira } from "@/lib/plots";
@@ -163,8 +163,8 @@ export default function HospitalDesk({ ctx }: ServiceBodyProps) {
             <p className="mt-1 text-sm text-stone-600">{ill ? "You look unwell. Tell us what you feel." : "Rest, drink water, wash your hands."}</p>
           </div>
           {!ill && (
-            <button type="button" className={primary} disabled={money < FEES.checkup} onClick={() => step(() => routineCheckup(place), closeService)}>
-              Routine check-up · {naira(FEES.checkup)}
+            <button type="button" className={primary} disabled={money < checkupPrice()} onClick={() => step(() => routineCheckup(place), closeService)}>
+              Routine check-up · {naira(checkupPrice())}
             </button>
           )}
           <button type="button" className={ghost} onClick={() => setStage("pick")}>{ill ? "Tell us what you feel" : "Back"}</button>
@@ -216,10 +216,12 @@ export default function HospitalDesk({ ctx }: ServiceBodyProps) {
           <p className="text-sm text-red-900/80">
             {adm.place !== place ? `For ${HOSPITALS[adm.place]?.name ?? "another hospital"}.` : waiting > 0 ? `Called in ${clock(waiting)}. Take a seat in the waiting area.` : "Called: please go to a bed."}
           </p>
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <button type="button" className="rounded-xl bg-red-600 px-3 py-2.5 text-sm font-bold text-white transition active:scale-[0.98]" onClick={() => { closeService(); walkToFreeBed(adm.kind === "emergency" ? "casualty" : "ward"); }}>
-              Go to a free bed
-            </button>
+          <div className={`mt-3 grid gap-2 ${adm.place === place ? "grid-cols-2" : "grid-cols-1"}`}>
+            {adm.place === place && (
+              <button type="button" className="rounded-xl bg-red-600 px-3 py-2.5 text-sm font-bold text-white transition active:scale-[0.98]" onClick={() => { closeService(); walkToFreeBed(adm.kind === "emergency" ? "casualty" : "ward"); }}>
+                Go to a free bed
+              </button>
+            )}
             <button type="button" className="rounded-xl bg-white px-3 py-2.5 text-sm font-semibold text-red-800 ring-1 ring-red-200 transition active:scale-[0.98]" onClick={cancelTicket}>
               Cancel ticket
             </button>

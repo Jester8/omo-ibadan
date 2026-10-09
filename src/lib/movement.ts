@@ -11,6 +11,13 @@ const held = (): boolean => {
   return !!s.custody;
 };
 
+/** True (with a toast) while the player is up on Bower's Tower: a ride or a walk from there would charge the fare and go nowhere. */
+const onDeck = (): boolean => {
+  const s = useGame.getState();
+  if (s.deck) s.toast("Come down from the tower first.", "info");
+  return s.deck;
+};
+
 /** Click-to-move: A* path from where the player stands to (x, z). */
 export function walkTo(x: number, z: number): boolean {
   const s = useGame.getState();
@@ -30,7 +37,7 @@ export function walkTo(x: number, z: number): boolean {
 }
 
 export function walkToPlace(id: string): boolean {
-  if (held()) return false;
+  if (held() || onDeck()) return false;
   const place = PLACES.find((p) => p.id === id);
   const s = useGame.getState();
   if (!place || !s.profile) return false;
@@ -72,7 +79,7 @@ export function quoteRide(id: string, ride: RideId): { fare: number; metres: num
 
 /** Pay the driver; the vehicle carries you along the same route, at its own speed. */
 export function rideToPlace(id: string, ride: RideId): boolean {
-  if (held()) return false;
+  if (held() || onDeck()) return false;
   const s = useGame.getState();
   const q = quoteRide(id, ride);
   if (!q) return false;
@@ -90,7 +97,7 @@ export function rideToPlace(id: string, ride: RideId): boolean {
 
 /** Drive one of your own cars there: you take the wheel and follow the route at the car's speed. */
 export function driveToPlace(id: string, carId: string): boolean {
-  if (held()) return false;
+  if (held() || onDeck()) return false;
   const s = useGame.getState();
   if (s.atPlace === id) return true;
   if (!(s.driving && s.activeCar === carId)) {

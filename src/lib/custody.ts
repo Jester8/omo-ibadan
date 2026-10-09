@@ -11,6 +11,7 @@ import type { Payee, Recent, ReportBody, ReportResult } from "./custodyRules";
 import { REASONS, RULES, STATIONS } from "./custodyRules";
 import { cellSpawnOf, interiorKey } from "./interiors";
 import { enterInterior, forceExit, loadLayout } from "./interiorRuntime";
+import { cancelDeck } from "./towerRuntime";
 import { me } from "./playerState";
 import { naira } from "./plots";
 import { blockers } from "./services";
@@ -158,6 +159,8 @@ export function custodyBlocks(): boolean {
 function lockdown(): void {
   const g = useGame.getState();
   g.cancelBusy();
+  // a climb in progress is dropped, and a player on the deck is put back on the ground with the camera as it was
+  cancelDeck();
   useGame.setState({ selected: null, computer: false, flight: null, deck: false, driving: false, ride: null, knocks: [], serves: [] });
   if (!g.call.room && g.voice.room) voice.leave();
   void import("./net").then(({ net }) => net.sit(null));

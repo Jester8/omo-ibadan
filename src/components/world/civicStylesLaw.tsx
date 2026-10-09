@@ -136,7 +136,7 @@ function Prison({ size: [w, h, d] }: StyleProps) {
     for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]] as const) lamps.push(B(0.16, 0.1, 0.05, "#e8f4ff", [sx * (hw - 0.17), 1.66, sz * (hd - 0.17) + sz * 0.3]));
     // inside: the yard, the long cell block with its barred windows, and a small admin block
     const bars: THREE.BufferGeometry[] = [];
-    for (let i = 0; i < 6; i++) bars.push(B(0.2, 0.3, 0.03, "#1e2227", [-1.5 + i * 0.6, 0.45, -hd + 0.55 + 1.4 / 2 + 0.01 + 0.3]));
+    for (let i = 0; i < 6; i++) bars.push(B(0.2, 0.3, 0.03, "#1e2227", [-1.5 + i * 0.6, 0.45, -hd + 0.55 + 1.4 / 2 + 0.01]));
     return {
       body: [
         B(w - 0.2, 0.04, d - 0.2, "#c9c3b2", [0, 0, 0]), B(w - 1.0, 0.02, 1.7, "#e6e1d2", [0, 0.04, 0.8]), // ground and the yard
